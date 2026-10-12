@@ -111,6 +111,15 @@ after(async () => {
   http.close();
 });
 
+test('natural rephrasings still get the suggestion (filler words like "one more" are not a match)', async () => {
+  setDemoTime('19:30', TZ, 'Sat');
+  for (const q of ["She's begging me for one more episode of Bluey, is that ok?", 'Is it ok if she watches one more Bluey episode?']) {
+    const r = await call('ask_house', { question: q });
+    assert.equal(r.structuredContent.shadow?.likely, 'yes', q);
+  }
+  resetClock();
+});
+
 test('ask_house adds the suggestion and never claims to decide', async () => {
   setDemoTime('19:30', TZ, 'Sat');
   const r = await call('ask_house', { question: 'Can she watch another episode?' });

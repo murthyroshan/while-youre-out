@@ -70,6 +70,11 @@ export class McpConnection {
     }
   }
 
+  /** The server's own instructions from initialize, passed to the AI brain. */
+  get instructions(): string | undefined {
+    return this.client.getInstructions();
+  }
+
   /** The MCP App (ui:// resource) a tool wants shown with its result, if any. */
   uiResourceFor(tool: string): string | undefined {
     const meta = this.tools.find((t) => t.name === tool)?._meta as Record<string, any> | undefined;

@@ -95,6 +95,15 @@ const cases: Array<[string, QuestionCategory]> = [
   ['Can she have one of the pills?', 'medicine'],
   ['Can she have a popsicle?', 'food'],
   ['Can she have some grapes?', 'food'],
+  // Hindi and Spanish emergencies are caught instantly, without AI
+  ['वह सांस नहीं ले पा रही है!', 'emergency'],
+  ['उसके होंठ सूज रहे हैं', 'emergency'],
+  ['माया बेहोश हो गई', 'emergency'],
+  ['किचन में आग लग गई', 'emergency'],
+  ['No puede respirar', 'emergency'],
+  ['Se está ahogando con una uva', 'emergency'],
+  ['माया रात को क्या खा सकती है?', 'general'],
+  ['¿Puede ver otro episodio?', 'general'],
   // From the review: privacy
   ["What's the code for the front door?", 'secret'],
   ["When's mom coming home?", 'return_time'],

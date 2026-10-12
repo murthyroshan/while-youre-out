@@ -22,6 +22,14 @@ const EMERGENCY_PATTERNS: Array<[EmergencyKind, RegExp]> = [
   ['fire', /\b(there'?s|there is) (a )?fire\b|\bon fire\b|\bfire in\b|\bcaught fire\b|^fire!*$|\b(fire|smoke) alarm\b(?!.*\b(chirp|chirping|beep|beeping|battery|batteries|low)\b)|\bsmoke (coming|everywhere|in)\b|smells? (like |of )?(smoke|burning)|\bsomething'?s burning/i],
   ['gas', /\bsmell(s|ing)? (like |of )?gas\b|\bgas leak\b|\bcarbon monoxide|\bco alarm\b(?!.*\b(chirp|beep|battery)\b)/i],
   ['general', /\b(call|calling|dial) (911|999|112|an ambulance|the ambulance|emergency)\b|\bneed (an )?ambulance\b|\bhelp me\b|\bemergency\b(?! (contact|number|plan|numbers|contacts))/i],
+  // Common phrasings in Hindi and Spanish, so a grandparent or nanny is caught instantly without an AI.
+  ['allergy_breathing', /(सांस|साँस|सास)\s*(नहीं|नही)|सांस लेने में (दिक्कत|तकलीफ)|(होंठ|होठ|जीभ|गला|चेहरा)\s*.*सूज|saa?ns\s+nahi|no puede respirar|no respira|le cuesta respirar|se le (hinch|est[aá] hinchando)|reacci[oó]n al[eé]rgica/i],
+  ['choking', /दम घुट|गले में (कुछ )?फंस|se est[aá] ahogando|se atragant/i],
+  ['unresponsive', /बेहोश|होश नहीं|उठ नहीं (रही|रहा)|behosh|inconsciente|no despierta|se desmay[oó]|convulsi/i],
+  ['fire', /\bआग\b|आग लग|धुआं|धुँआ|\bincendio\b|hay fuego|\bfuego\b/i],
+  ['gas', /गैस की (बदबू|गंध)|huele a gas|fuga de gas/i],
+  ['poison', /(ज़हर|जहर|ब्लीच|दवाई|दवा).*(पी|खा) (लिया|ली|गई|गया)|se (tom[oó]|bebi[oó]) (cloro|lej[ií]a|pastillas|veneno)|envenen/i],
+  ['missing', /(माया|बच्ची|बच्चा) (नहीं मिल|गायब)|no encuentro a|se perdi[oó]/i],
 ];
 
 // Questions about what to do *if* something happens: answered from the plan, nobody is alerted.

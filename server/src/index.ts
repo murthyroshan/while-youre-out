@@ -10,7 +10,7 @@ import { seedDemoHousehold } from './seed.js';
 import { buildServer } from './mcp/server.js';
 import { PARENT_HTML } from './parent/page.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
-import { geminiFromEnv, AiUnavailableError, type AiClient } from './ai/gemini.js';
+import { geminiChat, geminiFromEnv, AiUnavailableError, type AiClient, type ChatRequest } from './ai/gemini.js';
 import { decideProposal, importInfo, importNote, ImportError, IMAGE_TYPES, MAX_IMPORT_BYTES, pendingProposals, ProposalError } from './domain/houseBrain.js';
 import { householdTz, visibleFacts } from './domain/house.js';
 import { formatTime, localTime, resetClock, setDemoTime } from './clock.js';
@@ -31,6 +31,10 @@ export interface AppOptions {
   ai?: AiClient;
   /** Enables the demo clock endpoints. Default: WYO_DEMO=1. */
   demo?: boolean;
+  /** Enables the simulator's LLM proxy. Default: on unless WYO_HOST_LLM=0. */
+  hostLlm?: boolean;
+  /** Chat function for the proxy. Default: Gemini. Tests pass a fake. */
+  chat?: (req: ChatRequest) => Promise<{ parts: unknown[]; model: string }>;
 }
 
 const MAX_SESSIONS = 200;
@@ -307,6 +311,27 @@ export function createApp(opts: AppOptions = {}) {
       throw e;
     }
   });
+
+  // ---------- The simulator's "Alexa" brain: a Gemini proxy so the key never reaches a browser ----------
+  // In production Alexa+ is the brain; this exists only for the Echo Show simulator.
+  if (opts.hostLlm ?? process.env.WYO_HOST_LLM !== '0') {
+    const recent: number[] = [];
+    app.post('/host/llm', async (req, res) => {
+      const now = Date.now();
+      while (recent.length && recent[0] < now - 60_000) recent.shift();
+      if (recent.length >= 30) return void res.status(429).json({ error: 'Too many requests; try again in a minute.' });
+      recent.push(now);
+      const { system, contents, functions } = req.body ?? {};
+      if (typeof system !== 'string' || !Array.isArray(contents) || !Array.isArray(functions) || contents.length > 60 || functions.length > 40) {
+        return void res.status(400).json({ error: 'system, contents and functions required' });
+      }
+      try {
+        res.json(await (opts.chat ?? geminiChat)({ system: system.slice(0, 8000), contents, functions }));
+      } catch (e) {
+        res.status(503).json({ error: e instanceof Error ? e.message : 'unavailable' });
+      }
+    });
+  }
 
   // ---------- Demo clock (only with WYO_DEMO=1): lets a video jump to 7:40 pm ----------
   if (opts.demo ?? process.env.WYO_DEMO === '1') {

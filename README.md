@@ -32,7 +32,10 @@ Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
 - Voice in and out with the browser's speech APIs (Chrome or Edge), or type instead.
 - A minimal MCP Apps host: renders the server's `ui://` card in a sandboxed iframe and speaks the MCP Apps postMessage protocol (`ui/initialize`, `tool-input`, `tool-result`, `size-changed`).
 - Runs `ask_parent_and_wait` as an MCP task and shows its status as it changes.
-- The "brain" that maps speech to tools is rule-based for now, so it works without any API key. An AI brain comes next.
+- Two "brains" stand in for the Alexa+ language model (switch at the top of the device):
+  - **Gemini**: understands free speech in any language and picks the MCP tools with function calling. The key stays on the server, behind `/host/llm` (local pages only, 30 requests a minute).
+  - **Rules**: pattern matching, works with no API key. Gemini falls back to it for a turn if the model is busy.
+- Either way the device speaks the server's own reply text (the parents' words, guards, emergency script), never a model paraphrase, and emergencies are caught by fixed rules before any model call (English, Hindi, Spanish).
 
 Settings: `VITE_MCP_URL` (default `http://127.0.0.1:8787/mcp`), `VITE_PARENT_KEY` (default `demo-parent-key`).
 
@@ -47,6 +50,11 @@ Settings (environment variables):
 | `WYO_DB` | `:memory:` | SQLite file path |
 | `WYO_PARENT_KEY` | `demo-parent-key` | Key for the parent page. Required (16+ characters) when `HOST` is not local; the server refuses to start otherwise |
 | `WYO_ESCALATE_MS` | `180000` | How long a contact has to answer before the next one is asked |
+| `WYO_PUBLIC_URL` | local address | Base URL used in links to the parent page |
+| `WYO_DEMO` | off | `1` enables the demo clock |
+| `WYO_HOST_LLM` | on | `0` turns off the simulator's Gemini proxy (`/host/llm`) |
+| `GEMINI_API_KEY` | (none) | In `server/.env`; needed for House Brain, translation and the Gemini brain |
+| `WYO_GEMINI_MODELS` / `WYO_GEMINI_CHAT_MODELS` | built-in list | Comma-separated Gemini models for reading notes / for the simulator brain |
 
 ## House Brain: teach the house from notes you already have
 
@@ -81,6 +89,7 @@ Setup: put `GEMINI_API_KEY=...` in `server/.env` (free key from Google AI Studio
 | `teachback` | Three quick questions before the parents leave; result shown on the parent's phone |
 | `tonight_plan` | Tonight's timeline from the parents' routine, adjusted by their rules; announces steps as they come due |
 | `start_handoff` | Switches to carer mode and returns tonight's briefing (asks before replacing a running handoff) |
+| `set_carer_language` | Switches replies to the carer's language (e.g. `hi-IN`, `es-US`) |
 | `ask_house` | Answers in the parents' exact words; food and medicine always carry a guard |
 | `where_is` | Where something is kept, with the parents' photo |
 | `log_event` | The carer's log of the evening |

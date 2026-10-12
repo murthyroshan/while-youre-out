@@ -33,7 +33,7 @@ import { applyLogToPlan, takeDueAnnouncements, tonightPlan } from '../domain/pla
 import { teachback } from '../domain/teachback.js';
 import { busyUntil, shadowSuggestion } from '../domain/shadow.js';
 import { buildDebrief, sinceLastVisit } from '../domain/debrief.js';
-import { fixedTranslation, languageCode, translateOne } from '../domain/translate.js';
+import { fixedTranslation, languageCode, LANGUAGES, translateOne } from '../domain/translate.js';
 import type { Handoff } from '../db.js';
 import { formatTime, localTime } from '../clock.js';
 import { AiUnavailableError, type AiClient } from '../ai/gemini.js';
@@ -182,6 +182,23 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
   );
 
   server.registerTool(
+    'set_carer_language',
+    {
+      title: "Set the carer's language",
+      description:
+        "Call when the carer speaks (or asks to be spoken to in) another language, e.g. a grandparent speaking Hindi. From then on replies are given in that language, with the parents' original words kept on screen.",
+      inputSchema: { language: z.string().trim().min(2).max(20).describe('BCP-47 code such as hi-IN, es-US, ta-IN') },
+    },
+    async ({ language }) => {
+      const h = activeHandoff(db);
+      if (!h) return { content: [{ type: 'text', text: 'There is no handoff in progress.' }], isError: true };
+      const code = languageCode(language);
+      db.prepare('UPDATE handoffs SET language = ? WHERE id = ?').run(code === 'en' ? 'en' : language, h.id);
+      return localized('language', { language: code }, code === 'en' ? "Okay, I'll speak English." : `Okay, from now on I'll speak ${LANGUAGES[code]}.`);
+    },
+  );
+
+  server.registerTool(
     'teachback',
     {
       title: 'Teach-back check',
@@ -206,7 +223,12 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       const said = fb ? (fb.correct ? 'That\'s right.' : fb.correct === null ? 'Okay, skipping that one.' : `Not quite. The parents said: "${fb.answer}"`) : '';
       if (step.kind === 'done') {
         const s = step.summary;
-        const end = s.right === s.total ? `All ${s.total} right. The parents can see the handover is confirmed.` : `${s.right} of ${s.total} right. I've shown the correct answers, and the parents can see the handover is done.`;
+        const end =
+          s.right === s.total
+            ? `All ${s.total} right. The parents can see the handover is confirmed.`
+            : s.skipped === s.total
+              ? 'Check skipped. The answers are on the screen, and the parents can see it was skipped.'
+              : `${s.right} of ${s.total} right${s.skipped ? `, ${s.skipped} skipped` : ''}. I've shown the correct answers, and the parents can see the result.`;
         return localized('teachback', { ...step, carer: activeHandoff(db)?.carer_name }, [said, end].filter(Boolean).join(' '));
       }
       const intro = step.number === 1 && !fb ? `Quick check before the parents leave, ${step.total} questions. ` : '';

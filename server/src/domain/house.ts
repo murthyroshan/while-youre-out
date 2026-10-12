@@ -137,7 +137,8 @@ export function answerQuestion(db: DB, question: string, role: Role = 'carer'): 
 
 const toAnswerFact = (f: Fact) => ({ text: f.text, said_by: f.author, source: f.source, when: f.created_at, category: f.category, risk: f.risk });
 
-const PERMISSION = /\b(can|could|may|is (she|he|they) allowed|are (they|we) allowed|is it ok(ay)?|should (i|we))\b/i;
+const PERMISSION =
+  /\b(can|could|may|is (she|he|they) allowed|are (they|we) allowed|is it ok(ay)?|is (that|this) (ok|okay|alright|all right|fine)|would it be (ok|okay|fine)|do you think (she|he|they) can|should (i|we)|mind if)\b|\b(ok|okay|alright|fine|allowed)\s*\?\s*$/i;
 
 function contentWords(text: string) {
   return new Set(text.toLowerCase().match(/[a-z']+/g)?.filter((w) => w.length > 2 && !STOP.has(w)) ?? []);
@@ -157,7 +158,7 @@ function rank(f: Fact) {
 }
 
 const STOP = new Set(
-  'a an the is are can could should may might i we she he it to of in on for and or do does what when where how my her his this that be have has with at me you your our their them they allowed okay ok tonight'.split(' '),
+  'a an the is are can could should may might i we she he it to of in on for and or do does what when where how my her his this that be have has with at me you your our their them they allowed okay ok tonight one more another some any little bit just please really very much also too get got let lets let\'s if so then now still maya'.split(' '),
 );
 
 function keywordMatch(facts: Fact[], q: string, minScore = 1): Fact[] {

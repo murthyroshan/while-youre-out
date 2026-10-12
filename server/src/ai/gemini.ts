@@ -33,6 +33,61 @@ export interface AiClient {
   generateJson<T>(req: JsonRequest): Promise<{ data: T; model: string }>;
 }
 
+export interface ChatRequest {
+  system: string;
+  /** Gemini `contents`: user, model and function-response turns, passed through as-is. */
+  contents: unknown[];
+  /** Gemini `functionDeclarations`. */
+  functions: unknown[];
+}
+
+/**
+ * One turn of function-calling chat, used by the simulator's "Alexa" brain through the server so
+ * the API key never reaches a browser. Tries one model at a time (racing would spend quota 3x).
+ */
+export async function geminiChat(req: ChatRequest): Promise<{ parts: unknown[]; model: string }> {
+  const key = process.env.GEMINI_API_KEY?.trim();
+  if (!key) throw new AiUnavailableError('GEMINI_API_KEY is not set. Add it to server/.env.');
+  const models = process.env.WYO_GEMINI_CHAT_MODELS?.split(',').map((m) => m.trim()).filter(Boolean) ?? [
+    'gemini-flash-lite-latest',
+    'gemini-3.6-flash',
+    'gemini-flash-latest',
+    'gemini-3.5-flash',
+  ];
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: req.system }] },
+    contents: req.contents,
+    tools: req.functions.length ? [{ functionDeclarations: req.functions }] : undefined,
+    generationConfig: { temperature: 0.2 },
+  });
+  const errors: string[] = [];
+  for (const model of models) {
+    try {
+      const res = await fetch(`${API}/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
+        body,
+        signal: AbortSignal.timeout(20_000),
+      });
+      const json = (await res.json().catch(() => ({}))) as any;
+      if (!res.ok) {
+        errors.push(`${model}: ${res.status} ${json?.error?.message?.slice(0, 100) ?? ''}`);
+        if ((res.status === 400 && /api key/i.test(json?.error?.message ?? '')) || res.status === 403) break;
+        continue;
+      }
+      const parts = json.candidates?.[0]?.content?.parts;
+      if (!Array.isArray(parts) || !parts.length) {
+        errors.push(`${model}: empty (${json.candidates?.[0]?.finishReason ?? 'unknown'})`);
+        continue;
+      }
+      return { parts, model };
+    } catch (e) {
+      errors.push(`${model}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  throw new AiUnavailableError(`No Gemini model could answer right now. ${errors.join(' | ')}`);
+}
+
 export function geminiFromEnv(): AiClient {
   const key = process.env.GEMINI_API_KEY?.trim();
   const models = process.env.WYO_GEMINI_MODELS?.split(',').map((m) => m.trim()).filter(Boolean) ?? DEFAULT_MODELS;
