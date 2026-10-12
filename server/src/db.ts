@@ -33,12 +33,21 @@ export interface Handoff {
   started_at: string;
   ended_at: string | null;
   status: 'active' | 'ended';
+  /** Minutes the bedtime routine moved tonight (e.g. +30 after a late nap). */
+  plan_shift: number;
+  plan_shift_reason: string | null;
+  /** JSON arrays of plan item keys. */
+  plan_done: string;
+  plan_announced: string;
+  /** JSON teach-back state. */
+  teachback: string | null;
 }
 
 export interface Question {
   id: number;
   handoff_id: number | null;
   text: string;
+  text_english: string | null;
   category: string;
   urgency: 'urgent' | 'normal' | 'later';
   status: 'pending' | 'answered' | 'expired';
@@ -129,6 +138,42 @@ CREATE TABLE IF NOT EXISTS questions (
   asked_at TEXT NOT NULL,
   answered_at TEXT
 );
+CREATE TABLE IF NOT EXISTS translations (
+  lang TEXT NOT NULL,
+  source TEXT NOT NULL,
+  text TEXT NOT NULL,
+  PRIMARY KEY (lang, source)
+);
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS imports (
+  id INTEGER PRIMARY KEY,
+  kind TEXT NOT NULL,            -- photo | pdf | text
+  label TEXT NOT NULL,           -- e.g. "Fridge note photo", "WhatsApp from Anita"
+  author TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  model TEXT,
+  dropped_secrets INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS proposals (
+  id INTEGER PRIMARY KEY,
+  import_id INTEGER NOT NULL,
+  kind TEXT NOT NULL,            -- fact | location | plan_step | contact
+  category TEXT,
+  subject TEXT,
+  text TEXT NOT NULL,            -- the note's own words
+  english TEXT,                  -- translation when the note isn't in English
+  item TEXT,                     -- locations: what is kept there
+  extra TEXT,                    -- contacts: phone; plan steps: timer seconds
+  risk TEXT NOT NULL DEFAULT 'normal',
+  confidence REAL NOT NULL DEFAULT 1,
+  status TEXT NOT NULL DEFAULT 'pending',   -- pending | accepted | discarded
+  conflict_fact_id INTEGER,
+  conflict_reason TEXT,
+  created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS log_events (
   id INTEGER PRIMARY KEY,
   handoff_id INTEGER NOT NULL,
@@ -145,9 +190,20 @@ export function openDb(path = process.env.WYO_DB ?? ':memory:'): DB {
   db.exec('PRAGMA journal_mode = WAL;');
   db.exec(SCHEMA);
   // Older database files: add columns introduced later.
-  const cols = db.prepare('PRAGMA table_info(facts)').all() as Array<{ name: string }>;
-  if (!cols.some((c) => c.name === 'handoff_id')) db.exec('ALTER TABLE facts ADD COLUMN handoff_id INTEGER');
+  const addColumn = (table: string, column: string, type: string) => {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+    if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+  };
+  addColumn('facts', 'handoff_id', 'INTEGER');
+  addColumn('household', 'timezone', "TEXT NOT NULL DEFAULT 'America/Los_Angeles'");
+  addColumn('handoffs', 'plan_shift', 'INTEGER NOT NULL DEFAULT 0');
+  addColumn('handoffs', 'plan_shift_reason', 'TEXT');
+  addColumn('handoffs', 'plan_done', "TEXT NOT NULL DEFAULT '[]'");
+  addColumn('handoffs', 'plan_announced', "TEXT NOT NULL DEFAULT '[]'");
+  addColumn('handoffs', 'teachback', 'TEXT');
+  addColumn('questions', 'text_english', 'TEXT');
   return db;
 }
 
-export const nowIso = () => new Date().toISOString();
+// Timestamps follow the server clock, which a demo can move forward.
+export { nowIso } from './clock.js';

@@ -61,7 +61,7 @@ for (const u of [
 test('"We\'re back" asks before ending the handoff', async () => {
   const d = await run(['Priya is babysitting tonight', "We're back", 'yes']);
   assert.deepEqual(
-    d.calls.map((c) => c.name),
+    d.calls.map((c) => c.name).filter((n) => n !== 'teachback'),
     ['start_handoff', 'end_handoff'],
   );
   assert.ok(d.said.some((t) => /Should I end Priya's handoff/.test(t)));
@@ -107,7 +107,35 @@ test('a second handoff asks before replacing the first', async () => {
   await brain.handle('Dadi is babysitting tonight', io);
   assert.ok(said.some((t) => /already looking after things/.test(t)));
   await brain.handle('yes', io);
-  assert.deepEqual(calls.at(-1), { name: 'start_handoff', args: { carer_name: 'Dadi', replace: true } });
+  assert.deepEqual(calls.filter((c) => c.name !== 'teachback').at(-1), { name: 'start_handoff', args: { carer_name: 'Dadi', replace: true } });
+});
+
+test('a handoff runs the teach-back check and treats replies as answers', async () => {
+  let step = 0;
+  const d = await run(['Priya is babysitting tonight', 'Peanuts', 'skip', 'Her mom', 'What time is bedtime?'], {
+    teachback: {
+      get structuredContent() {
+        step++;
+        return { kind: step < 4 ? 'question' : 'done' };
+      },
+    } as any,
+  });
+  assert.deepEqual(
+    d.calls.map((c) => [c.name, c.args]),
+    [
+      ['start_handoff', { carer_name: 'Priya', replace: false }],
+      ['teachback', {}],
+      ['teachback', { answer: 'Peanuts' }],
+      ['teachback', { skip: true }],
+      ['teachback', { answer: 'Her mom' }],
+      ['ask_house', { question: 'What time is bedtime?' }],
+    ],
+  );
+});
+
+test('an emergency during teach-back still goes straight to the emergency tool', async () => {
+  const d = await run(['Priya is babysitting tonight', "She's choking!"], { teachback: { structuredContent: { kind: 'question' } } });
+  assert.equal(d.calls.at(-1)!.name, 'emergency');
 });
 
 // ---------- confirmations ----------
@@ -186,6 +214,8 @@ test('where_is falls back to the manual when the location is unknown', async () 
 
 test('status updates are logged; questions are not', async () => {
   assert.equal((await run(['She fell asleep at 8:10'])).calls[0].name, 'log_event');
+  assert.equal((await run(['Used the last diaper'])).calls[0].name, 'log_event');
+  assert.equal((await run(["We're out of milk"])).calls[0].name, 'log_event');
   assert.equal((await run(['Is she asleep?'])).calls[0].name, 'ask_house');
   assert.equal((await run(['Did she eat dinner?'])).calls[0].name, 'ask_house');
 });

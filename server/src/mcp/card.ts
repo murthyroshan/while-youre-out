@@ -33,6 +33,13 @@ export const CARD_HTML = /* html */ `<!doctype html>
   img.photo { display:block; max-width: 100%; max-height: 260px; object-fit: contain; border-radius: 8px; margin-top: 8px; }
   .emergency img.photo { max-height: 160px; background: #fff; }
   ul { padding-left: 20px; margin: 4px 0; }
+  ol.tl { list-style: none; padding: 0; margin: 6px 0; }
+  ol.tl li { display: grid; grid-template-columns: 82px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  ol.tl .t { font-variant-numeric: tabular-nums; color: var(--muted); }
+  ol.tl li.done { opacity: .55; }
+  ol.tl li.due .t, ol.tl li.due strong { color: var(--accent); }
+  ol.tl li.late .t { color: var(--red); }
+  ol.tl small { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -50,6 +57,13 @@ export const CARD_HTML = /* html */ `<!doctype html>
   function notify(method, params) { send({ jsonrpc: '2.0', method: method, params: params || {} }); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]; }); }
   function quote(f) { return '<div class="quote">' + esc(f.text) + '<small>' + esc(f.said_by || '') + (f.source ? ' · ' + esc(f.source) : '') + '</small></div>'; }
+  function timeline(items) {
+    var mark = { done: '✓', due: '●', late: '!', upcoming: '' };
+    return '<ol class="tl">' + items.map(function (i) {
+      return '<li class="' + esc(i.status) + '"><span class="t">' + esc(i.time) + '</span><span><strong>' + esc(i.title) + '</strong> <span class="m">' + (mark[i.status] || '') + '</span>' +
+        (i.checklist && i.checklist.length ? '<br><small>' + esc(i.checklist.join(' · ')) + '</small>' : '') + '</span></li>';
+    }).join('') + '</ol>';
+  }
   function list(items) { return items && items.length ? '<ul>' + items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>' : ''; }
 
   var renderers = {
@@ -61,12 +75,35 @@ export const CARD_HTML = /* html */ `<!doctype html>
       var safety = facts.filter(function (f) { return f.risk === 'safety'; });
       safety.forEach(function (f) { h += '<div class="alert"><strong>' + (f.category === 'allergy' ? 'Allergy' : 'Important') + '</strong><br>' + esc(f.text) + '<small style="display:block">' + esc(f.said_by) + '</small></div>'; });
       facts.filter(function (f) { return safety.indexOf(f) < 0; }).forEach(function (f) { h += quote(f); });
-      if (!facts.length && !d.guard && !d.allergy_alert) h += '<p>The parents haven\\'t covered this yet.</p>';
+      if (!facts.length && !d.guard && !d.allergy_alert && !d.shadow) h += '<p>The parents haven\\'t covered this yet.</p>';
       if (d.guard) h += '<div class="guard">' + esc(d.guard) + '</div>';
+      if (d.shadow) h += '<div class="quote" style="border-left-color:var(--accent)"><strong>Usually: ' + esc(d.shadow.likely) + '</strong> · ' + d.shadow.agree + ' of ' + d.shadow.total + ' times' + (d.shadow.days ? ' on ' + esc(d.shadow.days) : '') +
+        '<small>' + esc(d.shadow.message) + '</small></div>';
+      if (d.busy_until) h += '<p class="pill">Urgent questions only until ' + esc(d.busy_until) + '</p>';
       return '<h1>What the parents said</h1>' + h;
     },
+    teachback: function (d) {
+      var fb = d.feedback;
+      var h = '<h1>Quick check' + (d.carer ? ', ' + esc(d.carer) : '') + '</h1>';
+      if (fb) h += fb.correct ? '<div class="quote">✓ That\\'s right.</div>' :
+        fb.correct === null ? '<p class="pill">Skipped</p><div class="quote">' + esc(fb.answer) + '</div>' :
+        '<div class="alert"><strong>The parents said</strong><br>' + esc(fb.answer) + '</div>';
+      if (d.kind === 'question') h += '<h2>Question ' + d.number + ' of ' + d.total + '</h2><p style="font-size:22px">' + esc(d.question) + '</p>';
+      if (d.kind === 'done') h += '<h2>Handover check</h2><p style="font-size:22px">' + d.summary.right + ' of ' + d.summary.total + ' right</p>';
+      return h;
+    },
+    plan: function (d) {
+      var items = d.items || [];
+      return '<h1>Tonight\\'s plan</h1>' +
+        (d.plan_change ? '<div class="guard">' + esc(d.plan_change) + '</div>' : (d.shift_reason ? '<p class="pill">Adjusted tonight</p>' : '')) +
+        (items.length ? timeline(items) : '<p>The parents haven\\'t given times for tonight.</p>');
+    },
     briefing: function (d) {
+      var since = d.since_last_visit;
       return '<h1>Tonight with ' + esc(d.carer) + '</h1>' +
+        (since ? '<div class="guard"><strong>Since your last visit</strong>' +
+          list(since.added.map(function (a) { return a.text + ' (' + a.said_by + ')'; }).concat(since.removed.map(function (r) { return 'No longer: ' + r.text; }))) + '</div>' : '') +
+        (d.plan && d.plan.length ? '<h2>Tonight</h2>' + timeline(d.plan) : '') +
         (d.must_know.length ? '<div class="alert"><strong>Must know</strong>' + list(d.must_know) + (d.epipen ? '<div>EpiPen: ' + esc(d.epipen) + '</div>' : '') + '</div>' : '') +
         '<h2>Dinner</h2>' + list(d.dinner) + '<h2>Bedtime</h2>' + list(d.bedtime) +
         '<h2>Screen time</h2>' + list(d.screen) + (d.pets.length ? '<h2>Pets</h2>' + list(d.pets) : '') +
@@ -93,9 +130,10 @@ export const CARD_HTML = /* html */ `<!doctype html>
     summary: function (d) {
       var times = (d.timeline || []).map(function (e) {
         var t = new Date(e.at);
-        return (isNaN(t) ? '' : t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) + ' · ') + e.text;
+        return (isNaN(t) ? '' : t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone: d.timezone || undefined }) + ' · ') + e.text;
       });
       return '<h1>Evening with ' + esc(d.carer) + '</h1>' +
+        (d.insights && d.insights.length ? '<h2>Worth knowing</h2>' + list(d.insights) : '') +
         '<h2>Timeline</h2>' + (times.length ? list(times) : '<p>Nothing was logged.</p>') +
         '<h2>Questions</h2>' + (d.questions && d.questions.length ? list(d.questions) : '<p>No questions tonight.</p>');
     }
@@ -106,6 +144,10 @@ export const CARD_HTML = /* html */ `<!doctype html>
     var root = document.getElementById('root');
     if (!d || !d.view || !renderers[d.view]) { root.innerHTML = '<p>' + esc((result && result.content && result.content[0] && result.content[0].text) || '') + '</p>'; }
     else root.innerHTML = renderers[d.view](d);
+    // Bilingual relay: what the carer heard in their language, above the parents' original words.
+    if (d && d.spoken && d.language && d.language !== 'en') {
+      root.insertAdjacentHTML('afterbegin', '<div class="quote" lang="' + esc(d.language) + '" style="font-size:18px;border-left-color:var(--accent)">' + esc(d.spoken) + '<small>Said in ' + esc(d.language) + ' · the parents\\' own words are below</small></div>');
+    }
     // Emergencies take the whole screen on hosts that support it.
     if (d && d.view === 'emergency') request('ui/request-display-mode', { mode: 'fullscreen' });
   }

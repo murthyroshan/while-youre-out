@@ -10,6 +10,13 @@ import { seedDemoHousehold } from './seed.js';
 import { buildServer } from './mcp/server.js';
 import { PARENT_HTML } from './parent/page.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
+import { geminiFromEnv, AiUnavailableError, type AiClient } from './ai/gemini.js';
+import { decideProposal, importInfo, importNote, ImportError, IMAGE_TYPES, MAX_IMPORT_BYTES, pendingProposals, ProposalError } from './domain/houseBrain.js';
+import { householdTz, visibleFacts } from './domain/house.js';
+import { formatTime, localTime, resetClock, setDemoTime } from './clock.js';
+import { busyUntil, getSetting, setBusy, setSetting, setShadowTopic, shadowOffTopics, SHADOW_TOPICS } from './domain/shadow.js';
+import { latestDebrief, saveAnswerAsRule } from './domain/debrief.js';
+import { summary, teachbackState } from './domain/teachback.js';
 
 export interface AppOptions {
   dbPath?: string;
@@ -18,8 +25,12 @@ export interface AppOptions {
   host?: string;
   allowedHosts?: string[];
   publicUrl?: string;
-  /** Browser origins allowed to call the server. Default: any (fine for local development). */
+  /** Browser origins allowed to call the server. Default: local pages only. */
   allowedOrigins?: string[];
+  /** AI client for House Brain. Default: Gemini from GEMINI_API_KEY. Tests pass a fake. */
+  ai?: AiClient;
+  /** Enables the demo clock endpoints. Default: WYO_DEMO=1. */
+  demo?: boolean;
 }
 
 const MAX_SESSIONS = 200;
@@ -42,6 +53,7 @@ export function createApp(opts: AppOptions = {}) {
   const escalateAfterMs = opts.escalateAfterMs ?? envMs('WYO_ESCALATE_MS', 180_000);
   const allowedOrigins = opts.allowedOrigins ?? process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()).filter(Boolean);
   const publicUrl = opts.publicUrl ?? process.env.WYO_PUBLIC_URL ?? `http://127.0.0.1:${process.env.PORT ?? 8787}`;
+  const ai = opts.ai ?? geminiFromEnv();
 
   let lastEmergency: { at: string; description: string } | null = null;
   events.on('emergency', (e) => (lastEmergency = e));
@@ -112,7 +124,7 @@ export function createApp(opts: AppOptions = {}) {
             lastSeen.delete(t.sessionId);
           }
         };
-        await buildServer({ db, taskStore, escalateAfterMs, publicUrl }).connect(t);
+        await buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }).connect(t);
         transport = t;
       }
       if (transport.sessionId) lastSeen.set(transport.sessionId, Date.now());
@@ -133,6 +145,14 @@ export function createApp(opts: AppOptions = {}) {
   app.delete('/mcp', bySession);
 
   // ---------- Parent phone page ----------
+  const settingsView = () => {
+    const busy = busyUntil(db);
+    return {
+      busy_until: busy ? formatTime(localTime(householdTz(db), busy).minutes) : null,
+      shadow: Object.fromEntries(SHADOW_TOPICS.map((t) => [t, !shadowOffTopics(db).includes(t)])),
+    };
+  };
+
   const keyBuf = Buffer.from(parentKey);
   const authorised = (k: unknown) => {
     if (typeof k !== 'string') return false;
@@ -146,6 +166,14 @@ export function createApp(opts: AppOptions = {}) {
     if (!authorised(req.query.k)) return void res.sendStatus(401);
     res.json({
       handoff: activeHandoff(db) ?? null,
+      timezone: householdTz(db),
+      ...settingsView(),
+      debrief: activeHandoff(db) ? null : latestDebrief(db),
+      shopping: shopping(),
+      teachback: (() => {
+        const s = teachbackState(db);
+        return s ? { done: s.done, answered: s.results.length, ...summary(s) } : null;
+      })(),
       parents: contacts(db)
         .filter((c) => c.priority < 9)
         .map((c) => c.name),
@@ -168,8 +196,145 @@ export function createApp(opts: AppOptions = {}) {
     res.json(q);
   });
 
+  // ---------- Busy mode and Shadow Parent settings ----------
+  app.post('/parent/api/busy', (req, res) => {
+    const { k, minutes } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (typeof minutes !== 'number' || !Number.isFinite(minutes) || minutes < 0) return void res.status(400).json({ error: 'minutes must be 0 or more' });
+    setBusy(db, minutes);
+    res.json(settingsView());
+  });
+
+  app.post('/parent/api/shadow', (req, res) => {
+    const { k, topic, on } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (!SHADOW_TOPICS.includes(topic) || typeof on !== 'boolean') return void res.status(400).json({ error: 'topic and on required' });
+    setShadowTopic(db, topic, on);
+    res.json(settingsView());
+  });
+
+  // ---------- Morning debrief ----------
+  app.post('/parent/api/save-rule', (req, res) => {
+    const { k, question_id } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (!Number.isInteger(question_id)) return void res.status(400).json({ error: 'question_id required' });
+    if (!saveAnswerAsRule(db, question_id)) return void res.status(409).json({ error: "That answer can't be saved as a rule." });
+    res.json({ ok: true, debrief: latestDebrief(db) });
+  });
+
+  // A simulated shopping list (in production this would be the family's Alexa shopping list).
+  const shopping = (): string[] => {
+    try {
+      return JSON.parse(getSetting(db, 'shopping_list') ?? '[]');
+    } catch {
+      return [];
+    }
+  };
+  app.post('/parent/api/shopping', (req, res) => {
+    const { k, item } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (typeof item !== 'string' || !item.trim() || item.length > 60) return void res.status(400).json({ error: 'item required' });
+    const list = [...new Set([...shopping(), item.trim().toLowerCase()])].slice(-50);
+    setSetting(db, 'shopping_list', JSON.stringify(list));
+    res.json({ shopping: list });
+  });
+
+  // ---------- House Brain: teach the house from notes parents already have ----------
+  const parentName = (by: unknown) => (typeof by === 'string' && by.trim() ? by.trim().slice(0, 40) : 'Parent');
+
+  const proposalsView = () => {
+    const ps = pendingProposals(db);
+    const imports = [...new Set(ps.map((p) => p.import_id))].map((id) => importInfo(db, id));
+    const factText = new Map(visibleFacts(db, 'parent').map((f) => [f.id, f.text]));
+    return {
+      ai_available: ai.available,
+      imports,
+      proposals: ps.map((p) => ({ ...p, conflict_text: p.conflict_fact_id ? factText.get(p.conflict_fact_id) ?? null : null })),
+    };
+  };
+
+  const runImport = async (res: express.Response, input: Parameters<typeof importNote>[2]) => {
+    try {
+      const out = await importNote(db, ai, input);
+      res.json({ ...out, ...proposalsView() });
+    } catch (e) {
+      if (e instanceof ImportError) return void res.status(400).json({ error: e.message });
+      if (e instanceof AiUnavailableError) return void res.status(503).json({ error: e.message });
+      console.error('Import failed', e);
+      res.status(500).json({ error: 'Could not read that note. Try again, or paste the text instead.' });
+    }
+  };
+
+  // Typed or pasted text (a WhatsApp message, a note).
+  app.post('/parent/api/import/text', async (req, res) => {
+    const { k, text, label, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (typeof text !== 'string') return void res.status(400).json({ error: 'text required' });
+    await runImport(res, { kind: 'text', text, label: typeof label === 'string' && label.trim() ? label.trim() : 'Typed note', author: parentName(by) });
+  });
+
+  // A photo or PDF, sent as the raw file body (too big for the JSON limit).
+  app.post(
+    '/parent/api/import/file',
+    express.raw({ type: [...IMAGE_TYPES, 'application/pdf'], limit: MAX_IMPORT_BYTES }),
+    async (req, res) => {
+      if (!authorised(req.query.k)) return void res.sendStatus(401);
+      const mime = String(req.headers['content-type'] ?? '').split(';')[0].trim();
+      if (!Buffer.isBuffer(req.body) || req.body.length === 0) return void res.status(400).json({ error: 'Send a PNG, JPEG, WebP, HEIC or PDF file.' });
+      const kind = mime === 'application/pdf' ? 'pdf' : 'photo';
+      const label = typeof req.query.label === 'string' && req.query.label.trim() ? req.query.label.trim() : kind === 'pdf' ? 'PDF document' : 'Photo of a note';
+      await runImport(res, { kind, mimeType: mime, data: req.body.toString('base64'), label, author: parentName(req.query.by) });
+    },
+  );
+
+  app.get('/parent/api/proposals', (req, res) => {
+    if (!authorised(req.query.k)) return void res.sendStatus(401);
+    res.json(proposalsView());
+  });
+
+  app.post('/parent/api/proposals/:id', (req, res) => {
+    const { k, action, resolution, text, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || (action !== 'accept' && action !== 'discard')) return void res.status(400).json({ error: 'action must be accept or discard' });
+    if (resolution !== undefined && !['replace', 'keep_both', 'keep_old'].includes(resolution)) return void res.status(400).json({ error: 'bad resolution' });
+    if (text !== undefined && typeof text !== 'string') return void res.status(400).json({ error: 'bad text' });
+    try {
+      const out = decideProposal(db, id, { action, resolution, text, by: parentName(by) });
+      res.json({ ...out, ...proposalsView() });
+    } catch (e) {
+      if (e instanceof ProposalError) return void res.status(e.status).json({ error: e.message });
+      throw e;
+    }
+  });
+
+  // ---------- Demo clock (only with WYO_DEMO=1): lets a video jump to 7:40 pm ----------
+  if (opts.demo ?? process.env.WYO_DEMO === '1') {
+    app.get('/demo/clock', (_req, res) => void res.json({ ...localTime(householdTz(db)), demo: true }));
+    app.post('/demo/clock', (req, res) => {
+      try {
+        if (req.body?.reset) {
+          resetClock();
+          return void res.json(localTime(householdTz(db)));
+        }
+        const day = typeof req.body?.day === 'string' && req.body.day ? req.body.day : undefined;
+        res.json(setDemoTime(String(req.body?.time ?? ''), householdTz(db), day));
+      } catch (e) {
+        res.status(400).json({ error: e instanceof Error ? e.message : 'bad time' });
+      }
+    });
+  }
+
   app.use('/static', express.static(fileURLToPath(new URL('../public', import.meta.url))));
   app.get('/health', (_req, res) => void res.json({ ok: true }));
+
+  // JSON errors instead of Express's HTML error page (e.g. a file over the size limit).
+  app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (res.headersSent) return next(err);
+    const status = typeof err?.status === 'number' ? err.status : 500;
+    if (status >= 500) console.error('Unhandled error', err);
+    res.status(status).json({ error: status === 413 ? 'That file is larger than 6 MB.' : status >= 500 ? 'Internal error' : String(err?.message ?? 'Bad request') });
+  });
 
   const close = () => {
     clearInterval(sweeper);

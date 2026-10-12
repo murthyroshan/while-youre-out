@@ -1,4 +1,49 @@
 import { type DB, nowIso } from './db.js';
+import { now } from './clock.js';
+
+/** A past date on the given weekday (0 = Sunday), `weeksAgo` weeks back, at 20:00 UTC (midday in Seattle). */
+function pastWeekday(weekday: number, weeksAgo: number) {
+  const d = now();
+  d.setUTCHours(20, 0, 0, 0);
+  const back = ((d.getUTCDay() - weekday + 7) % 7) + 7 * weeksAgo;
+  d.setUTCDate(d.getUTCDate() - (back === 0 ? 7 : back));
+  return d;
+}
+
+/**
+ * Earlier evenings with sitters, so Shadow Parent has real decisions to learn from and the
+ * debrief can compare tonight with past nights.
+ */
+function seedPastEvenings(db: DB) {
+  const handoff = db.prepare("INSERT INTO handoffs (carer_name, language, started_at, ended_at, status, plan_done) VALUES (?, 'en', ?, ?, 'ended', '[]')");
+  const question = db.prepare(
+    "INSERT INTO questions (handoff_id, text, category, urgency, status, answer, answered_by, scope, asked_at, answered_at) VALUES (?, ?, 'general', 'normal', 'answered', ?, ?, 'tonight', ?, ?)",
+  );
+  const log = db.prepare('INSERT INTO log_events (handoff_id, at, kind, text) VALUES (?, ?, ?, ?)');
+  // [weekday, weeks ago, carer, questions [text, answer, by], woke at night?]
+  const evenings: Array<[number, number, string, Array<[string, string, string]>, boolean]> = [
+    [6, 6, 'Priya', [['Can she watch another episode?', "Yes, that's fine.", 'Anita']], true],
+    [0, 5, 'Dadi', [['Can she watch one more episode?', 'Yes, one more.', 'Anita']], false],
+    [2, 5, 'Priya', [['Can she watch another episode?', "No, please don't. School tomorrow.", 'Anita'], ['Can she stay up a bit later?', "No, please don't.", 'Anita']], false],
+    [6, 4, 'Priya', [['Can she watch another episode of Bluey?', "Yes, that's fine.", 'Rahul']], true],
+    [3, 3, 'Dadi', [['Can she watch one more show?', 'No, she has had enough TV.', 'Rahul']], false],
+    [6, 3, 'Priya', [['Can she watch another episode?', "No, please don't. She's overtired.", 'Anita'], ['Can she stay up later tonight?', "No, please don't.", 'Anita']], true],
+    [0, 2, 'Priya', [['Can she watch one more episode?', "Yes, that's fine.", 'Anita']], false],
+    [5, 2, 'Priya', [['Can she stay up a little later?', 'No, bedtime is bedtime.', 'Rahul']], true],
+  ];
+  for (const [weekday, weeks, carer, qs, woke] of evenings) {
+    const day = pastWeekday(weekday, weeks);
+    const start = new Date(day.getTime() + 4 * 3_600_000); // evening in Seattle
+    const end = new Date(start.getTime() + 5 * 3_600_000);
+    const id = Number(handoff.run(carer, start.toISOString(), end.toISOString()).lastInsertRowid);
+    qs.forEach(([text, answer, by], i) => {
+      const asked = new Date(start.getTime() + (1 + i) * 3_600_000).toISOString();
+      question.run(id, text, answer, by, asked, asked);
+    });
+    log.run(id, new Date(start.getTime() + 3.2 * 3_600_000).toISOString(), 'sleep', 'Asleep');
+    if (woke) log.run(id, new Date(start.getTime() + 4.2 * 3_600_000).toISOString(), 'sleep', 'Woke up crying, back asleep after a cuddle');
+  }
+}
 
 // Demo household used for the video and for judges to try immediately.
 // The emergency plan below is SAMPLE DATA written for the demo, not medical advice.
@@ -27,24 +72,29 @@ export function seedDemoHousehold(db: DB) {
     `INSERT INTO facts (category, subject, text, source, author, created_at, visibility, risk)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   );
-  const facts: Array<[string, string | null, string, string, string, string, string]> = [
-    ['allergy', 'Maya', 'Maya is allergic to peanuts. Nothing with peanuts or "may contain nuts" on the label.', 'pdf', 'Anita', 'carer', 'safety'],
-    ['food', 'Maya', 'Dinner is the dal and rice in the fridge. Heat it for 2 minutes.', 'whatsapp', 'Anita', 'carer', 'food_medicine'],
-    ['food', 'Maya', "If she won't eat dinner, she can have a banana or toast with butter.", 'voice', 'Anita', 'carer', 'food_medicine'],
-    ['food', 'Maya', 'No sweets after 6 pm.', 'photo', 'Anita', 'carer', 'food_medicine'],
-    ['medicine', 'Maya', 'No medicine unless I say so on the phone.', 'voice', 'Anita', 'carer', 'food_medicine'],
-    ['routine', 'Maya', 'Bath at 7:15, pyjamas, brush teeth, two stories, lights out at 8.', 'photo', 'Anita', 'carer', 'normal'],
-    ['routine', 'Maya', 'If her nap ends after 4 pm, bedtime moves 30 minutes later.', 'voice', 'Rahul', 'carer', 'normal'],
-    ['screen', 'Maya', 'One hour of TV at most. Bluey or Peppa Pig only.', 'whatsapp', 'Anita', 'carer', 'low'],
-    ['rules', 'Maya', 'No friends over tonight.', 'voice', 'Rahul', 'carer', 'normal'],
-    ['pet', 'Bruno', 'Bruno gets one cup of dry food at 7 pm, then a short walk around the block.', 'voice', 'Rahul', 'carer', 'normal'],
-    ['house', null, 'The thermostat is in the hallway. Keep it at 70.', 'voice', 'Rahul', 'carer', 'low'],
+  // [category, subject, text, source, author, visibility, risk, days ago it was added]
+  const facts: Array<[string, string | null, string, string, string, string, string, number]> = [
+    ['allergy', 'Maya', 'Maya is allergic to peanuts. Nothing with peanuts or "may contain nuts" on the label.', 'pdf', 'Anita', 'carer', 'safety', 90],
+    ['food', 'Maya', 'Dinner is the dal and rice in the fridge. Heat it for 2 minutes.', 'whatsapp', 'Anita', 'carer', 'food_medicine', 0],
+    ['food', 'Maya', "If she won't eat dinner, she can have a banana or toast with butter.", 'voice', 'Anita', 'carer', 'food_medicine', 60],
+    ['food', 'Maya', 'No sweets after 6 pm.', 'photo', 'Anita', 'carer', 'food_medicine', 5],
+    ['medicine', 'Maya', 'No medicine unless I say so on the phone.', 'voice', 'Anita', 'carer', 'food_medicine', 90],
+    ['routine', 'Maya', 'Dinner at 6:30.', 'voice', 'Anita', 'carer', 'normal', 60],
+    ['routine', 'Maya', 'Bath at 7:15, pyjamas, brush teeth, two stories, lights out at 8.', 'photo', 'Anita', 'carer', 'normal', 60],
+    ['routine', 'Maya', 'If her nap ends after 4 pm, bedtime moves 30 minutes later.', 'voice', 'Rahul', 'carer', 'normal', 6],
+    ['screen', 'Maya', 'One hour of TV at most. Bluey or Peppa Pig only.', 'whatsapp', 'Anita', 'carer', 'low', 60],
+    ['rules', 'Maya', 'No friends over tonight.', 'voice', 'Rahul', 'carer', 'normal', 0],
+    ['pet', 'Bruno', 'Bruno gets one cup of dry food at 7 pm, then a short walk around the block.', 'voice', 'Rahul', 'carer', 'normal', 60],
+    ['house', null, 'The thermostat is in the hallway. Keep it at 70.', 'voice', 'Rahul', 'carer', 'low', 60],
     // Parent-only: never revealed to a carer or child.
-    ['private', null, "We'll be back around 11.", 'voice', 'Anita', 'parent', 'normal'],
+    ['private', null, "We'll be back around 11.", 'voice', 'Anita', 'parent', 'normal', 0],
   ];
-  for (const [category, subject, text, source, author, visibility, risk] of facts) {
-    fact.run(category, subject, text, source, author, t, visibility, risk);
+  const daysAgo = (n: number) => new Date(now().getTime() - n * 86_400_000).toISOString();
+  for (const [category, subject, text, source, author, visibility, risk, age] of facts) {
+    fact.run(category, subject, text, source, author, age ? daysAgo(age) : t, visibility, risk);
   }
+
+  seedPastEvenings(db);
 
   const loc = db.prepare('INSERT INTO locations (item, description, photo_url) VALUES (?, ?, ?)');
   loc.run('EpiPen', 'Kitchen drawer to the left of the stove, in the red pouch.', '/static/photos/epipen-drawer.svg');

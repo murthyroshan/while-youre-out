@@ -256,6 +256,27 @@ test('a waiting ask-a-parent task finishes when the handoff ends', async () => {
   assert.match(text(final!), /handoff ended/);
 });
 
+test('teach-back over MCP, with the result on the parent page', async () => {
+  await call('end_handoff');
+  await call('start_handoff', { carer_name: 'Priya' });
+  const q1 = await call('teachback', {});
+  assert.match(text(q1), /What is Maya allergic to\?/);
+  await call('teachback', { answer: 'peanuts' });
+  await call('teachback', { answer: 'drawer by the stove' });
+  const done = await call('teachback', { answer: 'her mom' });
+  assert.match(text(done), /All 3 right/);
+  const s = await state();
+  assert.deepEqual([s.teachback.done, s.teachback.right, s.teachback.total], [true, 3, 3]);
+});
+
+test('an emergency said during teach-back is still an emergency', async () => {
+  await call('end_handoff');
+  await call('start_handoff', { carer_name: 'Priya' });
+  await call('teachback', {});
+  const r = await call('teachback', { answer: "Wait, she's choking!" });
+  assert.equal(r.structuredContent.emergency, true);
+});
+
 test('browsers from other websites are refused', async () => {
   const evil = await fetch(`${base}/parent/api/state?k=${KEY}`, { headers: { origin: 'https://evil.example' } });
   assert.equal(evil.status, 403);

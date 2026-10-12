@@ -48,11 +48,39 @@ Settings (environment variables):
 | `WYO_PARENT_KEY` | `demo-parent-key` | Key for the parent page. Required (16+ characters) when `HOST` is not local; the server refuses to start otherwise |
 | `WYO_ESCALATE_MS` | `180000` | How long a contact has to answer before the next one is asked |
 
+## House Brain: teach the house from notes you already have
+
+On the parent page, under **Teach the house**, upload a photo of the fridge note or the doctor's allergy plan (PDF), or paste a WhatsApp message. Gemini reads it into proposed cards:
+
+- Each card keeps the note's own words and shows where it came from. Notes in other languages (e.g. Hinglish) get an English translation.
+- Codes, PINs, passwords and key locations are left out and never stored; the page says how many were left out.
+- If a new rule disagrees with a saved one (bedtime 8:30 vs lights out at 8), the card asks: use the new one, keep both, or keep the old one.
+- Nothing is used until a parent confirms it. A new emergency plan replaces the old one only when the parent says so.
+
+Setup: put `GEMINI_API_KEY=...` in `server/.env` (free key from Google AI Studio; git ignores the file). The server asks three models at once and uses the first good answer, because the free tier is often busy; override with `WYO_GEMINI_MODELS`. Try it on the samples: `npx tsx scripts/try-house-brain.ts` (from `server/`), or upload `server/samples/fridge-note.png` on the parent page.
+
+## Signature features
+
+| Feature | What it does |
+| --- | --- |
+| Live Tonight Plan | Builds tonight's timeline from the parents' routine ("bath at 7:15 … lights out at 8"), prefers day-specific rules ("bedtime 8:30 on Fridays"), applies their rules as the evening goes ("napped till 5" moves bedtime 30 minutes), ticks steps off from the log, and announces each step once when due |
+| Teach-back | Before the parents leave: "What is Maya allergic to? Where is the EpiPen? Who do you call first?" Answers are checked without AI; wrong ones get the parents' own words |
+| Shadow Parent | On small questions (TV, play, staying up) it says how the parents usually answer: "The parents said yes to this 4 out of 5 times on weekends, and it's Saturday". Never decides, never for food, medicine or safety; switchable per topic |
+| Busy mode | A parent taps "urgent only" for 1–3 hours: small questions wait quietly, urgent ones still come through |
+| Morning debrief | Night wakes across recent sitter evenings, asleep time vs the plan, teach-back result, supplies that ran out (to a shopping list), and one-tap "save as a house rule" |
+| Since your last visit | A returning sitter hears only what changed in the house manual |
+| Bilingual relay | Replies in the sitter's language (native script), the parents' words kept on screen; safety rules read an English rendering; emergency lines use fixed translations |
+
+**Demo clock:** run the server with `WYO_DEMO=1` and the simulator shows a day-and-time control, so a video can jump to Saturday 7:45 pm.
+
 ## MCP tools
 
 | Tool | Purpose |
 | --- | --- |
-| `start_handoff` | Switches to carer mode and returns tonight's briefing |
+| `import_note` | Reads a dictated note into proposed cards the parent confirms on their phone |
+| `teachback` | Three quick questions before the parents leave; result shown on the parent's phone |
+| `tonight_plan` | Tonight's timeline from the parents' routine, adjusted by their rules; announces steps as they come due |
+| `start_handoff` | Switches to carer mode and returns tonight's briefing (asks before replacing a running handoff) |
 | `ask_house` | Answers in the parents' exact words; food and medicine always carry a guard |
 | `where_is` | Where something is kept, with the parents' photo |
 | `log_event` | The carer's log of the evening |

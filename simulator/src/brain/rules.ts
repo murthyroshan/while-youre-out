@@ -6,7 +6,7 @@ import type { Brain, DeviceIO } from './types';
 
 const QUESTION_START = /^(can|could|is|are|was|were|what|when|where|how|should|does|do|did|may|why|which|who|whose|will|would|has|have)\b/i;
 const LOG_STATUS =
-  /\b(is |was |went |fell )?(asleep|to bed|to sleep|woke( up)?|ate|eaten|had (her|his|their)? ?(dinner|bath|milk|snack)|threw up|brushed|took (her|his) bath|walked|fed bruno|is crying|was crying|gave (her|him) )\b/i;
+  /\b(is |was |went |fell )?(asleep|to bed|to sleep|woke( up)?|ate|eaten|had (her|his|their)? ?(dinner|bath|milk|snack)|threw up|brushed|took (her|his) bath|walked|fed bruno|is crying|was crying|gave (her|him) |napped|nap (ended|ends|was)|up from (her|his) nap|used the last|ran out of|run out of|we'?re out of|is out of|running low on|no more)\b/i;
 // Words that are never a carer's name ("She is watching TV", "Who is babysitting?").
 const NOT_A_NAME = new Set(
   'who what which she he they it someone somebody nobody everyone mom dad mum daddy mommy maya bruno the a an this that there here i you we my her his our their your anita rahul'.split(' '),
@@ -16,7 +16,12 @@ const YES = /^(yes|yeah|yep|yup|sure|ok|okay|yes please|please|please do|go ahea
 const NO = /^(no|nope|no thanks|never ?mind|don'?t|not now|cancel|no,? don'?t)[.!]*$/i;
 const SMALL_TALK = /^(thanks|thank you|thank you so much|cool|great|got it|alright|hi|hello|hey)[.!]*$/i;
 
-type Pending = { kind: 'ask'; question: string } | { kind: 'end' } | { kind: 'replace'; name: string };
+const LANGS: Record<string, string> = {
+  hindi: 'hi-IN', spanish: 'es-US', tamil: 'ta-IN', telugu: 'te-IN', bengali: 'bn-IN', marathi: 'mr-IN',
+  gujarati: 'gu-IN', kannada: 'kn-IN', malayalam: 'ml-IN', punjabi: 'pa-IN', urdu: 'ur-IN', tagalog: 'fil-PH',
+};
+
+type Pending = { kind: 'ask'; question: string } | { kind: 'end' } | { kind: 'replace'; name: string } | { kind: 'teachback' };
 
 /**
  * A deterministic stand-in for the Alexa+ language model. It needs no API key, so the
@@ -42,6 +47,23 @@ export class RuleBrain implements Brain {
       return io.say(textOf(e));
     }
 
+    // During the teach-back check, the carer's next replies are answers ("skip" moves on).
+    if (this.pending?.kind === 'teachback') {
+      const skip = /^(skip|pass|next|i don'?t know|not sure|no idea)[.!]*$/i.test(u);
+      if (/^(stop|cancel|later)[.!]*$/i.test(u)) {
+        this.pending = null;
+        return io.say("Okay, we'll skip the check.");
+      }
+      const r = await io.tool('teachback', skip ? { skip: true } : { answer: u });
+      if (r.structuredContent?.emergency) {
+        this.pending = null;
+        const e = await io.tool('emergency', { description: u });
+        return io.say(textOf(e));
+      }
+      if (r.structuredContent?.kind !== 'question') this.pending = null;
+      return io.say(textOf(r));
+    }
+
     if (YES.test(u)) {
       const p = this.pending;
       this.pending = null;
@@ -62,7 +84,10 @@ export class RuleBrain implements Brain {
     const handoff =
       u.match(/\b(?:start (?:a |the )?handoff for|hand(?:ing)? (?:it |things |the house )?over to)\s+([a-z][\w'-]*)/i) ??
       u.match(/^([a-z][\w'-]*) (?:is|will be|'s) (?:babysitting|minding|looking after (?:the kids|maya|her|them|things)|watching (?:the kids|maya|her|them)|taking care of (?:the kids|maya|her|them))\b/i);
-    if (handoff && !NOT_A_NAME.has(handoff[1].toLowerCase())) return this.startHandoff(cap(handoff[1]), io, false);
+    if (handoff && !NOT_A_NAME.has(handoff[1].toLowerCase())) {
+      const lang = /\bin (hindi|spanish|tamil|telugu|bengali|marathi|gujarati|kannada|malayalam|punjabi|urdu|tagalog)\b/i.exec(u)?.[1]?.toLowerCase();
+      return this.startHandoff(cap(handoff[1]), io, false, lang ? LANGS[lang] : undefined);
+    }
 
     if (/^(please )?end (the )?handoff\b/i.test(u)) return this.endHandoff(io);
     if (/\b(we'?re|we are|the parents are|parents are) (back|home)\b|\b(mom|dad|mum)(?:'?s| is) (back|home)\b/i.test(u) && !u.endsWith('?')) {
@@ -70,6 +95,11 @@ export class RuleBrain implements Brain {
       if (!this.carer) return io.say('Welcome back.');
       this.pending = { kind: 'end' };
       return io.say(`Welcome back. Should I end ${this.carer}'s handoff?`);
+    }
+
+    if (/\b(what'?s next|what is next|what now|what'?s the plan|what is the plan|tonight'?s plan|plan for tonight|what (do|should) (i|we) do (next|now)|schedule)\b/i.test(u)) {
+      const r = await io.tool('tonight_plan', { announce: false });
+      return io.say(textOf(r));
     }
 
     const where = u.match(/^(?:where(?:'s| is| are| do i find| can i find| do they keep)|find)\s+(?:the |her |his |my |their |maya'?s )?(.+?)\??$/i);
@@ -99,7 +129,7 @@ export class RuleBrain implements Brain {
       }
       if (s.allergy_alert) return io.say(String(s.allergy_alert));
       if (s.medicine_alert) return io.say(String(s.medicine_alert));
-      if (r.isError) return io.say(textOf(r));
+      if (s.plan_change || r.isError) return io.say(textOf(r));
       return io.say(`Got it. ${textOf(r).replace(/^Logged: /, 'I noted: ')}`);
     }
 
@@ -117,12 +147,13 @@ export class RuleBrain implements Brain {
     io.say(textOf(r));
     if (s.suggest_ask_parent && !s.allergy_alert) {
       this.pending = { kind: 'ask', question: u };
-      io.say(`Want me to ask ${this.firstContact}?`);
+      // A Shadow Parent suggestion already ends with "or I can ask"; don't ask twice.
+      if (!s.shadow) io.say(`Want me to ask ${this.firstContact}?`);
     }
   }
 
-  private async startHandoff(name: string, io: DeviceIO, replace: boolean) {
-    const r = await io.tool('start_handoff', { carer_name: name, replace });
+  private async startHandoff(name: string, io: DeviceIO, replace: boolean, language?: string) {
+    const r = await io.tool('start_handoff', language ? { carer_name: name, replace, language } : { carer_name: name, replace });
     if (r.isError) {
       if (r.structuredContent?.view === 'handoff_conflict') this.pending = { kind: 'replace', name };
       return io.say(textOf(r) || "Sorry, I couldn't start the handoff.");
@@ -130,7 +161,13 @@ export class RuleBrain implements Brain {
     this.carer = name;
     const first = r.structuredContent?.first_contact as string | undefined;
     if (first) this.firstContact = first.replace(/\s*\(.*\)/, '');
-    return io.say(textOf(r));
+    io.say(textOf(r));
+    // Straight into the teach-back check, while the parent is still at the door.
+    const tb = await io.tool('teachback', {});
+    if (!tb.isError && tb.structuredContent?.kind === 'question') {
+      this.pending = { kind: 'teachback' };
+      io.say(textOf(tb));
+    }
   }
 
   private async endHandoff(io: DeviceIO) {

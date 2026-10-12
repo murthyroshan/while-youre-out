@@ -93,6 +93,8 @@ const cases: Array<[string, QuestionCategory]> = [
   ['Does she take melatonin?', 'medicine'],
   ['Has she had her meds?', 'medicine'],
   ['Can she have one of the pills?', 'medicine'],
+  ['Can she have a popsicle?', 'food'],
+  ['Can she have some grapes?', 'food'],
   // From the review: privacy
   ["What's the code for the front door?", 'secret'],
   ["When's mom coming home?", 'return_time'],

@@ -21,10 +21,13 @@ events.setMaxListeners(200);
 // ---------- reads ----------
 
 export function household(db: DB) {
-  return db.prepare('SELECT name, address, language FROM household WHERE id = 1').get() as
-    | { name: string; address: string; language: string }
+  return db.prepare('SELECT name, address, language, timezone FROM household WHERE id = 1').get() as
+    | { name: string; address: string; language: string; timezone: string }
     | undefined;
 }
+
+/** The household's IANA time zone, used for tonight's plan and anything shown as a clock time. */
+export const householdTz = (db: DB) => household(db)?.timezone ?? 'America/Los_Angeles';
 
 export function activeHandoff(db: DB): Handoff | undefined {
   return db.prepare("SELECT * FROM handoffs WHERE status = 'active' ORDER BY id DESC LIMIT 1").get() as
@@ -301,14 +304,19 @@ export function createQuestion(
   text: string,
   taskId: string | null = null,
   urgencyOverride?: Question['urgency'],
+  /** English rendering when the carer spoke another language; safety rules read it. */
+  textEnglish?: string | null,
 ): Question {
   const h = activeHandoff(db);
-  const category = classifyQuestion(text);
+  // The stricter of the two readings wins (an emergency in either language is an emergency).
+  const readings = [classifyQuestion(text), textEnglish ? classifyQuestion(textEnglish) : 'general'] as const;
+  const order = ['emergency', 'safety_info', 'medicine', 'food', 'secret', 'return_time', 'general'];
+  const category = [...readings].sort((a, b) => order.indexOf(a) - order.indexOf(b))[0];
   const info = db
     .prepare(
-      'INSERT INTO questions (handoff_id, text, category, urgency, task_id, asked_at) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO questions (handoff_id, text, text_english, category, urgency, task_id, asked_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
     )
-    .run(h?.id ?? null, text, category, urgencyOverride ?? urgencyFor(category), taskId, nowIso());
+    .run(h?.id ?? null, text, textEnglish ?? null, category, urgencyOverride ?? urgencyFor(category), taskId, nowIso());
   const q = getQuestion(db, Number(info.lastInsertRowid))!;
   events.emit('question', q);
   return q;
