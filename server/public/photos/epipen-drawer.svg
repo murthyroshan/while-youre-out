@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" role="img" aria-label="Kitchen drawer left of the stove with a red pouch">
+  <rect width="480" height="300" fill="#f3ede4"/>
+  <rect x="250" y="40" width="200" height="220" rx="8" fill="#3a3f47"/>
+  <circle cx="300" cy="80" r="18" fill="#22262c"/><circle cx="350" cy="80" r="18" fill="#22262c"/><circle cx="400" cy="80" r="18" fill="#22262c"/>
+  <text x="350" y="160" fill="#cbd2d9" font-family="system-ui" font-size="18" text-anchor="middle">STOVE</text>
+  <rect x="30" y="120" width="200" height="140" rx="6" fill="#c9a77c"/>
+  <rect x="40" y="130" width="180" height="70" rx="4" fill="#b08d5f" stroke="#8a6a40"/>
+  <rect x="105" y="160" width="50" height="8" rx="4" fill="#5c4630"/>
+  <rect x="70" y="95" width="120" height="40" rx="8" fill="#c0392b"/>
+  <text x="130" y="121" fill="#fff" font-family="system-ui" font-size="16" font-weight="700" text-anchor="middle">EpiPen x2</text>
+  <path d="M130 135 L130 150" stroke="#c0392b" stroke-width="4"/>
+  <text x="130" y="290" fill="#1f2933" font-family="system-ui" font-size="15" text-anchor="middle">Top drawer, left of the stove</text>
+</svg>

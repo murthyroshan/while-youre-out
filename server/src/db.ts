@@ -1,0 +1,153 @@
+import { DatabaseSync } from 'node:sqlite';
+
+export type Visibility = 'parent' | 'carer' | 'child';
+export type Risk = 'safety' | 'food_medicine' | 'normal' | 'low';
+
+export interface Fact {
+  id: number;
+  category: string;
+  subject: string | null;
+  text: string;
+  source: string;
+  author: string;
+  created_at: string;
+  confirmed: number;
+  visibility: Visibility;
+  risk: Risk;
+  expires_at: string | null;
+  handoff_id: number | null;
+}
+
+export interface Contact {
+  id: number;
+  name: string;
+  relation: string;
+  phone: string;
+  priority: number;
+}
+
+export interface Handoff {
+  id: number;
+  carer_name: string;
+  language: string;
+  started_at: string;
+  ended_at: string | null;
+  status: 'active' | 'ended';
+}
+
+export interface Question {
+  id: number;
+  handoff_id: number | null;
+  text: string;
+  category: string;
+  urgency: 'urgent' | 'normal' | 'later';
+  status: 'pending' | 'answered' | 'expired';
+  answer: string | null;
+  answered_by: string | null;
+  scope: 'tonight' | 'always' | null;
+  task_id: string | null;
+  contact_index: number;
+  asked_at: string;
+  answered_at: string | null;
+}
+
+export interface LogEvent {
+  id: number;
+  handoff_id: number;
+  at: string;
+  kind: string;
+  text: string;
+}
+
+const SCHEMA = `
+CREATE TABLE IF NOT EXISTS household (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  language TEXT NOT NULL DEFAULT 'en'
+);
+CREATE TABLE IF NOT EXISTS members (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  kind TEXT NOT NULL,            -- child | pet
+  age TEXT
+);
+CREATE TABLE IF NOT EXISTS facts (
+  id INTEGER PRIMARY KEY,
+  category TEXT NOT NULL,        -- allergy | food | medicine | routine | screen | rules | contacts | house | pet
+  subject TEXT,                  -- member name the fact is about, if any
+  text TEXT NOT NULL,            -- the parent's exact words
+  source TEXT NOT NULL,          -- voice | photo | whatsapp | pdf | parent_answer
+  author TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  confirmed INTEGER NOT NULL DEFAULT 1,
+  visibility TEXT NOT NULL DEFAULT 'carer',
+  risk TEXT NOT NULL DEFAULT 'normal',
+  expires_at TEXT,
+  handoff_id INTEGER             -- set for "just tonight" answers; they end with this handoff
+);
+CREATE TABLE IF NOT EXISTS locations (
+  id INTEGER PRIMARY KEY,
+  item TEXT NOT NULL,
+  description TEXT NOT NULL,
+  photo_url TEXT
+);
+CREATE TABLE IF NOT EXISTS contacts (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  relation TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  priority INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS action_plan_steps (
+  id INTEGER PRIMARY KEY,
+  plan TEXT NOT NULL,            -- e.g. "Maya - peanut allergy"
+  step_no INTEGER NOT NULL,
+  text TEXT NOT NULL,            -- verbatim from the doctor's plan
+  timer_seconds INTEGER
+);
+CREATE TABLE IF NOT EXISTS handoffs (
+  id INTEGER PRIMARY KEY,
+  carer_name TEXT NOT NULL,
+  language TEXT NOT NULL DEFAULT 'en',
+  started_at TEXT NOT NULL,
+  ended_at TEXT,
+  status TEXT NOT NULL DEFAULT 'active'
+);
+CREATE TABLE IF NOT EXISTS questions (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER,
+  text TEXT NOT NULL,
+  category TEXT NOT NULL,
+  urgency TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  answer TEXT,
+  answered_by TEXT,
+  scope TEXT,
+  task_id TEXT,
+  contact_index INTEGER NOT NULL DEFAULT 0,
+  asked_at TEXT NOT NULL,
+  answered_at TEXT
+);
+CREATE TABLE IF NOT EXISTS log_events (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER NOT NULL,
+  at TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  text TEXT NOT NULL
+);
+`;
+
+export type DB = DatabaseSync;
+
+export function openDb(path = process.env.WYO_DB ?? ':memory:'): DB {
+  const db = new DatabaseSync(path);
+  db.exec('PRAGMA journal_mode = WAL;');
+  db.exec(SCHEMA);
+  // Older database files: add columns introduced later.
+  const cols = db.prepare('PRAGMA table_info(facts)').all() as Array<{ name: string }>;
+  if (!cols.some((c) => c.name === 'handoff_id')) db.exec('ALTER TABLE facts ADD COLUMN handoff_id INTEGER');
+  return db;
+}
+
+export const nowIso = () => new Date().toISOString();

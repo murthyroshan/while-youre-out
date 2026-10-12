@@ -1,0 +1,14 @@
+{
+  "name": "while-youre-out",
+  "private": true,
+  "workspaces": [
+    "server",
+    "simulator"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w server",
+    "dev:sim": "npm run dev -w simulator",
+    "test": "npm test -w server && npm test -w simulator",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w simulator"
+  }
+}

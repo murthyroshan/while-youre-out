@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" role="img" aria-label="Bathroom cabinet with the first aid kit on the top shelf">
+  <rect width="480" height="300" fill="#eef3f6"/>
+  <rect x="140" y="30" width="200" height="240" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="3"/>
+  <line x1="140" y1="110" x2="340" y2="110" stroke="#9aa5b1" stroke-width="3"/>
+  <line x1="140" y1="190" x2="340" y2="190" stroke="#9aa5b1" stroke-width="3"/>
+  <rect x="190" y="55" width="100" height="50" rx="6" fill="#1e7b4f"/>
+  <rect x="233" y="62" width="14" height="36" fill="#fff"/><rect x="222" y="73" width="36" height="14" fill="#fff"/>
+  <text x="240" y="290" fill="#1f2933" font-family="system-ui" font-size="15" text-anchor="middle">Bathroom cabinet, top shelf</text>
+</svg>
