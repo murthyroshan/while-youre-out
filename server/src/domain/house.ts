@@ -47,6 +47,16 @@ export function contacts(db: DB): Contact[] {
   return db.prepare('SELECT * FROM contacts ORDER BY priority').all() as unknown as Contact[];
 }
 
+/**
+ * The parents (or guardians) among the contacts: photos of the children and the debrief go to them,
+ * not to a neighbour who is only there to answer in a pinch. Falls back to the first contact.
+ */
+export function parentNames(db: DB): string[] {
+  const chain = contacts(db).filter((c) => c.priority < 9);
+  const parents = chain.filter((c) => /\b(mom|mum|mother|mommy|mummy|mama|dad|father|daddy|papa|parent|guardian|step ?(mom|dad))\b/i.test(c.relation));
+  return (parents.length ? parents : chain.slice(0, 1)).map((c) => c.name);
+}
+
 export function locations(db: DB) {
   return db.prepare('SELECT item, description, photo_url FROM locations ORDER BY id').all() as Array<{
     item: string;
@@ -69,7 +79,7 @@ export function actionPlan(db: DB) {
 const TOPIC_CATEGORIES: Array<[RegExp, string[]]> = [
   [/\b(bed|bedtime|sleep|nap|bath|pyjama|pajama|stories|story|teeth|lights out|night)\b/i, ['routine']],
   [/\b(tv|screen|watch|show|episode|ipad|tablet|cartoon|bluey|peppa|youtube|game)\b/i, ['screen']],
-  [/\b(dog|bruno|walk|pet|feed the dog)\b/i, ['pet']],
+  [/\b(dog|cat|walk|pet|feed the dog|feed the cat|litter)\b/i, ['pet']],
   [/\b(friend|friends|visit|outside|park|play ?date|neighbou?r)\b/i, ['rules']],
   [/\b(thermostat|heat|heating|cold|warm|temperature in)\b/i, ['house']],
   [/\b(call|phone|number|doctor|contact|emergency)\b/i, ['contacts']],
@@ -107,6 +117,10 @@ export function answerQuestion(db: DB, question: string, role: Role = 'carer'): 
   if (category === 'food') wanted = ['allergy', 'food'];
   else if (category === 'medicine') wanted = ['medicine', 'allergy'];
   for (const [re, cats] of TOPIC_CATEGORIES) if (re.test(question)) wanted.push(...cats);
+  // The family's own pets by name ("Did Bruno eat?").
+  const q = compact(question);
+  const pets = db.prepare("SELECT name FROM members WHERE kind = 'pet'").all() as Array<{ name: string }>;
+  if (pets.some((p) => compact(p.name) && q.includes(compact(p.name)))) wanted.push('pet');
 
   // Topic matches plus close keyword matches (e.g. rules learned from earlier parent answers).
   const byTopic = facts.filter((f) => wanted.includes(f.category));

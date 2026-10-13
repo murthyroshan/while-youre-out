@@ -22,6 +22,8 @@ npm test             # scripted evening against the real server
 
 The server prints the parent page link, for example `http://127.0.0.1:8787/parent?k=demo-parent-key`. Open it in another window to answer the sitter's questions as a parent.
 
+**Notifications on the parent's phone:** tap "Turn on" on the parent page. Android Chrome and desktop browsers work straight away; on an iPhone, first use Share → Add to Home Screen and open it from there (iOS 16.4+). Push needs https, or `localhost` on the same computer.
+
 For a quick demo, set `WYO_ESCALATE_MS=20000` so an unanswered question moves to the next contact after 20 seconds.
 
 ## The simulator
@@ -53,6 +55,7 @@ Settings (environment variables):
 | `WYO_PUBLIC_URL` | local address | Base URL used in links to the parent page |
 | `WYO_DEMO` | off | `1` enables the demo clock |
 | `WYO_HOST_LLM` | on | `0` turns off the simulator's Gemini proxy (`/host/llm`) |
+| `WYO_VAPID_PUBLIC_KEY` / `WYO_VAPID_PRIVATE_KEY` | generated | Keys for push notifications. Generated and saved in the database if not set; set them when the database isn't kept between restarts, or phones must turn notifications on again |
 | `GEMINI_API_KEY` | (none) | In `server/.env`; needed for House Brain, translation and the Gemini brain |
 | `WYO_GEMINI_MODELS` / `WYO_GEMINI_CHAT_MODELS` | built-in list | Comma-separated Gemini models for reading notes / for the simulator brain |
 
@@ -77,6 +80,9 @@ Setup: put `GEMINI_API_KEY=...` in `server/.env` (free key from Google AI Studio
 | Busy mode | A parent taps "urgent only" for 1–3 hours: small questions wait quietly, urgent ones still come through |
 | Morning debrief | Night wakes across recent sitter evenings, asleep time vs the plan, teach-back result, supplies that ran out (to a shopping list), and one-tap "save as a house rule" |
 | Since your last visit | A returning sitter hears only what changed in the house manual |
+| Phone notifications | Real push notifications to the parents' phones, even with the page closed: a question goes to whoever is first in the call order (then the next if nobody answers), urgent questions and emergencies buzz every phone and stay on screen, busy mode keeps small questions quiet |
+| Photo check-in | "Send Mom a photo saying good night": the Echo Show counts down, takes the picture and sends it to the parents only (not the neighbour). Never shown to a carer or sent to an AI; deleted after a week |
+| Family setup | Children and pets (with allergies in the parent's words), who to call in order, doctors kept out of the question chain, home address and time zone. "Reset to the demo family" and "Start fresh" for anyone trying it |
 | Bilingual relay | Replies in the sitter's language (native script), the parents' words kept on screen; safety rules read an English rendering; emergency lines use fixed translations |
 
 **Demo clock:** run the server with `WYO_DEMO=1` and the simulator shows a day-and-time control, so a video can jump to Saturday 7:45 pm.
@@ -97,6 +103,7 @@ Setup: put `GEMINI_API_KEY=...` in `server/.env` (free key from Google AI Studio
 | `ask_parent_and_wait` | MCP task: completes when a parent answers, escalates down the contact chain |
 | `emergency` | Fixed safety script from the family's own data; alerts every contact |
 | `end_handoff` | Ends carer mode and returns the evening summary |
+| `send_photo` | Sends a photo from the device camera to the parents (the host attaches the image) |
 
 Resources: `ui://while-youre-out/card.html` (MCP App card), `house://manual` (carer view of the manual).
 

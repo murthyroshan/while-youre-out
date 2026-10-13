@@ -174,6 +174,22 @@ CREATE TABLE IF NOT EXISTS proposals (
   conflict_reason TEXT,
   created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  endpoint TEXT PRIMARY KEY,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  member TEXT,                   -- who the phone belongs to ("Answering as")
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS photos (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER,
+  at TEXT NOT NULL,
+  mime TEXT NOT NULL,
+  data BLOB NOT NULL,
+  caption TEXT,
+  taken_by TEXT
+);
 CREATE TABLE IF NOT EXISTS log_events (
   id INTEGER PRIMARY KEY,
   handoff_id INTEGER NOT NULL,

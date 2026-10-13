@@ -11,6 +11,7 @@ import {
   answerQuestion,
   attachTask,
   briefing,
+  parentNames,
   createQuestion,
   currentContactFor,
   endHandoff,
@@ -28,6 +29,7 @@ import {
   type Role,
 } from '../domain/house.js';
 import { startEmergency } from '../domain/emergency.js';
+import { PhotoError, savePhoto } from '../domain/photos.js';
 import { importNote, ImportError } from '../domain/houseBrain.js';
 import { applyLogToPlan, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
 import { teachback } from '../domain/teachback.js';
@@ -592,9 +594,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       e.epipen_photo = abs(e.epipen_photo);
       const lang = carerLang();
       const fixed = lang === 'en' ? null : fixedTranslation(e.say_first, lang);
-      const english = `${e.say_first} The address is ${e.address}. ${e.action_plan.steps[0]?.text ?? ''}`;
+      const address = e.address?.trim() ? e.address : null;
+      const english = [e.say_first, address ? `The address is ${address}.` : '', e.action_plan.steps[0]?.text ?? ''].filter(Boolean).join(' ');
       // Emergencies never wait for an AI: a fixed translation of the first line if we have one, English otherwise.
-      return plain('emergency', { ...e, language: lang, spoken: fixed ? `${fixed} ${e.address}` : null }, fixed ? `${fixed} ${e.address}. ${english}` : english);
+      const spoken = fixed ? [fixed, address].filter(Boolean).join(' ') : null;
+      return plain('emergency', { ...e, address, language: lang, spoken }, spoken ? `${spoken}. ${english}` : english);
     },
   );
 
@@ -621,6 +625,35 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
         .filter(Boolean)
         .join(' ');
       return localized('summary', { carer: h.carer_name, timezone: householdTz(db), timeline: d.timeline, questions, insights: d.insights, rule_suggestions: d.rule_suggestions, supplies: d.supplies }, text);
+    },
+  );
+
+  server.registerTool(
+    'send_photo',
+    {
+      title: 'Send a photo to the parents',
+      description:
+        'Call when the carer asks to send the parents a photo ("send Mom a picture", "take a photo of us"). The device camera takes the picture and the host attaches it as image_base64; the parents get it on their phones. Photos are never shown to anyone else.',
+      inputSchema: {
+        image_base64: z.string().max(2_600_000).optional().describe('The JPEG/PNG/WebP photo from the device camera, base64. Attached by the device, not the model.'),
+        mime_type: z.enum(['image/jpeg', 'image/png', 'image/webp']).optional(),
+        caption: z.string().trim().max(200).optional().describe('What the carer said to go with the photo, e.g. "Maya says good night"'),
+      },
+      _meta: ui,
+    },
+    async ({ image_base64, mime_type, caption }) => {
+      if (!image_base64) {
+        return { isError: true, content: [{ type: 'text', text: "I need the camera for that. This device couldn't take a photo." }], structuredContent: { view: 'photo', needs_camera: true } };
+      }
+      try {
+        const photo = savePhoto(db, { data: Buffer.from(image_base64, 'base64'), mime: mime_type ?? 'image/jpeg', caption });
+        const names = parentNames(db);
+        const to = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0] ?? 'the parents';
+        return localized('photo', { photo_id: photo.id, caption: photo.caption, sent_to: names }, `Sent. ${to} will see it on their phone.`);
+      } catch (e) {
+        if (e instanceof PhotoError) return { isError: true, content: [{ type: 'text', text: e.message }] };
+        throw e;
+      }
     },
   );
 

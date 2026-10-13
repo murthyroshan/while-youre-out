@@ -6,7 +6,7 @@ import type { Brain, DeviceIO } from './types';
 
 const QUESTION_START = /^(can|could|is|are|was|were|what|when|where|how|should|does|do|did|may|why|which|who|whose|will|would|has|have)\b/i;
 const LOG_STATUS =
-  /\b(is |was |went |fell )?(asleep|to bed|to sleep|woke( up)?|ate|eaten|had (her|his|their)? ?(dinner|bath|milk|snack)|threw up|brushed|took (her|his) bath|walked|fed bruno|is crying|was crying|gave (her|him) |napped|nap (ended|ends|was)|up from (her|his) nap|used the last|ran out of|run out of|we'?re out of|is out of|running low on|no more)\b/i;
+  /\b(is |was |went |fell )?(asleep|to bed|to sleep|woke( up)?|ate|eaten|had (her|his|their)? ?(dinner|bath|milk|snack)|threw up|brushed|took (her|his) bath|walked|fed (the )?\w+|is crying|was crying|gave (her|him) |napped|nap (ended|ends|was)|up from (her|his) nap|used the last|ran out of|run out of|we'?re out of|is out of|running low on|no more)\b/i;
 // Words that are never a carer's name ("She is watching TV", "Who is babysitting?").
 const NOT_A_NAME = new Set(
   'who what which she he they it someone somebody nobody everyone mom dad mum daddy mommy maya bruno the a an this that there here i you we my her his our their your anita rahul'.split(' '),
@@ -14,6 +14,8 @@ const NOT_A_NAME = new Set(
 // Confirmations only count when that's all the person said ("Okay, she can't breathe" is not a yes).
 const YES = /^(yes|yeah|yep|yup|sure|ok|okay|yes please|please|please do|go ahead|do it|ask (them|her|him)|ask)[.!]*$/i;
 const NO = /^(no|nope|no thanks|never ?mind|don'?t|not now|cancel|no,? don'?t)[.!]*$/i;
+// "Send Mom a photo", "take a picture of us saying good night" (a request to the device, not "can she take pictures?").
+const PHOTO = /^(?:(?:please|can you|could you|would you|let'?s|lets)\s+)?(?:send|take|snap|share)\b.{0,40}?\b(?:photo|picture|pic|selfie)s?\b(?:.*?\b(?:saying|that says|with the caption|and say|to say)\b[\s,:]*(.+))?/i;
 const SMALL_TALK = /^(thanks|thank you|thank you so much|cool|great|got it|alright|hi|hello|hey)[.!]*$/i;
 
 const LANGS: Record<string, string> = {
@@ -46,6 +48,10 @@ export class RuleBrain implements Brain {
       const e = await io.tool('emergency', { description: u });
       return io.say(textOf(e));
     }
+
+    // A photo request is never mistaken for a teach-back answer or a "yes"; the check carries on after.
+    const photo = PHOTO.exec(u);
+    if (photo) return this.sendPhoto(io, photo[1]?.replace(/[.!?]+$/, '').trim());
 
     // During the teach-back check, the carer's next replies are answers ("skip" moves on).
     if (this.pending?.kind === 'teachback') {
@@ -173,6 +179,15 @@ export class RuleBrain implements Brain {
   private async endHandoff(io: DeviceIO) {
     const r = await io.tool('end_handoff');
     this.carer = null;
+    return io.say(textOf(r));
+  }
+
+  private async sendPhoto(io: DeviceIO, caption?: string) {
+    if (!io.capture) return io.say("This device doesn't have a camera.");
+    io.say('Okay, smile!');
+    const shot = await io.capture();
+    if (!shot) return io.say("Sorry, I couldn't take a photo.");
+    const r = await io.tool('send_photo', { image_base64: shot.data, mime_type: shot.mime, ...(caption ? { caption: cap(caption) } : {}) });
     return io.say(textOf(r));
   }
 

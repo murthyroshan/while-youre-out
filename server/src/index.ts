@@ -1,14 +1,17 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import express from 'express';
-import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
+import { hostHeaderValidation, localhostHostValidation } from '@modelcontextprotocol/sdk/server/middleware/hostHeaderValidation.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { InMemoryTaskStore } from '@modelcontextprotocol/sdk/experimental/tasks/stores/in-memory.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { openDb } from './db.js';
 import { seedDemoHousehold } from './seed.js';
 import { buildServer } from './mcp/server.js';
-import { PARENT_HTML } from './parent/page.js';
+import { PARENT_HTML, SERVICE_WORKER_JS } from './parent/page.js';
+import { createPush, isValidSubscription, type PushSender } from './domain/push.js';
+import { getPhotoData, recentPhotos } from './domain/photos.js';
+import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './domain/family.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
 import { geminiChat, geminiFromEnv, AiUnavailableError, type AiClient, type ChatRequest } from './ai/gemini.js';
 import { decideProposal, importInfo, importNote, ImportError, IMAGE_TYPES, MAX_IMPORT_BYTES, pendingProposals, ProposalError } from './domain/houseBrain.js';
@@ -35,6 +38,8 @@ export interface AppOptions {
   hostLlm?: boolean;
   /** Chat function for the proxy. Default: Gemini. Tests pass a fake. */
   chat?: (req: ChatRequest) => Promise<{ parts: unknown[]; model: string }>;
+  /** Sends Web Push messages. Default: the web-push library. Tests pass a fake. */
+  pushSender?: PushSender;
 }
 
 const MAX_SESSIONS = 200;
@@ -60,10 +65,19 @@ export function createApp(opts: AppOptions = {}) {
   const ai = opts.ai ?? geminiFromEnv();
 
   let lastEmergency: { at: string; description: string } | null = null;
-  events.on('emergency', (e) => (lastEmergency = e));
-  events.on('handoff', () => (lastEmergency = null));
+  const onEmergency = (e: { at: string; description: string }) => (lastEmergency = e);
+  const clearEmergency = () => (lastEmergency = null);
+  events.on('emergency', onEmergency);
+  events.on('handoff', clearEmergency);
+  events.on('reset', clearEmergency);
+  const push = createPush(db, { sender: opts.pushSender, publicUrl, parentKey });
 
-  const app = createMcpExpressApp({ host: opts.host ?? '127.0.0.1', allowedHosts: opts.allowedHosts });
+  // Same as the SDK's createMcpExpressApp, with a body limit that fits a photo from the device camera.
+  const app = express();
+  const bindHost = opts.host ?? '127.0.0.1';
+  if (opts.allowedHosts) app.use(hostHeaderValidation(opts.allowedHosts));
+  else if (['127.0.0.1', 'localhost', '::1'].includes(bindHost)) app.use(localhostHostValidation());
+  app.use(express.json({ limit: '3mb' }));
   // Browsers may only call us from local pages (the simulator) or origins listed in ALLOWED_ORIGINS.
   // Requests without an Origin header (MCP clients, curl, same-origin page loads) are not affected.
   const originAllowed = (origin: string | undefined) =>
@@ -165,6 +179,29 @@ export function createApp(opts: AppOptions = {}) {
   };
 
   app.get('/parent', (_req, res) => void res.type('html').send(PARENT_HTML));
+  // The service worker shows notifications when the page is closed. Scope: the parent page only.
+  app.get('/parent/sw.js', (_req, res) => {
+    res.setHeader('Service-Worker-Allowed', '/parent');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.type('application/javascript').send(SERVICE_WORKER_JS);
+  });
+  // Lets an iPhone add the page to the home screen, which iOS needs for notifications.
+  app.get('/parent/manifest.webmanifest', (req, res) => {
+    if (!authorised(req.query.k)) return void res.sendStatus(401);
+    res.type('application/manifest+json').json({
+      name: "While You're Out",
+      short_name: "While You're Out",
+      start_url: `/parent?k=${encodeURIComponent(String(req.query.k))}`,
+      scope: '/parent',
+      display: 'standalone',
+      background_color: '#f7f4ef',
+      theme_color: '#1f2933',
+      icons: [
+        { src: '/static/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/static/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+    });
+  });
 
   app.get('/parent/api/state', (req, res) => {
     if (!authorised(req.query.k)) return void res.sendStatus(401);
@@ -184,7 +221,78 @@ export function createApp(opts: AppOptions = {}) {
       questions: pendingQuestions(db).map((q) => ({ ...q, contact: currentContactFor(db, q)?.name ?? null })),
       log: eveningLog(db),
       emergency: lastEmergency,
+      photos: recentPhotos(db, activeHandoff(db)?.id ?? latestDebrief(db)?.handoff_id),
+      household: getFamily(db).household,
     });
+  });
+
+  // ---------- Phone notifications ----------
+  app.get('/parent/api/push/key', (req, res) => {
+    if (!authorised(req.query.k)) return void res.sendStatus(401);
+    res.json({ publicKey: push.publicKey });
+  });
+  app.post('/parent/api/push/subscribe', (req, res) => {
+    const { k, subscription, member } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (!isValidSubscription(subscription)) return void res.status(400).json({ error: 'bad subscription' });
+    push.subscribe(subscription, typeof member === 'string' && member.trim() ? member.trim().slice(0, 40) : null);
+    res.json({ ok: true });
+  });
+  app.post('/parent/api/push/unsubscribe', (req, res) => {
+    const { k, endpoint } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (typeof endpoint !== 'string') return void res.status(400).json({ error: 'endpoint required' });
+    push.unsubscribe(endpoint);
+    res.json({ ok: true });
+  });
+  app.post('/parent/api/push/test', async (req, res) => {
+    const { k, endpoint } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    const sent = await push.notify(
+      'everyone',
+      { title: "While You're Out", body: "Notifications are on. Questions and emergencies will reach you here.", tag: 'test' },
+      { endpoint: typeof endpoint === 'string' ? endpoint : undefined },
+    );
+    res.json({ sent });
+  });
+
+  // ---------- Photos from home (parents only) ----------
+  app.get('/parent/api/photos/:id', (req, res) => {
+    if (!authorised(req.query.k)) return void res.sendStatus(401);
+    const p = getPhotoData(db, Number(req.params.id));
+    if (!p) return void res.sendStatus(404);
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    res.setHeader('Content-Security-Policy', "default-src 'none'");
+    res.type(p.mime).send(p.data);
+  });
+
+  // ---------- Family setup ----------
+  app.get('/parent/api/family', (req, res) => {
+    if (!authorised(req.query.k)) return void res.sendStatus(401);
+    res.json(getFamily(db));
+  });
+  app.post('/parent/api/family', (req, res) => {
+    const { k, family, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    try {
+      res.json(saveFamily(db, family, parentName(by)));
+    } catch (e) {
+      if (e instanceof FamilyError) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
+  });
+  // "Reset to the demo family" (so every visitor starts clean) or "start fresh" with an empty house.
+  app.post('/parent/api/reset', (req, res) => {
+    const { k, mode, timezone } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    try {
+      if (mode === 'demo') return void res.json(resetToDemo(db));
+      if (mode === 'fresh') return void res.json(startFresh(db, typeof timezone === 'string' ? timezone : ''));
+      res.status(400).json({ error: 'mode must be demo or fresh' });
+    } catch (e) {
+      if (e instanceof FamilyError) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
   });
 
   app.post('/parent/api/answer', (req, res) => {
@@ -354,19 +462,23 @@ export function createApp(opts: AppOptions = {}) {
   app.get('/health', (_req, res) => void res.json({ ok: true }));
 
   // JSON errors instead of Express's HTML error page (e.g. a file over the size limit).
-  app.use((err: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (res.headersSent) return next(err);
     const status = typeof err?.status === 'number' ? err.status : 500;
     if (status >= 500) console.error('Unhandled error', err);
-    res.status(status).json({ error: status === 413 ? 'That file is larger than 6 MB.' : status >= 500 ? 'Internal error' : String(err?.message ?? 'Bad request') });
+    res.status(status).json({ error: status === 413 ? (req.path.startsWith('/parent/api/import') ? 'That file is larger than 6 MB.' : 'That is too large to send.') : status >= 500 ? 'Internal error' : String(err?.message ?? 'Bad request') });
   });
 
   const close = () => {
     clearInterval(sweeper);
+    push.close();
+    events.off('emergency', onEmergency);
+    events.off('handoff', clearEmergency);
+    events.off('reset', clearEmergency);
     taskStore.cleanup();
     for (const t of sessions.values()) void t.close();
   };
-  return { app, db, taskStore, parentKey, close };
+  return { app, db, taskStore, parentKey, push, close };
 }
 
 const entry = process.argv[1];

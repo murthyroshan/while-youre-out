@@ -128,3 +128,32 @@ test('a runaway model is stopped after a few rounds', async () => {
   await s.brain.handle('loop please', s.io);
   assert.ok(s.requests.length <= 5);
 });
+
+test('send_photo: the model never sees or sends the image; the device camera attaches it', async () => {
+  const tools = [...TOOLS, { name: 'send_photo', description: 'photo', inputSchema: { type: 'object', properties: { image_base64: { type: 'string' }, mime_type: { type: 'string' }, caption: { type: 'string' } } } }];
+  const requests: any[] = [];
+  const script = [[fc('send_photo', { caption: 'Good night from Maya' })], [{ text: 'Sent!' }]];
+  let i = 0;
+  const fetchImpl = (async (_u: string, init: RequestInit) => {
+    requests.push(JSON.parse(String(init.body)));
+    return new Response(JSON.stringify({ parts: script[i++], model: 'fake' }), { status: 200 });
+  }) as typeof fetch;
+  const calls: Call[] = [];
+  const said: string[] = [];
+  const io: DeviceIO = {
+    say: (t) => void said.push(t),
+    tool: async (name, args = {}) => {
+      calls.push({ name, args });
+      return { content: [{ type: 'text', text: 'Sent. Anita will see it.' }], structuredContent: {} } as ToolResult;
+    },
+    task: () => {},
+    capture: async () => ({ data: 'CAMERA', mime: 'image/jpeg' }),
+  };
+  const brain = new GeminiBrain({ serverOrigin: 'http://server', tools: () => tools as any, instructions: () => undefined, fallback: { name: 'x', handle: async () => {} }, fetchImpl });
+  await brain.handle('send mom a picture saying good night', io);
+  const decl = requests[0].functions.find((f: any) => f.name === 'send_photo');
+  assert.deepEqual(Object.keys(decl.parametersJsonSchema.properties), ['caption']);
+  assert.deepEqual(calls, [{ name: 'send_photo', args: { caption: 'Good night from Maya', image_base64: 'CAMERA', mime_type: 'image/jpeg' } }]);
+  assert.ok(!JSON.stringify(requests[1]).includes('CAMERA'), 'the photo is never sent to the model');
+  assert.equal(said[0], 'Okay, smile! Sent. Anita will see it.');
+});

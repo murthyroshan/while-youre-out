@@ -224,3 +224,44 @@ test('"ask mom if she can have dessert" asks the right question', async () => {
   const d = await run(['Ask mom if she can have dessert']);
   assert.deepEqual(d.tasks[0].args, { question: 'she can have dessert' });
 });
+
+// ---------- photo check-in ----------
+
+test('"Send Mom a photo saying good night" takes a photo and sends it with the caption', async () => {
+  const brain = new RuleBrain();
+  const dev = fakeDevice({ send_photo: { content: [{ type: 'text', text: 'Sent. Anita will see it on their phone.' }] } });
+  dev.io.capture = async () => ({ data: 'AAAA', mime: 'image/jpeg' });
+  await brain.handle('Send Mom a photo saying good night', dev.io);
+  assert.deepEqual(dev.calls, [{ name: 'send_photo', args: { image_base64: 'AAAA', mime_type: 'image/jpeg', caption: 'Good night' } }]);
+  assert.deepEqual(dev.said, ['Okay, smile!', 'Sent. Anita will see it on their phone.']);
+});
+
+test('"take a picture of us" works without a caption; no camera is said plainly', async () => {
+  const brain = new RuleBrain();
+  const dev = fakeDevice();
+  dev.io.capture = async () => ({ data: 'BBBB', mime: 'image/jpeg' });
+  await brain.handle("Let's take a picture of us for Dad", dev.io);
+  assert.deepEqual(dev.calls[0].args, { image_base64: 'BBBB', mime_type: 'image/jpeg' });
+  const none = await run(['Send them a photo']);
+  assert.equal(none.calls.length, 0);
+  assert.match(none.said[0], /doesn't have a camera/);
+});
+
+test('"Can she take pictures with my phone?" is a question for the house, not a photo', async () => {
+  const d = await run(['Can she take pictures with my phone?']);
+  assert.equal(d.calls[0].name, 'ask_house');
+});
+
+test('a photo request during the teach-back is not taken as an answer, and the check carries on', async () => {
+  const brain = new RuleBrain();
+  const dev = fakeDevice({ teachback: { structuredContent: { kind: 'question' } } });
+  dev.io.capture = async () => ({ data: 'CCCC', mime: 'image/jpeg' });
+  await brain.handle('Priya is babysitting tonight', dev.io);
+  await brain.handle('Take a photo for Mom', dev.io);
+  await brain.handle('Peanuts', dev.io);
+  assert.deepEqual(
+    dev.calls.map((c) => c.name),
+    ['start_handoff', 'teachback', 'send_photo', 'teachback'],
+  );
+  assert.deepEqual(dev.calls[3].args, { answer: 'Peanuts' });
+});

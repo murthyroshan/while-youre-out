@@ -45,6 +45,7 @@ How to act:
 - Anything that sounds like an emergency: call emergency immediately.
 - The parents are back / "end the handoff": confirm, then call end_handoff.
 - A dictated note from a parent ("remember: ..."): call import_note.
+- "Send Mom a photo", "take a picture of us": call send_photo. The device camera takes the picture; pass only a caption if they said one ("saying good night").
 
 Languages: if the carer speaks another language, call set_carer_language with its BCP-47 code (hi-IN, es-US, ta-IN, ...) once, and always pass an English rendering in question_english / text_english / answer_english / description_english so the add-on's safety rules can read it.
 
@@ -59,6 +60,15 @@ function cleanSchema(schema: unknown): unknown {
     out[k] = cleanSchema(v);
   }
   return out;
+}
+
+/** The photo itself comes from the device camera, never from the model. */
+function withoutDeviceFields(t: Tool): unknown {
+  if (t.name !== 'send_photo') return t.inputSchema;
+  const props = { ...((t.inputSchema.properties ?? {}) as Record<string, unknown>) };
+  delete props.image_base64;
+  delete props.mime_type;
+  return { ...t.inputSchema, properties: props };
 }
 
 /** Keeps tool results small: the model needs the gist, the card shows the rest. */
@@ -84,7 +94,7 @@ export class GeminiBrain implements Brain {
     return this.opts
       .tools()
       .filter((t) => !HIDDEN_TOOLS.has(t.name))
-      .map((t) => ({ name: t.name, description: (t.description ?? '').slice(0, 1000), parametersJsonSchema: cleanSchema(t.inputSchema) }));
+      .map((t) => ({ name: t.name, description: (t.description ?? '').slice(0, 1000), parametersJsonSchema: cleanSchema(withoutDeviceFields(t)) }));
   }
 
   private async callModel(): Promise<{ parts: Part[] }> {
@@ -141,7 +151,13 @@ export class GeminiBrain implements Brain {
             response = { text: 'Question sent to the parents. The answer will be announced when it arrives.' };
             spoken.push('Okay, I\'m asking now. I\'ll tell you when they answer.');
           } else {
-            const r = await io.tool(name, args);
+            let callArgs = args;
+            if (name === 'send_photo') {
+              spoken.push('Okay, smile!');
+              const shot = io.capture ? await io.capture() : null;
+              callArgs = shot ? { ...args, image_base64: shot.data, mime_type: shot.mime } : args;
+            }
+            const r = await io.tool(name, callArgs);
             response = forModel(r);
             const s = r.structuredContent ?? {};
             if (s.emergency && name !== 'emergency') {

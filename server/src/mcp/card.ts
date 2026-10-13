@@ -115,12 +115,19 @@ export const CARD_HTML = /* html */ `<!doctype html>
     },
     emergency: function (d) {
       document.body.className = 'emergency'; document.getElementById('root').className = 'emergency';
-      return '<h1>' + esc(d.say_first) + '</h1><div class="addr">' + esc(d.address) + '</div>' +
+      return '<h1>' + esc(d.say_first) + '</h1>' + (d.address ? '<div class="addr">' + esc(d.address) + '</div>' : '') +
         '<h2 style="color:#fff">' + esc(d.action_plan.source) + '</h2><ol>' +
         d.action_plan.steps.map(function (s) { return '<li>' + esc(s.text) + (s.timer_seconds ? ' <span class="pill">' + Math.round(s.timer_seconds / 60) + ' min timer</span>' : '') + '</li>'; }).join('') + '</ol>' +
         (d.epipen_location ? '<p><strong>EpiPen:</strong> ' + esc(d.epipen_location) + '</p>' : '') +
         (d.epipen_photo ? '<img class="photo" alt="Where the EpiPen is kept" src="' + esc(d.epipen_photo) + '">' : '') +
         '<p>Alerted: ' + esc(d.parents_alerted.join(', ')) + '</p><p style="opacity:.8;font-size:13px">' + esc(d.note) + '</p>';
+    },
+    photo: function (d) {
+      if (d.needs_camera) return '<h1>No camera</h1><p>This device couldn\\'t take a photo.</p>';
+      var to = d.sent_to || [];
+      return '<h1>📷 Photo sent</h1>' + (d.caption ? '<div class="quote">“' + esc(d.caption) + '”</div>' : '') +
+        '<p>' + (to.length ? esc(to.length > 1 ? to.slice(0, -1).join(', ') + ' and ' + to[to.length - 1] : to[0]) + ' will see it on their phone.' : 'The parents will see it on their phone.') + '</p>' +
+        '<p class="pill">Only the parents can see photos · deleted after a week</p>';
     },
     question: function (d) {
       var title = d.answer ? esc(d.answered_by) + ' answered' : 'Asking ' + esc(d.asked);

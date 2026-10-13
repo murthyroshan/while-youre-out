@@ -1,0 +1,178 @@
+// Real phone notifications for the parents (Web Push), so a question or an emergency reaches them
+// even when the parent page is closed. Works on Android Chrome, desktop browsers, and iPhone once
+// the page is added to the home screen.
+import webpush from 'web-push';
+import { type DB, nowIso } from '../db.js';
+import { activeHandoff, currentContactFor, events, parentNames } from './house.js';
+import { busyUntil, getSetting, setSetting } from './shadow.js';
+import type { Contact, Question } from '../db.js';
+import { summary, type TeachbackState } from './teachback.js';
+
+export interface PushSubscriptionJson {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+}
+
+export interface PushMessage {
+  title: string;
+  body: string;
+  /** Same tag replaces the earlier notification instead of stacking (e.g. one per question). */
+  tag?: string;
+  /** Emergencies and urgent questions stay on screen until tapped, and vibrate harder. */
+  urgent?: boolean;
+  /** An image shown in the notification (Android), e.g. the sitter's photo. */
+  image?: string;
+}
+
+/** Sends one encrypted message. Tests pass a fake; the default is the web-push library. */
+export type PushSender = (sub: PushSubscriptionJson, payload: string, options: webpush.RequestOptions) => Promise<{ statusCode: number }>;
+
+const MAX_SUBSCRIPTIONS = 50;
+
+interface Row {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  member: string | null;
+}
+
+/** VAPID keys from the environment, or generated once and kept in the database. */
+function vapidKeys(db: DB) {
+  if (process.env.WYO_VAPID_PUBLIC_KEY && process.env.WYO_VAPID_PRIVATE_KEY) {
+    return { publicKey: process.env.WYO_VAPID_PUBLIC_KEY, privateKey: process.env.WYO_VAPID_PRIVATE_KEY };
+  }
+  const saved = getSetting(db, 'vapid_keys');
+  if (saved) return JSON.parse(saved) as { publicKey: string; privateKey: string };
+  const keys = webpush.generateVAPIDKeys();
+  setSetting(db, 'vapid_keys', JSON.stringify(keys));
+  return keys;
+}
+
+export function isValidSubscription(s: any): s is PushSubscriptionJson {
+  return (
+    s &&
+    typeof s.endpoint === 'string' &&
+    /^https:\/\//.test(s.endpoint) &&
+    s.endpoint.length < 1000 &&
+    typeof s.keys?.p256dh === 'string' &&
+    typeof s.keys?.auth === 'string' &&
+    s.keys.p256dh.length < 200 &&
+    s.keys.auth.length < 100
+  );
+}
+
+export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: string; parentKey: string }) {
+  const keys = vapidKeys(db);
+  // Push services want a contact for the sender; an https URL or a mailto: address.
+  const subject = process.env.WYO_VAPID_SUBJECT ?? (opts.publicUrl.startsWith('https://') ? opts.publicUrl : 'mailto:hello@while-youre-out.app');
+  const sender: PushSender =
+    opts.sender ?? ((sub, payload, options) => webpush.sendNotification(sub, payload, options) as Promise<{ statusCode: number }>);
+  const pageUrl = `/parent?k=${encodeURIComponent(opts.parentKey)}`;
+
+  const subscribe = (sub: PushSubscriptionJson, member: string | null) => {
+    db.prepare(
+      `INSERT INTO push_subscriptions (endpoint, p256dh, auth, member, created_at) VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(endpoint) DO UPDATE SET p256dh = excluded.p256dh, auth = excluded.auth, member = excluded.member`,
+    ).run(sub.endpoint, sub.keys.p256dh, sub.keys.auth, member, nowIso());
+    // Keep the newest ones only.
+    db.prepare(
+      `DELETE FROM push_subscriptions WHERE endpoint NOT IN (SELECT endpoint FROM push_subscriptions ORDER BY created_at DESC LIMIT ${MAX_SUBSCRIPTIONS})`,
+    ).run();
+  };
+  const unsubscribe = (endpoint: string) => void db.prepare('DELETE FROM push_subscriptions WHERE endpoint = ?').run(endpoint);
+  const subscribers = () => db.prepare('SELECT endpoint, p256dh, auth, member FROM push_subscriptions').all() as unknown as Row[];
+
+  /**
+   * Sends to the phones of the named people. If none of them has turned notifications on, every
+   * subscribed phone gets it: a missed question is worse than an extra buzz. Private messages
+   * (photos of the children) never fall back: only the named people's phones get them.
+   */
+  const notify = async (to: string[] | 'everyone', msg: PushMessage, opts: { endpoint?: string; private?: boolean } = {}) => {
+    const all = subscribers().filter((s) => !opts.endpoint || s.endpoint === opts.endpoint);
+    const named = to === 'everyone' ? all : all.filter((s) => s.member && to.includes(s.member));
+    const targets = named.length || opts.private ? named : all;
+    const payload = JSON.stringify({ ...msg, url: pageUrl });
+    const results = await Promise.allSettled(
+      targets.map(async (s) => {
+        try {
+          await sender({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, {
+            vapidDetails: { subject, publicKey: keys.publicKey, privateKey: keys.privateKey },
+            TTL: msg.urgent ? 3600 : 4 * 3600,
+            urgency: msg.urgent ? 'high' : 'normal',
+            topic: msg.tag?.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32) || undefined,
+          });
+          return true;
+        } catch (e: any) {
+          // The phone unsubscribed or the browser was reset: forget it.
+          if (e?.statusCode === 404 || e?.statusCode === 410) unsubscribe(s.endpoint);
+          else console.warn('Push failed', e?.statusCode ?? e?.message ?? e);
+          return false;
+        }
+      }),
+    );
+    return results.filter((r) => r.status === 'fulfilled' && r.value).length;
+  };
+
+  const carer = () => activeHandoff(db)?.carer_name ?? 'The sitter';
+  const questionBody = (q: Question) => (q.text_english && q.text_english !== q.text ? `"${q.text}" (${q.text_english})` : `"${q.text}"`);
+
+  // ---------- what buzzes the phone ----------
+  const onQuestion = (q: Question) => {
+    if (q.urgency === 'urgent') {
+      const body = q.text.startsWith('Urgent:') ? q.text.replace(/^Urgent:\s*/, '') : questionBody(q);
+      return void notify('everyone', { title: `Urgent: ${carer()} needs you`, body, tag: `q${q.id}`, urgent: true });
+    }
+    // Busy mode: small questions wait quietly on the page.
+    if (busyUntil(db)) return;
+    const first = currentContactFor(db, q);
+    void notify(first ? [first.name] : 'everyone', { title: `${carer()} asks`, body: questionBody(q), tag: `q${q.id}` });
+  };
+  const onEscalated = ({ question, contact }: { question: Question; contact: Contact }) => {
+    if (busyUntil(db) && question.urgency !== 'urgent') return;
+    void notify([contact.name], { title: `${carer()} asks (no answer yet)`, body: questionBody(question), tag: `q${question.id}` });
+  };
+  const onEmergency = (e: { description: string; carer: string | null }) => {
+    void notify('everyone', {
+      title: 'Emergency at home',
+      body: `${e.carer ?? 'The sitter'} said: "${e.description}". Call them now.`,
+      tag: 'emergency',
+      urgent: true,
+    });
+  };
+  const onTeachback = (s: TeachbackState) => {
+    if (!s.done) return;
+    const { right, total, skipped } = summary(s);
+    const allRight = right === total;
+    void notify(parentNames(db), {
+      title: allRight ? 'Handover confirmed' : 'Handover checked',
+      body: `${carer()} got ${right} of ${total} right${skipped ? ` (${skipped} skipped)` : ''}${allRight ? '.' : '; the right answers were shown on screen.'}`,
+      tag: 'teachback',
+    });
+  };
+  const onEnded = (h: { carer_name: string }) => {
+    void notify(parentNames(db), { title: 'Your morning debrief is ready', body: `How the evening with ${h.carer_name} went.`, tag: 'debrief' });
+  };
+  const onPhoto = (p: { id: number; caption: string | null; taken_by: string | null }) => {
+    void notify(parentNames(db), {
+      title: `New photo from ${p.taken_by ?? 'home'}`,
+      body: p.caption || 'Tap to see it.',
+      tag: `photo${p.id}`,
+      image: `/parent/api/photos/${p.id}?k=${encodeURIComponent(opts.parentKey)}`,
+    }, { private: true });
+  };
+
+  const handlers: Array<[string, (...a: any[]) => void]> = [
+    ['question', onQuestion],
+    ['question_escalated', onEscalated],
+    ['emergency', onEmergency],
+    ['teachback', onTeachback],
+    ['handoff_ended', onEnded],
+    ['photo', onPhoto],
+  ];
+  for (const [name, fn] of handlers) events.on(name, fn);
+  const close = () => {
+    for (const [name, fn] of handlers) events.off(name, fn);
+  };
+
+  return { publicKey: keys.publicKey, subscribe, unsubscribe, subscribers, notify, close };
+}
