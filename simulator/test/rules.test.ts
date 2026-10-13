@@ -265,3 +265,32 @@ test('a photo request during the teach-back is not taken as an answer, and the c
   );
   assert.deepEqual(dev.calls[3].args, { answer: 'Peanuts' });
 });
+
+// ---------- Tonight screen buttons and calls ----------
+
+test('"Call Mom" places an Alexa call through the device', async () => {
+  const brain = new RuleBrain();
+  const dev = fakeDevice();
+  const called: string[] = [];
+  dev.io.call = async (who) => (called.push(who), 'Anita');
+  await brain.handle('Call Mom', dev.io);
+  assert.deepEqual(called, ['Mom']);
+  assert.deepEqual(dev.said, ['Calling Anita.']);
+  assert.equal(dev.calls.length, 0);
+});
+
+test('"Ask the parents" then the question sends that question', async () => {
+  const d = await run(['Ask the parents', 'Can we go to the park?']);
+  assert.match(d.said[0], /What should I ask them/);
+  assert.deepEqual(d.tasks, [{ name: 'ask_parent_and_wait', args: { question: 'Can we go to the park?' } }]);
+});
+
+test('"How\'s it going?" shows the Tonight screen', async () => {
+  const d = await run(["How's it going?"]);
+  assert.equal(d.calls[0].name, 'home_screen');
+});
+
+test('the Emergency button on the screen runs the emergency script', async () => {
+  const d = await run(['Emergency']);
+  assert.equal(d.calls[0].name, 'emergency');
+});

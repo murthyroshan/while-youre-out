@@ -21,116 +21,167 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   })();
 </script>
 <style>
-  :root { --bg:#f7f4ef; --card:#fff; --ink:#1f2933; --muted:#6b7280; --green:#1e7b4f; --red:#c0392b; --line:#e7e1d6; }
+  :root { --bg:#f6f2ec; --card:#fff; --ink:#1d2433; --muted:#667085; --green:#16815a; --red:#c81e28; --amber:#9a6200; --blue:#1f5fae; --line:#ebe5db; --shadow:0 1px 2px rgba(29,36,51,.05), 0 8px 24px rgba(29,36,51,.06); }
   * { box-sizing: border-box; }
-  body { margin: 0; font: 16px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
-  header { padding: 16px; background: #1f2933; color: #fff; }
-  header small { color: #cbd2d9; display:block; }
-  header .me { display:block; margin-top: 6px; font-size: 14px; color: #cbd2d9; }
-  header select { font: inherit; margin-left: 4px; }
-  main { padding: 12px 16px 40px; max-width: 520px; margin: 0 auto; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 12px 0; }
-  .q { font-size: 18px; margin: 0 0 10px; }
+  body { margin: 0; font: 16px/1.45 "Amazon Ember", Inter, system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); padding-bottom: 88px; -webkit-font-smoothing: antialiased; }
+  .hero { background: radial-gradient(520px 260px at 0% 0%, rgba(99,179,255,.28), transparent 70%), linear-gradient(160deg, #16233a, #0b1322); color: #fff; padding: 16px 16px 20px; border-radius: 0 0 26px 26px; }
+  .hero .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 560px; margin: 0 auto; }
+  .brand { display: flex; gap: 10px; align-items: center; min-width: 0; }
+  .brand img { width: 38px; height: 38px; border-radius: 11px; flex: none; }
+  .brand b { display: block; font-size: 17px; }
+  .brand small { display: block; color: #b8c3d6; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .me { font-size: 13px; color: #b8c3d6; white-space: nowrap; }
+  .me select { font: inherit; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: 5px 10px; margin-left: 4px; }
+  .me select option { color: #1d2433; }
+  .live { max-width: 560px; margin: 16px auto 0; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 14px 16px; }
+  .live #status { font-size: 14px; color: #cfd8e6; }
+  .live .now { font-size: 25px; font-weight: 800; letter-spacing: -.01em; margin-top: 2px; line-height: 1.2; }
+  .live .now small { display: block; font-size: 15px; font-weight: 600; color: #f7b955; margin-top: 2px; }
+  .live .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .lp { white-space: nowrap; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.12); color: #e6ecf5; }
+  .lp.ok { background: rgba(61,220,151,.18); color: #7eecc0; }
+  .lp.warn { background: rgba(247,185,85,.2); color: #ffd27a; }
+  .lp.bad { background: rgba(255,90,95,.22); color: #ffb3b5; }
+  main { padding: 4px 16px 24px; max-width: 560px; margin: 0 auto; }
+  .tabpane { display: none; }
+  body[data-tab=tonight] .tabpane[data-tab=tonight], body[data-tab=house] .tabpane[data-tab=house], body[data-tab=family] .tabpane[data-tab=family] { display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; margin: 14px 0; box-shadow: var(--shadow); }
+  .card > strong:first-child { display: block; font-size: 17px; margin: 0 0 2px; }
+  h2.sec { font-size: 12.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 24px 6px 0; }
+  .q { font-size: 19px; font-weight: 650; margin: 0 0 12px; line-height: 1.3; }
+  .asker { font-size: 13px; color: var(--muted); margin: 0 0 4px; }
   .btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  button { font: inherit; padding: 12px 8px; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
-  button.ok { background: var(--green); color: #fff; border: 0; }
-  button.no { background: #fff; color: var(--red); border-color: var(--red); }
-  .scope { display:flex; gap: 14px; margin: 10px 0 0; color: var(--muted); font-size: 14px; }
-  .alert { background: var(--red); color: #fff; }
+  button { font: inherit; font-weight: 600; padding: 12px 10px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+  button:active { transform: scale(.98); }
+  button:disabled { opacity: .6; }
+  button.ok { background: var(--green); color: #fff; border-color: var(--green); }
+  button.no { color: var(--red); border-color: #f1b7ba; background: #fff7f7; }
+  .scope { display: flex; gap: 14px; margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+  .alert { background: linear-gradient(160deg, #e0323b, #a5121a); color: #fff; border: 0; }
+  .alert p { margin: 6px 0 0; }
+  .alert a.call { display: block; text-align: center; margin-top: 12px; background: #fff; color: #a5121a; font-weight: 800; padding: 12px; border-radius: 14px; text-decoration: none; }
   .muted { color: var(--muted); font-size: 14px; }
   ul { padding-left: 18px; margin: 6px 0; }
-  .urgent { display:inline-block; font-size: 12px; background:#fdecea; color: var(--red); padding: 2px 8px; border-radius: 999px; margin-bottom: 6px; }
-  .always-note { display: none; margin: 8px 0 0; font-size: 14px; color: #8a5a00; background: #fff4d6; padding: 6px 8px; border-radius: 6px; }
+  .urgent { display: inline-block; font-size: 12px; font-weight: 700; background: #fdecea; color: var(--red); padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
+  .always-note { display: none; margin: 8px 0 0; font-size: 14px; color: var(--amber); background: #fff4d6; padding: 6px 8px; border-radius: 8px; }
   .card:has(input[value=always]:checked) .always-note { display: block; }
-  textarea { width: 100%; margin-top: 8px; font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); }
-  .upload { display: block; text-align: center; padding: 14px; border: 2px dashed var(--line); border-radius: 12px; margin-top: 10px; cursor: pointer; font-weight: 600; }
+  textarea { width: 100%; margin-top: 10px; font: inherit; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: #fcfbf8; }
+  .upload { display: flex; gap: 8px; justify-content: center; align-items: center; padding: 16px; border: 2px dashed #d9d0c2; border-radius: 16px; margin-top: 12px; cursor: pointer; font-weight: 650; background: #fcfbf8; }
   .upload input { display: none; }
-  .wide { width: 100%; margin-top: 8px; }
-  .from { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 18px 0 4px; }
+  .wide { width: 100%; margin-top: 10px; }
+  .from { font-size: 12.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 4px; }
   .pcard textarea.ptext { margin-top: 6px; }
-  .chip { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #eef2f7; color: #334e68; margin-right: 6px; }
+  .chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #eef2f7; color: #334e68; margin-right: 6px; }
   .chip.safety { background: #fdecea; color: var(--red); }
-  .warn { font-size: 13px; color: #8a5a00; background: #fff4d6; padding: 4px 8px; border-radius: 6px; margin-top: 6px; }
-  .conflict { background: #fff7e6; border: 1px solid #f0c36d; border-radius: 8px; padding: 8px; margin-top: 8px; font-size: 14px; }
-  .pbtns { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 8px; }
+  .warn { font-size: 13px; color: var(--amber); background: #fff4d6; padding: 6px 10px; border-radius: 10px; margin-top: 8px; }
+  .conflict { background: #fff7e6; border: 1px solid #f0c36d; border-radius: 12px; padding: 10px; margin-top: 8px; font-size: 14px; }
+  .pbtns { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 10px; }
   .perr { color: var(--red); font-size: 14px; margin-top: 6px; }
-  .en { font-size: 14px; color: var(--muted); margin-top: 4px; }
-  .notify { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .en { font-size: 14px; color: var(--muted); margin: -6px 0 10px; }
+  .notify { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .notify p { margin: 4px 0 0; }
-  .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+  .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
   .photos figure { margin: 0; }
-  .photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; display: block; background: #eee; }
-  .photos figcaption { font-size: 13px; color: var(--muted); margin-top: 2px; }
-  details.card > summary { cursor: pointer; font-weight: 600; list-style: none; }
-  details.card > summary::-webkit-details-marker { display: none; }
-  details.card > summary::after { content: '▸'; float: right; color: var(--muted); }
-  details.card[open] > summary::after { content: '▾'; }
-  .field { display: block; margin: 10px 0 0; font-size: 14px; color: var(--muted); }
-  .field input, .field select, .row input, .row select { display: block; width: 100%; font: inherit; color: var(--ink); padding: 9px; border-radius: 8px; border: 1px solid var(--line); background: #fff; margin-top: 4px; }
-  .row { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; display: block; background: #eee; }
+  .photos figcaption { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .tl { list-style: none; padding: 0; margin: 8px 0 0; }
+  .tl li { display: grid; grid-template-columns: 74px 1fr; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .tl li:first-child { border-top: 0; }
+  .tl .t { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .field { display: block; margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+  .field input, .field select, .row input, .row select { display: block; width: 100%; font: inherit; color: var(--ink); padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: #fcfbf8; margin-top: 4px; }
+  .row { border: 1px solid var(--line); border-radius: 16px; padding: 12px; margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #fff; }
   .row .full { grid-column: 1 / -1; }
   .row label { font-size: 13px; color: var(--muted); }
   .row .tools { grid-column: 1 / -1; display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
-  .row .tools button { padding: 6px 10px; font-size: 14px; }
+  .row .tools button { padding: 7px 11px; font-size: 14px; }
   .row .tools .grow { flex: 1; font-size: 13px; color: var(--muted); }
   .row .tools label { display: flex; gap: 6px; align-items: center; }
   .row .tools label input { display: inline; width: auto; margin: 0; }
-  .order { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #eef2f7; color: #334e68; font-size: 13px; font-weight: 700; }
-  .ferr { color: var(--red); font-size: 14px; min-height: 1em; margin: 8px 0 0; }
-  .banner { background: #fff4d6; border-color: #f0c36d; }
-  .danger button { border-color: var(--red); color: var(--red); }
+  .order { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #eef2f7; color: #334e68; font-size: 13px; font-weight: 800; }
+  .ferr { color: var(--red); font-size: 14px; min-height: 1em; margin: 10px 0 0; }
+  .banner { background: #fff8e6; border-color: #f0d08a; }
+  .danger button { border-color: #f1b7ba; color: var(--red); background: #fff; }
   .danger button.armed { background: var(--red); color: #fff; }
+  .switch { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 15px; }
+  .switch input { width: 20px; height: 20px; accent-color: var(--green); }
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 4px; background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); }
+  nav.tabs button { flex: 0 1 150px; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 12px; color: var(--muted); padding: 6px; position: relative; border-radius: 12px; }
+  nav.tabs svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  nav.tabs button[aria-selected=true] { color: var(--blue); background: #eef4fc; }
+  nav.tabs .badge { position: absolute; top: 2px; left: calc(50% + 6px); background: var(--red); color: #fff; font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 999px; display: grid; place-items: center; padding: 0 5px; }
+  nav.tabs .badge:empty { display: none; }
 </style>
 </head>
-<body>
-<header><strong>While You're Out</strong><small id="status">Connecting…</small>
-  <label class="me">Answering as <select id="me"></select></label></header>
+<body data-tab="tonight">
+<header class="hero">
+  <div class="top">
+    <div class="brand"><img src="/static/icon-192.png" alt=""><div><b>While You're Out</b><small id="household">Your home</small></div></div>
+    <label class="me">Answering as <select id="me"></select></label>
+  </div>
+  <section class="live" aria-live="polite">
+    <div id="status">Connecting…</div>
+    <div class="now" id="liveNow"></div>
+    <div class="pills" id="livePills"></div>
+  </section>
+</header>
 <main>
-  <div id="emergency"></div>
-  <div id="setupBanner"></div>
-  <section class="card notify" id="notify" hidden></section>
-  <div id="debrief"></div>
-  <section class="card" id="photos" hidden></section>
-  <div class="card" id="busy"></div>
-  <div id="questions"></div>
-  <div class="card"><strong>Tonight so far</strong><div id="log" class="muted">Nothing logged yet.</div></div>
-  <section class="card" id="teach">
-    <strong>Teach the house</strong>
-    <p class="muted">Snap the fridge note, upload the doctor's plan, or paste a WhatsApp message. Nothing is used until you confirm it, and codes or passwords are never stored.</p>
-    <label class="upload">📷 Photo or PDF<input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"></label>
-    <textarea id="paste" rows="3" placeholder="Or paste a message or note here…"></textarea>
-    <button id="readText" class="ok wide">Read it</button>
-    <p id="teachStatus" class="muted" aria-live="polite"></p>
-  </section>
-  <div id="proposals"></div>
-  <section class="card">
-    <strong>Suggestions from your past answers</strong>
-    <p class="muted">When a sitter asks something small you've answered before, Alexa can tell them how you usually answer. It never decides for you, and never for food, medicine or safety.</p>
-    <div id="shadow"></div>
-  </section>
-  <details class="card" id="family">
-    <summary>Your family</summary>
-    <p class="muted">Who Alexa looks after, who to call and in what order, and the address read out in an emergency. Allergies are saved in your words and checked before every food answer.</p>
-    <label class="field">Household name<input id="fName" maxlength="80" placeholder="The Sharma family"></label>
-    <label class="field">Home address (read out to 911)<input id="fAddress" maxlength="200" placeholder="42 Maple Street, Apt 3B, Seattle, WA"></label>
-    <label class="field">Time zone<select id="fTz"></select></label>
-    <p class="from">Children and pets</p>
-    <div id="fMembers"></div>
-    <div class="pbtns"><button data-add="child">+ Child</button><button data-add="pet">+ Pet</button></div>
-    <p class="from">Who to call, in order</p>
-    <p class="muted">Questions go to the first person, then the next if nobody answers. Doctors are shown to paramedics but never asked questions.</p>
-    <div id="fContacts"></div>
-    <div class="pbtns"><button data-add="contact">+ Contact</button></div>
-    <p class="ferr" id="fErr" aria-live="polite"></p>
-    <button class="ok wide" id="fSave">Save family</button>
-    <p class="from">Start over</p>
-    <div class="pbtns danger">
-      <button data-reset="demo">Reset to the demo family</button>
-      <button data-reset="fresh">Start fresh with my family</button>
-    </div>
-    <p class="muted" id="resetNote">Clears tonight, past evenings, photos and saved rules. Tap again to confirm.</p>
-  </details>
+  <div class="tabpane" data-tab="tonight">
+    <div id="emergency"></div>
+    <div id="setupBanner"></div>
+    <div id="questions"></div>
+    <section class="card notify" id="notify" hidden></section>
+    <section class="card" id="photos" hidden></section>
+    <div id="debrief"></div>
+    <div class="card" id="busy"></div>
+    <div class="card"><strong>Tonight so far</strong><div id="log" class="muted">Nothing logged yet.</div></div>
+  </div>
+  <div class="tabpane" data-tab="house">
+    <section class="card" id="teach">
+      <strong>Teach the house</strong>
+      <p class="muted">Snap the fridge note, upload the doctor's plan, or paste a WhatsApp message. Nothing is used until you confirm it, and codes or passwords are never stored.</p>
+      <label class="upload">📷 Photo or PDF<input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"></label>
+      <textarea id="paste" rows="3" placeholder="Or paste a message or note here…"></textarea>
+      <button id="readText" class="ok wide">Read it</button>
+      <p id="teachStatus" class="muted" aria-live="polite"></p>
+    </section>
+    <div id="proposals"></div>
+    <section class="card">
+      <strong>Suggestions from your past answers</strong>
+      <p class="muted">When a sitter asks something small you've answered before, Alexa can tell them how you usually answer. It never decides for you, and never for food, medicine or safety.</p>
+      <div id="shadow"></div>
+    </section>
+  </div>
+  <div class="tabpane" data-tab="family">
+    <section class="card" id="family">
+      <strong>Your family</strong>
+      <p class="muted">Who Alexa looks after, who to call and in what order, and the address read out in an emergency. Allergies are saved in your words and checked before every food answer.</p>
+      <label class="field">Household name<input id="fName" maxlength="80" placeholder="The Sharma family"></label>
+      <label class="field">Home address (read out to 911)<input id="fAddress" maxlength="200" placeholder="42 Maple Street, Apt 3B, Seattle, WA"></label>
+      <label class="field">Time zone<select id="fTz"></select></label>
+      <p class="from">Children and pets</p>
+      <div id="fMembers"></div>
+      <div class="pbtns"><button data-add="child">+ Child</button><button data-add="pet">+ Pet</button></div>
+      <p class="from">Who to call, in order</p>
+      <p class="muted">Questions go to the first person, then the next if nobody answers. Doctors are shown to paramedics but never asked questions.</p>
+      <div id="fContacts"></div>
+      <div class="pbtns"><button data-add="contact">+ Contact</button></div>
+      <p class="ferr" id="fErr" aria-live="polite"></p>
+      <button class="ok wide" id="fSave">Save family</button>
+      <p class="from">Start over</p>
+      <div class="pbtns danger">
+        <button data-reset="demo">Reset to the demo family</button>
+        <button data-reset="fresh">Start fresh with my family</button>
+      </div>
+      <p class="muted" id="resetNote">Clears tonight, past evenings, photos and saved rules. Tap again to confirm.</p>
+    </section>
+  </div>
 </main>
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tabbtn="tonight" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Tonight<span class="badge" id="badgeTonight"></span></button>
+  <button role="tab" data-tabbtn="house" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>House<span class="badge" id="badgeHouse"></span></button>
+  <button role="tab" data-tabbtn="family" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Family</button>
+</nav>
 <script>
   var params = new URLSearchParams(location.search);
   var key = params.get('k') || '';
@@ -159,10 +210,9 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       sel.innerHTML = (s.parents.length ? s.parents : ['Parent']).map(function (p) { return '<option' + (p === me ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('');
     }
     var tb = s.teachback;
-    var tbText = !tb ? '' : tb.done
-      ? (tb.right === tb.total ? ' · Handover confirmed ✓ (' + tb.right + '/' + tb.total + ')' : ' · Handover checked: ' + tb.right + '/' + tb.total + ' right, corrected on screen')
-      : ' · Handover check in progress (' + tb.answered + '/' + tb.total + ')';
-    document.getElementById('status').textContent = s.handoff ? (s.handoff.carer_name + ' is looking after things' + tbText) : 'No handoff in progress';
+    document.getElementById('status').textContent = s.handoff ? (s.handoff.carer_name + ' is looking after things' + (s.handoff.started_at ? ' · since ' + time(s.handoff.started_at) : '')) : 'No one is babysitting right now';
+    renderLive(s, tb);
+    document.getElementById('badgeTonight').textContent = s.questions.length ? String(s.questions.length) : '';
     document.getElementById('emergency').innerHTML = s.emergency ? '<div class="card alert"><strong>Emergency reported · ' + esc(time(s.emergency.at)) + '</strong><p>' + esc(s.emergency.description) + '</p><p>Every contact has been alerted. Call ' + esc(s.handoff ? s.handoff.carer_name : 'the carer') + ' now.</p></div>' : '';
     var dKey = JSON.stringify([s.debrief && s.debrief.handoff_id, s.debrief && s.debrief.rule_suggestions.length, s.shopping]);
     if (dKey !== lastDebrief) { lastDebrief = dKey; renderDebrief(s); }
@@ -251,7 +301,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       (waiting.length ? '<p class="from">Waiting until you\\'re free (' + waiting.length + ')</p>' + waiting.map(questionCard).join('') : '');
     function questionCard(q) {
       return '<div class="card" data-id="' + q.id + '">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') +
-        '<p class="q">' + esc(s.handoff ? s.handoff.carer_name : 'Carer') + ' asks: “' + esc(q.text) + '”</p>' +
+        '<p class="asker">' + esc(s.handoff ? s.handoff.carer_name : 'The sitter') + ' asks · ' + esc(time(q.asked_at)) + '</p><p class="q">“' + esc(q.text) + '”</p>' +
         (q.text_english ? '<p class="en">In English: “' + esc(q.text_english) + '”</p>' : '') +
         '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>' +
         '<textarea placeholder="Or type an answer…"></textarea>' +
@@ -301,6 +351,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       byImport[imp.id].forEach(function (p) { html += proposalCard(p); });
     });
     document.getElementById('proposals').innerHTML = html;
+    document.getElementById('badgeHouse').textContent = s.proposals.length ? String(s.proposals.length) : '';
   }
   function proposalCard(p) {
     var label = p.kind === 'fact' ? (p.category || 'rule') : KIND[p.kind];
@@ -566,7 +617,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       renderFamily();
       fErr.style.color = 'var(--green)';
       fErr.textContent = b.dataset.reset === 'demo' ? 'Back to the demo family ✓' : 'Clean house ✓ Add your family above, then save.';
-      famBox.open = true;
+      if (b.dataset.reset === 'fresh') setTab('family');
       lastQKey = lastBusy = lastShadow = lastDebrief = lastPhotos = lastPKey = null;
       parentsShown = null;
       load();
@@ -575,10 +626,46 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   });
   document.addEventListener('click', function (e) {
     if (e.target.id !== 'openFamily') return;
-    famBox.open = true;
-    famBox.scrollIntoView({ behavior: 'smooth' });
+    setTab('family');
   });
   loadFamily();
+
+  // ---------- tabs and the live header ----------
+  function setTab(t) {
+    document.body.dataset.tab = t;
+    document.querySelectorAll('[data-tabbtn]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tabbtn === t)); });
+    try { sessionStorage.setItem('wyo.tab', t); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-tabbtn]').forEach(function (b) { b.addEventListener('click', function () { setTab(b.dataset.tabbtn); }); });
+  try { var savedTab = sessionStorage.getItem('wyo.tab'); if (savedTab) setTab(savedTab); } catch (e) {}
+
+  function renderLive(s, tb) {
+    var h = s.home || {};
+    document.getElementById('household').textContent = (s.household && s.household.name) || 'Your home';
+    var now = '', pills = [];
+    if (s.emergency) {
+      now = 'Emergency reported<small>' + esc(time(s.emergency.at)) + ' · see below</small>';
+      pills.push('<span class="lp bad">Every contact alerted</span>');
+    } else if (!s.handoff) {
+      now = s.debrief ? 'Last night with ' + esc(s.debrief.carer) + '<small>Your debrief is below</small>' : 'All quiet at home';
+    } else if (h.night) {
+      var kid = ((h.members || []).filter(function (m) { return m.kind === 'child'; })[0] || {}).name;
+      now = (kid ? esc(kid) + ' is asleep' : 'Bedtime') + '<small>' + (h.asleep_since ? 'Since ' + esc(h.asleep_since) : 'Lights out') + '</small>';
+    } else if (h.next) {
+      var m = h.next.minutes_until;
+      now = 'Next: ' + esc(h.next.title) + '<small>' + esc(h.next.time) + (m > 1 ? ' · in ' + m + ' min' : m >= -5 ? ' · now' : ' · ' + -m + ' min late') + '</small>';
+    } else {
+      now = esc(s.handoff.carer_name) + ' is looking after things';
+    }
+    if (tb) pills.push(tb.done ? '<span class="lp ' + (tb.right === tb.total ? 'ok' : 'warn') + '">Handover ' + tb.right + '/' + tb.total + (tb.right === tb.total ? ' ✓' : '') + '</span>' : '<span class="lp">Handover check ' + tb.answered + '/' + tb.total + '</span>');
+    if (s.questions.length) pills.push('<span class="lp warn">' + s.questions.length + ' question' + (s.questions.length > 1 ? 's' : '') + ' for you</span>');
+    if (h.last_log) pills.push('<span class="lp">' + esc(h.last_log.time) + ' · ' + esc(h.last_log.text.length > 34 ? h.last_log.text.slice(0, 32) + '…' : h.last_log.text) + '</span>');
+    if (s.photos && s.photos.length) pills.push('<span class="lp">📷 ' + s.photos.length + '</span>');
+    if (s.busy_until) pills.push('<span class="lp">Urgent only till ' + esc(s.busy_until) + '</span>');
+    document.getElementById('liveNow').innerHTML = now;
+    document.getElementById('livePills').innerHTML = pills.join('');
+  }
 
   load(); setInterval(load, 2000);
   loadProposals(); setInterval(loadProposals, 4000);

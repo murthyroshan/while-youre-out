@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { McpConnection, type ToolResult } from './mcp';
+import { McpConnection, textOf, type ToolResult } from './mcp';
 import { AppFrame } from './AppFrame';
 import { RuleBrain } from './brain/rules';
 import { GeminiBrain } from './brain/gemini';
@@ -10,15 +10,18 @@ import { grab, openCamera, samplePhoto, type Shot } from './camera';
 // Served by the MCP server itself (the hosted demo): talk to that server. In development: the local one.
 const DEFAULT_URL = import.meta.env.VITE_MCP_URL ?? (location.port === '5173' ? 'http://127.0.0.1:8787/mcp' : `${location.origin}/mcp`);
 const PARENT_KEY = import.meta.env.VITE_PARENT_KEY ?? 'demo-parent-key';
+/** An answer card goes back to the Tonight screen after this long without anyone talking. */
+const CARD_TIMEOUT_MS = 40_000;
 
 type Light = 'idle' | 'listening' | 'thinking' | 'speaking';
+type Mode = 'inline' | 'fullscreen';
 interface Card {
   id: number;
   tool: string;
   args: Record<string, unknown>;
   result: ToolResult;
   html: string;
-  mode: 'inline' | 'fullscreen';
+  mode: Mode;
 }
 interface Line {
   id: number;
@@ -31,27 +34,6 @@ interface TaskView {
   statuses: string[];
   done: boolean;
 }
-
-const SUGGESTIONS = [
-  'Priya is babysitting tonight',
-  'Dadi is babysitting tonight in Hindi',
-  "What's next?",
-  'She napped till 5',
-  'Can Maya have the cookies on the counter?',
-  'What time is bedtime?',
-  "Where's the EpiPen?",
-  'Send Mom a photo saying good night',
-  'Can she watch another episode?',
-  'Can she stay up a bit later?',
-  'Can she sleep in your bed?',
-  'She fell asleep at 8:10',
-  "Her lips are swelling and she can't breathe",
-  "We're back",
-];
-
-let nextId = 1;
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 interface CameraView {
   stream: MediaStream | null;
   count: number;
@@ -59,6 +41,26 @@ interface CameraView {
   /** Waiting for the camera (or the browser's permission prompt). */
   opening?: boolean;
 }
+interface Call {
+  name: string;
+  relation: string;
+  connected: boolean;
+}
+
+// The demo, in the order a judge would try it (and the video tells it).
+const GUIDE: Array<{ title: string; lines: string[]; note?: string; clock?: [string, string] }> = [
+  { title: '1 · The parents hand over', clock: ['Sat', '18:00'], lines: ['Priya is babysitting tonight', 'Peanuts', 'In the kitchen drawer by the stove', 'Anita'], note: 'The Tonight screen appears, then a 3-question handover check.' },
+  { title: '2 · Questions, in the parents’ words', lines: ['Can Maya have the cookies on the counter?', "Where's the EpiPen?", 'Can she watch another episode?'], note: 'Food always gets a guard; Shadow Parent says how the parents usually answer.' },
+  { title: '3 · The evening goes on', clock: ['Sat', '18:40'], lines: ['She napped till 5', "What's next?", 'Send Mom a photo saying good night'], note: 'Late nap moves bedtime by the parents’ own rule.' },
+  { title: '4 · Ask a parent', lines: ['Can she sleep in your bed?', 'Yes'], note: 'Answer it on the parent page: the device announces the reply.' },
+  { title: '5 · Emergency', lines: ["Her lips are swelling and she can't breathe"], note: 'Fixed script, no AI. Every parent phone buzzes.' },
+  { title: '6 · Lights out', clock: ['Sat', '20:15'], lines: ['She fell asleep at 8:10'], note: 'The screen goes dim and warm.' },
+  { title: '7 · Morning', lines: ["We're back", 'Yes'], note: 'The debrief lands on the parent page.' },
+  { title: 'Another language', lines: ['Dadi is babysitting tonight in Hindi', 'क्या माया कुकीज़ खा सकती है?'], note: 'Needs the Gemini brain for free speech.' },
+];
+
+let nextId = 1;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function App() {
   const [url, setUrl] = useState(DEFAULT_URL);
@@ -66,6 +68,7 @@ export function App() {
   const [connState, setConnState] = useState<'connecting' | 'connected' | 'error'>('connecting');
   const [connError, setConnError] = useState('');
   const [card, setCard] = useState<Card | null>(null);
+  const [home, setHome] = useState<Card | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
   const [carer, setCarer] = useState<string | null>(null);
   const [tasks, setTasks] = useState<TaskView[]>([]);
@@ -80,6 +83,9 @@ export function App() {
   const [draft, setDraft] = useState('');
   const [interim, setInterim] = useState('');
   const [now, setNow] = useState(new Date());
+  const [camera, setCamera] = useState<CameraView | null>(null);
+  const [call, setCall] = useState<Call | null>(null);
+  const [caption, setCaption] = useState<Line | null>(null);
   const rules = useRef(new RuleBrain());
   const [brainKind, setBrainKind] = useState<'gemini' | 'rules'>(() => {
     try {
@@ -90,21 +96,27 @@ export function App() {
   });
   const gemini = useRef<GeminiBrain | null>(null);
   const brain = useRef<Brain>(rules.current);
-  // Read through a ref so replies from long-running tasks respect the current setting.
+  // Read through refs so replies from long-running tasks respect the current state.
   const voiceRef = useRef(voiceOn);
+  voiceRef.current = voiceOn;
   // The carer's language: replies are spoken with a matching voice.
   const langRef = useRef('en-US');
-  voiceRef.current = voiceOn;
   const stopListening = useRef<() => void>(() => {});
   const cardRef = useRef<Card | null>(null);
   cardRef.current = card;
+  const homeRef = useRef<Card | null>(null);
+  homeRef.current = home;
   const connRef = useRef<McpConnection | null>(null);
-  const [camera, setCamera] = useState<CameraView | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const connectSeq = useRef(0);
+  const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // When someone last spoke or was answered: reminders wait so they never talk over a reply.
+  const lastActivity = useRef(0);
+  const captionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (videoRef.current && camera?.stream) videoRef.current.srcObject = camera.stream;
   }, [camera?.stream]);
-  const connectSeq = useRef(0);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 15_000);
@@ -142,29 +154,6 @@ export function App() {
     };
   }, [connect]);
 
-  useEffect(() => {
-    if (!conn) return;
-    let origin = '';
-    try {
-      origin = new URL(url).origin;
-    } catch {
-      return;
-    }
-    gemini.current = new GeminiBrain({
-      serverOrigin: origin,
-      tools: () => connRef.current?.tools ?? [],
-      instructions: () => connRef.current?.instructions,
-      fallback: rules.current,
-    });
-  }, [conn, url]);
-  brain.current = brainKind === 'gemini' && gemini.current ? gemini.current : rules.current;
-
-  const addLine = (who: Line['who'], text: string) => setLines((ls) => [...ls.slice(-5), { id: nextId++, who, text }]);
-
-  // ---------- demo clock (only when the server runs with WYO_DEMO=1) ----------
-  const [demoTime, setDemoTime] = useState<string | null>(null);
-  const [demoInput, setDemoInput] = useState('19:10');
-  const [demoDay, setDemoDay] = useState('Sat');
   const serverOrigin = (() => {
     try {
       return new URL(url).origin;
@@ -172,6 +161,58 @@ export function App() {
       return '';
     }
   })();
+
+  useEffect(() => {
+    if (!conn || !serverOrigin) return;
+    gemini.current = new GeminiBrain({
+      serverOrigin,
+      tools: () => connRef.current?.tools ?? [],
+      instructions: () => connRef.current?.instructions,
+      fallback: rules.current,
+    });
+  }, [conn, serverOrigin]);
+  brain.current = brainKind === 'gemini' && gemini.current ? gemini.current : rules.current;
+
+  const addLine = (who: Line['who'], text: string) => {
+    const line = { id: nextId++, who, text };
+    setLines((ls) => [...ls.slice(-40), line]);
+    setCaption(line);
+    if (captionTimer.current) clearTimeout(captionTimer.current);
+    captionTimer.current = setTimeout(() => setCaption(null), who === 'alexa' ? 9_000 : 5_000);
+  };
+
+  // ---------- the Tonight screen (home) ----------
+  const refreshHome = useCallback(async (c: McpConnection) => {
+    if (!c.tools.some((t) => t.name === 'home_screen')) return;
+    try {
+      const result = await c.call('home_screen');
+      const uri = c.uiResourceFor('home_screen');
+      if (!uri || !result.structuredContent) return;
+      const html = await c.uiHtml(uri);
+      const s = result.structuredContent;
+      setCarer(s.mode === 'carer' ? String(s.carer ?? '') : null);
+      // Keep the same frame (it refreshes itself); replace it only when the data changed.
+      setHome((old) => (old && JSON.stringify(old.result.structuredContent) === JSON.stringify(s) ? old : { id: old?.id ?? nextId++, tool: 'home_screen', args: {}, result, html, mode: 'fullscreen' }));
+    } catch {
+      // the screen keeps what it had
+    }
+  }, []);
+  useEffect(() => {
+    if (conn) void refreshHome(conn);
+  }, [conn, refreshHome]);
+
+  // An answer card stays a while, then the device goes back to the Tonight screen (like an Echo Show).
+  const armCardTimer = useCallback(() => {
+    if (cardTimer.current) clearTimeout(cardTimer.current);
+    cardTimer.current = setTimeout(() => {
+      setCard((c) => (c && c.mode === 'inline' ? null : c));
+    }, CARD_TIMEOUT_MS);
+  }, []);
+
+  // ---------- demo clock (only when the server runs with WYO_DEMO=1) ----------
+  const [demoTime, setDemoTime] = useState<string | null>(null);
+  const [demoInput, setDemoInput] = useState('19:10');
+  const [demoDay, setDemoDay] = useState('Sat');
   // The demo server tells the simulator where the parent page is (its key isn't baked into the build).
   const [demoParentPath, setDemoParentPath] = useState<string | null>(null);
   useEffect(() => {
@@ -201,6 +242,9 @@ export function App() {
     if (r.ok) {
       const t = await r.json();
       setDemoTime(`${t.weekday} ${t.hhmm}`);
+      setDemoInput(time);
+      setDemoDay(day);
+      if (connRef.current) void refreshHome(connRef.current);
     }
   };
 
@@ -212,64 +256,74 @@ export function App() {
       if (background && cardRef.current?.mode === 'fullscreen') return;
       const html = await c.uiHtml(uri);
       setCard({ id: nextId++, tool, args, result, html, mode: c.wantsFullscreen(tool) ? 'fullscreen' : 'inline' });
+      armCardTimer();
     },
-    [],
+    [armCardTimer],
   );
+
+  const takePhoto = async (): Promise<Shot> => {
+    // Like a real Echo Show: a live preview, a 3-2-1 countdown, then the photo on screen.
+    setCamera({ stream: null, count: 0, still: null, opening: true });
+    const stream = await openCamera();
+    for (const n of [3, 2, 1]) {
+      setCamera({ stream, count: n, still: null });
+      await sleep(900);
+    }
+    const shot: Shot = (stream && videoRef.current && grab(videoRef.current)) || samplePhoto();
+    stream?.getTracks().forEach((t) => t.stop());
+    setCamera({ stream: null, count: 0, still: `data:${shot.mime};base64,${shot.data}` });
+    setTimeout(() => setCamera((cv) => (cv?.still ? null : cv)), 2500);
+    return shot;
+  };
 
   const io = useCallback(
     (c: McpConnection): DeviceIO => ({
       say(text) {
         if (!text) return;
         addLine('alexa', text);
+        armCardTimer();
         // Non-English replies are translated by the server; speak them with a voice for that language.
-        const lang = /[^ -ɏ]/.test(text) || langRef.current !== 'en-US' ? langRef.current : 'en-US';
+        const lang = /[^ -ɏ]/.test(text) || langRef.current !== 'en-US' ? langRef.current : 'en-US';
         if (voiceRef.current) void speak(text, lang, () => setLight('speaking'), () => setLight('idle'));
       },
       async tool(name, args = {}) {
         setLight('thinking');
         try {
           const result = await c.call(name, args);
-          if (name === 'start_handoff' && !result.isError) {
-            setCarer(String(args.carer_name ?? ''));
-            langRef.current = typeof args.language === 'string' ? args.language : 'en-US';
-          }
+          if (name === 'start_handoff' && !result.isError) langRef.current = typeof args.language === 'string' ? args.language : 'en-US';
           if (name === 'end_handoff' && !result.isError) langRef.current = 'en-US';
           if (name === 'set_carer_language' && !result.isError && typeof args.language === 'string') langRef.current = args.language;
-          if (name === 'end_handoff' && !result.isError) setCarer(null);
-          await showCard(c, name, args, result);
+          if (name === 'home_screen') {
+            setCard(null);
+            void refreshHome(c);
+          } else {
+            await showCard(c, name, args, result);
+            void refreshHome(c);
+          }
           return result;
         } finally {
           setLight((l) => (l === 'thinking' ? 'idle' : l));
         }
       },
-      async capture() {
-        // Like a real Echo Show: a live preview, a 3-2-1 countdown, then the photo on screen.
-        setCamera({ stream: null, count: 0, still: null, opening: true });
-        const stream = await openCamera();
-        for (const n of [3, 2, 1]) {
-          setCamera({ stream, count: n, still: null });
-          await sleep(900);
-        }
-        const shot: Shot = (stream && videoRef.current && grab(videoRef.current)) || samplePhoto();
-        stream?.getTracks().forEach((t) => t.stop());
-        setCamera({ stream: null, count: 0, still: `data:${shot.mime};base64,${shot.data}` });
-        setTimeout(() => setCamera((c) => (c?.still ? null : c)), 2500);
-        return shot;
-      },
       task(name, args, onDone) {
         const id = nextId++;
         setTasks((ts) => [...ts, { id, question: String(args.question ?? name), statuses: [], done: false }]);
+        // While it waits, the screen shows who was asked ("Asking Anita…"), like the task's status.
+        const waiting = (asked: string) =>
+          showCard(c, name, args, { content: [], structuredContent: { view: 'question', text: String(args.question ?? ''), status: 'pending', asked } }, true);
+        void waiting('a parent');
         void (async () => {
           try {
             for await (const update of c.callTask(name, args)) {
+              const asked = update.status && /^Asked (.+)$/.exec(update.status);
+              if (asked && cardRef.current?.tool === name && cardRef.current.result.structuredContent?.status === 'pending') void waiting(asked[1]);
               if (update.status) {
-                setTasks((ts) =>
-                  ts.map((t) => (t.id === id && t.statuses.at(-1) !== update.status ? { ...t, statuses: [...t.statuses, update.status!] } : t)),
-                );
+                setTasks((ts) => ts.map((t) => (t.id === id && t.statuses.at(-1) !== update.status ? { ...t, statuses: [...t.statuses, update.status!] } : t)));
               }
               if (update.result) {
                 setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, done: true } : t)));
                 await showCard(c, name, args, update.result, true);
+                void refreshHome(c);
                 onDone(update.result);
               }
             }
@@ -278,8 +332,22 @@ export function App() {
           }
         })();
       },
+      capture: takePhoto,
+      async call(who) {
+        // Alexa calling, simulated: find the contact on the Tonight screen ("Mom" finds Anita).
+        const parents = (homeRef.current?.result.structuredContent?.parents as Array<{ name: string; relation: string }> | undefined) ?? [];
+        const w = who.toLowerCase().replace(/^(my |the )/, '');
+        const match =
+          parents.find((p) => p.name.toLowerCase() === w) ??
+          parents.find((p) => (/^(mom|mum|mommy|mummy|mother|mama)$/.test(w) && /mom|mum|mother/i.test(p.relation)) || (/^(dad|daddy|father|papa)$/.test(w) && /dad|father/i.test(p.relation))) ??
+          (/(parent|them|someone)/.test(w) ? parents[0] : undefined);
+        const name = match?.name ?? who.replace(/^./, (ch) => ch.toUpperCase());
+        setCall({ name, relation: match?.relation ?? '', connected: false });
+        setTimeout(() => setCall((cl) => (cl && cl.name === name ? { ...cl, connected: true } : cl)), 2500);
+        return name;
+      },
     }),
-    [showCard],
+    [showCard, refreshHome, armCardTimer],
   );
 
   const handle = useCallback(
@@ -288,14 +356,17 @@ export function App() {
       if (!text || !conn) return;
       stopSpeaking();
       addLine('you', text);
+      armCardTimer();
+      lastActivity.current = Date.now();
       try {
         await brain.current.handle(text, io(conn));
+        lastActivity.current = Date.now();
       } catch (e) {
         addLine('alexa', `Sorry, something went wrong: ${e instanceof Error ? e.message : String(e)}`);
         setLight('idle');
       }
     },
-    [conn, io],
+    [conn, io, armCardTimer],
   );
 
   // While someone is babysitting, the device reminds them when a step of tonight's plan comes due.
@@ -303,11 +374,16 @@ export function App() {
     if (!conn || !carer) return;
     let stopped = false;
     const tick = async () => {
+      // Taking an announcement marks it said, so only ask when the device is free to say it.
+      if (Date.now() - lastActivity.current < 8000) return;
+      const started = Date.now();
       try {
         const r = await conn.call('tonight_plan', { announce: true });
         if (stopped || !(r.structuredContent?.due as string[] | undefined)?.length) return;
-        await showCard(conn, 'tonight_plan', { announce: true }, r, true);
-        io(conn).say(r.content.map((c) => c.text ?? '').join(' '));
+        // Someone spoke meanwhile: say the reminder, but don't cover their answer with an older card.
+        if (lastActivity.current < started) await showCard(conn, 'tonight_plan', { announce: true }, r, true);
+        void refreshHome(conn);
+        io(conn).say(textOf(r));
       } catch {
         // a missed reminder check is retried on the next tick
       }
@@ -318,7 +394,7 @@ export function App() {
       stopped = true;
       clearInterval(t);
     };
-  }, [conn, carer, io, showCard, demoTime]);
+  }, [conn, carer, io, showCard, refreshHome, demoTime]);
 
   const onMic = async () => {
     if (light === 'listening') return stopListening.current();
@@ -332,15 +408,7 @@ export function App() {
     if (heard) void handle(heard);
   };
 
-  const parentUrl = (() => {
-    try {
-      return `${new URL(url).origin}${demoParentPath ?? `/parent?k=${encodeURIComponent(PARENT_KEY)}`}`;
-    } catch {
-      return '#';
-    }
-  })();
-
-  // In demo mode the device shows the house's (demo) time, like a real Echo Show would.
+  const parentUrl = serverOrigin ? `${serverOrigin}${demoParentPath ?? `/parent?k=${encodeURIComponent(PARENT_KEY)}`}` : '#';
   const clockText = (() => {
     const m = demoTime ? /(\d{2}):(\d{2})$/.exec(demoTime) : null;
     if (!m) return now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -348,95 +416,112 @@ export function App() {
     return `${h % 12 === 0 ? 12 : h % 12}:${m[2]} ${h < 12 ? 'AM' : 'PM'}`;
   })();
   const fullscreen = card?.mode === 'fullscreen';
+  const showingHome = !card && Boolean(home);
   const activeTasks = tasks.filter((t) => !t.done || t.id === tasks.at(-1)?.id);
+  const cardProps = (c: Card) => ({
+    html: c.html,
+    toolName: c.tool,
+    toolInput: c.args,
+    toolResult: c.result,
+    onToolCall: (name: string, args: Record<string, unknown>) => {
+      const cn = connRef.current;
+      if (!cn) return Promise.reject(new Error('Not connected'));
+      // Cards may only call tools the server marked as callable from its UI.
+      if (!cn.appCallable(name)) return Promise.reject(new Error(`${name} can't be called from a card`));
+      return cn.call(name, args);
+    },
+    onUserMessage: (text: string) => void handle(text),
+  });
 
   return (
     <div className="page">
-      <section className="device" aria-label="Echo Show simulator">
-        <div className="bezel">
-          <div className="camera" />
-          <div className={`screen ${fullscreen ? 'is-fullscreen' : ''}`}>
-            {!fullscreen && (
-              <header className="statusbar">
-                <span className="clock">{clockText}</span>
-                <span className={`mode ${carer ? 'carer' : ''}`}>{carer ? `Sitter mode · ${carer}` : 'Parent mode'}</span>
-              </header>
-            )}
+      <section className="wall" aria-label="Echo Show simulator">
+        <div className="device">
+          <div className="bezel">
+            <div className="camera" />
+            <div className={`screen ${fullscreen || showingHome ? 'is-fullscreen' : ''}`}>
+              {!fullscreen && !showingHome && (
+                <header className="statusbar">
+                  <span className="clock">{clockText}</span>
+                  <span className={`mode ${carer ? 'carer' : ''}`}>{carer ? `Sitter mode · ${carer}` : 'Parent mode'}</span>
+                </header>
+              )}
 
-            <div className="stage">
-              {card ? (
-                <AppFrame
-                  key={card.id}
-                  html={card.html}
-                  toolName={card.tool}
-                  toolInput={card.args}
-                  toolResult={card.result}
-                  displayMode={card.mode}
-                  onDisplayMode={(mode) => setCard((c) => (c && c.id === card.id ? { ...c, mode } : c))}
-                />
-              ) : (
-                <div className="idle">
-                  <div className="big-clock">{clockText}</div>
-                  <p>Try “Priya is babysitting tonight”</p>
+              <div className="stage">
+                {home && (
+                  <div className={`home-layer ${showingHome ? '' : 'hidden'}`}>
+                    <AppFrame key={home.id} {...cardProps(home)} displayMode="fullscreen" />
+                  </div>
+                )}
+                {card && (
+                  <AppFrame
+                    key={card.id}
+                    {...cardProps(card)}
+                    displayMode={card.mode}
+                    onDisplayMode={(mode) => setCard((c) => (c && c.id === card.id ? { ...c, mode } : c))}
+                  />
+                )}
+                {!card && !home && (
+                  <div className="idle">
+                    <div className="big-clock">{clockText}</div>
+                    <p>{connState === 'connected' ? 'Try “Priya is babysitting tonight”' : connState === 'connecting' ? 'Connecting…' : 'Not connected'}</p>
+                  </div>
+                )}
+              </div>
+
+              {(interim || caption) && !fullscreen && (
+                <div className={`caption ${interim ? 'you' : caption?.who}`} aria-live="polite">
+                  {interim ? `${interim}…` : caption?.text}
                 </div>
               )}
-            </div>
+              {card && (
+                <button className="dismiss" onClick={() => setCard(null)} aria-label="Back to the Tonight screen">
+                  {fullscreen ? 'Close' : '✕'}
+                </button>
+              )}
 
-            {!fullscreen && (
-              <footer className="captions" aria-live="polite">
-                {interim ? <p className="you">{interim}…</p> : null}
-                {!interim &&
-                  lines.slice(-1).map((l) => (
-                    <p key={l.id} className={l.who}>
-                      {l.text}
-                    </p>
-                  ))}
-              </footer>
-            )}
-            {camera && (
-              <div className="camera-view" aria-live="polite">
-                {camera.still ? (
-                  <img src={camera.still} alt="The photo that was sent" />
-                ) : camera.stream ? (
-                  <video ref={videoRef} autoPlay muted playsInline />
-                ) : camera.opening ? (
-                  <div className="no-camera">Opening the camera…</div>
-                ) : (
-                  <div className="no-camera">No camera found: sending a sample photo</div>
-                )}
-                {camera.count > 0 && <div className="countdown">{camera.count}</div>}
-                {camera.still && <div className="sent">📷 Sending to the parents</div>}
-              </div>
-            )}
-            {fullscreen && (
-              <button className="dismiss" onClick={() => setCard(null)}>
-                Close
-              </button>
-            )}
+              {camera && (
+                <div className="overlay camera-view" aria-live="polite">
+                  {camera.still ? (
+                    <img src={camera.still} alt="The photo that was sent" />
+                  ) : camera.stream ? (
+                    <video ref={videoRef} autoPlay muted playsInline />
+                  ) : camera.opening ? (
+                    <div className="no-camera">Opening the camera…</div>
+                  ) : (
+                    <div className="no-camera">No camera found: sending a sample photo</div>
+                  )}
+                  {camera.count > 0 && <div className="countdown">{camera.count}</div>}
+                  {camera.still && <div className="sent">📷 Sending to the parents</div>}
+                </div>
+              )}
+
+              {call && (
+                <div className="overlay call-view" role="dialog" aria-label={`Calling ${call.name}`}>
+                  <div className={`call-avatar ${call.connected ? '' : 'ringing'}`}>{call.name.charAt(0)}</div>
+                  <h2>{call.connected ? call.name : `Calling ${call.name}…`}</h2>
+                  <p>{call.relation ? `${call.relation} · ` : ''}{call.connected ? 'Connected (simulated Alexa call)' : 'Alexa calling'}</p>
+                  <button className="hangup" onClick={() => setCall(null)} aria-label="End call">
+                    End call
+                  </button>
+                </div>
+              )}
+              <div className={`glow ${light}`} />
+            </div>
           </div>
-          <div className={`lightbar ${light}`} />
+          <p className="device-label">Echo Show 15 · simulated</p>
         </div>
       </section>
 
       <aside className="panel">
-        <h1>Echo Show simulator</h1>
-        <p className="muted">Stands in for Alexa+ while the real add-on toolkit is partner-only. It connects to the MCP server exactly like an MCP client.</p>
-
-        <div className="row">
-          <input value={url} onChange={(e) => setUrl(e.target.value)} aria-label="MCP server URL" />
-          <button onClick={() => void connect(url)}>Connect</button>
-        </div>
-        <p className={`conn ${connState}`}>
-          {connState === 'connected' && conn
-            ? `Connected to ${conn.serverName} · ${conn.tools.length} tools · protocol ${conn.protocolVersion ?? 'unknown'}`
-            : connState === 'connecting'
-              ? 'Connecting…'
-              : `Not connected: ${connError}`}
-        </p>
+        <header className="panel-head">
+          <h1>While You’re Out</h1>
+          <p className="muted">An Alexa+ add-on for whoever looks after your kids and home. Real Alexa+ access is partner-only, so this simulator plays Alexa: it connects to the add-on’s MCP server like Alexa+ would.</p>
+        </header>
 
         <div className="talk">
           <button className={`mic ${light === 'listening' ? 'on' : ''}`} onClick={() => void onMic()} disabled={!canListen || !conn} title={canListen ? 'Speak' : 'Speech recognition needs Chrome or Edge'}>
-            {light === 'listening' ? 'Listening… tap to stop' : 'Hold a conversation 🎤'}
+            {light === 'listening' ? 'Listening… tap to stop' : '🎤  Talk to Alexa'}
           </button>
           <form
             onSubmit={(e) => {
@@ -445,37 +530,56 @@ export function App() {
               setDraft('');
             }}
           >
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Or type what you'd say…" disabled={!conn} />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="…or type what you’d say" disabled={!conn} aria-label="What you would say" />
           </form>
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={voiceOn}
-              onChange={(e) => {
-                setVoiceOn(e.target.checked);
-                try {
-                  localStorage.setItem('wyo.voice', e.target.checked ? 'on' : 'off');
-                } catch {
-                  /* storage unavailable: setting just won't persist */
-                }
-                if (!e.target.checked) stopSpeaking();
-              }}
-            />{' '}
-            Speak replies
-          </label>
+          <div className="toggles">
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={voiceOn}
+                onChange={(e) => {
+                  setVoiceOn(e.target.checked);
+                  try {
+                    localStorage.setItem('wyo.voice', e.target.checked ? 'on' : 'off');
+                  } catch {
+                    /* storage unavailable: setting just won't persist */
+                  }
+                  if (!e.target.checked) stopSpeaking();
+                }}
+              />{' '}
+              Speak replies
+            </label>
+            <label className="check">
+              Brain{' '}
+              <select
+                value={brainKind}
+                onChange={(e) => {
+                  const v = e.target.value === 'rules' ? 'rules' : 'gemini';
+                  setBrainKind(v);
+                  try {
+                    localStorage.setItem('wyo.brain', v);
+                  } catch {
+                    /* not persisted */
+                  }
+                }}
+              >
+                <option value="gemini">Gemini (free speech, any language)</option>
+                <option value="rules">Rules (no AI, demo phrases)</option>
+              </select>
+            </label>
+          </div>
         </div>
 
-        <h2>Try saying</h2>
-        <div className="chips">
-          {SUGGESTIONS.map((s) => (
-            <button key={s} className="chip" onClick={() => void handle(s)} disabled={!conn}>
-              {s}
-            </button>
-          ))}
-        </div>
+        <a className="parent-link" href={parentUrl} target="_blank" rel="noreferrer">
+          <span>📱</span>
+          <span>
+            <b>Open the parent’s phone</b>
+            <small>Answer questions, get alerts, see photos</small>
+          </span>
+        </a>
 
         {activeTasks.length > 0 && (
-          <>
+          <section>
             <h2>Asking the parents</h2>
             {activeTasks.map((t) => (
               <div key={t.id} className={`task ${t.done ? 'done' : ''}`}>
@@ -487,12 +591,38 @@ export function App() {
                 </ul>
               </div>
             ))}
-          </>
+          </section>
         )}
 
+        <section>
+          <h2>Guided demo</h2>
+          <ol className="guide">
+            {GUIDE.map((g) => (
+              <li key={g.title}>
+                <div className="guide-head">
+                  <b>{g.title}</b>
+                  {g.clock && demoTime && (
+                    <button className="clock-chip" onClick={() => void setClock(g.clock![1], g.clock![0])} title="Move the house clock">
+                      🕒 {g.clock[0]} {g.clock[1]}
+                    </button>
+                  )}
+                </div>
+                <div className="chips">
+                  {g.lines.map((s) => (
+                    <button key={s} className="chip" onClick={() => void handle(s)} disabled={!conn}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                {g.note && <p className="muted small">{g.note}</p>}
+              </li>
+            ))}
+          </ol>
+        </section>
+
         {demoTime && (
-          <>
-            <h2>Demo clock</h2>
+          <section>
+            <h2>House clock</h2>
             <form
               className="row"
               onSubmit={(e) => {
@@ -506,46 +636,41 @@ export function App() {
                 ))}
               </select>
               <input type="time" value={demoInput} onChange={(e) => setDemoInput(e.target.value)} aria-label="Demo time" />
-              <button type="submit">Set time</button>
+              <button type="submit">Set</button>
             </form>
-            <p className="muted small">House time now: {demoTime}. Reminders fire as the plan's steps come due.</p>
-          </>
+            <p className="muted small">Now: {demoTime}. Reminders fire as the plan’s steps come due.</p>
+          </section>
         )}
 
-        <h2>Parent's phone</h2>
-        <p>
-          <a href={parentUrl} target="_blank" rel="noreferrer">
-            Open the parent page
-          </a>{' '}
-          <span className="muted">(answer questions as Mom or Dad)</span>
-        </p>
+        <details>
+          <summary>Conversation</summary>
+          <div className="log">
+            {lines.length ? (
+              lines.map((l) => (
+                <p key={l.id} className={l.who}>
+                  <b>{l.who === 'you' ? 'You' : 'Alexa'}:</b> {l.text}
+                </p>
+              ))
+            ) : (
+              <p className="muted">Nothing yet.</p>
+            )}
+          </div>
+        </details>
 
-        <h2>Conversation</h2>
-        <div className="log">
-          {lines.map((l) => (
-            <p key={l.id} className={l.who}>
-              <b>{l.who === 'you' ? 'You' : 'Alexa'}:</b> {l.text}
-            </p>
-          ))}
-        </div>
-        <label className="muted small">
-          Brain:{' '}
-          <select
-            value={brainKind}
-            onChange={(e) => {
-              const v = e.target.value === 'rules' ? 'rules' : 'gemini';
-              setBrainKind(v);
-              try {
-                localStorage.setItem('wyo.brain', v);
-              } catch {
-                /* not persisted */
-              }
-            }}
-          >
-            <option value="gemini">Gemini (understands free speech and other languages)</option>
-            <option value="rules">Rules (no AI, demo phrases only)</option>
-          </select>
-        </label>
+        <details>
+          <summary>Connection</summary>
+          <div className="row">
+            <input value={url} onChange={(e) => setUrl(e.target.value)} aria-label="MCP server URL" />
+            <button onClick={() => void connect(url)}>Connect</button>
+          </div>
+          <p className={`conn ${connState}`}>
+            {connState === 'connected' && conn
+              ? `Connected to ${conn.serverName} · ${conn.tools.length} tools · MCP ${conn.protocolVersion ?? 'unknown'}`
+              : connState === 'connecting'
+                ? 'Connecting…'
+                : `Not connected: ${connError}`}
+          </p>
+        </details>
       </aside>
     </div>
   );

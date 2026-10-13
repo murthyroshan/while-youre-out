@@ -13,6 +13,7 @@ import { PARENT_HTML, SERVICE_WORKER_JS } from './parent/page.js';
 import { createPush, isValidSubscription, type PushSender } from './domain/push.js';
 import { getPhotoData, recentPhotos } from './domain/photos.js';
 import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './domain/family.js';
+import { homeScreen } from './domain/home.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
 import { geminiChat, geminiFromEnv, AiUnavailableError, type AiClient, type ChatRequest } from './ai/gemini.js';
 import { decideProposal, importInfo, importNote, ImportError, IMAGE_TYPES, MAX_IMPORT_BYTES, pendingProposals, ProposalError } from './domain/houseBrain.js';
@@ -232,6 +233,7 @@ export function createApp(opts: AppOptions = {}) {
       emergency: lastEmergency,
       photos: recentPhotos(db, activeHandoff(db)?.id ?? latestDebrief(db)?.handoff_id),
       household: getFamily(db).household,
+      home: homeScreen(db),
     });
   });
 

@@ -30,6 +30,7 @@ import {
 } from '../domain/house.js';
 import { startEmergency } from '../domain/emergency.js';
 import { PhotoError, savePhoto } from '../domain/photos.js';
+import { homeScreen, homeSentence } from '../domain/home.js';
 import { importNote, ImportError } from '../domain/houseBrain.js';
 import { applyLogToPlan, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
 import { teachback } from '../domain/teachback.js';
@@ -39,7 +40,7 @@ import { fixedTranslation, languageCode, LANGUAGES, translateOne } from '../doma
 import type { Handoff } from '../db.js';
 import { formatTime, localTime } from '../clock.js';
 import { AiUnavailableError, type AiClient } from '../ai/gemini.js';
-import { CARD_HTML, CARD_MIME, CARD_URI } from './card.js';
+import { cardHtml, CARD_MIME, CARD_URI } from './card.js';
 
 export interface ServerDeps {
   db: DB;
@@ -118,7 +119,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
         {
           uri: CARD_URI,
           mimeType: CARD_MIME,
-          text: CARD_HTML,
+          text: cardHtml(),
           // Lets MCP Apps hosts load the parents' photos from this server.
           _meta: { ui: { csp: { resourceDomains: [new URL(publicUrl).origin] } } },
         },
@@ -260,6 +261,22 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
             ? 'Everything on tonight\'s plan is done.'
             : "The parents haven't given times for tonight.";
       return localized('plan', { items: plan.items, now: plan.now.hhmm, shift: plan.shift, shift_reason: plan.shift_reason, due: due.map((i) => i.key) }, say);
+    },
+  );
+
+  server.registerTool(
+    'home_screen',
+    {
+      title: 'Tonight at a glance',
+      description:
+        "The Echo Show's home screen during a handoff: what's next on tonight's plan, how the evening is going, who's in the house and whether the parents have answered. Show it when the device is idle; the screen refreshes itself. Also answers \"how's it going?\" or \"what's happening tonight?\".",
+      inputSchema: {},
+      annotations: { readOnlyHint: true },
+      _meta: { ui: { resourceUri: CARD_URI, visibility: ['model', 'app'] }, 'ui/resourceUri': CARD_URI },
+    },
+    async () => {
+      const s = homeScreen(db);
+      return localized('home', { ...s, timezone: householdTz(db) }, homeSentence(s));
     },
   );
 

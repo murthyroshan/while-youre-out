@@ -23,7 +23,10 @@ const LANGS: Record<string, string> = {
   gujarati: 'gu-IN', kannada: 'kn-IN', malayalam: 'ml-IN', punjabi: 'pa-IN', urdu: 'ur-IN', tagalog: 'fil-PH',
 };
 
-type Pending = { kind: 'ask'; question: string } | { kind: 'end' } | { kind: 'replace'; name: string } | { kind: 'teachback' };
+type Pending = { kind: 'ask'; question: string } | { kind: 'ask_what' } | { kind: 'end' } | { kind: 'replace'; name: string } | { kind: 'teachback' };
+// "Call Mom", "phone Anita", "video call dad".
+const CALL = /^(?:please |can you |could you )?(?:call|phone|ring|video call|facetime|drop in on)\s+(?:to\s+)?(.+?)(?:\s+(?:now|please|for me))?[.!?]*$/i;
+const HOW_IS_IT_GOING = /^(how'?s it going|how is it going|how are things|what'?s happening( tonight)?|home|go home|show (the )?home( screen)?|tonight)[.!?]*$/i;
 
 /**
  * A deterministic stand-in for the Alexa+ language model. It needs no API key, so the
@@ -70,6 +73,21 @@ export class RuleBrain implements Brain {
       return io.say(textOf(r));
     }
 
+    // After "Ask the parents", the next thing said is the question.
+    if (this.pending?.kind === 'ask_what') {
+      this.pending = null;
+      if (NO.test(u)) return io.say('Okay.');
+      return this.askParent(u, io);
+    }
+
+    const calling = CALL.exec(u);
+    if (calling) {
+      this.pending = null;
+      if (!io.call) return io.say("This device can't make calls.");
+      const name = await io.call(calling[1]);
+      return io.say(`Calling ${name}.`);
+    }
+
     if (YES.test(u)) {
       const p = this.pending;
       this.pending = null;
@@ -103,6 +121,11 @@ export class RuleBrain implements Brain {
       return io.say(`Welcome back. Should I end ${this.carer}'s handoff?`);
     }
 
+    if (HOW_IS_IT_GOING.test(u)) {
+      const r = await io.tool('home_screen');
+      return io.say(textOf(r));
+    }
+
     if (/\b(what'?s next|what is next|what now|what'?s the plan|what is the plan|tonight'?s plan|plan for tonight|what (do|should) (i|we) do (next|now)|schedule)\b/i.test(u)) {
       const r = await io.tool('tonight_plan', { announce: false });
       return io.say(textOf(r));
@@ -118,7 +141,10 @@ export class RuleBrain implements Brain {
     const ask = u.match(/^(?:can you |could you |please )?ask (?:mom|dad|mum|the parents|her parents|his parents|them|anita|rahul)\b[\s,:]*(?:if |whether |about )?(.*)$/i);
     if (ask) {
       const q = ask[1]?.trim();
-      if (!q) return io.say('What should I ask them?');
+      if (!q || /^(something|a question)$/i.test(q)) {
+        this.pending = { kind: 'ask_what' };
+        return io.say('What should I ask them?');
+      }
       return this.askParent(q, io);
     }
 

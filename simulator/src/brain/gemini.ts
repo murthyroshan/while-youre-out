@@ -27,6 +27,13 @@ export interface GeminiBrainOptions {
 
 // Tools the model should not use directly: the task version of ask_parent is preferred.
 const HIDDEN_TOOLS = new Set(['ask_parent', 'check_parent_answer']);
+const DEVICE_FUNCTIONS = [
+  {
+    name: 'call_contact',
+    description: 'Places an Alexa call to one of the family\'s contacts ("call Mom", "phone Anita"). Use the words they used for the person.',
+    parametersJsonSchema: { type: 'object', properties: { who: { type: 'string', description: 'Who to call, e.g. "Mom" or "Anita"' } }, required: ['who'] },
+  },
+];
 const MAX_HISTORY = 24;
 const MAX_ROUNDS = 5;
 
@@ -46,6 +53,9 @@ How to act:
 - The parents are back / "end the handoff": confirm, then call end_handoff.
 - A dictated note from a parent ("remember: ..."): call import_note.
 - "Send Mom a photo", "take a picture of us": call send_photo. The device camera takes the picture; pass only a caption if they said one ("saying good night").
+- "Call Mom", "phone Anita": call call_contact.
+- "How's it going?", "what's happening tonight?": call home_screen.
+- "Ask the parents" with no question yet: ask what they'd like to ask, then use ask_house / ask_parent_and_wait as usual.
 
 Languages: if the carer speaks another language, call set_carer_language with its BCP-47 code (hi-IN, es-US, ta-IN, ...) once, and always pass an English rendering in question_english / text_english / answer_english / description_english so the add-on's safety rules can read it.
 
@@ -91,10 +101,14 @@ export class GeminiBrain implements Brain {
   }
 
   private functions() {
-    return this.opts
-      .tools()
-      .filter((t) => !HIDDEN_TOOLS.has(t.name))
-      .map((t) => ({ name: t.name, description: (t.description ?? '').slice(0, 1000), parametersJsonSchema: cleanSchema(withoutDeviceFields(t)) }));
+    return [
+      ...this.opts
+        .tools()
+        .filter((t) => !HIDDEN_TOOLS.has(t.name))
+        .map((t) => ({ name: t.name, description: (t.description ?? '').slice(0, 1000), parametersJsonSchema: cleanSchema(withoutDeviceFields(t)) })),
+      // Things the device does itself, like Alexa calling.
+      ...DEVICE_FUNCTIONS,
+    ];
   }
 
   private async callModel(): Promise<{ parts: Part[] }> {
@@ -146,7 +160,12 @@ export class GeminiBrain implements Brain {
         for (const c of calls) {
           const { name, args = {}, id } = c.functionCall as { name: string; args?: Record<string, unknown>; id?: string };
           let response: unknown;
-          if (name === 'ask_parent_and_wait') {
+          if (name === 'call_contact') {
+            const who = String(args.who ?? 'a parent');
+            const calling = io.call ? await io.call(who) : null;
+            response = calling ? { calling } : { error: "This device can't make calls." };
+            spoken.push(calling ? `Calling ${calling}.` : "This device can't make calls.");
+          } else if (name === 'ask_parent_and_wait') {
             io.task(name, args, (result) => io.say(textOf(result)));
             response = { text: 'Question sent to the parents. The answer will be announced when it arrives.' };
             spoken.push('Okay, I\'m asking now. I\'ll tell you when they answer.');

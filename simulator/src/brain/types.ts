@@ -10,6 +10,8 @@ export interface DeviceIO {
   task(name: string, args: Record<string, unknown>, onDone: (result: ToolResult) => void): void;
   /** Takes a photo with the device camera (countdown on screen). Null if it couldn't. */
   capture?(): Promise<{ data: string; mime: string } | null>;
+  /** Places an Alexa call to a contact ("Mom", "Anita"); returns who is being called. */
+  call?(who: string): Promise<string>;
 }
 
 /** Turns what someone says into tool calls. Alexa+ plays this role in production. */

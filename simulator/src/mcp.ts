@@ -81,6 +81,13 @@ export class McpConnection {
     return meta?.ui?.resourceUri ?? meta?.['ui/resourceUri'];
   }
 
+  /** Tools a card may call itself (MCP Apps visibility includes "app"). */
+  appCallable(tool: string): boolean {
+    const meta = this.tools.find((t) => t.name === tool)?._meta as Record<string, any> | undefined;
+    const visibility = meta?.ui?.visibility;
+    return Array.isArray(visibility) && visibility.includes('app');
+  }
+
   wantsFullscreen(tool: string): boolean {
     const meta = this.tools.find((t) => t.name === tool)?._meta as Record<string, any> | undefined;
     return meta?.ui?.preferredDisplayMode === 'fullscreen';
