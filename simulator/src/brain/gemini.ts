@@ -36,13 +36,17 @@ const DEVICE_FUNCTIONS = [
   },
 ];
 const MAX_HISTORY = 24;
-const MAX_ROUNDS = 5;
+const MAX_ROUNDS = 3;
+// Past this, the rule brain answers instead: a device that goes quiet feels broken.
+const MODEL_TIMEOUT_MS = 12_000;
+// Tools that only set something up: the model still has to act on what was said.
+const SETUP_TOOLS = new Set(['set_carer_language']);
 
 const SYSTEM = `You are Alexa+ on an Echo Show in a family home, running the "While You're Out" add-on.
 The parents may hand the home over to a carer (a babysitter, grandparent or nanny). Everything about the children, pets and house comes ONLY from the add-on's tools. Never invent rules, times, foods, medicines or advice.
 
 How to act:
-- A parent saying someone is babysitting, watching or looking after the kids: call start_handoff with the carer's name. Only pass a language if the parent explicitly said one ("she speaks Hindi" -> hi-IN); never guess a language from a name. Then call teachback with no arguments to start the quick check.
+- A parent saying someone is babysitting, watching or looking after the kids: call start_handoff with the carer's name. Only pass a language if the parent explicitly said one ("she speaks Hindi" -> hi-IN); never guess a language from a name. The device starts the quick teach-back check itself.
 - While the teach-back check is running, pass the carer's replies to teachback as answer (or skip=true).
 - Questions about food, bedtime, screen time, rules, pets, the house: call ask_house with the carer's words.
 - "Where is ...": call where_is.
@@ -123,6 +127,7 @@ export class GeminiBrain implements Brain {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ system, contents: this.history.slice(-MAX_HISTORY), functions: this.functions() }),
+      signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? `LLM proxy ${res.status}`);
     return (await res.json()) as { parts: Part[] };
@@ -174,6 +179,7 @@ export class GeminiBrain implements Brain {
           break;
         }
         const responses: Part[] = [];
+        let handoffStarted = false;
         for (const c of calls) {
           const { name, args = {}, id } = c.functionCall as { name: string; args?: Record<string, unknown>; id?: string };
           let response: unknown;
@@ -202,6 +208,7 @@ export class GeminiBrain implements Brain {
               response = { ...forModel(r), parents_asked: true };
             }
             if (name === 'emergency') this.inEmergency = true;
+            if (name === 'start_handoff' && !r.isError && s.view !== 'handoff_cancelled') handoffStarted = true;
             if (s.emergency && name !== 'emergency') {
               this.inEmergency = true;
               const e = await io.tool('emergency', { description: String(args.question ?? args.text ?? u), description_english: args.question_english ?? args.text_english });
@@ -214,6 +221,17 @@ export class GeminiBrain implements Brain {
           responses.push({ functionResponse: { name, ...(id ? { id } : {}), response } });
         }
         this.remember({ role: 'user', parts: responses });
+        // Straight into the teach-back check, like the rule brain: no second model call needed.
+        if (handoffStarted && !calls.some((c) => c.functionCall.name === 'teachback')) {
+          const tb = await io.tool('teachback', {});
+          if (!tb.isError && textOf(tb)) spoken.push(textOf(tb));
+        }
+        // The device speaks the tools' own words, so once a tool has answered the turn is done.
+        // Asking the model again would only double the wait (and the free-tier quota) for nothing.
+        if (spoken.length && !calls.every((c) => SETUP_TOOLS.has(c.functionCall.name))) {
+          this.remember({ role: 'model', parts: [{ text: spoken.join(' ') }] });
+          break;
+        }
       }
     } catch {
       // The model is unavailable (quota, network): answer this one with the rule brain.

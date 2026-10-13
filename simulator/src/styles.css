@@ -94,26 +94,38 @@ button, input, select { font: inherit; }
 .muted { color: var(--muted); font-size: 14px; line-height: 1.45; }
 .small { font-size: 12.5px; margin: 6px 0 0; }
 .panel button { cursor: pointer; }
-.talk { display: grid; gap: 10px; margin-top: 16px; }
-.mic { padding: 13px; border-radius: 12px; border: 0; background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; box-shadow: 0 6px 16px rgba(31, 95, 174, 0.25); }
+.talk { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 14px; }
+.mic { width: 46px; border-radius: 12px; border: 0; background: var(--accent); color: #fff; font-size: 18px; }
 .mic.on { background: var(--alexa); color: #062b33; }
 .mic:disabled { opacity: 0.5; cursor: not-allowed; }
-.talk form input { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfaf7; }
-.toggles { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.talk form input { width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 12px; background: #fbfaf7; font-size: 15px; }
+.settings { display: grid; gap: 10px; margin-top: 10px; }
+.settings .row { margin-top: 0; align-items: center; }
 .check { font-size: 13.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
 .check select { border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; background: #fff; font-size: 13px; }
 .parent-link { display: flex; gap: 12px; align-items: center; margin-top: 16px; padding: 12px 14px; border-radius: 14px; background: linear-gradient(135deg, #1d2433, #2c3a55); color: #fff; text-decoration: none; }
 .parent-link > span:first-child { font-size: 26px; }
 .parent-link b { display: block; }
 .parent-link small { color: #c4cee0; }
-.guide { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
-.guide li { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: #fcfbf8; }
-.guide-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; }
-.clock-chip { border: 1px solid #f0c36d; background: #fff6e2; color: #7a5200; border-radius: 999px; padding: 3px 9px; font-size: 12px; white-space: nowrap; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13px; text-align: left; color: var(--ink); }
-.chip:hover:not(:disabled) { background: #f2eee6; border-color: #d6cfc2; }
-.chip:disabled { opacity: 0.5; }
+/* The guided demo: one step at a time, one button */
+.tour { margin-top: 18px; border: 1px solid var(--line); border-radius: 18px; padding: 16px; background: #fcfbf8; }
+.tour-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.dots { display: flex; gap: 6px; }
+.dot { width: 10px; height: 10px; padding: 0; border-radius: 50%; border: 0; background: #ddd6ca; }
+.dot.past { background: #9cc3a8; }
+.dot.on { background: var(--accent); transform: scale(1.25); }
+.panel .tour-title { font-size: 20px; text-transform: none; letter-spacing: -0.01em; color: var(--ink); margin: 10px 0 4px; }
+.tour-note { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.tour-lines { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.tour-lines li { padding-left: 22px; position: relative; }
+.tour-lines li::before { content: '○'; position: absolute; left: 2px; }
+.tour-lines li.done { text-decoration: line-through; opacity: 0.6; }
+.tour-lines li.done::before { content: '✓'; color: #1e7b4f; }
+.tour-lines li.now { color: var(--ink); font-weight: 600; }
+.tour-lines li.now::before { content: '▸'; color: var(--accent); }
+.tour-go { width: 100%; padding: 14px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15.5px; text-align: left; box-shadow: 0 6px 16px rgba(31, 95, 174, 0.25); }
+.tour-go.next { background: #1d2433; box-shadow: none; }
+.tour-go:disabled { opacity: 0.6; cursor: wait; }
 .task { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; font-size: 14px; background: #f5f9ff; }
 .task.done { opacity: 0.7; background: #fff; }
 .task ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
@@ -135,8 +147,6 @@ summary { cursor: pointer; font-size: 12px; text-transform: uppercase; letter-sp
 .ring-view img { width: 100%; height: 100%; object-fit: cover; }
 .ring-top { position: absolute; top: 16px; left: 16px; background: rgba(0, 0, 0, 0.65); color: #fff; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: clamp(14px, 1.5vw, 19px); }
 .ring-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 18px 22px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.85)); color: #fff; font-size: clamp(16px, 1.9vw, 24px); font-weight: 600; }
-.ring-chips { margin-bottom: 8px; }
-.chip.ring { background: #eef6ff; border-color: #c9defa; }
 
 /* The add-on asking something on screen (MCP elicitation) */
 .ask-view { background: rgba(6, 10, 18, 0.72); backdrop-filter: blur(6px); }

@@ -48,11 +48,6 @@ interface Ring {
   label: string;
   time: string;
 }
-const RINGERS: Array<[string, string]> = [
-  ['delivery', '📦 Delivery driver'],
-  ['stranger', '❓ Someone unknown'],
-  ['grandma', '👵 Nani with soup'],
-];
 
 /** A two-tone doorbell chime (Web Audio, no file needed). */
 function chime() {
@@ -82,26 +77,25 @@ interface Call {
   connected: boolean;
 }
 
-// The demo, in the order a judge would try it (and the video tells it).
+// The demo, in the order a judge would try it (and the video tells it): one step at a time.
+type TourAction = { say: string } | { ring: string };
 interface GuideStep {
   title: string;
-  lines: string[];
-  note?: string;
-  /** Moves the house clock (demo mode) to [day, "HH:MM"]. */
+  note: string;
+  /** Moves the house clock (demo mode) to [day, "HH:MM"] when the step starts. */
   clock?: [string, string];
-  /** Shows the Ring doorbell buttons. */
-  ring?: boolean;
+  actions: TourAction[];
 }
+const say = (...lines: string[]): TourAction[] => lines.map((l) => ({ say: l }));
 const GUIDE: GuideStep[] = [
-  { title: '1 · The parents hand over', clock: ['Sat', '18:00'], lines: ['Priya is babysitting tonight', 'Peanuts', 'In the kitchen drawer by the stove', 'Anita'], note: 'Or say “We’re heading out” and fill in the form. The Tonight screen appears, then a 3-question handover check.' },
-  { title: '2 · Questions, in the parents’ words', lines: ['Can Maya have the cookies on the counter?', "Where's the EpiPen?", 'Can she watch another episode?'], note: 'Food always gets a guard; Shadow Parent says how the parents usually answer.' },
-  { title: '3 · The evening goes on', clock: ['Sat', '18:40'], lines: ['She napped till 5', "What's next?", 'Send Mom a photo saying good night'], note: 'Late nap moves bedtime by the parents’ own rule.' },
-  { title: '4 · Someone at the door', clock: ['Sat', '21:00'], ring: true, lines: ["Someone's knocking, should I open the door?"], note: 'Ring the bell first. Unknown visitor: don’t open, and the photo goes to the parents’ lock screen. (Between 6:30 and 7:30 Nani is expected, so it says “check first”.)' },
-  { title: '5 · Ask a parent', lines: ['Can she sleep in your bed?', 'Yes'], note: 'Answer it on the parent page: the device announces the reply.' },
-  { title: '6 · Emergency', lines: ["Her lips are swelling and she can't breathe", 'I gave the EpiPen', 'Done'], note: 'Fixed script, one step at a time, with the 5-minute timer. On the parent page tap “I’m on my way”.' },
-  { title: '7 · Lights out', clock: ['Sat', '20:30'], lines: ['Maya misses her mom', 'She fell asleep at 8:10'], note: 'Mom’s goodnight message plays; the screen goes dim and warm.' },
-  { title: '8 · Morning', clock: ['Sun', '07:30'], lines: ["We're back", 'Yes', 'Pay Priya'], note: 'The debrief, then pay the sitter: approve on the phone (it opens a tab).' },
-  { title: 'Another language', lines: ['Dadi is babysitting tonight in Hindi', 'क्या माया कुकीज़ खा सकती है?'], note: 'Needs the Gemini brain for free speech.' },
+  { title: 'Mom hands over to Priya', clock: ['Sat', '18:00'], note: 'The Echo Show becomes tonight’s screen, then checks Priya knows three key things.', actions: say('Priya is babysitting tonight', 'Peanuts', 'In the kitchen drawer by the stove', 'Anita') },
+  { title: 'Priya asks questions', note: 'Answers come in the parents’ own words. Food always gets a safety check.', actions: say('Can Maya have the cookies on the counter?', "Where's the EpiPen?", 'Can she watch another episode?') },
+  { title: 'The evening goes on', clock: ['Sat', '18:40'], note: 'A late nap moves bedtime, by the parents’ own rule.', actions: say('She napped till 5', "What's next?") },
+  { title: 'A knock at the door', clock: ['Sat', '21:00'], note: 'Nobody is expected, so: don’t open. The doorbell photo goes to Mom’s phone.', actions: [{ ring: 'stranger' }, ...say("Someone's knocking, should I open the door?")] },
+  { title: 'Ask a parent', note: 'Open the parent’s phone below and answer. The Echo Show reads the reply out.', actions: say('Can she sleep in your bed?', 'Yes') },
+  { title: 'Emergency', note: 'A fixed script, one step at a time, with the 5-minute EpiPen timer.', actions: say("Her lips are swelling and she can't breathe", 'I gave the EpiPen', 'Done') },
+  { title: 'Lights out', clock: ['Sat', '20:30'], note: 'Mom’s goodnight message plays for Maya, and the screen dims.', actions: say('Maya misses her mom', 'She fell asleep at 8:10') },
+  { title: 'The parents are back', clock: ['Sun', '07:30'], note: 'The morning summary, then pay Priya: Mom approves on her phone.', actions: say("We're back", 'Yes', 'Pay Priya') },
 ];
 
 let nextId = 1;
@@ -134,13 +128,16 @@ export function App() {
   const [emergencyOn, setEmergencyOn] = useState(false);
   const [caption, setCaption] = useState<Line | null>(null);
   const rules = useRef(new RuleBrain());
+  // Instant built-in rules by default: the free Gemini key only allows a few replies a day.
   const [brainKind, setBrainKind] = useState<'gemini' | 'rules'>(() => {
     try {
-      return localStorage.getItem('wyo.brain') === 'rules' ? 'rules' : 'gemini';
+      return localStorage.getItem('wyo.brain2') === 'gemini' ? 'gemini' : 'rules';
     } catch {
-      return 'gemini';
+      return 'rules';
     }
   });
+  const [tour, setTour] = useState<[number, number]>([0, 0]);
+  const [tourBusy, setTourBusy] = useState(false);
   const gemini = useRef<GeminiBrain | null>(null);
   const brain = useRef<Brain>(rules.current);
   // Read through refs so replies from long-running tasks respect the current state.
@@ -449,9 +446,11 @@ export function App() {
       addLine('you', text);
       armCardTimer();
       lastActivity.current = Date.now();
+      setLight('thinking');
       try {
         await brain.current.handle(text, io(conn));
         lastActivity.current = Date.now();
+        setLight((l) => (l === 'thinking' ? 'idle' : l));
       } catch (e) {
         addLine('alexa', `Sorry, something went wrong: ${e instanceof Error ? e.message : String(e)}`);
         setLight('idle');
@@ -525,6 +524,21 @@ export function App() {
     const h = Number(m[1]);
     return `${h % 12 === 0 ? 12 : h % 12}:${m[2]} ${h < 12 ? 'AM' : 'PM'}`;
   })();
+  const [tourStep, tourAt] = tour;
+  const step = GUIDE[tourStep];
+  const nextAction = step.actions[tourAt];
+  const runTour = async () => {
+    if (!nextAction) return;
+    setTourBusy(true);
+    try {
+      if (tourAt === 0 && step.clock && demoTime) await setClock(step.clock[1], step.clock[0]);
+      if ('ring' in nextAction) await ringDoorbell(nextAction.ring);
+      else await handle(nextAction.say);
+      setTour([tourStep, tourAt + 1]);
+    } finally {
+      setTourBusy(false);
+    }
+  };
   const fullscreen = card?.mode === 'fullscreen';
   const showingHome = !card && Boolean(home);
   const activeTasks = tasks.filter((t) => !t.done || t.id === tasks.at(-1)?.id);
@@ -642,13 +656,41 @@ export function App() {
       <aside className="panel">
         <header className="panel-head">
           <h1>While You’re Out</h1>
-          <p className="muted">An Alexa+ add-on for whoever looks after your kids and home. Real Alexa+ access is partner-only, so this simulator plays Alexa: it connects to the add-on’s MCP server like Alexa+ would.</p>
+          <p className="muted">An Alexa+ add-on that turns the Echo Show into a guide for whoever is babysitting. This page plays Alexa.</p>
         </header>
 
+        <section className="tour" aria-label="Guided demo">
+          <div className="tour-top">
+            <span>
+              Step {tourStep + 1} of {GUIDE.length}
+            </span>
+            <div className="dots">
+              {GUIDE.map((g, i) => (
+                <button key={g.title} className={`dot ${i === tourStep ? 'on' : i < tourStep ? 'past' : ''}`} onClick={() => setTour([i, 0])} aria-label={`Step ${i + 1}: ${g.title}`} title={g.title} />
+              ))}
+            </div>
+          </div>
+          <h2 className="tour-title">{step.title}</h2>
+          <p className="tour-note">{step.note}</p>
+          <ol className="tour-lines">
+            {step.actions.map((a, i) => (
+              <li key={i} className={i < tourAt ? 'done' : i === tourAt ? 'now' : ''}>
+                {'ring' in a ? '🔔 The doorbell rings' : `“${a.say}”`}
+              </li>
+            ))}
+          </ol>
+          {nextAction ? (
+            <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy}>
+              {tourBusy ? 'Alexa is answering…' : 'ring' in nextAction ? '🔔  Ring the doorbell' : `▶  Say “${nextAction.say}”`}
+            </button>
+          ) : (
+            <button className="tour-go next" onClick={() => setTour([tourStep < GUIDE.length - 1 ? tourStep + 1 : 0, 0])}>
+              {tourStep < GUIDE.length - 1 ? `Next: ${GUIDE[tourStep + 1].title}  →` : 'Start over'}
+            </button>
+          )}
+        </section>
+
         <div className="talk">
-          <button className={`mic ${light === 'listening' ? 'on' : ''}`} onClick={() => void onMic()} disabled={!canListen || !conn} title={canListen ? 'Speak' : 'Speech recognition needs Chrome or Edge'}>
-            {light === 'listening' ? 'Listening… tap to stop' : '🎤  Talk to Alexa'}
-          </button>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -656,51 +698,18 @@ export function App() {
               setDraft('');
             }}
           >
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="…or type what you’d say" disabled={!conn} aria-label="What you would say" />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Or type anything Priya would say…" disabled={!conn} aria-label="What you would say" />
           </form>
-          <div className="toggles">
-            <label className="check">
-              <input
-                type="checkbox"
-                checked={voiceOn}
-                onChange={(e) => {
-                  setVoiceOn(e.target.checked);
-                  try {
-                    localStorage.setItem('wyo.voice', e.target.checked ? 'on' : 'off');
-                  } catch {
-                    /* storage unavailable: setting just won't persist */
-                  }
-                  if (!e.target.checked) stopSpeaking();
-                }}
-              />{' '}
-              Speak replies
-            </label>
-            <label className="check">
-              Brain{' '}
-              <select
-                value={brainKind}
-                onChange={(e) => {
-                  const v = e.target.value === 'rules' ? 'rules' : 'gemini';
-                  setBrainKind(v);
-                  try {
-                    localStorage.setItem('wyo.brain', v);
-                  } catch {
-                    /* not persisted */
-                  }
-                }}
-              >
-                <option value="gemini">Gemini (free speech, any language)</option>
-                <option value="rules">Rules (no AI, demo phrases)</option>
-              </select>
-            </label>
-          </div>
+          <button className={`mic ${light === 'listening' ? 'on' : ''}`} onClick={() => void onMic()} disabled={!canListen || !conn} title={canListen ? 'Speak' : 'Speech recognition needs Chrome or Edge'} aria-label="Talk to Alexa">
+            {light === 'listening' ? '■' : '🎤'}
+          </button>
         </div>
 
         <a className="parent-link" href={parentUrl} target="_blank" rel="noreferrer">
           <span>📱</span>
           <span>
             <b>Open the parent’s phone</b>
-            <small>Answer questions, get alerts, see photos</small>
+            <small>Answer questions, get alerts</small>
           </span>
         </a>
 
@@ -711,69 +720,12 @@ export function App() {
               <div key={t.id} className={`task ${t.done ? 'done' : ''}`}>
                 <strong>“{t.question}”</strong>
                 <ul>
-                  {t.statuses.map((s, i) => (
-                    <li key={i}>{s}</li>
+                  {t.statuses.map((st, i) => (
+                    <li key={i}>{st}</li>
                   ))}
                 </ul>
               </div>
             ))}
-          </section>
-        )}
-
-        <section>
-          <h2>Guided demo</h2>
-          <ol className="guide">
-            {GUIDE.map((g) => (
-              <li key={g.title}>
-                <div className="guide-head">
-                  <b>{g.title}</b>
-                  {g.clock && demoTime && (
-                    <button className="clock-chip" onClick={() => void setClock(g.clock![1], g.clock![0])} title="Move the house clock">
-                      🕒 {g.clock[0]} {g.clock[1]}
-                    </button>
-                  )}
-                </div>
-                <div className="chips">
-                  {g.lines.map((s) => (
-                    <button key={s} className="chip" onClick={() => void handle(s)} disabled={!conn}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-                {g.ring && demoTime && (
-                  <div className="chips ring-chips">
-                    {RINGERS.map(([who, label]) => (
-                      <button key={who} className="chip ring" onClick={() => void ringDoorbell(who)} title="Simulate the Ring doorbell">
-                        🔔 {label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {g.note && <p className="muted small">{g.note}</p>}
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {demoTime && (
-          <section>
-            <h2>House clock</h2>
-            <form
-              className="row"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void setClock(demoInput, demoDay);
-              }}
-            >
-              <select value={demoDay} onChange={(e) => setDemoDay(e.target.value)} aria-label="Demo day">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                  <option key={d}>{d}</option>
-                ))}
-              </select>
-              <input type="time" value={demoInput} onChange={(e) => setDemoInput(e.target.value)} aria-label="Demo time" />
-              <button type="submit">Set</button>
-            </form>
-            <p className="muted small">Now: {demoTime}. Reminders fire as the plan’s steps come due.</p>
           </section>
         )}
 
@@ -793,18 +745,72 @@ export function App() {
         </details>
 
         <details>
-          <summary>Connection</summary>
-          <div className="row">
-            <input value={url} onChange={(e) => setUrl(e.target.value)} aria-label="MCP server URL" />
-            <button onClick={() => void connect(url)}>Connect</button>
+          <summary>Settings</summary>
+          <div className="settings">
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={voiceOn}
+                onChange={(e) => {
+                  setVoiceOn(e.target.checked);
+                  try {
+                    localStorage.setItem('wyo.voice', e.target.checked ? 'on' : 'off');
+                  } catch {
+                    /* storage unavailable: setting just won't persist */
+                  }
+                  if (!e.target.checked) stopSpeaking();
+                }}
+              />{' '}
+              Speak replies out loud
+            </label>
+            <label className="check">
+              Understanding{' '}
+              <select
+                value={brainKind}
+                onChange={(e) => {
+                  const v = e.target.value === 'gemini' ? 'gemini' : 'rules';
+                  setBrainKind(v);
+                  try {
+                    localStorage.setItem('wyo.brain2', v);
+                  } catch {
+                    /* not persisted */
+                  }
+                }}
+              >
+                <option value="rules">Built-in rules (instant)</option>
+                <option value="gemini">Gemini AI (any language; slower, a few replies a day)</option>
+              </select>
+            </label>
+            {demoTime && (
+              <form
+                className="row"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void setClock(demoInput, demoDay);
+                }}
+              >
+                <span className="check">House clock</span>
+                <select value={demoDay} onChange={(e) => setDemoDay(e.target.value)} aria-label="Demo day">
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+                    <option key={d}>{d}</option>
+                  ))}
+                </select>
+                <input type="time" value={demoInput} onChange={(e) => setDemoInput(e.target.value)} aria-label="Demo time" />
+                <button type="submit">Set</button>
+              </form>
+            )}
+            <div className="row">
+              <input value={url} onChange={(e) => setUrl(e.target.value)} aria-label="MCP server URL" />
+              <button onClick={() => void connect(url)}>Connect</button>
+            </div>
+            <p className={`conn ${connState}`}>
+              {connState === 'connected' && conn
+                ? `Connected to ${conn.serverName} · ${conn.tools.length} tools · MCP ${conn.protocolVersion ?? 'unknown'}`
+                : connState === 'connecting'
+                  ? 'Connecting…'
+                  : `Not connected: ${connError}`}
+            </p>
           </div>
-          <p className={`conn ${connState}`}>
-            {connState === 'connected' && conn
-              ? `Connected to ${conn.serverName} · ${conn.tools.length} tools · MCP ${conn.protocolVersion ?? 'unknown'}`
-              : connState === 'connecting'
-                ? 'Connecting…'
-                : `Not connected: ${connError}`}
-          </p>
         </details>
       </aside>
     </div>

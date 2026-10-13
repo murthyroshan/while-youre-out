@@ -41,19 +41,27 @@ export interface ChatRequest {
   functions: unknown[];
 }
 
+// Models whose free-tier quota is used up (Google says when it resets): skipped until then, so a
+// spent key fails in milliseconds instead of making the device wait.
+const exhaustedUntil = new Map<string, number>();
+const CHAT_TIMEOUT_MS = 8_000;
+
+/** For tests. */
+export function resetChatQuota() {
+  exhaustedUntil.clear();
+}
+
 /**
  * One turn of function-calling chat, used by the simulator's "Alexa" brain through the server so
  * the API key never reaches a browser. Tries one model at a time (racing would spend quota 3x).
  */
-export async function geminiChat(req: ChatRequest): Promise<{ parts: unknown[]; model: string }> {
+export async function geminiChat(req: ChatRequest, fetchImpl: typeof fetch = fetch): Promise<{ parts: unknown[]; model: string }> {
   const key = process.env.GEMINI_API_KEY?.trim();
   if (!key) throw new AiUnavailableError('GEMINI_API_KEY is not set. Add it to server/.env.');
-  const models = process.env.WYO_GEMINI_CHAT_MODELS?.split(',').map((m) => m.trim()).filter(Boolean) ?? [
-    'gemini-flash-lite-latest',
-    'gemini-3.6-flash',
-    'gemini-flash-latest',
-    'gemini-3.5-flash',
-  ];
+  // gemini-flash-lite-latest is left out: it often hangs on large tool lists.
+  const all = process.env.WYO_GEMINI_CHAT_MODELS?.split(',').map((m) => m.trim()).filter(Boolean) ?? ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash'];
+  const models = all.filter((m) => (exhaustedUntil.get(m) ?? 0) <= Date.now());
+  if (!models.length) throw new AiUnavailableError('The Gemini key has used its free quota for now.');
   const body = JSON.stringify({
     systemInstruction: { parts: [{ text: req.system }] },
     contents: req.contents,
@@ -63,15 +71,21 @@ export async function geminiChat(req: ChatRequest): Promise<{ parts: unknown[]; 
   const errors: string[] = [];
   for (const model of models) {
     try {
-      const res = await fetch(`${API}/${model}:generateContent`, {
+      const res = await fetchImpl(`${API}/${model}:generateContent`, {
         method: 'POST',
         headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
         body,
-        signal: AbortSignal.timeout(20_000),
+        signal: AbortSignal.timeout(CHAT_TIMEOUT_MS),
       });
       const json = (await res.json().catch(() => ({}))) as any;
       if (!res.ok) {
         errors.push(`${model}: ${res.status} ${json?.error?.message?.slice(0, 100) ?? ''}`);
+        if (res.status === 429) {
+          // "retryDelay": "25532s" for a daily quota; a per-minute limit says a few seconds.
+          const delay = (json?.error?.details ?? []).find((d: any) => String(d?.['@type']).endsWith('RetryInfo'))?.retryDelay;
+          const seconds = Math.min(24 * 3600, Math.max(30, parseFloat(String(delay ?? '60')) || 60));
+          exhaustedUntil.set(model, Date.now() + seconds * 1000);
+        }
         if ((res.status === 400 && /api key/i.test(json?.error?.message ?? '')) || res.status === 403) break;
         continue;
       }

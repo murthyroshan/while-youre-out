@@ -41,15 +41,26 @@ function setup(script: Array<Array<Record<string, unknown>> | 'fail'>, toolRepli
 
 const fc = (name: string, args: Record<string, unknown> = {}, id?: string) => ({ functionCall: { name, args, ...(id ? { id } : {}) } });
 
-test('routes a question to ask_house and speaks the server\'s own words, not the model\'s', async () => {
-  const s = setup([[fc('ask_house', { question: 'Can Maya have the cookies?' }, 'c1')], [{ text: 'Sure, cookies are great!' }]]);
+test('routes a question to ask_house and speaks the server\'s own words, in one model call', async () => {
+  const s = setup([[fc('ask_house', { question: 'Can Maya have the cookies?' }, 'c1')], [{ text: 'Thanks!' }]]);
   await s.brain.handle('Can Maya have the cookies?', s.io);
   assert.deepEqual(s.calls, [{ name: 'ask_house', args: { question: 'Can Maya have the cookies?' } }]);
-  assert.deepEqual(s.said, ['ask_house says hi'], 'the model\'s paraphrase is never spoken over a tool answer');
-  // The function response went back to the model with the same id.
-  const last = s.requests[1].contents.at(-1);
-  assert.equal(last.parts[0].functionResponse.name, 'ask_house');
-  assert.equal(last.parts[0].functionResponse.id, 'c1');
+  assert.deepEqual(s.said, ['ask_house says hi']);
+  assert.equal(s.requests.length, 1, 'once a tool has answered, the model is not asked again');
+  // Next turn, the model sees the function response (same id) and what the device said.
+  await s.brain.handle('thanks', s.io);
+  const contents = s.requests[1].contents;
+  const response = contents.find((c: any) => c.parts[0]?.functionResponse);
+  assert.equal(response.parts[0].functionResponse.name, 'ask_house');
+  assert.equal(response.parts[0].functionResponse.id, 'c1');
+  assert.deepEqual(contents.at(-2), { role: 'model', parts: [{ text: 'ask_house says hi' }] });
+});
+
+test('setting the language is not an answer: the model goes on to answer the question', async () => {
+  const s = setup([[fc('set_carer_language', { language: 'hi-IN' })], [fc('ask_house', { question: 'cookies?' })]]);
+  await s.brain.handle('क्या माया कुकीज़ खा सकती है?', s.io);
+  assert.deepEqual(s.calls.map((c) => c.name), ['set_carer_language', 'ask_house']);
+  assert.equal(s.requests.length, 2);
 });
 
 test('the model gets the tools (without $schema and without the non-task ask_parent) and the server instructions', async () => {
@@ -64,8 +75,8 @@ test('the model gets the tools (without $schema and without the non-task ask_par
   assert.deepEqual(s.said, ['Hello!'], 'small talk uses the model\'s reply');
 });
 
-test('a multi-step turn: start the handoff, then the teach-back', async () => {
-  const s = setup([[fc('start_handoff', { carer_name: 'Dadi', language: 'hi-IN' })], [fc('teachback', {})], [{ text: '' }]], {
+test('a handoff goes straight into the teach-back without asking the model again', async () => {
+  const s = setup([[fc('start_handoff', { carer_name: 'Dadi', language: 'hi-IN' })]], {
     teachback: { content: [{ type: 'text', text: 'Maya ko kis cheez se allergy hai?' }] },
   });
   await s.brain.handle('Dadi is babysitting tonight, she speaks Hindi', s.io);
@@ -75,6 +86,7 @@ test('a multi-step turn: start the handoff, then the teach-back', async () => {
   );
   assert.equal(s.said.length, 1);
   assert.match(s.said[0], /start_handoff says hi Maya ko kis cheez/);
+  assert.equal(s.requests.length, 1);
 });
 
 test('asking a parent runs as a background task', async () => {
@@ -123,10 +135,10 @@ test('when the model is unavailable, the rule brain answers that turn', async ()
 });
 
 test('a runaway model is stopped after a few rounds', async () => {
-  const loop = Array.from({ length: 10 }, () => [fc('ask_house', { question: 'again' })]);
+  const loop = Array.from({ length: 10 }, () => [fc('set_carer_language', { language: 'hi-IN' })]);
   const s = setup(loop);
   await s.brain.handle('loop please', s.io);
-  assert.ok(s.requests.length <= 5);
+  assert.ok(s.requests.length <= 3);
 });
 
 test('send_photo: the model never sees or sends the image; the device camera attaches it', async () => {
@@ -154,6 +166,7 @@ test('send_photo: the model never sees or sends the image; the device camera att
   const decl = requests[0].functions.find((f: any) => f.name === 'send_photo');
   assert.deepEqual(Object.keys(decl.parametersJsonSchema.properties), ['caption']);
   assert.deepEqual(calls, [{ name: 'send_photo', args: { caption: 'Good night from Maya', image_base64: 'CAMERA', mime_type: 'image/jpeg' } }]);
+  await brain.handle('thanks', io);
   assert.ok(!JSON.stringify(requests[1]).includes('CAMERA'), 'the photo is never sent to the model');
   assert.equal(said[0], 'Okay, smile! Sent. Anita will see it.');
 });
