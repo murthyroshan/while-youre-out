@@ -6,7 +6,7 @@ The Echo Show in the kitchen becomes the sitter's guide for the evening, in the 
 
 Built for the Build, Ship, Shape: Amazon Developer Hackathon (Alexa+ track).
 
-**Live demo:** [while-youre-out.onrender.com](https://while-youre-out.onrender.com) (the Echo Show simulator; follow the **Guided demo** panel) · **MCP endpoint:** `https://while-youre-out.onrender.com/mcp` (Streamable HTTP, MCP 2025-11-25). It's on a free host: if nobody has visited for a while, the first load can take up to a minute.
+**Live demo:** [while-youre-out-wpj3.onrender.com](https://while-youre-out-wpj3.onrender.com) (the Echo Show simulator; follow the **Guided demo** panel) · **MCP endpoint:** `https://while-youre-out-wpj3.onrender.com/mcp` (Streamable HTTP, MCP 2025-11-25). It's on a free host: if nobody has visited for a while, the first load can take up to a minute.
 
 ## An evening with While You're Out
 
