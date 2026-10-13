@@ -240,6 +240,20 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TEXT NOT NULL,
   played_at TEXT
 );
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER NOT NULL,
+  carer TEXT NOT NULL,
+  minutes INTEGER NOT NULL,
+  rate_cents INTEGER NOT NULL,
+  amount_cents INTEGER NOT NULL,
+  tip_cents INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL,          -- pending | paid | declined
+  token TEXT NOT NULL,           -- the approval page's address (sent by URL elicitation)
+  elicitation_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  paid_at TEXT
+);
 CREATE TABLE IF NOT EXISTS log_events (
   id INTEGER PRIMARY KEY,
   handoff_id INTEGER NOT NULL,
@@ -269,6 +283,7 @@ export function openDb(path = process.env.WYO_DB ?? ':memory:'): DB {
   addColumn('handoffs', 'teachback', 'TEXT');
   addColumn('questions', 'text_english', 'TEXT');
   addColumn('questions', 'door_event_id', 'INTEGER');
+  addColumn('handoffs', 'rate_cents', 'INTEGER');
   return db;
 }
 

@@ -205,14 +205,14 @@ export class HandoffInProgressError extends Error {
   }
 }
 
-export function startHandoff(db: DB, carerName: string, language = 'en', opts: { replace?: boolean } = {}): Handoff {
+export function startHandoff(db: DB, carerName: string, language = 'en', opts: { replace?: boolean; rateCents?: number | null } = {}): Handoff {
   const current = activeHandoff(db);
   // Never silently replace a handoff: that would close its questions and "just tonight" rules.
   if (current && !opts.replace) throw new HandoffInProgressError(current);
   if (current) endHandoff(db);
   const info = db
-    .prepare("INSERT INTO handoffs (carer_name, language, started_at, status) VALUES (?, ?, ?, 'active')")
-    .run(carerName, language, nowIso());
+    .prepare("INSERT INTO handoffs (carer_name, language, started_at, status, rate_cents) VALUES (?, ?, ?, 'active', ?)")
+    .run(carerName, language, nowIso(), opts.rateCents ?? null);
   const h = db.prepare('SELECT * FROM handoffs WHERE id = ?').get(info.lastInsertRowid) as unknown as Handoff;
   events.emit('handoff', h);
   return h;

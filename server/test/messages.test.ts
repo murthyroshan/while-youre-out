@@ -21,7 +21,7 @@ const sender: PushSender = async (_s, payload) => (sent.push(JSON.parse(payload)
 const call = async (name: string, args: Record<string, unknown> = {}) => (await client.callTool({ name, arguments: args })) as any;
 const state = async () => (await fetch(`${base}/parent/api/state?k=${KEY}`)).json();
 const upload = (body: Buffer, type: string, query: string, k = KEY) =>
-  fetch(`${base}/parent/api/messages?k=${k}&${query}`, { method: 'POST', headers: { 'content-type': type }, body });
+  fetch(`${base}/parent/api/messages?k=${k}&${query}`, { method: 'POST', headers: { 'content-type': type }, body: new Uint8Array(body) });
 
 before(async () => {
   const created = createApp({ parentKey: KEY, pushSender: sender, ai: { available: false } as any });

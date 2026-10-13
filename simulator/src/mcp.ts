@@ -1,6 +1,14 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { ElicitationCompleteNotificationSchema, ElicitRequestSchema, type ElicitRequest, type ElicitResult, type Tool } from '@modelcontextprotocol/sdk/types.js';
+
+/** What the device does when the add-on asks the person in front of it for something (MCP elicitation). */
+export interface ElicitationHandlers {
+  /** A form to fill in, or a link to open on another device (e.g. to approve a payment). */
+  elicit?: (params: ElicitRequest['params']) => Promise<ElicitResult>;
+  /** The server says an out-of-band step (the payment page) has finished. */
+  complete?: (elicitationId: string) => void;
+}
 
 export interface ToolResult {
   content: Array<{ type: string; text?: string }>;
@@ -13,8 +21,11 @@ export interface TaskUpdate {
   result?: ToolResult;
 }
 
-async function open(url: string) {
-  const client = new Client({ name: 'echo-show-simulator', version: '0.1.0' });
+async function open(url: string, handlers: ElicitationHandlers = {}) {
+  // Like Alexa+, the device can ask the person in front of it: forms on screen, and links to open on a phone.
+  const client = new Client({ name: 'echo-show-simulator', version: '0.2.0' }, { capabilities: { elicitation: { form: {}, url: {} } } });
+  client.setRequestHandler(ElicitRequestSchema, async (req) => (handlers.elicit ? handlers.elicit(req.params) : { action: 'decline' }));
+  client.setNotificationHandler(ElicitationCompleteNotificationSchema, (n) => handlers.complete?.(n.params.elicitationId));
   const transport = new StreamableHTTPClientTransport(new URL(url));
   await client.connect(transport);
   const { tools } = await client.listTools();
@@ -30,16 +41,17 @@ export class McpConnection {
 
   private constructor(
     private url: string,
+    private handlers: ElicitationHandlers,
     private client: Client,
     public tools: Tool[],
     public serverName: string,
     public protocolVersion: string | undefined,
   ) {}
 
-  static async connect(url: string) {
-    const { client, transport, tools } = await open(url);
+  static async connect(url: string, handlers: ElicitationHandlers = {}) {
+    const { client, transport, tools } = await open(url, handlers);
     const info = client.getServerVersion();
-    return new McpConnection(url, client, tools, info?.title ?? info?.name ?? 'MCP server', transport.protocolVersion);
+    return new McpConnection(url, handlers, client, tools, info?.title ?? info?.name ?? 'MCP server', transport.protocolVersion);
   }
 
   private reconnecting: Promise<void> | null = null;
@@ -49,7 +61,7 @@ export class McpConnection {
     this.reconnecting ??= (async () => {
       try {
         void this.client.close().catch(() => {});
-        const { client, tools } = await open(this.url);
+        const { client, tools } = await open(this.url, this.handlers);
         this.client = client;
         this.tools = tools;
         this.uiCache.clear();

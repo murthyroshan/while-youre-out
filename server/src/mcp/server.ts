@@ -34,6 +34,7 @@ import { PhotoError, savePhoto } from '../domain/photos.js';
 import { homeScreen, homeSentence } from '../domain/home.js';
 import { doorCheck, getDoorEvent } from '../domain/door.js';
 import { markPlayed, pickMessage, type MessageInfo } from '../domain/messages.js';
+import { createPayment, dollars, duration, getPayment, payableHandoff, PaymentError, type Payment } from '../domain/payments.js';
 import { activeIncident, incidentView, latestIncident, stepIncident, takeIncidentAnnouncements } from '../domain/incident.js';
 import { importNote, ImportError } from '../domain/houseBrain.js';
 import { applyLogToPlan, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
@@ -44,6 +45,7 @@ import { fixedTranslation, languageCode, LANGUAGES, translateOne } from '../doma
 import type { Handoff } from '../db.js';
 import { formatTime, localTime } from '../clock.js';
 import { AiUnavailableError, type AiClient } from '../ai/gemini.js';
+import QRCode from 'qrcode';
 import { cardHtml, CARD_MIME, CARD_URI } from './card.js';
 
 export interface ServerDeps {
@@ -147,16 +149,29 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       description:
         'Call when a parent hands the home over to a carer ("Priya is babysitting tonight"). Switches the device into carer mode and returns tonight\'s briefing to read aloud.',
       inputSchema: {
-        carer_name: z.string().trim().min(1).max(60).describe('Name of the person taking over'),
+        carer_name: z.string().trim().min(1).max(60).optional().describe("Name of the person taking over. Leave out if the parent didn't say; the device will ask."),
         language: z.string().max(20).default('en').describe('Language the carer prefers, as a BCP-47 code such as en, hi, es'),
+        hourly_rate: z.number().min(0).max(500).optional().describe("The sitter's hourly rate in dollars, if the parent said it"),
         replace: z.boolean().default(false).describe('Set only after the parent confirms ending the handoff already in progress'),
       },
       _meta: ui,
     },
-    async ({ carer_name, language, replace }) => {
+    async ({ carer_name: named, language: lang, hourly_rate, replace }) => {
+      let carer_name = named;
+      let language = lang;
+      let rate = hourly_rate;
+      // "We're heading out" without a name: ask on the screen (MCP form elicitation).
+      if (!carer_name) {
+        const asked = await askWhoIsSitting();
+        if (!asked) return { content: [{ type: 'text', text: "Who's looking after the kids tonight? Say, for example, 'Priya is babysitting tonight'." }], isError: true };
+        if (asked === 'declined') return plain('handoff_cancelled', {}, "Okay, I won't start sitter mode.");
+        carer_name = asked.carer_name;
+        language = asked.language ?? language;
+        rate = asked.hourly_rate ?? rate;
+      }
       let h;
       try {
-        h = startHandoff(db, carer_name, language, { replace });
+        h = startHandoff(db, carer_name, language, { replace, rateCents: rate === undefined ? null : Math.round(rate * 100) });
       } catch (e) {
         if (e instanceof HandoffInProgressError) {
           return {
@@ -185,6 +200,116 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
         .filter(Boolean)
         .join(' ');
       return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since }, text);
+    },
+  );
+
+  /** Asks the parent on the screen who is babysitting (form elicitation); null if the host can't ask. */
+  const askWhoIsSitting = async (): Promise<{ carer_name: string; language?: string; hourly_rate?: number } | 'declined' | null> => {
+    if (!server.server.getClientCapabilities()?.elicitation) return null;
+    try {
+      const r = await server.server.elicitInput({
+        mode: 'form',
+        message: "Who's looking after the kids tonight?",
+        requestedSchema: {
+          type: 'object',
+          properties: {
+            carer_name: { type: 'string', title: 'Name', description: 'Who is babysitting', minLength: 1, maxLength: 60 },
+            language: {
+              type: 'string',
+              title: 'Language they speak',
+              oneOf: Object.entries({ en: 'English', 'hi-IN': 'Hindi', 'es-US': 'Spanish', 'ta-IN': 'Tamil', 'te-IN': 'Telugu', 'bn-IN': 'Bengali' }).map(([c, t]) => ({ const: c, title: t })),
+              default: 'en',
+            },
+            hourly_rate: { type: 'number', title: 'Hourly rate ($)', description: 'So you can pay them in one tap later', minimum: 0, maximum: 500 },
+          },
+          required: ['carer_name'],
+        },
+      });
+      const c = r.content as Record<string, unknown> | undefined;
+      if (r.action !== 'accept' || typeof c?.carer_name !== 'string' || !c.carer_name.trim()) return 'declined';
+      return {
+        carer_name: c.carer_name.trim().slice(0, 60),
+        language: typeof c.language === 'string' ? c.language : undefined,
+        hourly_rate: typeof c.hourly_rate === 'number' && c.hourly_rate >= 0 ? c.hourly_rate : undefined,
+      };
+    } catch {
+      return null;
+    }
+  };
+
+  // ---------- paying the sitter (URL-mode elicitation) ----------
+  const paymentData = async (p: Payment) => ({
+    id: p.id,
+    carer: p.carer,
+    status: p.status,
+    hours: duration(p.minutes),
+    rate: dollars(p.rate_cents),
+    amount: dollars(p.amount_cents),
+    tip: p.tip_cents ? dollars(p.tip_cents) : null,
+    total: dollars(p.amount_cents + p.tip_cents),
+    url: abs(`/pay/${p.token}`)!,
+    // Scan with the phone: the payment happens there, never on the shared screen.
+    qr_svg: p.status === 'pending' ? await QRCode.toString(abs(`/pay/${p.token}`)!, { type: 'svg', margin: 1, color: { dark: '#1d2433', light: '#ffffff' } }) : null,
+  });
+
+  server.registerTool(
+    'pay_sitter',
+    {
+      title: 'Pay the sitter',
+      description:
+        "When the parents are back and say 'pay Priya': works out the evening (hours times the rate the parent gave, rounded up to the quarter hour) and asks the parent to approve it on their phone through a link (the payment is never made on the shared screen). Tell them to check their phone.",
+      inputSchema: {},
+      _meta: ui,
+    },
+    async () => {
+      const h = payableHandoff(db);
+      if (!h) return { content: [{ type: 'text', text: "There's no evening to pay for yet." }], isError: true };
+      let p: Payment;
+      try {
+        p = createPayment(db, h);
+      } catch (e) {
+        if (e instanceof PaymentError) return { content: [{ type: 'text', text: e.message }], isError: true };
+        throw e;
+      }
+      const data = await paymentData(p);
+      const message = `Approve paying ${p.carer} ${data.amount} for tonight (${data.hours} at ${data.rate} an hour) on your phone.`;
+      // The device hears when it's done: notifications/elicitation/complete.
+      const done = server.server.createElicitationCompletionNotifier(p.elicitation_id);
+      const onPaid = (paid: Payment) => {
+        if (paid.id !== p.id) return;
+        events.off('payment_paid', onPaid);
+        void done().catch(() => {});
+      };
+      events.on('payment_paid', onPaid);
+      if (server.server.getClientCapabilities()?.elicitation?.url) {
+        try {
+          const r = await server.server.elicitInput({ mode: 'url', message, url: data.url, elicitationId: p.elicitation_id });
+          if (r.action !== 'accept') {
+            events.off('payment_paid', onPaid);
+            return plain('pay', { ...data, status: 'not_opened' }, 'Okay. You can pay later from the parent page.');
+          }
+        } catch {
+          // the link is still on the screen and on the parent page
+        }
+      }
+      return plain('pay', data, `${p.carer}'s evening comes to ${data.amount}: ${data.hours} at ${data.rate} an hour. I've sent it to your phone to approve.`);
+    },
+  );
+
+  server.registerTool(
+    'payment_status',
+    {
+      title: 'Payment status',
+      description: 'Whether the sitter has been paid. The payment card refreshes itself with this.',
+      inputSchema: { id: z.number().int().positive() },
+      annotations: { readOnlyHint: true },
+      _meta: { ui: { resourceUri: CARD_URI, visibility: ['model', 'app'] }, 'ui/resourceUri': CARD_URI },
+    },
+    async ({ id }) => {
+      const p = getPayment(db, id);
+      if (!p) return { content: [{ type: 'text', text: 'No such payment.' }], isError: true };
+      const data = await paymentData(p);
+      return plain('pay', data, p.status === 'paid' ? `Done. ${p.carer} has been paid ${data.total}.` : p.status === 'declined' ? 'The payment was cancelled.' : 'Waiting for you to approve it on your phone.');
     },
   );
 

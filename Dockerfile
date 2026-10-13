@@ -1,5 +1,5 @@
 # While You're Out: the MCP server, the parent page and the Echo Show simulator in one container.
-# Built for Hugging Face Spaces (Docker, port 7860) but runs anywhere.
+# Runs on any Docker host (the live demo is on Render, which sets PORT itself).
 FROM node:24-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -17,7 +17,7 @@ ENV HOST=0.0.0.0 \
     WYO_DEMO=1 \
     WYO_ESCALATE_MS=30000
 COPY --from=build /app /app
-# The "node" user is uid 1000, which Hugging Face Spaces expects.
+# Run as the unprivileged "node" user.
 USER node
 EXPOSE 7860
 HEALTHCHECK --interval=60s --timeout=5s CMD node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

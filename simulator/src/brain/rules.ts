@@ -138,6 +138,14 @@ export class RuleBrain implements Brain {
       return this.startHandoff(cap(handoff[1]), io, false, lang ? LANGS[lang] : undefined);
     }
 
+    // "We're heading out": the add-on asks who's babysitting.
+    if (/^(ok(ay)?,? )?(we'?re|we are|i'?m|i am) (heading|going|leaving|off)( out| now)?( for the (night|evening))?[.!]*$/i.test(u)) return this.startHandoff(undefined, io, false);
+
+    if (/^(please )?pay (the )?(sitter|babysitter|nanny|[a-z][\w'-]*)( now| please)?[.!]*$/i.test(u) && !/^pay (attention|for)\b/i.test(u)) {
+      const r = await io.tool('pay_sitter');
+      return io.say(textOf(r));
+    }
+
     if (/^(please )?end (the )?handoff\b/i.test(u)) return this.endHandoff(io);
     if (/\b(we'?re|we are|the parents are|parents are) (back|home)\b|\b(mom|dad|mum)(?:'?s| is) (back|home)\b/i.test(u) && !u.endsWith('?')) {
       // The carer and child say "we're back" too, so confirm before ending.
@@ -216,13 +224,19 @@ export class RuleBrain implements Brain {
     }
   }
 
-  private async startHandoff(name: string, io: DeviceIO, replace: boolean, language?: string) {
-    const r = await io.tool('start_handoff', language ? { carer_name: name, replace, language } : { carer_name: name, replace });
+  /** With no name, the add-on asks on screen who is babysitting (a form). */
+  private async startHandoff(name: string | undefined, io: DeviceIO, replace: boolean, language?: string) {
+    const args: Record<string, unknown> = { replace };
+    if (name) args.carer_name = name;
+    if (language) args.language = language;
+    const r = await io.tool('start_handoff', args);
     if (r.isError) {
-      if (r.structuredContent?.view === 'handoff_conflict') this.pending = { kind: 'replace', name };
+      const s = r.structuredContent ?? {};
+      if (s.view === 'handoff_conflict') this.pending = { kind: 'replace', name: String(name ?? s.requested ?? '') };
       return io.say(textOf(r) || "Sorry, I couldn't start the handoff.");
     }
-    this.carer = name;
+    if (r.structuredContent?.view === 'handoff_cancelled') return io.say(textOf(r)); // the parent cancelled the form
+    this.carer = String(r.structuredContent?.carer ?? name ?? '');
     const first = r.structuredContent?.first_contact as string | undefined;
     if (first) this.firstContact = first.replace(/\s*\(.*\)/, '');
     io.say(textOf(r));

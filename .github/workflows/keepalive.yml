@@ -1,9 +1,10 @@
-# Free hosts put idle apps to sleep. Judging runs until Nov 20, so ping the demo every 6 hours.
-# Set the repository variable DEMO_URL (e.g. https://you-while-youre-out.hf.space).
+# Free hosts put idle apps to sleep (Render: after 15 minutes). Judging runs until Nov 20.
+# UptimeRobot is the main 5-minute ping; this is a backup. GitHub may run schedules late.
+# Set the repository variable DEMO_URL (e.g. https://while-youre-out.onrender.com).
 name: Keep the demo awake
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '*/10 * * * *'
   workflow_dispatch:
 jobs:
   ping:

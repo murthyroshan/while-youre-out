@@ -14,6 +14,8 @@ import { createPush, isValidSubscription, type PushSender } from './domain/push.
 import { getPhotoData, recentPhotos } from './domain/photos.js';
 import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './domain/family.js';
 import { homeScreen } from './domain/home.js';
+import { approvePayment, createPayment, declinePayment, payableHandoff, PaymentError, paymentByToken } from './domain/payments.js';
+import { payPage } from './parent/pay.js';
 import { listMessages, MAX_MESSAGE_BYTES, MessageError, messageMedia, removeMessage, saveMessage } from './domain/messages.js';
 import { activeIncident, incidentView, latestIncident, markOnTheWay } from './domain/incident.js';
 import { addVisitor, getDoorEvent, recordDoorEvent, removeVisitor, VisitorError, visitors } from './domain/door.js';
@@ -223,6 +225,11 @@ export function createApp(opts: AppOptions = {}) {
       timezone: householdTz(db),
       ...settingsView(),
       debrief: activeHandoff(db) ? null : latestDebrief(db),
+      payment: (() => {
+        // The latest evening's payment, for the debrief card: pay, or paid ✓.
+        const p = db.prepare('SELECT carer, amount_cents, tip_cents, status, token FROM payments ORDER BY id DESC LIMIT 1').get() as { carer: string; amount_cents: number; tip_cents: number; status: string; token: string } | undefined;
+        return p ? { carer: p.carer, total_cents: p.amount_cents + p.tip_cents, status: p.status, url: `/pay/${p.token}` } : null;
+      })(),
       shopping: shopping(),
       teachback: (() => {
         const s = teachbackState(db);
@@ -302,6 +309,44 @@ export function createApp(opts: AppOptions = {}) {
       res.json({ visitors: visitors(db) });
     } catch (e) {
       if (e instanceof VisitorError) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
+  });
+
+  // ---------- Paying the sitter: the page the Echo Show's URL elicitation sends the parent to ----------
+  // The unguessable token in the address is the permission (a capability URL), like a payment link.
+  app.get('/pay/:token', (req, res) => {
+    const p = paymentByToken(db, req.params.token);
+    if (!p) return void res.status(404).type('text').send('This payment link has expired.');
+    res.setHeader('Cache-Control', 'no-store');
+    res.type('html').send(payPage(p));
+  });
+  // From the morning debrief: "Pay Priya" without asking Alexa.
+  app.post('/parent/api/pay', (req, res) => {
+    if (!authorised(req.body?.k)) return void res.sendStatus(401);
+    const h = payableHandoff(db);
+    if (!h) return void res.status(409).json({ error: "There's no evening to pay for yet." });
+    try {
+      const p = createPayment(db, h);
+      res.json({ url: `/pay/${p.token}` });
+    } catch (e) {
+      if (e instanceof PaymentError) return void res.status(409).json({ error: e.message });
+      throw e;
+    }
+  });
+  app.post('/pay/:token', (req, res) => {
+    const p = paymentByToken(db, req.params.token);
+    if (!p) return void res.sendStatus(404);
+    const { action, tip } = req.body ?? {};
+    try {
+      if (action === 'pay') return void res.json(approvePayment(db, p, typeof tip === 'number' ? tip : 0));
+      if (action === 'decline') {
+        declinePayment(db, p);
+        return void res.json({ ok: true });
+      }
+      res.status(400).json({ error: 'action must be pay or decline' });
+    } catch (e) {
+      if (e instanceof PaymentError) return void res.status(409).json({ error: e.message });
       throw e;
     }
   });

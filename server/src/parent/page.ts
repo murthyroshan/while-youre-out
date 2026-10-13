@@ -298,7 +298,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     var incKey = s.incident ? JSON.stringify(Object.assign({}, s.incident, { elapsed_seconds: 0, timers: s.incident.timers.map(function (t) { return Object.assign({}, t, { remaining_seconds: 0 }); }) })) : '';
     if (incKey !== lastIncident) { lastIncident = incKey; incReceived = Date.now(); document.getElementById('emergency').innerHTML = s.incident ? incidentCard(s.incident) : ''; tickIncident(); }
     if (!s.incident) document.getElementById('emergency').innerHTML = s.emergency ? '<div class="card alert"><strong>Emergency reported · ' + esc(time(s.emergency.at)) + '</strong><p>' + esc(s.emergency.description) + '</p><p>Every contact has been alerted. Call ' + esc(s.handoff ? s.handoff.carer_name : 'the carer') + ' now.</p></div>' : '';
-    var dKey = JSON.stringify([s.debrief && s.debrief.handoff_id, s.debrief && s.debrief.rule_suggestions.length, s.shopping]);
+    var dKey = JSON.stringify([s.debrief && s.debrief.handoff_id, s.debrief && s.debrief.rule_suggestions.length, s.shopping, s.payment && s.payment.status]);
     if (dKey !== lastDebrief) { lastDebrief = dKey; renderDebrief(s); }
     var busyKey = String(s.busy_until);
     if (busyKey !== lastBusy) {
@@ -353,6 +353,10 @@ export const PARENT_HTML = /* html */ `<!doctype html>
           (added ? '<span class="muted">On your shopping list ✓</span>' : '<button data-shop="' + esc(item) + '">Add to shopping list</button>') + '</div>';
       }).join('');
     }
+    var pay = s.payment;
+    h += pay && pay.status === 'paid' && pay.carer === d.carer
+      ? '<p class="from">Paid</p><p>' + esc(d.carer) + ' was paid $' + (pay.total_cents / 100).toFixed(pay.total_cents % 100 ? 2 : 0) + ' ✓ <span class="muted">(demo payment)</span></p>'
+      : '<div class="pbtns"><button class="ok" data-pay="1">Pay ' + esc(d.carer) + '</button></div>';
     document.getElementById('debrief').innerHTML = h + '</div>';
   }
   document.addEventListener('click', async function (e) {
@@ -754,6 +758,17 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     await post('/parent/api/incident', { action: 'on_the_way', minutes: Number(b.dataset.otw), by: me }).catch(function () {});
     lastIncident = null;
     load();
+  });
+
+  // ---------- paying the sitter from the debrief ----------
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest && e.target.closest('button[data-pay]');
+    if (!b) return;
+    b.disabled = true;
+    var r = await post('/parent/api/pay', {}).catch(function () { return null; });
+    var out = r ? await r.json().catch(function () { return {}; }) : {};
+    if (r && r.ok && out.url) location.href = out.url;
+    else { b.disabled = false; b.textContent = out.error || 'Could not start the payment'; }
   });
 
   // ---------- goodnight message ----------

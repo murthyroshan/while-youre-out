@@ -326,3 +326,8 @@ p { margin: 0.3em 0; }
 .goodnight.playing .wave i:nth-child(2n) { animation-delay: 0.15s; }
 .goodnight.playing .wave i:nth-child(3n) { animation-delay: 0.3s; }
 @keyframes wave { 50% { height: 46%; opacity: 1; } }
+
+/* Paying the sitter */
+.split.pay { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; }
+.qr { background: #fff; border-radius: var(--radius); padding: 1em; display: grid; justify-items: center; gap: 0.4em; color: #1d2433; font-size: var(--fs-xs); font-weight: 600; }
+.qr svg { width: 100%; max-width: 30vh; height: auto; }

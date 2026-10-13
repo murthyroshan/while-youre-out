@@ -260,7 +260,8 @@
       return panel('<div class="eyebrow">' + icon('heart') + 'The evening</div><div class="title">Evening with ' + esc(d.carer) + '</div><div class="grid2">' +
         (d.insights && d.insights.length ? '<div class="tile"><h3>' + icon('sparkles') + 'Worth knowing</h3>' + list(d.insights) + '</div>' : '') +
         '<div class="tile"><h3>' + icon('clock') + 'Timeline</h3>' + (times.length ? timeline(times) : '<p class="sub">Nothing was logged.</p>') + '</div>' +
-        '<div class="tile"><h3>' + icon('message') + 'Questions</h3>' + (d.questions && d.questions.length ? list(d.questions) : '<p class="sub">No questions tonight.</p>') + '</div></div>');
+        '<div class="tile"><h3>' + icon('message') + 'Questions</h3>' + (d.questions && d.questions.length ? list(d.questions) : '<p class="sub">No questions tonight.</p>') + '</div></div>' +
+        '<div class="stepbtns" style="margin-top:1em"><button class="btn green" data-say="' + esc('Pay ' + d.carer) + '">' + icon('heart') + ' Pay ' + esc(d.carer) + '</button></div>');
     },
 
     photo: function (d) {
@@ -322,6 +323,21 @@
         (d.caption ? '<p class="gn-caption">“' + esc(d.caption) + '”</p>' : '') +
         '<div class="stepbtns"><button class="btn" id="replay">' + icon('heart') + ' Play again</button></div></div>' +
         '<div class="gn-media">' + media + '</div></div>';
+    },
+
+    pay: function (d) {
+      payData = d;
+      if (d.status === 'paid') {
+        return panel('<div class="confirm"><span class="tick">' + icon('check') + '</span><div><div class="eyebrow" style="margin:0">Demo payment · no money moved</div>' +
+          '<div class="title" style="margin:.1em 0 0">' + esc(d.carer) + ' has been paid ' + esc(d.total) + '</div><p class="sub">' + esc(d.hours) + ' at ' + esc(d.rate) + ' an hour' + (d.tip ? ' + ' + esc(d.tip) + ' tip' : '') + '. Thank you!</p></div></div>');
+      }
+      return panel('<div class="eyebrow">' + icon('heart') + 'Pay ' + esc(d.carer) + '</div><div class="split pay">' +
+        '<div><p class="q-big" style="margin:0">' + esc(d.amount) + '</p><p class="sub">' + esc(d.hours) + ' at ' + esc(d.rate) + ' an hour</p>' +
+        (d.status === 'declined' || d.status === 'not_opened'
+          ? '<p class="pill">Not paid. You can pay later from the parent page.</p>'
+          : '<div class="banner info" style="margin-top:1em">' + icon('phone') + '<div><strong>Approve it on your phone</strong><span>The payment happens there, never on this screen.</span></div></div>' +
+            '<div class="typing" style="margin-top:.8em"><i></i><i></i><i></i><span style="margin-left:.5em">Waiting for your approval</span></div>') +
+        '</div>' + (d.qr_svg && d.status === 'pending' ? '<div class="qr">' + d.qr_svg + '<span>Or scan with your phone</span></div>' : '') + '</div>');
     },
 
     home: function (d) { return home(d); },
@@ -408,6 +424,7 @@
 
   // ---------- the emergency guide: ticking clock, timers, refresh ----------
   var emergencyData = null;
+  var payData = null;
   var emergencyReceived = 0;
   var showSheet = false;
   var emergencyTimer = null;
@@ -509,6 +526,14 @@
     }
     stopHomeTimers();
     stopEmergencyTimers();
+    if (d && d.view === 'pay' && d.status === 'pending') {
+      // Turns into "Paid" by itself once the parent approves on their phone.
+      refreshTimer = setInterval(function () {
+        request('tools/call', { name: 'payment_status', arguments: { id: d.id } }).then(function (r) {
+          if (r && r.structuredContent && r.structuredContent.status !== 'pending') render(r);
+        }).catch(function () {});
+      }, 3000);
+    }
     if (d && d.view === 'home') startHomeTimers();
     else if (d && d.view === 'emergency' && d.incident && d.incident.status === 'active') startEmergencyTimers();
     // Emergencies and the home screen take the whole screen on hosts that support it.

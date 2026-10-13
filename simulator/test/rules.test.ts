@@ -347,3 +347,23 @@ test('"Maya misses her mom" plays the parents\' message; "play Mom\'s message" t
   const question = await run(['Does she miss her mom when she naps?']);
   assert.notEqual(question.calls[0].name, 'play_message');
 });
+
+// ---------- the add-on asking on screen, and paying the sitter ----------
+
+test('"We\'re heading out" starts sitter mode without a name: the add-on asks on screen', async () => {
+  const d = await run(["We're heading out"], { start_handoff: { structuredContent: { view: 'briefing', carer: 'Priya' } } });
+  assert.deepEqual(d.calls[0], { name: 'start_handoff', args: { replace: false } });
+  assert.equal(d.calls[1].name, 'teachback');
+});
+
+test('if the parent cancels the form, nothing else happens', async () => {
+  const d = await run(["We're going out"], { start_handoff: { content: [{ type: 'text', text: "Okay, I won't start sitter mode." }], structuredContent: { view: 'handoff_cancelled' } } });
+  assert.deepEqual(d.calls.map((c) => c.name), ['start_handoff']);
+  assert.deepEqual(d.said, ["Okay, I won't start sitter mode."]);
+});
+
+test('"Pay Priya" pays the sitter; "pay attention" does not', async () => {
+  assert.equal((await run(['Pay Priya'])).calls[0].name, 'pay_sitter');
+  assert.equal((await run(['Pay the babysitter'])).calls[0].name, 'pay_sitter');
+  assert.notEqual((await run(['Pay attention to the stove'])).calls[0]?.name, 'pay_sitter');
+});

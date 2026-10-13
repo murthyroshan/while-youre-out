@@ -210,8 +210,13 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
     void notify(parentNames(db), { title: `${m.for_name ?? 'The kids'} heard your goodnight message 💛`, body: `Played on the Echo Show${m.carer ? ` with ${m.carer}` : ''}.`, tag: 'goodnight' });
   };
 
+  const onPaid = (p: { carer: string; amount_cents: number; tip_cents: number }) => {
+    void notify(parentNames(db), { title: `Paid ${p.carer} $${((p.amount_cents + p.tip_cents) / 100).toFixed((p.amount_cents + p.tip_cents) % 100 ? 2 : 0)} ✓`, body: 'Demo payment: no money moved.', tag: 'payment' });
+  };
+
   const handlers: Array<[string, (...a: any[]) => void]> = [
     ['incident', onIncident],
+    ['payment_paid', onPaid],
     ['message_played', onMessagePlayed],
     ['question', onQuestion],
     ['question_escalated', onEscalated],

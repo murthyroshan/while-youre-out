@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { McpConnection, textOf, type ToolResult } from './mcp';
+import { McpConnection, textOf, type ElicitationHandlers, type ToolResult } from './mcp';
+import { Elicit } from './Elicit';
+import type { ElicitRequest, ElicitResult } from '@modelcontextprotocol/sdk/types.js';
 import { AppFrame } from './AppFrame';
 import { RuleBrain } from './brain/rules';
 import { GeminiBrain } from './brain/gemini';
@@ -81,15 +83,24 @@ interface Call {
 }
 
 // The demo, in the order a judge would try it (and the video tells it).
-const GUIDE: Array<{ title: string; lines: string[]; note?: string; clock?: [string, string]; ring?: boolean }> = [
-  { title: '1 · The parents hand over', clock: ['Sat', '18:00'], lines: ['Priya is babysitting tonight', 'Peanuts', 'In the kitchen drawer by the stove', 'Anita'], note: 'The Tonight screen appears, then a 3-question handover check.' },
+interface GuideStep {
+  title: string;
+  lines: string[];
+  note?: string;
+  /** Moves the house clock (demo mode) to [day, "HH:MM"]. */
+  clock?: [string, string];
+  /** Shows the Ring doorbell buttons. */
+  ring?: boolean;
+}
+const GUIDE: GuideStep[] = [
+  { title: '1 · The parents hand over', clock: ['Sat', '18:00'], lines: ['Priya is babysitting tonight', 'Peanuts', 'In the kitchen drawer by the stove', 'Anita'], note: 'Or say “We’re heading out” and fill in the form. The Tonight screen appears, then a 3-question handover check.' },
   { title: '2 · Questions, in the parents’ words', lines: ['Can Maya have the cookies on the counter?', "Where's the EpiPen?", 'Can she watch another episode?'], note: 'Food always gets a guard; Shadow Parent says how the parents usually answer.' },
   { title: '3 · The evening goes on', clock: ['Sat', '18:40'], lines: ['She napped till 5', "What's next?", 'Send Mom a photo saying good night'], note: 'Late nap moves bedtime by the parents’ own rule.' },
-  { title: '4 · Someone at the door', clock: ['Sat', '18:50'], ring: true, lines: ["Someone's knocking, should I open the door?"], note: 'Ring the bell first. Unknown visitor: don’t open, and the photo goes to the parents’ lock screen.' },
+  { title: '4 · Someone at the door', clock: ['Sat', '21:00'], ring: true, lines: ["Someone's knocking, should I open the door?"], note: 'Ring the bell first. Unknown visitor: don’t open, and the photo goes to the parents’ lock screen. (Between 6:30 and 7:30 Nani is expected, so it says “check first”.)' },
   { title: '5 · Ask a parent', lines: ['Can she sleep in your bed?', 'Yes'], note: 'Answer it on the parent page: the device announces the reply.' },
-  { title: '6 · Emergency', lines: ["Her lips are swelling and she can't breathe"], note: 'Fixed script, no AI. Every parent phone buzzes.' },
-  { title: '7 · Lights out', clock: ['Sat', '20:15'], lines: ['She fell asleep at 8:10'], note: 'The screen goes dim and warm.' },
-  { title: '8 · Morning', lines: ["We're back", 'Yes'], note: 'The debrief lands on the parent page.' },
+  { title: '6 · Emergency', lines: ["Her lips are swelling and she can't breathe", 'I gave the EpiPen', 'Done'], note: 'Fixed script, one step at a time, with the 5-minute timer. On the parent page tap “I’m on my way”.' },
+  { title: '7 · Lights out', clock: ['Sat', '20:30'], lines: ['Maya misses her mom', 'She fell asleep at 8:10'], note: 'Mom’s goodnight message plays; the screen goes dim and warm.' },
+  { title: '8 · Morning', clock: ['Sun', '07:30'], lines: ["We're back", 'Yes', 'Pay Priya'], note: 'The debrief, then pay the sitter: approve on the phone (it opens a tab).' },
   { title: 'Another language', lines: ['Dadi is babysitting tonight in Hindi', 'क्या माया कुकीज़ खा सकती है?'], note: 'Needs the Gemini brain for free speech.' },
 ];
 
@@ -159,6 +170,14 @@ export function App() {
     return () => clearInterval(t);
   }, []);
 
+  // The add-on asking the person in front of the screen (MCP elicitation): a form, or a link for their phone.
+  const [ask, setAsk] = useState<{ params: ElicitRequest['params']; resolve: (r: ElicitResult) => void } | null>(null);
+  const onElicitComplete = useRef<(id: string) => void>(() => {});
+  const elicitation = useRef<ElicitationHandlers>({
+    elicit: (params) => new Promise<ElicitResult>((resolve) => setAsk({ params, resolve })),
+    complete: (id) => onElicitComplete.current(id),
+  }).current;
+
   const connect = useCallback(async (target: string) => {
     // Only the latest connect attempt wins; older sessions are closed, not leaked.
     const seq = ++connectSeq.current;
@@ -168,7 +187,7 @@ export function App() {
     connRef.current = null;
     void previous?.close().catch(() => {});
     try {
-      const c = await McpConnection.connect(target);
+      const c = await McpConnection.connect(target, elicitation);
       if (seq !== connectSeq.current) return void c.close().catch(() => {});
       connRef.current = c;
       setConn(c);
@@ -409,6 +428,19 @@ export function App() {
     [showCard, refreshHome, armCardTimer],
   );
 
+  // The payment page on the phone finished (notifications/elicitation/complete): say so here.
+  useEffect(() => {
+    onElicitComplete.current = async () => {
+      const c = connRef.current;
+      if (!c) return;
+      const s = cardRef.current?.result.structuredContent;
+      if (s?.view !== 'pay' || typeof s.id !== 'number') return io(c).say('Done.');
+      const r = await c.call('payment_status', { id: s.id });
+      await showCard(c, 'payment_status', { id: s.id }, r);
+      io(c).say(textOf(r));
+    };
+  }, [io, showCard]);
+
   const handle = useCallback(
     async (utterance: string) => {
       const text = utterance.trim();
@@ -580,6 +612,15 @@ export function App() {
                   <div className="ring-top">🔔 Front Door · {ring.time}</div>
                   <div className="ring-bottom">Someone is at the front door. Ask “Should I open the door?”</div>
                 </div>
+              )}
+              {ask && (
+                <Elicit
+                  params={ask.params}
+                  onDone={(r) => {
+                    ask.resolve(r);
+                    setAsk(null);
+                  }}
+                />
               )}
               {call && (
                 <div className="overlay call-view" role="dialog" aria-label={`Calling ${call.name}`}>

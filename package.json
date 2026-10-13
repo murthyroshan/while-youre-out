@@ -1,6 +1,7 @@
 {
   "name": "while-youre-out",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "server",
     "simulator"
