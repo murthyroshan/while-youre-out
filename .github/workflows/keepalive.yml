@@ -1,0 +1,14 @@
+# Free hosts put idle apps to sleep. Judging runs until Nov 20, so ping the demo every 6 hours.
+# Set the repository variable DEMO_URL (e.g. https://you-while-youre-out.hf.space).
+name: Keep the demo awake
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+jobs:
+  ping:
+    if: vars.DEMO_URL != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the health check
+        run: curl -fsS --retry 5 --retry-delay 30 --max-time 60 "${{ vars.DEMO_URL }}/health"

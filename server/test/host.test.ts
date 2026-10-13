@@ -43,3 +43,29 @@ test('the proxy can be switched off', async () => {
   http.closeAllConnections();
   http.close();
 });
+
+test('hosted demo: pages served by this server may call it; other sites may not', async () => {
+  const created = createApp({ parentKey: 'k', demo: true, allowedOrigins: ['https://simulator.example'] });
+  const http = created.app.listen(0, '127.0.0.1');
+  await new Promise((r) => http.once('listening', r));
+  const base = `http://127.0.0.1:${(http.address() as AddressInfo).port}`;
+  const state = (origin: string) => fetch(`${base}/parent/api/state?k=k`, { headers: { origin } });
+  assert.equal((await state(base)).status, 200, 'same origin');
+  assert.equal((await state('https://simulator.example')).status, 200, 'listed origin');
+  assert.equal((await state('https://evil.example')).status, 403);
+  assert.deepEqual(await (await fetch(`${base}/demo/config`)).json(), { parent_url: '/parent?k=k' });
+  created.close();
+  http.closeAllConnections();
+  http.close();
+});
+
+test('the parent link is only published by the demo deployment', async () => {
+  const created = createApp({ parentKey: 'secret-key-1234567890', demo: false });
+  const http = created.app.listen(0, '127.0.0.1');
+  await new Promise((r) => http.once('listening', r));
+  const base = `http://127.0.0.1:${(http.address() as AddressInfo).port}`;
+  assert.equal((await fetch(`${base}/demo/config`)).status, 404);
+  created.close();
+  http.closeAllConnections();
+  http.close();
+});

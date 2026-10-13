@@ -1,5 +1,6 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { existsSync } from 'node:fs';
 import express from 'express';
 import { hostHeaderValidation, localhostHostValidation } from '@modelcontextprotocol/sdk/server/middleware/hostHeaderValidation.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -80,12 +81,20 @@ export function createApp(opts: AppOptions = {}) {
   app.use(express.json({ limit: '3mb' }));
   // Browsers may only call us from local pages (the simulator) or origins listed in ALLOWED_ORIGINS.
   // Requests without an Origin header (MCP clients, curl, same-origin page loads) are not affected.
-  const originAllowed = (origin: string | undefined) =>
-    !origin || (allowedOrigins?.length ? allowedOrigins.includes(origin) : LOCAL_ORIGIN.test(origin));
+  const originAllowed = (origin: string | undefined, host: string | undefined) => {
+    if (!origin) return true;
+    // Pages this server serves itself (the hosted simulator and parent page) are always allowed.
+    try {
+      if (host && new URL(origin).host === host) return true;
+    } catch {
+      return false;
+    }
+    return allowedOrigins?.length ? allowedOrigins.includes(origin) : LOCAL_ORIGIN.test(origin);
+  };
 
   app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (!originAllowed(origin)) {
+    if (!originAllowed(origin, req.headers.host)) {
       // Stops any website the user happens to visit from driving the device or the parent API.
       return void res.status(403).json({ error: 'Origin not allowed' });
     }
@@ -443,6 +452,8 @@ export function createApp(opts: AppOptions = {}) {
 
   // ---------- Demo clock (only with WYO_DEMO=1): lets a video jump to 7:40 pm ----------
   if (opts.demo ?? process.env.WYO_DEMO === '1') {
+    // The demo deployment is public, so the simulator may link straight to the parent page.
+    app.get('/demo/config', (_req, res) => void res.json({ parent_url: `/parent?k=${encodeURIComponent(parentKey)}` }));
     app.get('/demo/clock', (_req, res) => void res.json({ ...localTime(householdTz(db)), demo: true }));
     app.post('/demo/clock', (req, res) => {
       try {
@@ -459,6 +470,9 @@ export function createApp(opts: AppOptions = {}) {
   }
 
   app.use('/static', express.static(fileURLToPath(new URL('../public', import.meta.url))));
+  // The built Echo Show simulator, when present (the hosted demo): one URL for everything.
+  const simulatorDist = process.env.WYO_SIMULATOR_DIR ?? fileURLToPath(new URL('../../simulator/dist', import.meta.url));
+  if (existsSync(simulatorDist)) app.use('/', express.static(simulatorDist));
   app.get('/health', (_req, res) => void res.json({ ok: true }));
 
   // JSON errors instead of Express's HTML error page (e.g. a file over the size limit).
