@@ -8,6 +8,7 @@ import { tonightPlan } from './plan.js';
 import { busyUntil } from './shadow.js';
 import { summary, teachbackState } from './teachback.js';
 import { recentPhotos } from './photos.js';
+import { latestDoorEvent } from './door.js';
 
 const ALLERGENS = ['peanut', 'tree nut', 'egg', 'milk', 'dairy', 'wheat', 'gluten', 'soy', 'sesame', 'fish', 'shellfish', 'shrimp', 'bee', 'penicillin', 'latex', 'nut'];
 const ASLEEP = /\b(asleep|fell asleep|sleeping|lights out|went to bed|in bed)\b/i;
@@ -38,6 +39,8 @@ export interface HomeScreen {
   busy_until: string | null;
   teachback: { right: number; total: number; done: boolean } | null;
   photos_sent: number;
+  /** The doorbell in the last hour, and what a parent said about it. */
+  door: { time: string; label: string; decision: string | null } | null;
 }
 
 /** "Peanuts", "Eggs and sesame": the allergens named in a child's allergy rules. */
@@ -89,6 +92,7 @@ export function homeScreen(db: DB): HomeScreen {
     busy_until: null,
     teachback: null,
     photos_sent: 0,
+    door: null,
   };
   if (!h) return { ...base, plan: tonightPlan(db, tz, undefined, now).items.map((i) => ({ key: i.key, title: i.title, time: i.time, status: 'upcoming' })) };
 
@@ -119,6 +123,14 @@ export function homeScreen(db: DB): HomeScreen {
     busy_until: busy ? formatTime(localTime(tz, busy).minutes) : null,
     teachback: tb ? { ...summary(tb), done: tb.done } : null,
     photos_sent: recentPhotos(db, h.id).filter((p) => p.handoff_id === h.id).length,
+    door: (() => {
+      const ev = latestDoorEvent(db, 60 * 60_000);
+      if (!ev) return null;
+      const a = db.prepare("SELECT answered_by, answer FROM questions WHERE door_event_id = ? AND status = 'answered' ORDER BY id DESC LIMIT 1").get(ev.id) as
+        | { answered_by: string; answer: string }
+        | undefined;
+      return { time: timeOf(ev.at), label: ev.label, decision: a ? `${a.answered_by}: "${a.answer}"` : null };
+    })(),
   };
 }
 

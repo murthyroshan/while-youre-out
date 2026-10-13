@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { type DB, nowIso } from './db.js';
 import { now } from './clock.js';
 
@@ -86,6 +89,7 @@ export function seedDemoHousehold(db: DB) {
     ['rules', 'Maya', 'No friends over tonight.', 'voice', 'Rahul', 'carer', 'normal', 0],
     ['pet', 'Bruno', 'Bruno gets one cup of dry food at 7 pm, then a short walk around the block.', 'voice', 'Rahul', 'carer', 'normal', 60],
     ['house', null, 'The thermostat is in the hallway. Keep it at 70.', 'voice', 'Rahul', 'carer', 'low', 60],
+    ['rules', null, "Don't open the door to anyone you don't know. Deliveries can stay outside until we're back.", 'voice', 'Rahul', 'carer', 'normal', 30],
     // Parent-only: never revealed to a carer or child.
     ['private', null, "We'll be back around 11.", 'voice', 'Anita', 'parent', 'normal', 0],
   ];
@@ -95,6 +99,28 @@ export function seedDemoHousehold(db: DB) {
   }
 
   seedPastEvenings(db);
+
+  // A goodnight message for lights out. The demo's is a music-box lullaby with the words as a
+  // caption; a real parent records their own voice or video on the parent page.
+  const lullaby = fileURLToPath(new URL('../public/demo/lullaby.wav', import.meta.url));
+  if (existsSync(lullaby)) {
+    db.prepare('INSERT INTO messages (from_name, for_name, kind, mime, data, when_to_play, caption, token, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
+      'Anita',
+      'Maya',
+      'audio',
+      'audio/wav',
+      readFileSync(lullaby),
+      'bedtime',
+      'Goodnight Maya. Sweet dreams, my love. Mama will give you a big kiss when we get home.',
+      randomBytes(16).toString('hex'),
+      t,
+    );
+  }
+
+  // Who the parents said to expect tonight (cleared when the handoff ends).
+  const visitor = db.prepare('INSERT INTO visitors (name, kind, window, from_minutes, to_minutes, note, added_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+  visitor.run('Nani', 'person', 'around 7 pm', 18 * 60 + 30, 19 * 60 + 30, "Anita's mom. She may drop off soup.", 'Anita', t);
+  visitor.run('Amazon package', 'delivery', '7-8 pm', 19 * 60, 20 * 60, 'The driver leaves it at the door.', 'Anita', t);
 
   const loc = db.prepare('INSERT INTO locations (item, description, photo_url) VALUES (?, ?, ?)');
   loc.run('EpiPen', 'Kitchen drawer to the left of the stove, in the red pouch.', '/static/photos/epipen-drawer.svg');

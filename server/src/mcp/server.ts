@@ -11,6 +11,7 @@ import {
   answerQuestion,
   attachTask,
   briefing,
+  contacts,
   parentNames,
   createQuestion,
   currentContactFor,
@@ -31,6 +32,9 @@ import {
 import { startEmergency } from '../domain/emergency.js';
 import { PhotoError, savePhoto } from '../domain/photos.js';
 import { homeScreen, homeSentence } from '../domain/home.js';
+import { doorCheck, getDoorEvent } from '../domain/door.js';
+import { markPlayed, pickMessage, type MessageInfo } from '../domain/messages.js';
+import { activeIncident, incidentView, latestIncident, stepIncident, takeIncidentAnnouncements } from '../domain/incident.js';
 import { importNote, ImportError } from '../domain/houseBrain.js';
 import { applyLogToPlan, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
 import { teachback } from '../domain/teachback.js';
@@ -260,6 +264,12 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
           : plan.items.length
             ? 'Everything on tonight\'s plan is done.'
             : "The parents haven't given times for tonight.";
+      // Lights out: the parents' goodnight message, if they left one for bedtime.
+      const goodnight = due.some((i) => i.key === 'bedtime') ? pickMessage(db, 'bedtime') : undefined;
+      if (goodnight && goodnight.when_to_play !== 'missing') {
+        markPlayed(db, goodnight);
+        return localized('message', { ...messageCard(goodnight), due: due.map((i) => i.key) }, `${say} ${goodnight.from_name} left a goodnight message for ${goodnight.for_name ?? 'you'}.`);
+      }
       return localized('plan', { items: plan.items, now: plan.now.hhmm, shift: plan.shift, shift_reason: plan.shift_reason, due: due.map((i) => i.key) }, say);
     },
   );
@@ -480,16 +490,19 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       inputSchema: {
         question: z.string().trim().min(1).max(MAX_TEXT),
         question_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer spoke another language'),
+        door_event_id: z.number().int().positive().optional().describe('From door_check: attaches the doorbell photo, and the question is treated as urgent'),
       },
       execution: { taskSupport: 'required' },
       _meta: ui,
     },
     {
-      async createTask({ question, question_english }, { taskStore: store, taskRequestedTtl }) {
+      async createTask({ question, question_english, door_event_id }, { taskStore: store, taskRequestedTtl }) {
         // Between 1 minute and 6 hours, whatever the client asks for.
         const ttl = Math.min(Math.max(taskRequestedTtl ?? 60 * 60 * 1000, 60_000), 6 * 60 * 60 * 1000);
         const task = await store.createTask({ ttl, pollInterval: 2000 });
-        const q = createQuestion(db, question, task.taskId, undefined, question_english ?? null);
+        // Someone waiting at the door can't wait for busy mode: door questions are urgent.
+        const door = getDoorEvent(db, door_event_id);
+        const q = createQuestion(db, question, task.taskId, door ? 'urgent' : undefined, question_english ?? null, door?.id ?? null);
         attachTask(db, q.id, task.taskId);
         const first = currentContactFor(db, q);
         // Busy mode: non-urgent questions wait quietly and don't move down the contact chain.
@@ -576,7 +589,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
           await store
             .storeTaskResult(task.taskId, 'completed', {
               content: [{ type: 'text', text: `${answered.answered_by} said: "${answered.answer}"` }],
-              structuredContent: { view: 'question', ...getQuestion(db, q.id), asked: answered.answered_by },
+              structuredContent: { view: 'question', ...getQuestion(db, q.id), asked: answered.answered_by, door_snapshot: abs(door?.snapshot_url ?? null) },
             })
             .catch(() => {});
         };
@@ -619,6 +632,59 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
     },
   );
 
+  /** The emergency screen's data: the fixed script plus where the carer is in it. */
+  const incidentResult = (i: NonNullable<ReturnType<typeof activeIncident>>, text: string, extra: Record<string, unknown> = {}) => {
+    const s = i.script as Record<string, unknown>;
+    // Photos as absolute URLs: the card runs in a sandbox with no base address of its own.
+    return plain('emergency', { ...s, address: s.address || null, epipen_photo: abs((s.epipen_photo as string | null) ?? null), incident: incidentView(db, i), ...extra }, text);
+  };
+
+  server.registerTool(
+    'emergency_step',
+    {
+      title: 'Emergency: next step',
+      description:
+        'During an emergency, moves the step-by-step guide on. Call with action "done" when the carer says they did the step ("done", "I gave the EpiPen", "called 911"), "next" to skip ahead, "back" to repeat, and "resolved" only when the carer says it is over (paramedics have taken over, she is fine). Read the returned text aloud.',
+      inputSchema: { action: z.enum(['done', 'next', 'back', 'resolved']) },
+      _meta: { ...ui, ui: { resourceUri: CARD_URI, preferredDisplayMode: 'fullscreen' } },
+    },
+    async ({ action }) => {
+      const before = activeIncident(db);
+      if (!before) return { content: [{ type: 'text', text: 'There is no emergency in progress.' }], isError: true };
+      const i = stepIncident(db, action)!;
+      if (i.status === 'resolved') {
+        return incidentResult(i, "Okay. I've told the parents the emergency is over. If anything changes, say emergency again.", { resolved: true });
+      }
+      const timer = i.current === 1 && i.timers.length && before.current === 0 ? ` I've started a ${Math.round(i.timers[0].seconds / 60)}-minute timer.` : '';
+      const text =
+        i.current >= i.steps.length
+          ? `That was the last step.${timer} Stay with her and follow the 911 dispatcher. Say "it's over" when help has taken over.`
+          : `${action === 'back' ? 'Again' : 'Next'}, step ${i.current + 1} of ${i.steps.length}: ${i.steps[i.current].text}${timer}`;
+      return incidentResult(i, text);
+    },
+  );
+
+  server.registerTool(
+    'emergency_status',
+    {
+      title: 'Emergency status',
+      description:
+        "The emergency in progress: which step the carer is on, the plan's timers, and which parent is on the way. The emergency screen refreshes itself with this. With announce=true it also returns what should be said now, once each (\"One minute left on the EpiPen timer\").",
+      inputSchema: { announce: z.boolean().default(false) },
+      annotations: { readOnlyHint: true },
+      _meta: { ui: { resourceUri: CARD_URI, visibility: ['model', 'app'], preferredDisplayMode: 'fullscreen' }, 'ui/resourceUri': CARD_URI },
+    },
+    async ({ announce }) => {
+      const say = announce ? takeIncidentAnnouncements(db) : [];
+      const i = activeIncident(db) ?? latestIncident(db);
+      if (!i) return { content: [{ type: 'text', text: 'There is no emergency in progress.' }], structuredContent: { view: 'none', active: false } };
+      return incidentResult(i, say.join(' ') || (i.status === 'resolved' ? 'The emergency is over.' : `Step ${Math.min(i.current + 1, i.steps.length)} of ${i.steps.length}.`), {
+        announce: say,
+        active: i.status === 'active',
+      });
+    },
+  );
+
   server.registerTool(
     'end_handoff',
     {
@@ -642,6 +708,57 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
         .filter(Boolean)
         .join(' ');
       return localized('summary', { carer: h.carer_name, timezone: householdTz(db), timeline: d.timeline, questions, insights: d.insights, rule_suggestions: d.rule_suggestions, supplies: d.supplies }, text);
+    },
+  );
+
+  /** What the Echo Show needs to play a parent's message. */
+  const messageCard = (m: MessageInfo) => {
+    const from = contacts(db).find((c) => c.name === m.from_name);
+    return {
+      id: m.id,
+      from: m.from_name,
+      relation: from?.relation ?? null,
+      for_name: m.for_name,
+      kind: m.kind,
+      caption: m.caption,
+      url: abs(`/media/messages/${m.id}?t=${m.token}`),
+    };
+  };
+
+  server.registerTool(
+    'play_message',
+    {
+      title: "Play the parents' message",
+      description:
+        "Plays the voice or video message a parent recorded for the child. Call when the child misses a parent or is sad (\"Maya misses her mom\", \"she's crying for her dad\"), or when the carer asks to play it. At lights out the tonight_plan reminder plays the bedtime message by itself.",
+      inputSchema: { when: z.enum(['bedtime', 'missing', 'any']).default('missing').describe('bedtime, or missing when the child misses the parents') },
+      _meta: { ...ui, ui: { resourceUri: CARD_URI, preferredDisplayMode: 'fullscreen' } },
+    },
+    async ({ when }) => {
+      const m = pickMessage(db, when);
+      if (!m) return localized('answer', { category: 'general', facts: [], guard: null }, "The parents haven't left a message tonight. I can call them, or you could send them a photo.");
+      markPlayed(db, m);
+      return localized('message', messageCard(m), `${m.from_name} left a message for ${m.for_name ?? 'you'}.`);
+    },
+  );
+
+  server.registerTool(
+    'door_check',
+    {
+      title: 'Who is at the door?',
+      description:
+        "Call when the carer asks about the front door (\"someone's knocking, should I open?\", \"who's at the door?\", the doorbell rang). Uses the doorbell camera's latest event, who the parents said to expect tonight, delivery windows and the parents' door rule. Never says a stranger is safe. If the result has ask_parent, call ask_parent_and_wait with that question and door_event_id so the parents see the photo.",
+      inputSchema: { question: z.string().trim().max(MAX_TEXT).optional().describe("The carer's words") },
+      annotations: { readOnlyHint: true },
+      _meta: ui,
+    },
+    async ({ question }) => {
+      if (question && isEmergency(question)) {
+        return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
+      }
+      const c = doorCheck(db);
+      const data = { ...c, event: c.event ? { ...c.event, snapshot_url: abs(c.event.snapshot_url), time: clockTime(new Date(c.event.at)) } : null };
+      return localized('door', data, c.say);
     },
   );
 

@@ -157,3 +157,12 @@ test('send_photo: the model never sees or sends the image; the device camera att
   assert.ok(!JSON.stringify(requests[1]).includes('CAMERA'), 'the photo is never sent to the model');
   assert.equal(said[0], 'Okay, smile! Sent. Anita will see it.');
 });
+
+test('door_check: the device itself asks the parents with the photo, not the model', async () => {
+  const s = setup([[fc('door_check', { question: 'should I open the door?' })], [{ text: '' }]], {
+    door_check: { content: [{ type: 'text', text: "Don't open the door." }], structuredContent: { ask_parent: { question: 'Someone is at the door', door_event_id: 3 } } },
+  });
+  await s.brain.handle('someone is knocking, should I open the door?', s.io);
+  assert.deepEqual(s.tasks, [{ name: 'ask_parent_and_wait', args: { question: 'Someone is at the door', door_event_id: 3 } }]);
+  assert.match(s.said[0], /Don't open the door/);
+});

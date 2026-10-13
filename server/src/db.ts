@@ -56,6 +56,8 @@ export interface Question {
   scope: 'tonight' | 'always' | null;
   task_id: string | null;
   contact_index: number;
+  /** Set when the question is about someone at the front door. */
+  door_event_id: number | null;
   asked_at: string;
   answered_at: string | null;
 }
@@ -190,6 +192,54 @@ CREATE TABLE IF NOT EXISTS photos (
   caption TEXT,
   taken_by TEXT
 );
+CREATE TABLE IF NOT EXISTS door_events (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER,
+  at TEXT NOT NULL,
+  kind TEXT NOT NULL,            -- person | package
+  label TEXT NOT NULL,           -- what the doorbell camera saw, e.g. "Person at the front door"
+  snapshot_url TEXT,
+  source TEXT NOT NULL DEFAULT 'ring'
+);
+CREATE TABLE IF NOT EXISTS visitors (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,            -- "Nani", "Pizza from Tony's", "Amazon package"
+  kind TEXT NOT NULL,            -- person | delivery
+  window TEXT,                   -- the parent's words: "around 7", "7-8 pm"
+  from_minutes INTEGER,
+  to_minutes INTEGER,
+  note TEXT,
+  added_by TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS incidents (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER,
+  started_at TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  description TEXT NOT NULL,
+  script TEXT NOT NULL,          -- JSON: the fixed script shown on screen
+  steps TEXT NOT NULL,           -- JSON: [{ text, timer_seconds }]
+  current INTEGER NOT NULL DEFAULT 0,
+  timers TEXT NOT NULL DEFAULT '[]',
+  updates TEXT NOT NULL DEFAULT '[]',
+  on_the_way TEXT NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'active',
+  resolved_at TEXT
+);
+CREATE TABLE IF NOT EXISTS messages (
+  id INTEGER PRIMARY KEY,
+  from_name TEXT NOT NULL,
+  for_name TEXT,
+  kind TEXT NOT NULL,            -- audio | video
+  mime TEXT NOT NULL,
+  data BLOB NOT NULL,
+  when_to_play TEXT NOT NULL,    -- bedtime | missing | any
+  caption TEXT,
+  token TEXT NOT NULL,           -- lets the Echo Show fetch the media without the parent key
+  created_at TEXT NOT NULL,
+  played_at TEXT
+);
 CREATE TABLE IF NOT EXISTS log_events (
   id INTEGER PRIMARY KEY,
   handoff_id INTEGER NOT NULL,
@@ -218,6 +268,7 @@ export function openDb(path = process.env.WYO_DB ?? ':memory:'): DB {
   addColumn('handoffs', 'plan_announced', "TEXT NOT NULL DEFAULT '[]'");
   addColumn('handoffs', 'teachback', 'TEXT');
   addColumn('questions', 'text_english', 'TEXT');
+  addColumn('questions', 'door_event_id', 'INTEGER');
   return db;
 }
 

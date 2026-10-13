@@ -225,6 +225,8 @@ export function endHandoff(db: DB) {
   db.prepare("UPDATE handoffs SET status = 'ended', ended_at = ? WHERE id = ?").run(t, h.id);
   // "Just tonight" answers end with the handoff they were given in.
   db.prepare('UPDATE facts SET expires_at = ? WHERE handoff_id = ? AND expires_at IS NOT NULL AND expires_at > ?').run(t, h.id, t);
+  // Tonight's expected visitors were for tonight.
+  db.prepare('DELETE FROM visitors').run();
   // Questions nobody answered are closed so they stop showing on the parent's phone.
   const closing = db.prepare("SELECT id FROM questions WHERE handoff_id = ? AND status = 'pending'").all(h.id) as Array<{ id: number }>;
   db.prepare("UPDATE questions SET status = 'expired' WHERE handoff_id = ? AND status = 'pending'").run(h.id);
@@ -321,6 +323,8 @@ export function createQuestion(
   urgencyOverride?: Question['urgency'],
   /** English rendering when the carer spoke another language; safety rules read it. */
   textEnglish?: string | null,
+  /** The doorbell event the question is about ("Is this Nani at the door?"). */
+  doorEventId?: number | null,
 ): Question {
   const h = activeHandoff(db);
   // The stricter of the two readings wins (an emergency in either language is an emergency).
@@ -329,9 +333,9 @@ export function createQuestion(
   const category = [...readings].sort((a, b) => order.indexOf(a) - order.indexOf(b))[0];
   const info = db
     .prepare(
-      'INSERT INTO questions (handoff_id, text, text_english, category, urgency, task_id, asked_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO questions (handoff_id, text, text_english, category, urgency, task_id, asked_at, door_event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     )
-    .run(h?.id ?? null, text, textEnglish ?? null, category, urgencyOverride ?? urgencyFor(category), taskId, nowIso());
+    .run(h?.id ?? null, text, textEnglish ?? null, category, urgencyOverride ?? urgencyFor(category), taskId, nowIso(), doorEventId ?? null);
   const q = getQuestion(db, Number(info.lastInsertRowid))!;
   events.emit('question', q);
   return q;

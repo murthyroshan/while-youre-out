@@ -103,6 +103,53 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   .banner { background: #fff8e6; border-color: #f0d08a; }
   .danger button { border-color: #f1b7ba; color: var(--red); background: #fff; }
   .danger button.armed { background: var(--red); color: #fff; }
+  .inc { padding: 18px; }
+  .inc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .inc-head .elapsed { font-variant-numeric: tabular-nums; opacity: .85; font-size: 14px; }
+  .inc-desc { font-size: 15px; opacity: .92; }
+  .inc-now { background: #fff; color: #7a0b10; border-radius: 14px; padding: 12px 14px; margin-top: 12px; font-size: 18px; font-weight: 700; line-height: 1.3; }
+  .inc-now small { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #b3141b; margin-bottom: 4px; }
+  .inc-timer { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.22); border-radius: 14px; padding: 10px 14px; margin-top: 10px; font-weight: 700; }
+  .inc-timer b { font-size: 24px; font-variant-numeric: tabular-nums; }
+  .inc-timer.up { background: #fff3c4; color: #7a4a00; animation: pulse 1s infinite; }
+  .inc-steps { margin: 12px 0 0; padding-left: 20px; font-size: 14px; }
+  .inc-steps li { margin: 4px 0; opacity: .7; }
+  .inc-steps li.done { text-decoration: line-through; opacity: .55; }
+  .inc-steps li.now { opacity: 1; font-weight: 700; }
+  .inc-otw { background: rgba(255,255,255,.16); border-radius: 12px; padding: 8px 12px; font-weight: 600; }
+  .inc-label { margin: 14px 0 6px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; font-weight: 700; }
+  .inc .btns button { background: rgba(255,255,255,.95); color: #8a0d14; border: 0; }
+  .inc-log { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13px; opacity: .9; }
+  .inc-log li { padding: 4px 0; border-top: 1px solid rgba(255,255,255,.18); }
+  .inc-log span { font-variant-numeric: tabular-nums; margin-right: 6px; opacity: .8; }
+  .inc.over { border-color: #b7e4cf; background: #f1fbf6; }
+  .inc.over .inc-log li { border-color: var(--line); }
+  .inc-addr { font-size: 13px; opacity: .85; margin: 10px 0 0; }
+  @keyframes pulse { 50% { opacity: .65; } }
+  .gn-item { border-top: 1px solid var(--line); padding: 10px 0; }
+  .gn-item:first-child { border-top: 0; }
+  .gn-item .gn-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 14px; }
+  .gn-item audio, .gn-item video, #gnDraftMedia audio, #gnDraftMedia video { width: 100%; margin-top: 6px; border-radius: 12px; }
+  .gn-item video, #gnDraftMedia video, #gnPreview { max-height: 260px; background: #000; }
+  .gn-rec { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  #gnPreview { width: 100%; border-radius: 14px; margin-top: 10px; }
+  .gn-timer { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; }
+  .gn-timer .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); animation: pulse 1s infinite; }
+  .gn-timer button { margin-left: auto; padding: 8px 14px; }
+  .gn-upload { display: block; margin-top: 10px; }
+  .gn-upload input { font-size: 13px; }
+  .doorcam { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; margin: 0 0 12px; background: #111; }
+  .vlist { list-style: none; padding: 0; margin: 10px 0 0; }
+  .vlist li { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .vlist li:first-child { border-top: 0; }
+  .vlist .vi { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #eef4fc; flex: none; }
+  .vlist .vt { flex: 1; min-width: 0; }
+  .vlist .vt b { display: block; }
+  .vlist .vt small { color: var(--muted); }
+  .vlist button { padding: 6px 10px; font-size: 13px; }
+  .vadd { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 6px; margin-top: 10px; }
+  .vadd input, .vadd select { min-width: 0; font: inherit; padding: 9px; border-radius: 12px; border: 1px solid var(--line); background: #fcfbf8; }
+  @media (max-width: 420px) { .vadd { grid-template-columns: 1fr 1fr; } }
   .switch { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 15px; }
   .switch input { width: 20px; height: 20px; accent-color: var(--green); }
   nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 4px; background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); }
@@ -133,6 +180,36 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <section class="card notify" id="notify" hidden></section>
     <section class="card" id="photos" hidden></section>
     <div id="debrief"></div>
+    <section class="card" id="visitors">
+      <strong>Expected tonight</strong>
+      <p class="muted">Who might come to the door. When the doorbell rings, Alexa checks this list; anyone else and the sitter is told not to open, and you get the doorbell photo.</p>
+      <ul class="vlist" id="vlist"></ul>
+      <div class="vadd">
+        <input id="vName" maxlength="60" placeholder="Who? e.g. Nani, pizza">
+        <input id="vWhen" maxlength="40" placeholder="When? e.g. around 7">
+        <select id="vKind"><option value="person">Person</option><option value="delivery">Delivery</option></select>
+        <button id="vAdd">Add</button>
+      </div>
+      <p class="perr" id="vErr"></p>
+    </section>
+    <section class="card" id="goodnight">
+      <strong>Goodnight message 💛</strong>
+      <p class="muted">Record a few words before you go. The Echo Show plays it at lights out, or when the sitter says your child is missing you.</p>
+      <div id="gnList"></div>
+      <div class="gn-rec">
+        <button id="gnVoice">🎙 Record voice</button><button id="gnVideo">🎥 Record video</button>
+      </div>
+      <div id="gnLive" hidden><video id="gnPreview" muted playsinline></video><p class="gn-timer"><span class="dot"></span><b id="gnTime">0:00</b> recording… <button id="gnStop" class="no">Stop</button></p></div>
+      <div id="gnDraft" hidden>
+        <div id="gnDraftMedia"></div>
+        <label class="field">For<select id="gnFor"></select></label>
+        <label class="field">Play it<select id="gnWhen"><option value="bedtime">At lights out</option><option value="missing">If they're missing us</option><option value="any">Either</option></select></label>
+        <label class="field">Words to show on screen (optional)<input id="gnCaption" maxlength="160" placeholder="Goodnight Maya, sweet dreams"></label>
+        <div class="pbtns"><button class="ok" id="gnSave">Save message</button><button id="gnDiscard">Discard</button></div>
+      </div>
+      <label class="muted gn-upload">or upload a recording <input type="file" id="gnFile" accept="audio/*,video/*"></label>
+      <p class="perr" id="gnErr"></p>
+    </section>
     <div class="card" id="busy"></div>
     <div class="card"><strong>Tonight so far</strong><div id="log" class="muted">Nothing logged yet.</div></div>
   </div>
@@ -212,8 +289,15 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     var tb = s.teachback;
     document.getElementById('status').textContent = s.handoff ? (s.handoff.carer_name + ' is looking after things' + (s.handoff.started_at ? ' · since ' + time(s.handoff.started_at) : '')) : 'No one is babysitting right now';
     renderLive(s, tb);
+    var mKey = JSON.stringify(s.messages);
+    if (mKey !== lastMessages) { lastMessages = mKey; renderMessages(s.messages || []); }
+    var vKey = JSON.stringify(s.visitors);
+    if (vKey !== lastVisitors) { lastVisitors = vKey; renderVisitors(s.visitors || []); }
     document.getElementById('badgeTonight').textContent = s.questions.length ? String(s.questions.length) : '';
-    document.getElementById('emergency').innerHTML = s.emergency ? '<div class="card alert"><strong>Emergency reported · ' + esc(time(s.emergency.at)) + '</strong><p>' + esc(s.emergency.description) + '</p><p>Every contact has been alerted. Call ' + esc(s.handoff ? s.handoff.carer_name : 'the carer') + ' now.</p></div>' : '';
+    // Redraw only when something changed (not every second the clock moves), so buttons stay tappable.
+    var incKey = s.incident ? JSON.stringify(Object.assign({}, s.incident, { elapsed_seconds: 0, timers: s.incident.timers.map(function (t) { return Object.assign({}, t, { remaining_seconds: 0 }); }) })) : '';
+    if (incKey !== lastIncident) { lastIncident = incKey; incReceived = Date.now(); document.getElementById('emergency').innerHTML = s.incident ? incidentCard(s.incident) : ''; tickIncident(); }
+    if (!s.incident) document.getElementById('emergency').innerHTML = s.emergency ? '<div class="card alert"><strong>Emergency reported · ' + esc(time(s.emergency.at)) + '</strong><p>' + esc(s.emergency.description) + '</p><p>Every contact has been alerted. Call ' + esc(s.handoff ? s.handoff.carer_name : 'the carer') + ' now.</p></div>' : '';
     var dKey = JSON.stringify([s.debrief && s.debrief.handoff_id, s.debrief && s.debrief.rule_suggestions.length, s.shopping]);
     if (dKey !== lastDebrief) { lastDebrief = dKey; renderDebrief(s); }
     var busyKey = String(s.busy_until);
@@ -303,7 +387,10 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       return '<div class="card" data-id="' + q.id + '">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') +
         '<p class="asker">' + esc(s.handoff ? s.handoff.carer_name : 'The sitter') + ' asks · ' + esc(time(q.asked_at)) + '</p><p class="q">“' + esc(q.text) + '”</p>' +
         (q.text_english ? '<p class="en">In English: “' + esc(q.text_english) + '”</p>' : '') +
-        '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>' +
+        (q.door_snapshot
+          ? '<img class="doorcam" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' +
+            '<div class="btns"><button class="ok" data-a="It\\'s fine, you can let them in.">Let them in</button><button class="no" data-a="Don\\'t open the door. I\\'ll call you.">Don\\'t open</button><button data-a="Please call me.">Call me</button></div>'
+          : '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>') +
         '<textarea placeholder="Or type an answer…"></textarea>' +
         (q.urgency === 'urgent'
           ? '<input type="radio" name="s' + q.id + '" value="tonight" checked hidden><p class="muted">Food, medicine and safety answers apply to tonight only.</p></div>'
@@ -630,6 +717,153 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   });
   loadFamily();
 
+  // ---------- emergency: live view, as it happens at home ----------
+  var lastIncident = null, incReceived = Date.now();
+  function mmss(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+  function incidentCard(i) {
+    if (i.status === 'resolved') {
+      return '<div class="card inc over"><strong>Emergency over</strong><p class="muted">Started ' + esc(i.started) + '. ' + esc((i.updates[i.updates.length - 1] || {}).by || 'The sitter') + ' said it\\'s over.</p>' +
+        '<ul class="inc-log">' + i.updates.slice(-6).map(function (u) { return '<li><span>' + esc(u.time) + '</span>' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul></div>';
+    }
+    var now = i.steps[i.current];
+    return '<div class="card alert inc"><div class="inc-head"><strong>🚨 Emergency · ' + esc(i.started) + '</strong><span class="elapsed" data-elapsed="' + i.elapsed_seconds + '"></span></div>' +
+      '<p class="inc-desc">' + esc(i.carer || 'The sitter') + ' said: “' + esc(i.description) + '”</p>' +
+      (now ? '<div class="inc-now"><small>Step ' + (i.current + 1) + ' of ' + i.total + ' right now</small>' + esc(now.text) + '</div>' : '<div class="inc-now"><small>All steps done</small>Waiting for help to arrive</div>') +
+      i.timers.map(function (t) { return '<div class="inc-timer" data-left="' + t.remaining_seconds + '"><span>⏱ ' + esc(t.label) + '</span><b></b></div>'; }).join('') +
+      '<ol class="inc-steps">' + i.steps.map(function (st) { return '<li class="' + st.state + '">' + esc(st.text) + '</li>'; }).join('') + '</ol>' +
+      (i.on_the_way.length ? '<p class="inc-otw">' + i.on_the_way.map(function (o) { return '🚗 ' + esc(o.name) + ' · home by ' + esc(o.eta); }).join('<br>') + '</p>' : '') +
+      '<p class="inc-label">I’m on my way</p><div class="btns"><button data-otw="10">10 min</button><button data-otw="20">20 min</button><button data-otw="30">30 min</button></div>' +
+      '<ul class="inc-log">' + i.updates.slice(-4).reverse().map(function (u) { return '<li><span>' + esc(u.time) + '</span>' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul>' +
+      (i.address ? '<p class="inc-addr">Home: ' + esc(i.address) + '</p>' : '') + '</div>';
+  }
+  function tickIncident() {
+    // Seconds as the server counted them (it may run on a demo clock), plus time since then.
+    var passed = (Date.now() - incReceived) / 1000;
+    document.querySelectorAll('.elapsed[data-elapsed]').forEach(function (el) { el.textContent = mmss(Number(el.dataset.elapsed) + passed) + ' ago'; });
+    document.querySelectorAll('.inc-timer[data-left]').forEach(function (el) {
+      var left = Number(el.dataset.left) - passed;
+      el.querySelector('b').textContent = left > 0 ? mmss(left) : 'Time’s up';
+      el.classList.toggle('up', left <= 0);
+    });
+  }
+  setInterval(tickIncident, 1000);
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-otw]');
+    if (!b) return;
+    b.disabled = true;
+    await post('/parent/api/incident', { action: 'on_the_way', minutes: Number(b.dataset.otw), by: me }).catch(function () {});
+    lastIncident = null;
+    load();
+  });
+
+  // ---------- goodnight message ----------
+  var lastMessages = null, recorder = null, recChunks = [], recStream = null, recTimer = null, draftBlob = null;
+  var WHEN = { bedtime: 'At lights out', missing: 'If they\\'re missing you', any: 'Lights out, or if they miss you' };
+  function renderMessages(list) {
+    document.getElementById('gnList').innerHTML = list.map(function (m) {
+      var media = m.kind === 'video' ? '<video controls preload="metadata" src="' + esc(m.url) + '"></video>' : '<audio controls preload="none" src="' + esc(m.url) + '"></audio>';
+      return '<div class="gn-item"><div class="gn-meta"><span><b>' + esc(m.from_name) + '</b> → ' + esc(m.for_name || 'the kids') + ' · ' + esc(WHEN[m.when_to_play] || '') +
+        (m.played_at ? ' · <span class="muted">played ' + esc(time(m.played_at)) + '</span>' : '') + '</span><button data-gnremove="' + m.id + '">Remove</button></div>' +
+        (m.caption ? '<p class="muted" style="margin:4px 0 0">“' + esc(m.caption) + '”</p>' : '') + media + '</div>';
+    }).join('');
+  }
+  function gnErr(t) { document.getElementById('gnErr').textContent = t || ''; }
+  function fillFor() {
+    var kids = (fam && fam.members || []).filter(function (m) { return m.kind === 'child'; });
+    document.getElementById('gnFor').innerHTML = (kids.length ? kids : [{ name: 'The kids' }]).map(function (k) { return '<option>' + esc(k.name) + '</option>'; }).join('');
+  }
+  function showDraft(blob) {
+    draftBlob = blob;
+    fillFor();
+    var url = URL.createObjectURL(blob);
+    document.getElementById('gnDraftMedia').innerHTML = /^video/.test(blob.type) ? '<video controls src="' + url + '"></video>' : '<audio controls src="' + url + '"></audio>';
+    document.getElementById('gnDraft').hidden = false;
+  }
+  async function startRecording(video) {
+    gnErr('');
+    if (!navigator.mediaDevices || !window.MediaRecorder) return gnErr('This browser can\\'t record. Upload a recording instead.');
+    try { recStream = await navigator.mediaDevices.getUserMedia(video ? { audio: true, video: { facingMode: 'user' } } : { audio: true }); }
+    catch (e) { return gnErr('Allow the microphone' + (video ? ' and camera' : '') + ' to record, or upload a recording.'); }
+    recChunks = [];
+    recorder = new MediaRecorder(recStream);
+    recorder.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
+    recorder.onstop = function () {
+      recStream.getTracks().forEach(function (t) { t.stop(); });
+      clearInterval(recTimer);
+      document.getElementById('gnLive').hidden = true;
+      showDraft(new Blob(recChunks, { type: recorder.mimeType || (video ? 'video/webm' : 'audio/webm') }));
+    };
+    var preview = document.getElementById('gnPreview');
+    preview.hidden = !video;
+    if (video) { preview.srcObject = recStream; preview.play().catch(function () {}); }
+    document.getElementById('gnLive').hidden = false;
+    var started = Date.now();
+    recTimer = setInterval(function () {
+      var s = Math.floor((Date.now() - started) / 1000);
+      document.getElementById('gnTime').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+      if (s >= 60) recorder.stop(); // a minute is plenty
+    }, 250);
+    recorder.start();
+  }
+  document.addEventListener('click', async function (e) {
+    var t = e.target;
+    if (t.id === 'gnVoice' || t.id === 'gnVideo') return startRecording(t.id === 'gnVideo');
+    if (t.id === 'gnStop' && recorder && recorder.state === 'recording') return recorder.stop();
+    if (t.id === 'gnDiscard') { draftBlob = null; document.getElementById('gnDraft').hidden = true; return; }
+    var rm = t.closest && t.closest('button[data-gnremove]');
+    if (rm) {
+      var rr = await post('/parent/api/messages/remove', { id: Number(rm.dataset.gnremove) }).catch(function () { return null; });
+      if (rr && rr.ok) { var out = await rr.json(); lastMessages = JSON.stringify(out.messages); renderMessages(out.messages); }
+      return;
+    }
+    if (t.id === 'gnSave' && draftBlob) {
+      t.disabled = true;
+      gnErr('Saving…');
+      var q = '?k=' + encodeURIComponent(key) + '&by=' + encodeURIComponent(me) + '&for=' + encodeURIComponent(document.getElementById('gnFor').value) +
+        '&when=' + encodeURIComponent(document.getElementById('gnWhen').value) + '&caption=' + encodeURIComponent(document.getElementById('gnCaption').value);
+      var r = await fetch('/parent/api/messages' + q, { method: 'POST', headers: { 'content-type': draftBlob.type.split(';')[0] || 'audio/webm' }, body: draftBlob }).catch(function () { return null; });
+      t.disabled = false;
+      var body = r ? await r.json().catch(function () { return {}; }) : {};
+      if (!r || !r.ok) return gnErr(body.error || 'Could not save. Try again.');
+      gnErr('');
+      draftBlob = null;
+      document.getElementById('gnDraft').hidden = true;
+      document.getElementById('gnCaption').value = '';
+      lastMessages = JSON.stringify(body.messages);
+      renderMessages(body.messages);
+    }
+  });
+  document.getElementById('gnFile').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (f) showDraft(f);
+    e.target.value = '';
+  });
+
+  // ---------- expected visitors ----------
+  var lastVisitors = null;
+  function renderVisitors(list) {
+    document.getElementById('vlist').innerHTML = list.length ? list.map(function (v) {
+      return '<li><span class="vi">' + (v.kind === 'delivery' ? '📦' : '🙋') + '</span><span class="vt"><b>' + esc(v.name) + '</b><small>' +
+        esc([v.window, v.note].filter(Boolean).join(' · ') || (v.kind === 'delivery' ? 'Delivery' : 'Any time tonight')) + '</small></span>' +
+        '<button data-vremove="' + v.id + '" aria-label="Remove ' + esc(v.name) + '">Remove</button></li>';
+    }).join('') : '<li class="muted">Nobody yet. The sitter will be told not to open the door to anyone.</li>';
+  }
+  document.addEventListener('click', async function (e) {
+    var rm = e.target.closest('button[data-vremove]');
+    var add = e.target.closest('#vAdd');
+    if (!rm && !add) return;
+    var vErr = document.getElementById('vErr');
+    vErr.textContent = '';
+    var body = rm ? { action: 'remove', id: Number(rm.dataset.vremove) }
+      : { action: 'add', name: document.getElementById('vName').value, window: document.getElementById('vWhen').value, kind: document.getElementById('vKind').value, by: me };
+    var r = await post('/parent/api/visitors', body).catch(function () { return null; });
+    var out = r ? await r.json().catch(function () { return {}; }) : {};
+    if (!r || !r.ok) { vErr.textContent = out.error || 'Could not save.'; return; }
+    if (add) { document.getElementById('vName').value = ''; document.getElementById('vWhen').value = ''; }
+    lastVisitors = JSON.stringify(out.visitors);
+    renderVisitors(out.visitors);
+  });
+
   // ---------- tabs and the live header ----------
   function setTab(t) {
     document.body.dataset.tab = t;
@@ -651,7 +885,9 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       now = s.debrief ? 'Last night with ' + esc(s.debrief.carer) + '<small>Your debrief is below</small>' : 'All quiet at home';
     } else if (h.night) {
       var kid = ((h.members || []).filter(function (m) { return m.kind === 'child'; })[0] || {}).name;
-      now = (kid ? esc(kid) + ' is asleep' : 'Bedtime') + '<small>' + (h.asleep_since ? 'Since ' + esc(h.asleep_since) : 'Lights out') + '</small>';
+      now = h.asleep_since
+        ? (kid ? esc(kid) + ' is asleep' : 'All asleep') + '<small>Since ' + esc(h.asleep_since) + '</small>'
+        : 'Past bedtime<small>Nobody has said ' + (kid ? esc(kid) + ' is' : 'they are') + ' asleep yet</small>';
     } else if (h.next) {
       var m = h.next.minutes_until;
       now = 'Next: ' + esc(h.next.title) + '<small>' + esc(h.next.time) + (m > 1 ? ' · in ' + m + ' min' : m >= -5 ? ' · now' : ' · ' + -m + ' min late') + '</small>';
@@ -688,14 +924,31 @@ self.addEventListener('push', function (e) {
     vibrate: m.urgent ? [400, 150, 400, 150, 400] : [150],
     icon: '/static/icon-192.png',
     badge: '/static/icon-192.png',
-    data: { url: m.url || '/parent' },
+    data: { url: m.url || '/parent', question_id: m.question_id, actions: m.actions || [], by: m.by },
   };
   if (m.image) options.image = m.image;
+  if (m.actions && m.actions.length) options.actions = m.actions.slice(0, 2).map(function (a) { return { action: a.action, title: a.title }; });
   e.waitUntil(self.registration.showNotification(m.title || "While You're Out", options));
 });
 self.addEventListener('notificationclick', function (e) {
   e.notification.close();
-  var url = (e.notification.data && e.notification.data.url) || '/parent';
+  var data = e.notification.data || {};
+  var url = data.url || '/parent';
+  // A button on the notification answers the question without opening the page.
+  var chosen = e.action && (data.actions || []).filter(function (a) { return a.action === e.action; })[0];
+  if (chosen && data.question_id) {
+    var k = new URL(url, self.location.origin).searchParams.get('k');
+    e.waitUntil(fetch('/parent/api/answer', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ k: k, id: data.question_id, answer: chosen.answer, by: data.by || 'Parent', scope: 'tonight' })
+    }).then(function (r) {
+      return self.registration.showNotification(r.ok ? 'Sent' : 'Could not send', {
+        body: r.ok ? '“' + chosen.answer + '”' : 'Open the app to answer.', tag: 'answer-' + data.question_id, icon: '/static/icon-192.png', data: { url: url }
+      });
+    }).catch(function () { return self.clients.openWindow(url); }));
+    return;
+  }
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
     for (var i = 0; i < list.length; i++) {
       if (new URL(list[i].url).pathname === '/parent' && 'focus' in list[i]) return list[i].focus();

@@ -8,6 +8,7 @@
 // by the same deterministic rules as the server before the model is even asked.
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { isEmergency } from '../../../server/src/domain/safety';
+import { emergencyAction } from './rules';
 import { textOf, type ToolResult } from '../mcp';
 import type { Brain, DeviceIO } from './types';
 
@@ -54,6 +55,8 @@ How to act:
 - A dictated note from a parent ("remember: ..."): call import_note.
 - "Send Mom a photo", "take a picture of us": call send_photo. The device camera takes the picture; pass only a caption if they said one ("saying good night").
 - "Call Mom", "phone Anita": call call_contact.
+- Anything about the front door ("someone's knocking", "should I open the door?", "who's at the door?"): call door_check. The device sends the doorbell photo to the parents itself; don't call ask_parent_and_wait for it.
+- The child misses a parent or is sad ("Maya misses her mom", "she's crying for her dad"), or "play Mom's message": call play_message.
 - "How's it going?", "what's happening tonight?": call home_screen.
 - "Ask the parents" with no question yet: ask what they'd like to ask, then use ask_house / ask_parent_and_wait as usual.
 
@@ -94,6 +97,7 @@ function forModel(r: ToolResult) {
 export class GeminiBrain implements Brain {
   readonly name = 'Gemini (via the server)';
   private history: Content[] = [];
+  private inEmergency = false;
   private fetchImpl: typeof fetch;
 
   constructor(private opts: GeminiBrainOptions) {
@@ -134,8 +138,19 @@ export class GeminiBrain implements Brain {
     const u = raw.trim().replace(/^(hey |ok |okay )?alexa[,.!\s]*/i, '').trim();
     if (!u) return;
 
+    // During an emergency, "done" / "next" / "it's over" move the fixed guide on without the model.
+    const step = this.inEmergency ? emergencyAction(u) : null;
+    if (step) {
+      const r = await io.tool('emergency_step', { action: step });
+      if (r.isError || r.structuredContent?.resolved) this.inEmergency = false;
+      this.remember({ role: 'user', parts: [{ text: u }] });
+      this.remember({ role: 'model', parts: [{ text: textOf(r) }] });
+      return io.say(textOf(r));
+    }
+
     // Safety first, deterministically, before any model call.
     if (isEmergency(u)) {
+      this.inEmergency = true;
       const e = await io.tool('emergency', { description: u });
       this.remember({ role: 'user', parts: [{ text: u }] });
       this.remember({ role: 'model', parts: [{ text: textOf(e) }] });
@@ -179,7 +194,14 @@ export class GeminiBrain implements Brain {
             const r = await io.tool(name, callArgs);
             response = forModel(r);
             const s = r.structuredContent ?? {};
+            // Someone at the door: the parents get the photo, decided by the add-on, not left to the model.
+            if (name === 'door_check' && s.ask_parent?.door_event_id) {
+              io.task('ask_parent_and_wait', { question: s.ask_parent.question, door_event_id: s.ask_parent.door_event_id }, (result) => io.say(textOf(result)));
+              response = { ...forModel(r), parents_asked: true };
+            }
+            if (name === 'emergency') this.inEmergency = true;
             if (s.emergency && name !== 'emergency') {
+              this.inEmergency = true;
               const e = await io.tool('emergency', { description: String(args.question ?? args.text ?? u), description_english: args.question_english ?? args.text_english });
               spoken.push(textOf(e));
               response = { ...forModel(r), emergency_handled: true };

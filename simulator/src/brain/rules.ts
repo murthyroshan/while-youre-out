@@ -24,8 +24,22 @@ const LANGS: Record<string, string> = {
 };
 
 type Pending = { kind: 'ask'; question: string } | { kind: 'ask_what' } | { kind: 'end' } | { kind: 'replace'; name: string } | { kind: 'teachback' };
+// The emergency guide: "done" / "I gave the EpiPen", "next", "repeat that", "the paramedics are here".
+const EMERGENCY_DONE = /^(done|did it|i did it|ok(ay)?,? done|finished|yes,? done|gave (it|her|him|the epi ?pen)|i gave (it|her|him|the epi ?pen)( to her| to him)?|epi ?pen (is )?(given|done|in)|called( 911)?|i called( 911)?|911 (is )?called|they'?re coming)[.!]*$/i;
+const EMERGENCY_NEXT = /^(next( step)?|skip( it)?|what'?s next|and then\??|what now\??)[.!?]*$/i;
+const EMERGENCY_BACK = /^(back|go back|repeat( that)?|say (that|it) again|what\??)[.!?]*$/i;
+const EMERGENCY_OVER = /^(it'?s over|all clear|false alarm|(the )?(paramedics|ambulance|ems|help) (is |are )?here|help has (arrived|come)|it'?s over,? the paramedics are here|she'?s (fine|ok(ay)?|better) now|he'?s (fine|ok(ay)?|better) now)[.!]*$/i;
+/** What a short reply means while the emergency guide is on screen, if anything. */
+export function emergencyAction(u: string): 'done' | 'next' | 'back' | 'resolved' | null {
+  return EMERGENCY_DONE.test(u) ? 'done' : EMERGENCY_NEXT.test(u) ? 'next' : EMERGENCY_BACK.test(u) ? 'back' : EMERGENCY_OVER.test(u) ? 'resolved' : null;
+}
 // "Call Mom", "phone Anita", "video call dad".
 const CALL = /^(?:please |can you |could you )?(?:call|phone|ring|video call|facetime|drop in on)\s+(?:to\s+)?(.+?)(?:\s+(?:now|please|for me))?[.!?]*$/i;
+// "Someone's knocking, should I open?", "who's at the door?", "the doorbell rang".
+const DOOR = /\b(knock\w*|doorbell|bell rang|ring(ing|s)?|someone|somebody|who'?s|who is)\b.*\b(door|outside|porch)\b|\b(should|can|do|shall) i (open|answer|get) (the|that) door\b|\blet (him|her|them) in\b|\bdoorbell\b/i;
+// "Maya misses her mom", "she's crying for her dad", "play Mom's message".
+const MISSING = /\b(miss(es|ing)?|crying for|asking for|wants?) (her |his |their )?(mom|mum|mommy|mummy|mama|dad|daddy|papa|parents|mother|father)\b/i;
+const PLAY_MESSAGE = /\bplay (the |mom'?s |mum'?s |dad'?s |the parents'? |their |her |his )?(goodnight |good night |bedtime )?(message|video|recording)\b/i;
 const HOW_IS_IT_GOING = /^(how'?s it going|how is it going|how are things|what'?s happening( tonight)?|home|go home|show (the )?home( screen)?|tonight)[.!?]*$/i;
 
 /**
@@ -35,6 +49,7 @@ const HOW_IS_IT_GOING = /^(how'?s it going|how is it going|how are things|what'?
 export class RuleBrain implements Brain {
   readonly name = 'Rules (no AI key needed)';
   private pending: Pending | null = null;
+  private inEmergency = false;
   private firstContact = 'a parent';
   private carer: string | null = null;
 
@@ -46,9 +61,19 @@ export class RuleBrain implements Brain {
     if (!u) return;
 
     // Safety first: anything that sounds like an emergency skips every other rule.
+    // During an emergency, short replies move the step-by-step guide on.
+    if (this.inEmergency) {
+      const action = emergencyAction(u);
+      if (action) {
+        const r = await io.tool('emergency_step', { action });
+        if (r.isError || r.structuredContent?.resolved) this.inEmergency = false;
+        return io.say(textOf(r));
+      }
+    }
+
     if (isEmergency(u)) {
       this.pending = null;
-      const e = await io.tool('emergency', { description: u });
+      const e = await this.emergency(io, u);
       return io.say(textOf(e));
     }
 
@@ -66,7 +91,7 @@ export class RuleBrain implements Brain {
       const r = await io.tool('teachback', skip ? { skip: true } : { answer: u });
       if (r.structuredContent?.emergency) {
         this.pending = null;
-        const e = await io.tool('emergency', { description: u });
+        const e = await this.emergency(io, u);
         return io.say(textOf(e));
       }
       if (r.structuredContent?.kind !== 'question') this.pending = null;
@@ -121,6 +146,13 @@ export class RuleBrain implements Brain {
       return io.say(`Welcome back. Should I end ${this.carer}'s handoff?`);
     }
 
+    if (DOOR.test(u) && !/\b(key|code|lock)\b/i.test(u)) return this.door(u, io);
+
+    if (PLAY_MESSAGE.test(u) || (MISSING.test(u) && !QUESTION_START.test(u))) {
+      const r = await io.tool('play_message', { when: PLAY_MESSAGE.test(u) ? 'any' : 'missing' });
+      return io.say(textOf(r));
+    }
+
     if (HOW_IS_IT_GOING.test(u)) {
       const r = await io.tool('home_screen');
       return io.say(textOf(r));
@@ -156,7 +188,7 @@ export class RuleBrain implements Brain {
       const s = r.structuredContent ?? {};
       // Logging never bypasses safety: the server flags emergencies, allergens and medicine.
       if (s.emergency) {
-        const e = await io.tool('emergency', { description: text });
+        const e = await this.emergency(io, text);
         return io.say(textOf(e));
       }
       if (s.allergy_alert) return io.say(String(s.allergy_alert));
@@ -173,7 +205,7 @@ export class RuleBrain implements Brain {
     if (r.isError) return io.say("Sorry, I couldn't check that.");
     const s = r.structuredContent ?? {};
     if (s.emergency) {
-      const e = await io.tool('emergency', { description: u });
+      const e = await this.emergency(io, u);
       return io.say(textOf(e));
     }
     io.say(textOf(r));
@@ -215,6 +247,26 @@ export class RuleBrain implements Brain {
     if (!shot) return io.say("Sorry, I couldn't take a photo.");
     const r = await io.tool('send_photo', { image_base64: shot.data, mime_type: shot.mime, ...(caption ? { caption: cap(caption) } : {}) });
     return io.say(textOf(r));
+  }
+
+  /** Starts the emergency script; from then on "done" and "next" move its guide on. */
+  private async emergency(io: DeviceIO, description: string) {
+    this.pending = null;
+    this.inEmergency = true;
+    return io.tool('emergency', { description });
+  }
+
+  private async door(u: string, io: DeviceIO) {
+    const r = await io.tool('door_check', { question: u });
+    const s = r.structuredContent ?? {};
+    if (s.emergency) {
+      const e = await this.emergency(io, u);
+      return io.say(textOf(e));
+    }
+    io.say(textOf(r));
+    // The parents see the doorbell photo and can answer from their lock screen.
+    const ask = s.ask_parent as { question: string; door_event_id: number } | null | undefined;
+    if (ask) io.task('ask_parent_and_wait', { question: ask.question, door_event_id: ask.door_event_id }, (result) => io.say(textOf(result)));
   }
 
   private askParent(question: string, io: DeviceIO) {

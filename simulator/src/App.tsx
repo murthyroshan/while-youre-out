@@ -41,6 +41,39 @@ interface CameraView {
   /** Waiting for the camera (or the browser's permission prompt). */
   opening?: boolean;
 }
+interface Ring {
+  snapshot: string;
+  label: string;
+  time: string;
+}
+const RINGERS: Array<[string, string]> = [
+  ['delivery', '📦 Delivery driver'],
+  ['stranger', '❓ Someone unknown'],
+  ['grandma', '👵 Nani with soup'],
+];
+
+/** A two-tone doorbell chime (Web Audio, no file needed). */
+function chime() {
+  try {
+    const ctx = new AudioContext();
+    [659.25, 523.25].forEach((f, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.value = f;
+      o.type = 'sine';
+      g.gain.setValueAtTime(0.0001, ctx.currentTime + i * 0.45);
+      g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + i * 0.45 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.45 + 1.1);
+      o.connect(g).connect(ctx.destination);
+      o.start(ctx.currentTime + i * 0.45);
+      o.stop(ctx.currentTime + i * 0.45 + 1.2);
+    });
+    setTimeout(() => void ctx.close(), 2500);
+  } catch {
+    // no audio: the screen still shows it
+  }
+}
+
 interface Call {
   name: string;
   relation: string;
@@ -48,14 +81,15 @@ interface Call {
 }
 
 // The demo, in the order a judge would try it (and the video tells it).
-const GUIDE: Array<{ title: string; lines: string[]; note?: string; clock?: [string, string] }> = [
+const GUIDE: Array<{ title: string; lines: string[]; note?: string; clock?: [string, string]; ring?: boolean }> = [
   { title: '1 · The parents hand over', clock: ['Sat', '18:00'], lines: ['Priya is babysitting tonight', 'Peanuts', 'In the kitchen drawer by the stove', 'Anita'], note: 'The Tonight screen appears, then a 3-question handover check.' },
   { title: '2 · Questions, in the parents’ words', lines: ['Can Maya have the cookies on the counter?', "Where's the EpiPen?", 'Can she watch another episode?'], note: 'Food always gets a guard; Shadow Parent says how the parents usually answer.' },
   { title: '3 · The evening goes on', clock: ['Sat', '18:40'], lines: ['She napped till 5', "What's next?", 'Send Mom a photo saying good night'], note: 'Late nap moves bedtime by the parents’ own rule.' },
-  { title: '4 · Ask a parent', lines: ['Can she sleep in your bed?', 'Yes'], note: 'Answer it on the parent page: the device announces the reply.' },
-  { title: '5 · Emergency', lines: ["Her lips are swelling and she can't breathe"], note: 'Fixed script, no AI. Every parent phone buzzes.' },
-  { title: '6 · Lights out', clock: ['Sat', '20:15'], lines: ['She fell asleep at 8:10'], note: 'The screen goes dim and warm.' },
-  { title: '7 · Morning', lines: ["We're back", 'Yes'], note: 'The debrief lands on the parent page.' },
+  { title: '4 · Someone at the door', clock: ['Sat', '18:50'], ring: true, lines: ["Someone's knocking, should I open the door?"], note: 'Ring the bell first. Unknown visitor: don’t open, and the photo goes to the parents’ lock screen.' },
+  { title: '5 · Ask a parent', lines: ['Can she sleep in your bed?', 'Yes'], note: 'Answer it on the parent page: the device announces the reply.' },
+  { title: '6 · Emergency', lines: ["Her lips are swelling and she can't breathe"], note: 'Fixed script, no AI. Every parent phone buzzes.' },
+  { title: '7 · Lights out', clock: ['Sat', '20:15'], lines: ['She fell asleep at 8:10'], note: 'The screen goes dim and warm.' },
+  { title: '8 · Morning', lines: ["We're back", 'Yes'], note: 'The debrief lands on the parent page.' },
   { title: 'Another language', lines: ['Dadi is babysitting tonight in Hindi', 'क्या माया कुकीज़ खा सकती है?'], note: 'Needs the Gemini brain for free speech.' },
 ];
 
@@ -85,6 +119,8 @@ export function App() {
   const [now, setNow] = useState(new Date());
   const [camera, setCamera] = useState<CameraView | null>(null);
   const [call, setCall] = useState<Call | null>(null);
+  const [ring, setRing] = useState<Ring | null>(null);
+  const [emergencyOn, setEmergencyOn] = useState(false);
   const [caption, setCaption] = useState<Line | null>(null);
   const rules = useRef(new RuleBrain());
   const [brainKind, setBrainKind] = useState<'gemini' | 'rules'>(() => {
@@ -248,12 +284,32 @@ export function App() {
     }
   };
 
+  // Ring announces the doorbell on Echo devices by itself; this stands in for that alert.
+  const ringDoorbell = async (who: string) => {
+    const r = await fetch(`${serverOrigin}/demo/ring`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ who }) }).catch(() => null);
+    if (!r?.ok) return;
+    const ev = await r.json();
+    chime();
+    setRing({ snapshot: `${serverOrigin}${ev.snapshot_url}`, label: ev.label, time: ev.time });
+    addLine('alexa', 'Someone is at the front door.');
+    if (voiceRef.current) void speak('Someone is at the front door.', 'en-US', () => setLight('speaking'), () => setLight('idle'));
+    setTimeout(() => setRing((x) => (x?.snapshot.endsWith(ev.snapshot_url) ? null : x)), 9000);
+    if (connRef.current) void refreshHome(connRef.current);
+  };
+
   const showCard = useCallback(
     async (c: McpConnection, tool: string, args: Record<string, unknown>, result: ToolResult, background = false) => {
       const uri = c.uiResourceFor(tool);
       if (!uri || !result.structuredContent) return;
       // A background answer must never cover the emergency screen.
       if (background && cardRef.current?.mode === 'fullscreen') return;
+      // The next step of the emergency guide updates the screen that's already up (no reload, no flash).
+      const open = cardRef.current;
+      if (tool === 'emergency_step' && open && (open.tool === 'emergency' || open.tool === 'emergency_step')) {
+        setCard({ ...open, args, result });
+        armCardTimer();
+        return;
+      }
       const html = await c.uiHtml(uri);
       setCard({ id: nextId++, tool, args, result, html, mode: c.wantsFullscreen(tool) ? 'fullscreen' : 'inline' });
       armCardTimer();
@@ -293,6 +349,7 @@ export function App() {
           if (name === 'start_handoff' && !result.isError) langRef.current = typeof args.language === 'string' ? args.language : 'en-US';
           if (name === 'end_handoff' && !result.isError) langRef.current = 'en-US';
           if (name === 'set_carer_language' && !result.isError && typeof args.language === 'string') langRef.current = args.language;
+          if (name === 'emergency' || name === 'emergency_step') setEmergencyOn(!result.structuredContent?.resolved);
           if (name === 'home_screen') {
             setCard(null);
             void refreshHome(c);
@@ -311,12 +368,14 @@ export function App() {
         // While it waits, the screen shows who was asked ("Asking Anita…"), like the task's status.
         const waiting = (asked: string) =>
           showCard(c, name, args, { content: [], structuredContent: { view: 'question', text: String(args.question ?? ''), status: 'pending', asked } }, true);
-        void waiting('a parent');
+        // A door question keeps the door card (photo, "don't open") on screen instead.
+        const door = Boolean(args.door_event_id);
+        if (!door) void waiting('a parent');
         void (async () => {
           try {
             for await (const update of c.callTask(name, args)) {
               const asked = update.status && /^Asked (.+)$/.exec(update.status);
-              if (asked && cardRef.current?.tool === name && cardRef.current.result.structuredContent?.status === 'pending') void waiting(asked[1]);
+              if (asked && !door && cardRef.current?.tool === name && cardRef.current.result.structuredContent?.status === 'pending') void waiting(asked[1]);
               if (update.status) {
                 setTasks((ts) => ts.map((t) => (t.id === id && t.statuses.at(-1) !== update.status ? { ...t, statuses: [...t.statuses, update.status!] } : t)));
               }
@@ -368,6 +427,25 @@ export function App() {
     },
     [conn, io, armCardTimer],
   );
+
+  // During an emergency the device says the plan's timers out loud ("One minute left on the EpiPen timer").
+  useEffect(() => {
+    if (!conn || !emergencyOn) return;
+    const t = setInterval(async () => {
+      try {
+        const r = await conn.call('emergency_status', { announce: true });
+        const s = r.structuredContent ?? {};
+        if (!s.active) return setEmergencyOn(false);
+        if ((s.announce as string[] | undefined)?.length) {
+          setCard((c) => (c?.tool === 'emergency' || c?.tool === 'emergency_step' ? { ...c, result: r } : c));
+          io(conn).say((s.announce as string[]).join(' '));
+        }
+      } catch {
+        // retried on the next tick
+      }
+    }, 4000);
+    return () => clearInterval(t);
+  }, [conn, emergencyOn, io]);
 
   // While someone is babysitting, the device reminds them when a step of tonight's plan comes due.
   useEffect(() => {
@@ -496,6 +574,13 @@ export function App() {
                 </div>
               )}
 
+              {ring && (
+                <div className="overlay ring-view" onClick={() => setRing(null)} role="alert">
+                  <img src={ring.snapshot} alt={`Doorbell camera: ${ring.label}`} />
+                  <div className="ring-top">🔔 Front Door · {ring.time}</div>
+                  <div className="ring-bottom">Someone is at the front door. Ask “Should I open the door?”</div>
+                </div>
+              )}
               {call && (
                 <div className="overlay call-view" role="dialog" aria-label={`Calling ${call.name}`}>
                   <div className={`call-avatar ${call.connected ? '' : 'ringing'}`}>{call.name.charAt(0)}</div>
@@ -614,6 +699,15 @@ export function App() {
                     </button>
                   ))}
                 </div>
+                {g.ring && demoTime && (
+                  <div className="chips ring-chips">
+                    {RINGERS.map(([who, label]) => (
+                      <button key={who} className="chip ring" onClick={() => void ringDoorbell(who)} title="Simulate the Ring doorbell">
+                        🔔 {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {g.note && <p className="muted small">{g.note}</p>}
               </li>
             ))}

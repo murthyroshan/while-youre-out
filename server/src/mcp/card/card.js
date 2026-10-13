@@ -110,6 +110,20 @@
   function list(items) { return items && items.length ? '<ul>' + items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>' : ''; }
   function panel(inner, cls) { return '<div class="panel ' + (cls || '') + '">' + inner + '</div>'; }
 
+  function legacyEmergency(d) {
+      document.body.style.background = '#7a0b10';
+      var steps = d.action_plan.steps || [];
+      return '<div class="emergency" role="alert"><span class="flag">' + icon('alert') + ' EMERGENCY</span><h1>' + esc(d.say_first) + '</h1>' +
+        (d.address ? '<div class="addr"><small>Tell 911 this address</small>' + esc(d.address) + '</div>' : '') +
+        '<div class="cols"><div><div class="eyebrow" style="color:#ffd7d8">' + esc(d.action_plan.source) + '</div><ol class="steps">' +
+        steps.map(function (s, i) { return '<li class="' + (i === 0 ? 'now' : '') + '">' + esc(s.text) + (s.timer_seconds ? ' <span class="pill" style="background:rgba(0,0,0,.25);color:#fff">' + icon('timer') + ' ' + Math.round(s.timer_seconds / 60) + ' min</span>' : '') + '</li>'; }).join('') +
+        '</ol></div><div class="side">' +
+        (d.epipen_photo ? '<img alt="Where the EpiPen is kept" src="' + esc(d.epipen_photo) + '">' : '') +
+        (d.epipen_location ? '<div class="box"><strong>EpiPen</strong>' + esc(d.epipen_location) + '</div>' : '') +
+        '<div class="box"><strong>Alerted</strong>' + esc((d.parents_alerted || []).join(', ') || 'The parents') + '</div>' +
+        '<p class="note">' + esc(d.note) + '</p></div></div></div>';
+    }
+
   // ---------- views ----------
   var views = {
     answer: function (d) {
@@ -189,25 +203,53 @@
 
     emergency: function (d) {
       document.body.style.background = '#7a0b10';
-      var steps = d.action_plan.steps || [];
-      return '<div class="emergency" role="alert"><span class="flag">' + icon('alert') + ' EMERGENCY</span><h1>' + esc(d.say_first) + '</h1>' +
-        (d.address ? '<div class="addr"><small>Tell 911 this address</small>' + esc(d.address) + '</div>' : '') +
-        '<div class="cols"><div><div class="eyebrow" style="color:#ffd7d8">' + esc(d.action_plan.source) + '</div><ol class="steps">' +
-        steps.map(function (s, i) { return '<li class="' + (i === 0 ? 'now' : '') + '">' + esc(s.text) + (s.timer_seconds ? ' <span class="pill" style="background:rgba(0,0,0,.25);color:#fff">' + icon('timer') + ' ' + Math.round(s.timer_seconds / 60) + ' min</span>' : '') + '</li>'; }).join('') +
-        '</ol></div><div class="side">' +
+      var inc = d.incident;
+      if (!inc) return legacyEmergency(d);
+      emergencyData = d;
+      emergencyReceived = Date.now();
+      if (inc.status === 'resolved') {
+        document.body.style.background = '#0d2a20';
+        return '<div class="emergency over"><span class="flag">' + icon('check') + ' EMERGENCY OVER</span><h1>Help has taken over</h1>' +
+          '<p class="sub" style="color:#c9f7e3">The parents have been told. Say “emergency” again if anything changes.</p>' +
+          '<ul class="inc-log">' + inc.updates.slice(-6).map(function (u) { return '<li><b>' + esc(u.time) + '</b> ' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul></div>';
+      }
+      if (showSheet) return paramedicSheet(d);
+      var step = inc.steps[inc.current];
+      var dots = inc.steps.map(function (s) { return '<i class="' + s.state + '"></i>'; }).join('');
+      var otw = inc.on_the_way.map(function (o) { return '<span class="otw">' + icon('heart') + ' ' + esc(o.name) + ' is on the way · home by ' + esc(o.eta) + '</span>'; }).join('');
+      var timer = inc.timers[0];
+      var C = 2 * Math.PI * 44;
+      var side = (timer
+        ? '<div class="eringbox"><div class="ering" data-timer="' + timer.remaining_seconds + '" data-total="' + (timer.remaining_seconds > 0 ? Math.max(timer.remaining_seconds, 60) : 1) + '">' +
+          '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" stroke-width="7" fill="none" class="track"/><circle cx="50" cy="50" r="44" stroke-width="7" fill="none" class="prog" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="0"/></svg>' +
+          '<b class="tab" id="timerText"></b></div><div><strong>' + esc(timer.label) + '</strong><span>' + esc(timer.step_text) + '</span></div></div>'
+        : '') +
         (d.epipen_photo ? '<img alt="Where the EpiPen is kept" src="' + esc(d.epipen_photo) + '">' : '') +
         (d.epipen_location ? '<div class="box"><strong>EpiPen</strong>' + esc(d.epipen_location) + '</div>' : '') +
-        '<div class="box"><strong>Alerted</strong>' + esc((d.parents_alerted || []).join(', ') || 'The parents') + '</div>' +
-        '<p class="note">' + esc(d.note) + '</p></div></div></div>';
+        '<div class="box"><strong>Alerted</strong>' + esc((d.parents_alerted || []).join(', ') || 'The parents') + '</div>';
+      return '<div class="emergency guided" role="alert"><div class="etop"><span class="flag">' + icon('alert') + ' EMERGENCY</span><span class="elapsed tab" id="elapsed"></span>' + otw + '</div>' +
+        '<h1 class="first">' + esc(d.say_first) + '</h1>' +
+        (d.address ? '<div class="addr"><small>Tell 911 this address</small>' + esc(d.address) + '</div>' : '') +
+        '<div class="cols"><div class="stepcard">' +
+        (step
+          ? '<small>Step ' + (inc.current + 1) + ' of ' + inc.total + ' · ' + esc(d.action_plan.source) + '</small><p>' + esc(step.text) + '</p>'
+          : '<small>All steps done</small><p>Stay with her and follow the 911 dispatcher until help arrives.</p>') +
+        '<div class="stepdots">' + dots + '</div><div class="stepbtns">' +
+        (step ? '<button class="btn green" data-say="Done">' + icon('check') + ' Done</button><button class="btn" data-say="Next step">Next ›</button>' : '<button class="btn green" data-say="It\'s over, the paramedics are here">' + icon('check') + ' Help has arrived</button>') +
+        '<button class="btn" data-sheet="1">' + icon('list') + ' For paramedics</button></div></div>' +
+        '<div class="side">' + side + '<p class="note">' + esc(d.note) + '</p></div></div></div>';
     },
 
     question: function (d) {
       var who = String(d.asked || 'a parent').replace(/\s*\(.*\)$/, '');
-      var h = '<div class="eyebrow">' + icon('send') + (d.answer ? 'A parent answered' : 'Asking ' + esc(who)) + '</div><div class="chat"><div class="bubble me">“' + esc(d.text) + '”</div>';
+      var h = '<div class="eyebrow">' + icon(d.door_snapshot ? 'door' : 'send') + (d.answer ? 'A parent answered' : 'Asking ' + esc(who)) + '</div>' +
+        // About the front door: the doorbell photo beside the conversation.
+        (d.door_snapshot ? '<div class="split door"><figure class="doorcam"><img src="' + esc(d.door_snapshot) + '" alt="Doorbell camera photo"></figure>' : '') +
+        '<div class="chat"><div class="bubble me">“' + esc(d.text) + '”</div>';
       if (d.answer) h += '<div class="bubble them"><b>' + esc(d.answer) + '</b><span class="by">' + esc(d.answered_by) + (d.scope === 'always' ? ' · saved as a house rule' : ' · just for tonight') + '</span></div>';
       else if (d.status === 'expired') h += '<p class="sub">Nobody answered in time.</p>';
       else h += '<div class="typing" aria-label="Waiting for an answer"><i></i><i></i><i></i><span style="margin-left:.5em">' + (d.busy_until ? 'Waiting until ' + esc(who) + ' is free' : 'Waiting for ' + esc(who)) + '</span></div>';
-      return panel(h + '</div>');
+      return panel(h + '</div>' + (d.door_snapshot ? '</div>' : ''));
     },
 
     summary: function (d) {
@@ -246,6 +288,40 @@
 
     handoff_conflict: function (d) {
       return panel('<div class="eyebrow">' + icon('users') + 'Sitter mode</div><div class="title">' + esc(d.current) + ' is already looking after things</div><p class="sub">Should I end that handoff and start one for ' + esc(d.requested) + '?</p>');
+    },
+
+    door: function (d) {
+      var e = d.event;
+      var V = {
+        unknown: ['safety', 'alert', 'Don’t open the door', 'They’re not on tonight’s list. The photo went to the parents.'],
+        expected: ['guard', 'users', 'Check first: ' + (d.expected[0] ? d.expected[0].name : 'expected'), 'Look through the window before you open. The parents are confirming.'],
+        delivery: ['ok', 'check', 'It’s a delivery', 'No need to open. Bring it in once the driver has gone.'],
+        no_event: ['info', 'door', 'No one at the door camera', 'Nobody has rung in the last few minutes.'],
+        parent_decided: [d.decision && /let them in|fine|yes/i.test(d.decision.answer) ? 'ok' : 'safety', 'message', d.decision ? d.decision.by + ' answered' : 'A parent answered', d.decision ? '“' + d.decision.answer + '”' : ''],
+      }[d.verdict] || ['info', 'door', 'Front door', ''];
+      var cam = e && e.snapshot_url
+        ? '<figure class="doorcam"><img src="' + esc(e.snapshot_url) + '" alt="Doorbell camera: ' + esc(e.label) + '"><figcaption><i></i>Front door · ' + esc(e.time || '') + '</figcaption></figure>'
+        : '<div class="doorcam empty">' + icon('door') + '</div>';
+      var people = (d.expected || []).concat(d.deliveries || []);
+      var right = '<div class="banner ' + V[0] + ' big">' + icon(V[1]) + '<div><strong>' + esc(V[2]) + '</strong><span>' + esc(V[3]) + '</span></div></div>' +
+        (d.rule ? quoteFact({ text: d.rule.text, said_by: d.rule.said_by }) : '') +
+        (people.length ? '<div class="tile"><h3>' + icon('users') + 'Expected tonight</h3>' + list(people.map(function (v) { return v.name + (v.window ? ' · ' + v.window : '') + (v.note ? ' · ' + v.note : ''); })) + '</div>' : '');
+      return panel('<div class="eyebrow">' + icon('door') + 'Front door</div><div class="split door">' + cam + '<div class="stack">' + right + '</div></div>');
+    },
+
+    message: function (d) {
+      document.body.style.background = '#120c08';
+      var who = d.relation && /mom|mum|mother/i.test(d.relation) ? 'Mom' : d.relation && /dad|father/i.test(d.relation) ? 'Dad' : d.from;
+      var media = d.kind === 'video'
+        ? '<video id="media" src="' + esc(d.url) + '" playsinline></video>'
+        : '<div class="wave" aria-hidden="true">' + Array(9).join('<i></i>') + '</div><audio id="media" src="' + esc(d.url) + '"></audio>';
+      // Alexa says who it's from first; then the message plays.
+      setTimeout(function () { var m = document.getElementById('media'); if (m) m.play().catch(function () {}); }, 3500);
+      return '<div class="goodnight ' + esc(d.kind) + '"><div class="gn-text"><div class="eyebrow" style="color:#e9c98f">' + icon('heart') + 'A message from home</div>' +
+        '<h1>' + esc(who) + ' left a message for ' + esc(d.for_name || 'you') + '</h1>' +
+        (d.caption ? '<p class="gn-caption">“' + esc(d.caption) + '”</p>' : '') +
+        '<div class="stepbtns"><button class="btn" id="replay">' + icon('heart') + ' Play again</button></div></div>' +
+        '<div class="gn-media">' + media + '</div></div>';
     },
 
     home: function (d) { return home(d); },
@@ -314,6 +390,7 @@
     if (d.last_answer) rows.push('<div class="row">' + icon('message') + '<div><b>' + esc(d.last_answer.by) + '</b> answered <q>' + esc(d.last_answer.answer) + '</q><br><span class="sub">' + (d.last_answer.minutes_ago < 1 ? 'just now' : d.last_answer.minutes_ago + ' min ago') + '</span></div></div>');
     if (d.questions_waiting) rows.push('<div class="row">' + icon('send') + '<div>' + d.questions_waiting + ' question' + (d.questions_waiting > 1 ? 's' : '') + ' waiting for the parents</div></div>');
     if (d.last_log) rows.push('<div class="row">' + icon('clock') + '<div><span class="tab">' + esc(d.last_log.time) + '</span> · ' + esc(d.last_log.text) + '</div></div>');
+    if (d.door) rows.push('<div class="row">' + icon('door') + '<div><span class="tab">' + esc(d.door.time) + '</span> · ' + esc(d.door.label) + (d.door.decision ? '<br><span class="sub">' + esc(d.door.decision) + '</span>' : '') + '</div></div>');
     if (d.photos_sent) rows.push('<div class="row">' + icon('camera') + '<div>' + d.photos_sent + ' photo' + (d.photos_sent > 1 ? 's' : '') + ' sent to the parents</div></div>');
     if (d.mode === 'parent' && d.parents.length) rows.push('<div class="row">' + icon('phone') + '<div>Questions go to <b>' + esc(andList(d.parents.map(function (p) { return p.name; }))) + '</b>, in your call order</div></div>');
     if (!rows.length && d.mode === 'carer') rows.push('<div class="row">' + icon('info') + '<div>Ask me anything about the house, or tell me how it’s going.</div></div>');
@@ -328,6 +405,66 @@
       : '';
     return '<div class="home' + (d.night ? ' night' : '') + (d.mode === 'parent' ? ' parent' : '') + '">' + header + main + side + footer + '</div>';
   }
+
+  // ---------- the emergency guide: ticking clock, timers, refresh ----------
+  var emergencyData = null;
+  var emergencyReceived = 0;
+  var showSheet = false;
+  var emergencyTimer = null;
+  function paramedicSheet(d) {
+    var p = d.paramedic_sheet || {};
+    var inc = d.incident || { updates: [] };
+    return '<div class="sheet"><div class="eyebrow">' + icon('list') + 'For the paramedics</div><h1>' + esc((d.address || '').split(',')[0] || 'Paramedic sheet') + '</h1>' +
+      '<div class="grid2"><div class="tile must"><h3>' + icon('shield') + 'Allergies</h3>' + (list(p.allergies) || '<p>None on file</p>') + '</div>' +
+      '<div class="tile"><h3>' + icon('pill') + 'Medicine</h3>' + (list(p.medicine_notes) || '<p>None given tonight</p>') + '</div>' +
+      '<div class="tile"><h3>' + icon('phone') + 'Doctor</h3><p>' + esc(p.doctor || 'Not on file') + '</p></div>' +
+      '<div class="tile"><h3>' + icon('clock') + 'Tonight</h3>' + list(inc.updates.map(function (u) { return u.time + ' · ' + u.text; }).concat((p.tonight || []).map(function (e) { return e.text; }))) + '</div></div>' +
+      '<div class="stepbtns" style="margin-top:1em"><button class="btn red" data-sheet="0">' + icon('alert') + ' Back to the steps</button></div></div>';
+  }
+  function tickEmergency() {
+    if (!emergencyData || !emergencyData.incident) return;
+    var passed = (Date.now() - emergencyReceived) / 1000;
+    var el = document.getElementById('elapsed');
+    if (el) el.textContent = mmss(emergencyData.incident.elapsed_seconds + passed) + ' since the alert';
+    document.querySelectorAll('.ering[data-timer]').forEach(function (r) {
+      var left = Math.max(0, Number(r.getAttribute('data-timer')) - passed);
+      var total = Number(r.getAttribute('data-total')) || 1;
+      var t = r.querySelector('#timerText');
+      if (t) t.textContent = left > 0 ? mmss(left) : 'Now';
+      var prog = r.querySelector('.prog');
+      if (prog) prog.setAttribute('stroke-dashoffset', String((2 * Math.PI * 44) * (1 - left / total)));
+      r.classList.toggle('up', left <= 0);
+    });
+  }
+  function mmss(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60); }
+  function startEmergencyTimers() {
+    stopEmergencyTimers();
+    tickEmergency();
+    emergencyTimer = setInterval(tickEmergency, 1000);
+    // The parents' phones and the carer's "done" change the guide: keep the screen in step.
+    refreshTimer = setInterval(function () {
+      request('tools/call', { name: 'emergency_status', arguments: {} }).then(function (r) {
+        var s = r && r.structuredContent;
+        if (s && s.view === 'emergency' && JSON.stringify(s.incident) !== JSON.stringify(emergencyData && emergencyData.incident)) render(r);
+      }).catch(function () {});
+    }, 3000);
+  }
+  function stopEmergencyTimers() { clearInterval(emergencyTimer); emergencyTimer = null; }
+  // Goodnight message: play again, and the wave moves while it plays.
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('#replay')) return;
+    var m = document.getElementById('media');
+    if (m) { m.currentTime = 0; m.play().catch(function () {}); }
+  });
+  document.addEventListener('play', function (e) { var g = document.querySelector('.goodnight'); if (g && e.target.id === 'media') g.classList.add('playing'); }, true);
+  document.addEventListener('ended', function (e) { var g = document.querySelector('.goodnight'); if (g && e.target.id === 'media') g.classList.remove('playing'); }, true);
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-sheet]');
+    if (!b || !current) return;
+    showSheet = b.getAttribute('data-sheet') === '1';
+    render(current);
+  });
 
   function startHomeTimers() {
     stopHomeTimers();
@@ -370,8 +507,10 @@
       }
       root.innerHTML = html;
     }
+    stopHomeTimers();
+    stopEmergencyTimers();
     if (d && d.view === 'home') startHomeTimers();
-    else stopHomeTimers();
+    else if (d && d.view === 'emergency' && d.incident && d.incident.status === 'active') startEmergencyTimers();
     // Emergencies and the home screen take the whole screen on hosts that support it.
     if (d && (d.view === 'emergency' || d.view === 'home') && host.displayMode !== 'fullscreen') request('ui/request-display-mode', { mode: 'fullscreen' }).catch(function () {});
   }

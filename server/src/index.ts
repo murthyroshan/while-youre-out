@@ -14,6 +14,9 @@ import { createPush, isValidSubscription, type PushSender } from './domain/push.
 import { getPhotoData, recentPhotos } from './domain/photos.js';
 import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './domain/family.js';
 import { homeScreen } from './domain/home.js';
+import { listMessages, MAX_MESSAGE_BYTES, MessageError, messageMedia, removeMessage, saveMessage } from './domain/messages.js';
+import { activeIncident, incidentView, latestIncident, markOnTheWay } from './domain/incident.js';
+import { addVisitor, getDoorEvent, recordDoorEvent, removeVisitor, VisitorError, visitors } from './domain/door.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
 import { geminiChat, geminiFromEnv, AiUnavailableError, type AiClient, type ChatRequest } from './ai/gemini.js';
 import { decideProposal, importInfo, importNote, ImportError, IMAGE_TYPES, MAX_IMPORT_BYTES, pendingProposals, ProposalError } from './domain/houseBrain.js';
@@ -228,14 +231,25 @@ export function createApp(opts: AppOptions = {}) {
       parents: contacts(db)
         .filter((c) => c.priority < 9)
         .map((c) => c.name),
-      questions: pendingQuestions(db).map((q) => ({ ...q, contact: currentContactFor(db, q)?.name ?? null })),
+      questions: pendingQuestions(db).map((q) => ({ ...q, contact: currentContactFor(db, q)?.name ?? null, door_snapshot: getDoorEvent(db, q.door_event_id)?.snapshot_url ?? null })),
+      visitors: visitors(db),
+      messages: messagesView(),
       log: eveningLog(db),
       emergency: lastEmergency,
+      incident: (() => {
+        // The emergency in progress, or one that ended in the last hour.
+        const i = activeIncident(db) ?? latestIncident(db);
+        if (!i || (i.status === 'resolved' && Date.now() - Date.parse(i.resolved_at ?? i.started_at) > 60 * 60_000)) return null;
+        const sc = i.script as Record<string, unknown>;
+        return { ...incidentView(db, i), description: i.description, say_first: sc.say_first, address: sc.address || null, carer: activeHandoff(db)?.carer_name ?? null };
+      })(),
       photos: recentPhotos(db, activeHandoff(db)?.id ?? latestDebrief(db)?.handoff_id),
       household: getFamily(db).household,
       home: homeScreen(db),
     });
   });
+
+  const messagesView = () => listMessages(db).map(({ token, ...m }) => ({ ...m, url: `/media/messages/${m.id}?t=${token}` }));
 
   // ---------- Phone notifications ----------
   app.get('/parent/api/push/key', (req, res) => {
@@ -265,6 +279,67 @@ export function createApp(opts: AppOptions = {}) {
       { endpoint: typeof endpoint === 'string' ? endpoint : undefined },
     );
     res.json({ sent });
+  });
+
+  // ---------- Emergency: a parent tells the sitter they're coming ----------
+  app.post('/parent/api/incident', (req, res) => {
+    const { k, action, minutes, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (action !== 'on_the_way' || typeof minutes !== 'number' || !Number.isFinite(minutes)) return void res.status(400).json({ error: 'action on_the_way and minutes required' });
+    const i = markOnTheWay(db, parentName(by), minutes);
+    if (!i) return void res.status(409).json({ error: 'There is no emergency in progress.' });
+    res.json({ incident: incidentView(db, i) });
+  });
+
+  // ---------- Who to expect tonight (the Front Door Guard reads this) ----------
+  app.post('/parent/api/visitors', (req, res) => {
+    const { k, action, id, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    try {
+      if (action === 'add') addVisitor(db, req.body, parentName(by));
+      else if (action === 'remove' && Number.isInteger(id)) removeVisitor(db, id);
+      else return void res.status(400).json({ error: 'action must be add or remove' });
+      res.json({ visitors: visitors(db) });
+    } catch (e) {
+      if (e instanceof VisitorError) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
+  });
+
+  // ---------- Goodnight messages ----------
+  // Recorded on the phone (the raw audio/video is the body), played on the Echo Show.
+  app.post('/parent/api/messages', express.raw({ type: ['audio/*', 'video/*'], limit: MAX_MESSAGE_BYTES }), (req, res) => {
+    if (!authorised(req.query.k)) return void res.sendStatus(401);
+    if (!Buffer.isBuffer(req.body)) return void res.status(400).json({ error: 'Send the recording as audio or video.' });
+    try {
+      const q = req.query;
+      const m = saveMessage(db, {
+        data: req.body,
+        mime: String(req.headers['content-type'] ?? ''),
+        from: parentName(q.by),
+        for_name: typeof q.for === 'string' ? q.for : null,
+        when: typeof q.when === 'string' ? q.when : undefined,
+        caption: typeof q.caption === 'string' ? q.caption : null,
+      });
+      res.json({ message: { ...m, token: undefined }, messages: messagesView() });
+    } catch (e) {
+      if (e instanceof MessageError) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
+  });
+  app.post('/parent/api/messages/remove', (req, res) => {
+    const { k, id } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    if (!Number.isInteger(id)) return void res.status(400).json({ error: 'id required' });
+    removeMessage(db, id);
+    res.json({ messages: messagesView() });
+  });
+  app.get('/media/messages/:id', (req, res) => {
+    const m = messageMedia(db, Number(req.params.id), req.query.t);
+    if (!m) return void res.sendStatus(404);
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    res.setHeader('Accept-Ranges', 'none');
+    res.type(m.mime).send(m.data);
   });
 
   // ---------- Photos from home (parents only) ----------
@@ -456,6 +531,18 @@ export function createApp(opts: AppOptions = {}) {
   if (opts.demo ?? process.env.WYO_DEMO === '1') {
     // The demo deployment is public, so the simulator may link straight to the parent page.
     app.get('/demo/config', (_req, res) => void res.json({ parent_url: `/parent?k=${encodeURIComponent(parentKey)}` }));
+    // Stands in for a Ring doorbell event (Ring's API in production): who pressed the bell.
+    const RINGERS: Record<string, { kind: 'person' | 'package'; label: string; snapshot_url: string }> = {
+      delivery: { kind: 'package', label: 'Delivery driver with a package', snapshot_url: '/static/door/delivery.jpg' },
+      stranger: { kind: 'person', label: 'Person at the front door', snapshot_url: '/static/door/stranger.jpg' },
+      grandma: { kind: 'person', label: 'Person at the front door', snapshot_url: '/static/door/grandma.jpg' },
+    };
+    app.post('/demo/ring', (req, res) => {
+      const r = RINGERS[String(req.body?.who)];
+      if (!r) return void res.status(400).json({ error: 'who must be delivery, stranger or grandma' });
+      const ev = recordDoorEvent(db, { ...r, source: 'ring (simulated)' });
+      res.json({ ...ev, time: formatTime(localTime(householdTz(db), new Date(ev.at)).minutes) });
+    });
     app.get('/demo/clock', (_req, res) => void res.json({ ...localTime(householdTz(db)), demo: true }));
     app.post('/demo/clock', (req, res) => {
       try {

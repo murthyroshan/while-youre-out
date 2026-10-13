@@ -7,6 +7,8 @@ import { activeHandoff, currentContactFor, events, parentNames } from './house.j
 import { busyUntil, getSetting, setSetting } from './shadow.js';
 import type { Contact, Question } from '../db.js';
 import { summary, type TeachbackState } from './teachback.js';
+import { DOOR_ANSWERS, getDoorEvent } from './door.js';
+import type { Incident } from './incident.js';
 
 export interface PushSubscriptionJson {
   endpoint: string;
@@ -22,6 +24,10 @@ export interface PushMessage {
   urgent?: boolean;
   /** An image shown in the notification (Android), e.g. the sitter's photo. */
   image?: string;
+  /** The question this asks, so the phone can answer it straight from the notification. */
+  question_id?: number;
+  /** One-tap answers shown as notification buttons (Android Chrome, desktop). */
+  actions?: Array<{ action: string; title: string; answer: string }>;
 }
 
 /** Sends one encrypted message. Tests pass a fake; the default is the web-push library. */
@@ -91,9 +97,10 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
     const all = subscribers().filter((s) => !opts.endpoint || s.endpoint === opts.endpoint);
     const named = to === 'everyone' ? all : all.filter((s) => s.member && to.includes(s.member));
     const targets = named.length || opts.private ? named : all;
-    const payload = JSON.stringify({ ...msg, url: pageUrl });
     const results = await Promise.allSettled(
       targets.map(async (s) => {
+        // Each phone answers as its owner ("Answering as Anita").
+        const payload = JSON.stringify({ ...msg, url: pageUrl, by: s.member });
         try {
           await sender({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, {
             vapidDetails: { subject, publicKey: keys.publicKey, privateKey: keys.privateKey },
@@ -117,19 +124,41 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
   const questionBody = (q: Question) => (q.text_english && q.text_english !== q.text ? `"${q.text}" (${q.text_english})` : `"${q.text}"`);
 
   // ---------- what buzzes the phone ----------
+  /** The buttons a question gets on the lock screen. */
+  const answersFor = (q: Question): PushMessage['actions'] =>
+    q.door_event_id
+      ? [
+          { action: 'yes', title: 'Let them in', answer: DOOR_ANSWERS.yes },
+          { action: 'no', title: "Don't open", answer: DOOR_ANSWERS.no },
+        ]
+      : q.text.startsWith('Urgent:')
+        ? [{ action: 'call', title: 'Call me', answer: 'Please call me.' }]
+        : [
+            { action: 'yes', title: 'Approve', answer: "Yes, that's fine." },
+            { action: 'no', title: 'Deny', answer: "No, please don't." },
+          ];
+  const questionMessage = (q: Question, title: string): PushMessage => {
+    const door = getDoorEvent(db, q.door_event_id);
+    return {
+      title: door ? `${carer()}: someone's at the front door` : title,
+      body: q.text.startsWith('Urgent:') ? q.text.replace(/^Urgent:\s*/, '') : questionBody(q),
+      tag: `q${q.id}`,
+      urgent: q.urgency === 'urgent',
+      image: door?.snapshot_url ?? undefined,
+      question_id: q.id,
+      actions: answersFor(q),
+    };
+  };
   const onQuestion = (q: Question) => {
-    if (q.urgency === 'urgent') {
-      const body = q.text.startsWith('Urgent:') ? q.text.replace(/^Urgent:\s*/, '') : questionBody(q);
-      return void notify('everyone', { title: `Urgent: ${carer()} needs you`, body, tag: `q${q.id}`, urgent: true });
-    }
+    if (q.urgency === 'urgent') return void notify('everyone', questionMessage(q, `Urgent: ${carer()} needs you`));
     // Busy mode: small questions wait quietly on the page.
     if (busyUntil(db)) return;
     const first = currentContactFor(db, q);
-    void notify(first ? [first.name] : 'everyone', { title: `${carer()} asks`, body: questionBody(q), tag: `q${q.id}` });
+    void notify(first ? [first.name] : 'everyone', questionMessage(q, `${carer()} asks`));
   };
   const onEscalated = ({ question, contact }: { question: Question; contact: Contact }) => {
     if (busyUntil(db) && question.urgency !== 'urgent') return;
-    void notify([contact.name], { title: `${carer()} asks (no answer yet)`, body: questionBody(question), tag: `q${question.id}` });
+    void notify([contact.name], questionMessage(question, `${carer()} asks (no answer yet)`));
   };
   const onEmergency = (e: { description: string; carer: string | null }) => {
     void notify('everyone', {
@@ -161,7 +190,29 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
     }, { private: true });
   };
 
+  // The emergency, as it unfolds: one notification that updates in place (same tag).
+  const onIncident = ({ incident: i, change }: { incident: Incident; change: string }) => {
+    const last = i.updates.at(-1);
+    const who = last?.by ?? carer();
+    const step = Math.min(i.current, i.steps.length);
+    const timer = change === 'step' && i.current === 1 && i.timers.length ? ` ${Math.round(i.timers[0].seconds / 60)}-minute timer started.` : '';
+    const msg: Record<string, PushMessage> = {
+      step: { title: `Emergency · step ${step} of ${i.steps.length} done`, body: `${who}: ${last?.text ?? ''}${timer}`, tag: 'emergency', urgent: true },
+      timer: { title: 'Emergency · timer', body: i.timers.some((t) => t.ended) ? `Time's up: ${i.steps[i.timers.find((t) => t.ended)!.step_index]?.text ?? ''}` : 'One minute left on the timer.', tag: 'emergency', urgent: true },
+      reported: { title: 'Emergency · update', body: `${who}: ${last?.text ?? ''}`, tag: 'emergency', urgent: true },
+      on_the_way: { title: `${who} is on the way home`, body: last?.text ?? '', tag: 'emergency-otw' },
+      resolved: { title: 'Emergency over', body: `${who} says it's over.`, tag: 'emergency' },
+    };
+    if (msg[change]) void notify('everyone', msg[change]);
+  };
+
+  const onMessagePlayed = (m: { for_name: string | null; from_name: string; carer: string | null }) => {
+    void notify(parentNames(db), { title: `${m.for_name ?? 'The kids'} heard your goodnight message 💛`, body: `Played on the Echo Show${m.carer ? ` with ${m.carer}` : ''}.`, tag: 'goodnight' });
+  };
+
   const handlers: Array<[string, (...a: any[]) => void]> = [
+    ['incident', onIncident],
+    ['message_played', onMessagePlayed],
     ['question', onQuestion],
     ['question_escalated', onEscalated],
     ['emergency', onEmergency],

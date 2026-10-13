@@ -1,6 +1,7 @@
 import { type DB, nowIso } from '../db.js';
 import { actionPlan, activeHandoff, contacts, eveningLog, events, household, visibleFacts, whereIs } from './house.js';
 import { emergencyKind, type EmergencyKind } from './safety.js';
+import { incidentView, openIncident } from './incident.js';
 
 interface Script {
   say_first: string;
@@ -112,7 +113,7 @@ export function startEmergency(db: DB, description: string) {
   };
   events.emit('emergency', alert);
 
-  return {
+  const result = {
     kind,
     say_first: script.say_first,
     address: home?.address ?? null,
@@ -129,4 +130,7 @@ export function startEmergency(db: DB, description: string) {
     },
     note: "This is a fixed safety script from the family's own information and general safety steps. It is not medical advice.",
   };
+  // The guide that walks the carer through it, one step at a time, with the plan's timers.
+  const incident = openIncident(db, { kind, description, steps: script.steps.map((s) => ({ text: s.text, timer_seconds: s.timer_seconds })), script: result });
+  return { ...result, incident: incidentView(db, incident) };
 }

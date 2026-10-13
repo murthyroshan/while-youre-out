@@ -111,6 +111,7 @@ export function AppFrame(props: {
       title={`${props.toolName} card`}
       className={`app-frame ${props.displayMode}`}
       sandbox="allow-scripts"
+      allow="autoplay"
       srcDoc={props.html}
       style={props.displayMode === 'fullscreen' ? undefined : { height }}
     />

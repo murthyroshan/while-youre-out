@@ -294,3 +294,56 @@ test('the Emergency button on the screen runs the emergency script', async () =>
   const d = await run(['Emergency']);
   assert.equal(d.calls[0].name, 'emergency');
 });
+
+// ---------- front door ----------
+
+test('"Someone\'s knocking, should I open?" checks the door and sends the photo to the parents', async () => {
+  const d = await run(["Someone's knocking, should I open the door?"], {
+    door_check: { content: [{ type: 'text', text: "Don't open the door." }], structuredContent: { ask_parent: { question: 'Someone you didn’t list is at the door', door_event_id: 7 } } },
+  });
+  assert.equal(d.calls[0].name, 'door_check');
+  assert.deepEqual(d.said, ["Don't open the door."]);
+  assert.deepEqual(d.tasks, [{ name: 'ask_parent_and_wait', args: { question: 'Someone you didn’t list is at the door', door_event_id: 7 } }]);
+});
+
+test('a delivery needs no parent; "where is the door key" is not a door check', async () => {
+  const delivery = await run(["Who's at the door?"], { door_check: { content: [{ type: 'text', text: "It's a delivery." }], structuredContent: { ask_parent: null } } });
+  assert.equal(delivery.tasks.length, 0);
+  const key = await run(['Where is the front door key?']);
+  assert.notEqual(key.calls[0].name, 'door_check');
+});
+
+// ---------- emergency guide ----------
+
+test('during an emergency, "done", "next" and "it\'s over" move the guide on', async () => {
+  const d = await run(["She can't breathe", 'Done', 'I gave the EpiPen', 'Next step', "It's over, the paramedics are here", 'Done'], {
+    emergency_step: { content: [{ type: 'text', text: 'Next, step 2 of 5' }], structuredContent: {} },
+  });
+  assert.deepEqual(
+    d.calls.map((c) => [c.name, c.args.action ?? null]),
+    [['emergency', null], ['emergency_step', 'done'], ['emergency_step', 'done'], ['emergency_step', 'next'], ['emergency_step', 'resolved'], ['emergency_step', 'done']],
+  );
+});
+
+test('the guide ends when it is over; "done" afterwards is an ordinary sentence again', async () => {
+  const d = await run(["She can't breathe", "It's over, the paramedics are here", 'Done'], {
+    emergency_step: { content: [{ type: 'text', text: 'Okay.' }], structuredContent: { resolved: true } },
+  });
+  assert.deepEqual(d.calls.map((c) => c.name), ['emergency', 'emergency_step', 'ask_house']);
+});
+
+test('"done" with no emergency does not touch the guide', async () => {
+  const d = await run(['Done']);
+  assert.notEqual(d.calls[0]?.name, 'emergency_step');
+});
+
+// ---------- goodnight message ----------
+
+test('"Maya misses her mom" plays the parents\' message; "play Mom\'s message" too', async () => {
+  const sad = await run(['Maya misses her mom']);
+  assert.deepEqual(sad.calls[0], { name: 'play_message', args: { when: 'missing' } });
+  const asked = await run(["Play Mom's goodnight message"]);
+  assert.deepEqual(asked.calls[0], { name: 'play_message', args: { when: 'any' } });
+  const question = await run(['Does she miss her mom when she naps?']);
+  assert.notEqual(question.calls[0].name, 'play_message');
+});
