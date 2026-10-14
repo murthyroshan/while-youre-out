@@ -145,6 +145,9 @@ test('end to end: emergency → "done" → the phones follow → "on my way" rea
   await settle();
   assert.equal(sent.at(-1).title, 'Emergency over');
   assert.equal((await call('emergency_status')).structuredContent.active, false);
+  // The parent's header no longer says "Emergency reported".
+  const after = await (await fetch(`${base}/parent/api/state?k=${KEY}`)).json();
+  assert.equal(after.emergency, null);
   assert.equal((await call('emergency_step', { action: 'done' })).isError, true);
   assert.equal((await post('/parent/api/incident', { action: 'on_the_way', minutes: 5 })).status, 409);
 });

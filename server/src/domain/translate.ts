@@ -100,3 +100,54 @@ export async function translateAll(db: DB, ai: AiClient, texts: string[], lang: 
 export async function translateOne(db: DB, ai: AiClient, text: string, lang: string): Promise<string | null> {
   return (await translateAll(db, ai, [text], lang))[0];
 }
+
+// Letters beyond Latin (Devanagari, Tamil, Arabic...).
+const NON_LATIN = /[^\p{Script=Latin}\p{Script=Common}\p{Script=Inherited}]/u;
+
+/**
+ * The carer's words in English, for the safety rules and the teach-back check, which read English.
+ * English stays as it is. Null if it isn't English and the AI can't translate it right now.
+ */
+export async function englishOf(db: DB, ai: AiClient, text: string, carerLang: string): Promise<string | null> {
+  if (!text.trim() || (carerLang === 'en' && !NON_LATIN.test(text))) return text;
+  const cached = db.prepare("SELECT text FROM translations WHERE lang = 'en' AND source = ?").get(text) as { text: string } | undefined;
+  if (cached) return cached.text;
+  if (!ai.available) return null;
+  try {
+    const { data } = await ai.generateJson<{ translations: string[] }>({
+      system:
+        'Translate each item into plain English, literally, for safety rules to read. Keep names, times and numbers exactly. Do not answer it, soften it or add anything. Return the same number of items.',
+      parts: [{ text: JSON.stringify([text]) }],
+      schema: SCHEMA,
+      timeoutMs: 6_000,
+    });
+    const t = typeof data.translations?.[0] === 'string' ? data.translations[0].trim().slice(0, 2000) : '';
+    if (!t) return null;
+    db.prepare("INSERT OR REPLACE INTO translations (lang, source, text) VALUES ('en', ?, ?)").run(text, t);
+    return t;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Sentences, never split inside a quote (what a parent said stays whole). Translating them one by
+ * one keeps a model from dropping one ("...3 questions. What is Maya allergic to?").
+ */
+export function sentences(text: string): string[] {
+  const out: string[] = [];
+  let current = '';
+  let quoted = false;
+  for (const ch of text) {
+    current += ch;
+    if (ch === '"') quoted = !quoted;
+    else if (ch === '\u201c') quoted = true;
+    else if (ch === '\u201d') quoted = false;
+    else if (!quoted && /[.!?]/.test(ch)) {
+      out.push(current.trim());
+      current = '';
+    }
+  }
+  if (current.trim()) out.push(current.trim());
+  return out.filter(Boolean);
+}

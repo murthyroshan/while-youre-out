@@ -51,9 +51,23 @@ export class RuleBrain implements Brain {
   private inEmergency = false;
   private firstContact = 'a parent';
   private carer: string | null = null;
+  private busyUntil: string | null = null;
 
-  async handle(raw: string, io: DeviceIO) {
+  /** What the home screen says about tonight, so a reload mid-evening keeps working. */
+  sync(state: { carer: string | null; firstContact?: string | null; busyUntil?: string | null }) {
+    this.carer = state.carer;
+    if (state.firstContact) this.firstContact = state.firstContact;
+    this.busyUntil = state.busyUntil ?? null;
+  }
+
+  /**
+   * With `out`, a phrase the rules don't recognise is declined (out.declined = true, nothing done)
+   * instead of going to the house manual, so the hybrid brain can ask the model.
+   */
+  async handle(raw: string, io: DeviceIO, out?: { declined?: boolean }) {
     const u = raw
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201c\u201d]/g, '"')
       .trim()
       .replace(/^(hey |ok |okay )?alexa[,.!\s]*/i, '')
       .trim();
@@ -204,11 +218,26 @@ export class RuleBrain implements Brain {
       }
       if (s.allergy_alert) return io.say(String(s.allergy_alert));
       if (s.medicine_alert) return io.say(String(s.medicine_alert));
+      // Something ran out: the parents are asked to add it to the shopping list.
+      const shop = s.shopping_ask as { question: string; shopping_item: string } | undefined;
+      if (shop) {
+        io.say(textOf(r));
+        return io.task('ask_parent_and_wait', { question: shop.question, shopping_item: shop.shopping_item }, (result) => io.say(textOf(result)));
+      }
       if (s.plan_change || r.isError) return io.say(textOf(r));
       return io.say(`Got it. ${textOf(r).replace(/^Logged: /, 'I noted: ')}`);
     }
 
+    if (out && !QUESTION_START.test(u) && !u.endsWith('?')) {
+      out.declined = true;
+      return;
+    }
     return this.askHouse(u, io);
+  }
+
+  /** Another brain answered: offers made earlier ("Want me to ask?") no longer apply. */
+  forgetOffers() {
+    if (this.pending?.kind !== 'teachback') this.pending = null;
   }
 
   private async askHouse(u: string, io: DeviceIO) {
@@ -219,11 +248,12 @@ export class RuleBrain implements Brain {
       const e = await this.emergency(io, u);
       return io.say(textOf(e));
     }
+    if (s.busy_until !== undefined) this.busyUntil = (s.busy_until as string | null) ?? null;
     io.say(textOf(r));
     if (s.suggest_ask_parent && !s.allergy_alert) {
       this.pending = { kind: 'ask', question: u };
-      // Food guards and Shadow Parent already end with "I can ask"; don't ask twice.
-      if (!/\bI can ask\b/i.test(textOf(r))) io.say(`Want me to ask ${this.firstContact}?`);
+      // Food guards and Shadow Parent already end with "I can ask" (in English underneath a translation).
+      if (!/\bI can ask\b/i.test(String(s.english ?? textOf(r)))) io.say(`Want me to ask ${this.firstContact}?`);
     }
   }
 
@@ -278,7 +308,11 @@ export class RuleBrain implements Brain {
   }
 
   private askParent(question: string, io: DeviceIO) {
-    io.say(`Okay, I'm asking ${this.firstContact} now. I'll tell you when they answer.`);
+    io.say(
+      this.busyUntil
+        ? `Okay. ${this.firstContact} asked for urgent questions only until ${this.busyUntil}, so it'll reach them then. I'll tell you the answer.`
+        : `Okay, I'm asking ${this.firstContact} now. I'll tell you when they answer.`,
+    );
     io.task('ask_parent_and_wait', { question }, (result) => io.say(textOf(result)));
   }
 }

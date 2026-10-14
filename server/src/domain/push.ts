@@ -2,6 +2,7 @@
 // even when the parent page is closed. Works on Android Chrome, desktop browsers, and iPhone once
 // the page is added to the home screen.
 import webpush from 'web-push';
+import { SHOP_ANSWERS } from './shopping.js';
 import { type DB, nowIso } from '../db.js';
 import { activeHandoff, currentContactFor, events, parentNames } from './house.js';
 import { busyUntil, getSetting, setSetting } from './shadow.js';
@@ -125,7 +126,12 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
   // ---------- what buzzes the phone ----------
   /** The buttons a question gets on the lock screen. */
   const answersFor = (q: Question): PushMessage['actions'] =>
-    q.door_event_id
+    q.shopping_item
+      ? [
+          { action: 'yes', title: 'Add to list', answer: SHOP_ANSWERS.yes },
+          { action: 'no', title: 'Not now', answer: SHOP_ANSWERS.no },
+        ]
+      : q.door_event_id
       ? [
           { action: 'yes', title: 'Let them in', answer: DOOR_ANSWERS.yes },
           { action: 'no', title: "Don't open", answer: DOOR_ANSWERS.no },

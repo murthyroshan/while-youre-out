@@ -331,3 +331,15 @@ p { margin: 0.3em 0; }
 .split.pay { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; }
 .qr { background: #fff; border-radius: var(--radius); padding: 1em; display: grid; justify-items: center; gap: 0.4em; color: #1d2433; font-size: var(--fs-xs); font-weight: 600; }
 .qr svg { width: 100%; max-width: 30vh; height: auto; }
+
+/* Lights out for the house (simulated smart home) */
+.scene { display: flex; flex-wrap: wrap; align-items: center; gap: .4em 1.1em; margin: 1em 0 0; padding: .7em 1em; border-radius: 14px; background: rgba(233, 201, 143, .1); border: 1px solid rgba(233, 201, 143, .25); color: #f3e3c3; font-size: .9em; }
+.scene svg { width: 1.2em; height: 1.2em; color: #e9c98f; }
+.scene b { font-weight: 700; }
+.scene .sub { margin-left: auto; font-size: .8em; opacity: .7; }
+
+/* The side column never runs under the buttons. */
+.home .status { overflow: hidden; }
+.home .status .row .sub { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* The device's Close button sits bottom right: keep fine print clear of it. */
+.emergency .note, .emergency .fine { padding-right: 6.5em; }

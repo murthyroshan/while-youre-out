@@ -33,6 +33,12 @@
     var named = (members || []).some(function (m) { return String(m.name).toLowerCase() === first; });
     return named ? title : title.charAt(0).toLowerCase() + title.slice(1);
   }
+  // Lights out for the house (simulated smart home): "Maya's room: lights dimmed · Front door: locked".
+  function scene(actions) {
+    if (!actions || !actions.length) return '';
+    return '<p class="scene">' + icon('moon') + actions.map(function (a) { return '<span><b>' + esc(a.device) + '</b> ' + esc(a.state) + '</span>'; }).join('') +
+      '<span class="sub">Simulated smart home</span></p>';
+  }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function cap(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
   function andList(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : (a[0] || ''); }
@@ -181,7 +187,7 @@
       var h = '<div class="eyebrow">' + icon('list') + 'Tonight’s plan</div>';
       if (d.plan_change) h += banner('guard', 'sparkles', 'Plan updated', d.plan_change);
       else if (d.shift_reason) h += '<span class="pill amber">Adjusted tonight</span>';
-      return panel(h + (items.length ? timeline(items) : '<div class="empty">' + icon('clock') + '<span>The parents haven’t given times for tonight.</span></div>'));
+      return panel(h + (items.length ? timeline(items) : '<div class="empty">' + icon('clock') + '<span>The parents haven’t given times for tonight.</span></div>') + scene(d.smart_home));
     },
 
     briefing: function (d) {
@@ -320,7 +326,7 @@
         '<h1>' + esc(who) + ' left a message for ' + esc(d.for_name || 'you') + '</h1>' +
         (d.caption ? '<p class="gn-caption">“' + esc(d.caption) + '”</p>' : '') +
         '<div class="stepbtns"><button class="btn" id="replay">' + icon('heart') + ' Play again</button></div></div>' +
-        '<div class="gn-media">' + media + '</div></div>';
+        '<div class="gn-media">' + media + '</div></div>' + scene(d.smart_home);
     },
 
     pay: function (d) {
@@ -401,18 +407,22 @@
         (m.allergy ? '<span class="pill red allergy">' + icon('shield') + ' ' + esc(m.allergy) + '</span>' : '') + '</div>';
     }).join('');
     var rows = [];
+    // A returning sitter: what the parents changed since their last visit (first hour).
+    if (d.changes && d.changes.length) rows.push('<div class="row">' + icon('info') + '<div><b>New since your last visit</b><br><span class="sub">' + esc(d.changes.join(' · ')) + '</span></div></div>');
+    if (d.smart_home && d.smart_home.length) rows.push('<div class="row">' + icon('moon') + '<div>' + esc(d.smart_home.map(function (a) { return a.device + ' ' + a.state; }).join(' · ')) + '<br><span class="sub">Simulated smart home</span></div></div>');
     if (d.last_answer) rows.push('<div class="row">' + icon('message') + '<div><b>' + esc(d.last_answer.by) + '</b> answered <q>' + esc(d.last_answer.answer) + '</q><br><span class="sub">' + (d.last_answer.minutes_ago < 1 ? 'just now' : d.last_answer.minutes_ago + ' min ago') + '</span></div></div>');
     if (d.questions_waiting) rows.push('<div class="row">' + icon('send') + '<div>' + d.questions_waiting + ' question' + (d.questions_waiting > 1 ? 's' : '') + ' waiting for the parents</div></div>');
     if (d.last_log) rows.push('<div class="row">' + icon('clock') + '<div><span class="tab">' + esc(d.last_log.time) + '</span> · ' + esc(d.last_log.text) + '</div></div>');
     if (d.door) rows.push('<div class="row">' + icon('door') + '<div><span class="tab">' + esc(d.door.time) + '</span> · ' + esc(d.door.label) + (d.door.decision ? '<br><span class="sub">' + esc(d.door.decision) + '</span>' : '') + '</div></div>');
     if (d.mode === 'parent' && d.parents.length) rows.push('<div class="row">' + icon('phone') + '<div>Questions go to <b>' + esc(andList(d.parents.map(function (p) { return p.name; }))) + '</b>, in your call order</div></div>');
     if (!rows.length && d.mode === 'carer') rows.push('<div class="row">' + icon('info') + '<div>Ask me anything about the house, or tell me how it’s going.</div></div>');
+    rows = rows.slice(0, 3);
     var side = '<section class="side"><div class="kids">' + kids + '</div>' + (rows.length ? '<div class="status">' + rows.join('') + '</div>' : '') + '</section>';
 
     var first = d.parents[0];
     var footer = d.mode === 'carer'
       ? '<footer><button class="btn blue" data-say="Ask the parents">' + icon('message') + ' Ask a parent</button>' +
-        '<button class="btn" data-say="What’s next?">' + icon('clock') + ' What’s next?</button>' +
+        '<button class="btn" data-say="What\'s next?">' + icon('clock') + ' What’s next?</button>' +
         '<button class="btn green" data-say="' + esc('Call ' + (first ? first.name : 'Mom')) + '">' + icon('phone') + ' Call ' + esc(first ? first.name : 'a parent') + '</button>' +
         '<button class="btn red" data-say="Emergency">' + icon('alert') + ' Emergency</button></footer>'
       : '';

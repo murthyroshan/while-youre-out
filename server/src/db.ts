@@ -58,6 +58,10 @@ export interface Question {
   contact_index: number;
   /** Set when the question is about someone at the front door. */
   door_event_id: number | null;
+  /** A shopping-list question: the item to add if a parent says yes. */
+  shopping_item: string | null;
+  /** 1 once the carer has been told the answer. */
+  heard: number;
   asked_at: string;
   answered_at: string | null;
 }
@@ -273,6 +277,8 @@ export function openDb(path = process.env.WYO_DB ?? ':memory:'): DB {
   addColumn('handoffs', 'plan_announced', "TEXT NOT NULL DEFAULT '[]'");
   addColumn('handoffs', 'teachback', 'TEXT');
   addColumn('questions', 'text_english', 'TEXT');
+  addColumn('questions', 'shopping_item', 'TEXT');
+  addColumn('questions', 'heard', 'INTEGER NOT NULL DEFAULT 0');
   addColumn('questions', 'door_event_id', 'INTEGER');
   addColumn('handoffs', 'rate_cents', 'INTEGER');
   return db;

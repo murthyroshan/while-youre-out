@@ -1,4 +1,6 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
+import { createHouses } from './houses.js';
+import { addToShoppingList, shoppingList } from './domain/shopping.js';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { existsSync } from 'node:fs';
 import express from 'express';
@@ -50,6 +52,7 @@ export interface AppOptions {
   pushSender?: PushSender;
 }
 
+const STARTED_AT = new Date().toISOString();
 const MAX_SESSIONS = 200;
 // Long enough for a quiet evening between questions.
 const SESSION_IDLE_MS = 6 * 60 * 60 * 1000;
@@ -78,6 +81,8 @@ export function createApp(opts: AppOptions = {}) {
   events.on('emergency', onEmergency);
   events.on('handoff', clearEmergency);
   events.on('reset', clearEmergency);
+  const onIncident = ({ change }: { change: string }) => change === 'resolved' && clearEmergency();
+  events.on('incident', onIncident);
   const push = createPush(db, { sender: opts.pushSender, publicUrl, parentKey });
 
   // Same as the SDK's createMcpExpressApp, with our own host checks.
@@ -456,20 +461,12 @@ export function createApp(opts: AppOptions = {}) {
   });
 
   // A simulated shopping list (in production this would be the family's Alexa shopping list).
-  const shopping = (): string[] => {
-    try {
-      return JSON.parse(getSetting(db, 'shopping_list') ?? '[]');
-    } catch {
-      return [];
-    }
-  };
+  const shopping = () => shoppingList(db);
   app.post('/parent/api/shopping', (req, res) => {
     const { k, item } = req.body ?? {};
     if (!authorised(k)) return void res.sendStatus(401);
     if (typeof item !== 'string' || !item.trim() || item.length > 60) return void res.status(400).json({ error: 'item required' });
-    const list = [...new Set([...shopping(), item.trim().toLowerCase()])].slice(-50);
-    setSetting(db, 'shopping_list', JSON.stringify(list));
-    res.json({ shopping: list });
+    res.json({ shopping: addToShoppingList(db, item) });
   });
 
   // ---------- House Brain: teach the house from notes parents already have ----------
@@ -603,6 +600,10 @@ export function createApp(opts: AppOptions = {}) {
   const simulatorDist = process.env.WYO_SIMULATOR_DIR ?? fileURLToPath(new URL('../../simulator/dist', import.meta.url));
   if (existsSync(simulatorDist)) app.use('/', express.static(simulatorDist));
   app.get('/health', (_req, res) => void res.json({ ok: true }));
+  // Which commit is live: Render sets RENDER_GIT_COMMIT on every deploy.
+  app.get('/version', (_req, res) =>
+    void res.json({ commit: process.env.RENDER_GIT_COMMIT ?? process.env.WYO_COMMIT ?? 'dev', started_at: STARTED_AT }),
+  );
 
   // JSON errors instead of Express's HTML error page (e.g. a file over the size limit).
   app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -618,6 +619,7 @@ export function createApp(opts: AppOptions = {}) {
     events.off('emergency', onEmergency);
     events.off('handoff', clearEmergency);
     events.off('reset', clearEmergency);
+    events.off('incident', onIncident);
     taskStore.cleanup();
     for (const t of sessions.values()) void t.close();
   };
@@ -634,7 +636,14 @@ if (isMain) {
     process.exit(1);
   }
   const host = process.env.HOST ?? '127.0.0.1';
-  const { app, parentKey } = createApp({ host, allowedHosts: process.env.ALLOWED_HOSTS?.split(',').map((h) => h.trim()) });
+  const allowedHosts = process.env.ALLOWED_HOSTS?.split(',').map((h) => h.trim());
+  const publicUrl = process.env.WYO_PUBLIC_URL ?? `http://127.0.0.1:${port}`;
+  // Every visitor of the demo gets a house of their own; the shared one keeps WYO_DB if set.
+  const { app, shared } = createHouses(
+    (url, isShared) => createApp({ host, allowedHosts, publicUrl: url, ...(isShared ? {} : { dbPath: ':memory:' }) }),
+    { publicUrl },
+  );
+  const parentKey = shared.parentKey;
   app.listen(port, host, () => {
     console.log(`While You're Out MCP server: http://${host}:${port}/mcp`);
     console.log(`Parent page: http://${host}:${port}/parent?k=${parentKey}`);

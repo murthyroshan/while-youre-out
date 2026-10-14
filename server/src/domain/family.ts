@@ -82,6 +82,7 @@ export function parseFamily(input: any): Family {
     };
   });
   if (new Set(members.map((m) => m.name.toLowerCase())).size !== members.length) throw new FamilyError('Two children or pets have the same name.');
+  if (!members.some((m) => m.kind === 'child')) throw new FamilyError('Add at least one child.');
 
   if (!Array.isArray(input.contacts) || input.contacts.length > 10) throw new FamilyError('Add up to 10 contacts.');
   const people: FamilyContact[] = input.contacts.map((c: any) => {

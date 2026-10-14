@@ -161,7 +161,7 @@ test('a phone that unsubscribed is forgotten; if the named person has no phone, 
 // ---------- family setup ----------
 
 test('family form checks: a name, a real time zone, someone to call, sensible phones', () => {
-  const ok = { household: { name: 'The Okoro family', address: '1 Elm St', timezone: 'Africa/Lagos' }, members: [], contacts: [{ name: 'Ada', relation: 'Mom', phone: '+234 803 555 0101' }] };
+  const ok = { household: { name: 'The Okoro family', address: '1 Elm St', timezone: 'Africa/Lagos' }, members: [{ name: 'Tobi', kind: 'child' }], contacts: [{ name: 'Ada', relation: 'Mom', phone: '+234 803 555 0101' }] };
   assert.equal(parseFamily(ok).household.timezone, 'Africa/Lagos');
   const bad = (patch: object, msg: RegExp) => assert.throws(() => parseFamily({ ...ok, ...patch }), (e: any) => e instanceof FamilyError && msg.test(e.message));
   bad({ household: { ...ok.household, name: ' ' } }, /name/);
@@ -170,6 +170,8 @@ test('family form checks: a name, a real time zone, someone to call, sensible ph
   bad({ contacts: [{ name: 'Dr. Ade', relation: 'Doctor', phone: '555 0101 22', doctor: true }] }, /not only a doctor/);
   bad({ contacts: [{ name: 'Ada', relation: 'Mom', phone: 'call me' }] }, /phone number/);
   bad({ members: [{ name: 'Tobi', kind: 'robot' }] }, /child or a pet/);
+  bad({ members: [] }, /at least one child/);
+  bad({ members: [{ name: 'Rex', kind: 'pet' }] }, /at least one child/);
   bad({ members: [{ name: 'Tobi', kind: 'child' }, { name: 'tobi', kind: 'pet' }] }, /same name/);
 });
 

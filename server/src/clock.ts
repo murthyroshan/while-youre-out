@@ -1,9 +1,17 @@
-// One clock for the whole server. In demo mode it can be moved ("make it 7:40 pm") so a video
-// can show the evening unfold without waiting; it always moves forward from the chosen time.
+// The house's clock. In demo mode it can be moved ("make it 7:40 pm") so a video can show the
+// evening unfold without waiting; it always moves forward from the chosen time. Each demo house
+// has its own (see context.ts).
+import { currentHouse } from './context.js';
 
-let offsetMs = 0;
+let defaultOffsetMs = 0;
+const offset = () => currentHouse()?.clockOffsetMs ?? defaultOffsetMs;
+const setOffset = (ms: number) => {
+  const house = currentHouse();
+  if (house) house.clockOffsetMs = ms;
+  else defaultOffsetMs = ms;
+};
 
-export const now = () => new Date(Date.now() + offsetMs);
+export const now = () => new Date(Date.now() + offset());
 export const nowIso = () => now().toISOString();
 
 export interface LocalTime {
@@ -48,15 +56,14 @@ export function setDemoTime(hhmm: string, tz: string, weekday?: string) {
   if (target >= 24 * 60) throw new Error('Use a time between 00:00 and 23:59');
   const day = weekday ? WEEKDAYS.findIndex((d) => d.toLowerCase() === weekday.slice(0, 3).toLowerCase()) : -1;
   if (weekday && day < 0) throw new Error('Use a weekday such as Sat');
-  offsetMs = 0;
   const current = localTime(tz, new Date());
   const days = day < 0 ? 0 : (day - WEEKDAYS.indexOf(current.weekday) + 7) % 7;
-  offsetMs = (days * 24 * 60 + target - current.minutes) * 60_000;
+  setOffset((days * 24 * 60 + target - current.minutes) * 60_000);
   return localTime(tz);
 }
 
 export function resetClock() {
-  offsetMs = 0;
+  setOffset(0);
 }
 
 export const formatTime = (minutes: number) => {

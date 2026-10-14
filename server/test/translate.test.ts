@@ -116,3 +116,75 @@ test('parents see the question in English as well as the carer\'s own words', as
   assert.ok(q);
   assert.equal(q.text, 'क्या वह पार्क जा सकती है?');
 });
+
+// ---------- the carer's words in English, for the safety rules ----------
+
+test('replies are translated sentence by sentence; a parent\'s quote stays whole', async () => {
+  const { sentences } = await import('../src/domain/translate.js');
+  assert.deepEqual(sentences('Quick check, 3 questions. What is Maya allergic to?'), ['Quick check, 3 questions.', 'What is Maya allergic to?']);
+  assert.deepEqual(sentences('Anita said: "No sweets. Fruit is fine." I can ask.'), ['Anita said: "No sweets. Fruit is fine." I can ask.']);
+});
+
+async function app(ai: AiClient) {
+  const created = createApp({ parentKey: 'k2', ai });
+  const h = created.app.listen(0, '127.0.0.1');
+  await new Promise((r) => h.once('listening', r));
+  const c = new Client({ name: 'tr2', version: '0' });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${(h.address() as AddressInfo).port}/mcp`)));
+  const run = async (name: string, args: Record<string, unknown> = {}) => (await c.callTool({ name, arguments: args })) as any;
+  const stop = async () => {
+    await c.close();
+    created.close();
+    h.closeAllConnections();
+    h.close();
+  };
+  return { run, stop };
+}
+
+test('a Hindi answer in the handover check is checked in English, even if the device sent no English', async () => {
+  const toEnglish: AiClient = {
+    available: true,
+    async generateJson<T>(req: JsonRequest) {
+      const items = JSON.parse((req.parts[0] as { text: string }).text) as string[];
+      const english = /plain English/.test(req.system);
+      return { data: { translations: items.map((t) => (english ? (t === 'मूंगफली' ? 'peanuts' : t) : `[hi] ${t}`)) } as T, model: 'fake' };
+    },
+  };
+  const { run, stop } = await app(toEnglish);
+  await run('start_handoff', { carer_name: 'Dadi', language: 'hi-IN' });
+  const first = await run('teachback');
+  assert.match(first.structuredContent.english, /What is Maya allergic to\?$/, 'the question is never dropped');
+  const r = await run('teachback', { answer: 'मूंगफली' });
+  assert.match(r.structuredContent.english, /^That's right\./);
+  await stop();
+});
+
+test("a food question in another language that can't be read in English is not guessed at", async () => {
+  const down: AiClient = { available: false, generateJson: async () => { throw new Error('down'); } };
+  const { run, stop } = await app(down);
+  await run('start_handoff', { carer_name: 'Dadi', language: 'hi-IN' });
+  const r = await run('ask_house', { question: 'क्या माया कुकीज़ खा सकती है?' });
+  assert.match(r.content[0].text, /couldn't understand that well enough to answer safely/);
+  assert.equal(r.structuredContent.suggest_ask_parent, true);
+  // Emergencies are still caught without any translation.
+  const e = await run('ask_house', { question: 'वह सांस नहीं ले पा रही है!' });
+  assert.equal(e.structuredContent.emergency, true);
+  await stop();
+});
+
+test('"where is" in another language answers with the place, once it is read in English', async () => {
+  const toEnglish: AiClient = {
+    available: true,
+    async generateJson<T>(req: JsonRequest) {
+      const items = JSON.parse((req.parts[0] as { text: string }).text) as string[];
+      const english = /plain English/.test(req.system);
+      return { data: { translations: items.map((t) => (english ? 'Where is the EpiPen?' : `[hi] ${t}`)) } as T, model: 'fake' };
+    },
+  };
+  const { run, stop } = await app(toEnglish);
+  await run('start_handoff', { carer_name: 'Dadi', language: 'hi-IN' });
+  const r = await run('ask_house', { question: 'एपिपेन कहाँ है?' });
+  assert.equal(r.structuredContent.view, 'location');
+  assert.match(r.structuredContent.english, /Kitchen drawer/);
+  await stop();
+});

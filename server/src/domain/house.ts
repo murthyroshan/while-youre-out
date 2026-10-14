@@ -1,4 +1,6 @@
 import { EventEmitter } from 'node:events';
+import { currentHouse } from '../context.js';
+import { addToShoppingList, SHOP_ANSWERS } from './shopping.js';
 import { type DB, type Fact, type Contact, type Handoff, type Question, type LogEvent, nowIso } from '../db.js';
 import {
   classifyQuestion,
@@ -14,7 +16,15 @@ import {
 
 export type Role = 'parent' | 'carer';
 
-export const events = new EventEmitter();
+const defaultEvents = new EventEmitter();
+/** The house's event bus: each demo house has its own (see context.ts). */
+export const events: EventEmitter = new Proxy(defaultEvents, {
+  get(target, prop) {
+    const bus = currentHouse()?.events ?? target;
+    const value = Reflect.get(bus, prop, bus);
+    return typeof value === 'function' ? value.bind(bus) : value;
+  },
+});
 // Each waiting ask-a-parent task listens for answers; allow many at once without warnings.
 events.setMaxListeners(200);
 
@@ -328,17 +338,19 @@ export function createQuestion(
   textEnglish?: string | null,
   /** The doorbell event the question is about ("Is this Nani at the door?"). */
   doorEventId?: number | null,
+  /** A shopping-list question ("Add diapers to the list?"): never a house rule, never about food safety. */
+  shoppingItem?: string | null,
 ): Question {
   const h = activeHandoff(db);
   // The stricter of the two readings wins (an emergency in either language is an emergency).
   const readings = [classifyQuestion(text), textEnglish ? classifyQuestion(textEnglish) : 'general'] as const;
   const order = ['emergency', 'safety_info', 'medicine', 'food', 'secret', 'return_time', 'general'];
-  const category = [...readings].sort((a, b) => order.indexOf(a) - order.indexOf(b))[0];
+  const category = shoppingItem ? 'general' : [...readings].sort((a, b) => order.indexOf(a) - order.indexOf(b))[0];
   const info = db
     .prepare(
-      'INSERT INTO questions (handoff_id, text, text_english, category, urgency, task_id, asked_at, door_event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO questions (handoff_id, text, text_english, category, urgency, task_id, asked_at, door_event_id, shopping_item) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     )
-    .run(h?.id ?? null, text, textEnglish ?? null, category, urgencyOverride ?? urgencyFor(category), taskId, nowIso(), doorEventId ?? null);
+    .run(h?.id ?? null, text, textEnglish ?? null, category, urgencyOverride ?? urgencyFor(category), taskId, nowIso(), doorEventId ?? null, shoppingItem ?? null);
   const q = getQuestion(db, Number(info.lastInsertRowid))!;
   events.emit('question', q);
   return q;
@@ -396,8 +408,11 @@ export function answerQuestionFromParent(
     t,
     id,
   );
+  // A shopping question just adds to the list (on a yes); it is never a house rule.
+  if (q.shopping_item && answer === SHOP_ANSWERS.yes) addToShoppingList(db, q.shopping_item);
   // A "call me" reply or an alert acknowledgement is not a house rule.
   const isRule =
+    !q.shopping_item &&
     !/^please call me\.?$/i.test(answer.trim()) &&
     !q.text.startsWith('Urgent:') &&
     // Codes, keys and passwords are passed on once and never stored for future carers.

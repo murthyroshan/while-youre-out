@@ -350,3 +350,32 @@ test('"hello" is a greeting, not thanks', async () => {
   assert.match(d.said[0], /^Hi\./);
   assert.equal(d.said[1], "You're welcome.");
 });
+
+// ---------- found in the Chrome run ----------
+
+test('curly quotes from a card button or a phone keyboard work like straight ones', async () => {
+  const d = await run(['What\u2019s next?']);
+  assert.equal(d.calls[0].name, 'tonight_plan');
+});
+
+test('after a reload mid-evening, the device still knows who is babysitting and who to ask', async () => {
+  const brain = new RuleBrain();
+  brain.sync({ carer: 'Priya', firstContact: 'Anita' });
+  const dev = fakeDevice({ end_handoff: { content: [{ type: 'text', text: 'Evening with Priya.' }] } });
+  await brain.handle("We're back", dev.io);
+  assert.match(dev.said[0], /end Priya's handoff/);
+  await brain.handle('Yes', dev.io);
+  assert.equal(dev.calls.at(-1)!.name, 'end_handoff');
+  await brain.handle('Ask Mom if she can stay up late', dev.io);
+  assert.match(dev.said.at(-1)!, /asking Anita/);
+});
+
+test('busy mode: the device says the question will wait, not "asking now"', async () => {
+  const brain = new RuleBrain();
+  brain.sync({ carer: 'Priya', firstContact: 'Anita', busyUntil: '9:13 pm' });
+  const dev = fakeDevice();
+  await brain.handle('Ask Mom if she can stay up late', dev.io);
+  assert.match(dev.said[0], /urgent questions only until 9:13 pm/);
+  assert.doesNotMatch(dev.said[0], /asking Anita now/);
+  assert.equal(dev.tasks.length, 1, 'the question is still sent');
+});

@@ -2,10 +2,11 @@
 // the house, and whether the parents have answered. Built from the same data as everything else;
 // the screen refreshes it every half minute.
 import type { DB } from '../db.js';
-import { formatTime, localTime } from '../clock.js';
+import { formatTime, localTime, now as nowDate } from '../clock.js';
 import { activeHandoff, eveningLog, household, householdTz, parentNames, pendingQuestions, contacts, visibleFacts } from './house.js';
 import { inSentence, nextItem, tonightPlan } from './plan.js';
-import { busyUntil } from './shadow.js';
+import { busyUntil, getSetting } from './shadow.js';
+import { sinceLastVisit } from './debrief.js';
 import { summary, teachbackState } from './teachback.js';
 import { latestDoorEvent } from './door.js';
 
@@ -39,6 +40,10 @@ export interface HomeScreen {
   teachback: { right: number; total: number; done: boolean } | null;
   /** The doorbell in the last hour, and what a parent said about it. */
   door: { time: string; label: string; decision: string | null } | null;
+  /** What the parents changed since this carer's last visit (first hour of the handoff). */
+  changes?: string[];
+  /** Lights out for the house (simulated smart home). */
+  smart_home?: Array<{ device: string; state: string }> | null;
 }
 
 /** "Peanuts", "Eggs and sesame": the allergens named in a child's allergy rules. */
@@ -115,10 +120,25 @@ export function homeScreen(db: DB): HomeScreen {
     last_log: log.length ? { time: timeOf(log.at(-1)!.at), text: log.at(-1)!.text } : null,
     questions_waiting: pendingQuestions(db).filter((q) => q.handoff_id === h.id).length,
     last_answer: answered
-      ? { by: answered.answered_by, answer: answered.answer, question: answered.text, minutes_ago: Math.max(0, Math.round((Date.now() - Date.parse(answered.answered_at)) / 60000)) }
+      ? { by: answered.answered_by, answer: answered.answer, question: answered.text, minutes_ago: Math.max(0, Math.round((nowDate().getTime() - Date.parse(answered.answered_at)) / 60000)) }
       : null,
     busy_until: busy ? formatTime(localTime(tz, busy).minutes) : null,
     teachback: tb ? { ...summary(tb), done: tb.done } : null,
+    // A returning carer: what the parents changed since their last visit, for the first hour.
+    changes: (() => {
+      if (nowDate().getTime() - Date.parse(h.started_at) > 60 * 60_000) return [];
+      const since = sinceLastVisit(db, h.carer_name, h.id);
+      return since ? [...since.added.map((a) => a.text), ...since.removed.map((r) => `No longer: ${r.text}`)].slice(0, 3) : [];
+    })(),
+    // Lights out for the house (simulated smart home), once it has happened tonight.
+    smart_home: (() => {
+      try {
+        const scene = JSON.parse(getSetting(db, 'smart_home') ?? 'null') as { at: string; actions: Array<{ device: string; state: string }> } | null;
+        return scene && scene.at >= h.started_at ? scene.actions : null;
+      } catch {
+        return null;
+      }
+    })(),
     door: (() => {
       const ev = latestDoorEvent(db, 60 * 60_000);
       if (!ev) return null;

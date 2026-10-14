@@ -13,6 +13,9 @@ body { margin: 0; background: #ebe5db; }
 button, input, select { font: inherit; }
 
 .page { display: grid; grid-template-columns: minmax(0, 1fr) 400px; min-height: 100vh; }
+.page.film { grid-template-columns: 1fr; }
+.page.film .device { width: min(100%, 1600px, calc((100vh - 48px) * 1.6)); }
+.page.film .device-label { visibility: hidden; }
 @media (max-width: 1150px) { .page { grid-template-columns: 1fr; } }
 
 /* ---------- the kitchen wall with the Echo Show 15 ---------- */

@@ -192,3 +192,52 @@ test('the demo clock endpoint exists only in demo mode', async () => {
     s.close();
   }
 });
+
+test('lights out: the house gets ready for bed (simulated smart home), said and shown once', async () => {
+  const { app, close } = createApp({ parentKey: 'k' });
+  const http = app.listen(0, '127.0.0.1');
+  await new Promise((r) => http.once('listening', r));
+  const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
+  const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+  const c = new Client({ name: 't', version: '0' });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${(http.address() as any).port}/mcp`)));
+  await c.callTool({ name: 'start_handoff', arguments: { carer_name: 'Priya' } });
+  setDemoTime('19:58', TZ);
+  const r = (await c.callTool({ name: 'tonight_plan', arguments: { announce: true } })) as any;
+  assert.ok(r.structuredContent.due.includes('bedtime'));
+  assert.deepEqual(r.structuredContent.smart_home.map((a: any) => a.device), ["Maya's room", 'Night light', 'Front door']);
+  assert.match(r.content[0].text, /dimmed Maya's room and checked the front door is locked/);
+  const again = (await c.callTool({ name: 'tonight_plan', arguments: { announce: true } })) as any;
+  assert.equal(again.structuredContent.smart_home ?? null, null, 'once');
+  resetClock();
+  await c.close();
+  close();
+  http.closeAllConnections();
+  http.close();
+});
+
+test("the goodnight message doesn't play twice in a row (she missed her mom, then lights out)", async () => {
+  const { app, close } = createApp({ parentKey: 'k' });
+  const http = app.listen(0, '127.0.0.1');
+  await new Promise((r) => http.once('listening', r));
+  const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
+  const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+  const c = new Client({ name: 't', version: '0' });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${(http.address() as any).port}/mcp`)));
+  await c.callTool({ name: 'start_handoff', arguments: { carer_name: 'Priya' } });
+  setDemoTime('19:55', TZ);
+  const missing = (await c.callTool({ name: 'play_message', arguments: { when: 'missing' } })) as any;
+  assert.equal(missing.structuredContent.view, 'message');
+  setDemoTime('19:58', TZ);
+  const lightsOut = (await c.callTool({ name: 'tonight_plan', arguments: { announce: true } })) as any;
+  assert.ok(lightsOut.structuredContent.due.includes('bedtime'));
+  assert.notEqual(lightsOut.structuredContent.view, 'message', 'not played again 3 minutes later');
+  assert.ok(lightsOut.structuredContent.smart_home, 'the house still gets ready for bed');
+  const home = (await c.callTool({ name: 'home_screen', arguments: {} })) as any;
+  assert.equal(home.structuredContent.smart_home.length, 3, 'and the home screen shows it');
+  resetClock();
+  await c.close();
+  close();
+  http.closeAllConnections();
+  http.close();
+});

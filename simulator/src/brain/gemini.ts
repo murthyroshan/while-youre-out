@@ -43,7 +43,7 @@ const DEVICE_FUNCTIONS = [
 const MAX_HISTORY = 24;
 const MAX_ROUNDS = 3;
 // Past this, the rule brain answers instead: a device that goes quiet feels broken.
-const MODEL_TIMEOUT_MS = 12_000;
+const MODEL_TIMEOUT_MS = 7_000;
 // Tools that only set something up: the model still has to act on what was said.
 const SETUP_TOOLS = new Set(['set_carer_language']);
 
@@ -128,6 +128,14 @@ export class GeminiBrain implements Brain {
     return (await res.json()) as { parts: Part[] };
   }
 
+  /** A turn another brain answered, so the model knows what was said ("What is Maya allergic to?"). */
+  note(user: string, said: string[]) {
+    const u = user.trim();
+    if (!u) return;
+    this.remember({ role: 'user', parts: [{ text: u }] });
+    if (said.length) this.remember({ role: 'model', parts: [{ text: said.join(' ') }] });
+  }
+
   private remember(content: Content) {
     this.history.push(content);
     // Never cut between a model's function call and its response.
@@ -194,6 +202,11 @@ export class GeminiBrain implements Brain {
             // Someone at the door: the parents get the photo, decided by the add-on, not left to the model.
             if (name === 'door_check' && s.ask_parent?.door_event_id) {
               io.task('ask_parent_and_wait', { question: s.ask_parent.question, door_event_id: s.ask_parent.door_event_id }, (result) => io.say(textOf(result)));
+              response = { ...forModel(r), parents_asked: true };
+            }
+            // Something ran out: the device asks the parents to add it to the shopping list.
+            if (name === 'log_event' && s.shopping_ask?.shopping_item) {
+              io.task('ask_parent_and_wait', { question: s.shopping_ask.question, shopping_item: s.shopping_ask.shopping_item }, (result) => io.say(textOf(result)));
               response = { ...forModel(r), parents_asked: true };
             }
             if (name === 'emergency') this.inEmergency = true;

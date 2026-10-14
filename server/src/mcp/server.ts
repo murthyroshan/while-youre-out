@@ -14,12 +14,14 @@ import { createPayment, dollars, duration, getPayment, payableHandoff, PaymentEr
 import { activeIncident, incidentView, latestIncident, stepIncident, takeIncidentAnnouncements } from '../domain/incident.js';
 import { importNote, ImportError } from '../domain/houseBrain.js';
 import { applyLogToPlan, inSentence, nextItem, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
+import { SHOP_ANSWERS, shoppingList, shoppingQuestion, suppliesMentioned } from '../domain/shopping.js';
+import { bedtimeScene } from '../domain/smarthome.js';
 import { teachback } from '../domain/teachback.js';
 import { busyUntil, shadowSuggestion } from '../domain/shadow.js';
 import { buildDebrief, sinceLastVisit } from '../domain/debrief.js';
-import { fixedTranslation, languageCode, LANGUAGES, translateOne } from '../domain/translate.js';
-import type { Handoff } from '../db.js';
-import { formatTime, localTime } from '../clock.js';
+import { englishOf, fixedTranslation, sentences, translateAll, languageCode, LANGUAGES, translateOne } from '../domain/translate.js';
+import type { Handoff, Question } from '../db.js';
+import { formatTime, localTime, now } from '../clock.js';
 import { AiUnavailableError, type AiClient } from '../ai/gemini.js';
 import QRCode from 'qrcode';
 import { cardHtml, CARD_MIME, CARD_URI } from './card.js';
@@ -54,16 +56,56 @@ const MAX_TEXT = 1000;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voiceWaitMs = 8_000 }: ServerDeps) {
-  const abs = (path: string | null) => (path ? new URL(path, publicUrl).href : null);
+  // Alexa+ add-ons can't start speaking on their own. So anything the carer hasn't heard yet (a
+  // reminder that came due, a parent's answer) is told at the start of the next reply, when they
+  // talk. The simulator also announces these by itself; whatever it said is never said twice.
+  const takeNotices = (): string[] => {
+    const h = activeHandoff(db);
+    if (!h) return [];
+    const names = (db.prepare('SELECT name FROM members').all() as Array<{ name: string }>).map((m) => m.name);
+    const out = takeDueAnnouncements(db, householdTz(db)).map((i) => `Reminder: ${inSentence(i.title, names)} at ${i.time}.`);
+    const answered = db.prepare("SELECT * FROM questions WHERE handoff_id = ? AND status = 'answered' AND heard = 0 ORDER BY id").all(h.id) as unknown as Question[];
+    for (const q of answered) {
+      out.push(
+        q.shopping_item
+          ? q.answer === SHOP_ANSWERS.yes
+            ? `${q.answered_by} added ${q.shopping_item} to the shopping list.`
+            : `${q.answered_by} said not now to ${q.shopping_item}.`
+          : `${q.answered_by} answered "${q.text.length > 60 ? `${q.text.slice(0, 57)}...` : q.text}": "${q.answer}"`,
+      );
+    }
+    if (answered.length) db.prepare(`UPDATE questions SET heard = 1 WHERE id IN (${answered.map(() => '?').join(',')})`).run(...answered.map((q) => q.id));
+    return out;
+  };
+  const withNotices = <A extends unknown[]>(fn: (...a: A) => Promise<CallToolResult>) =>
+    async (...a: A): Promise<CallToolResult> => {
+      const result = await fn(...a);
+      // Never in front of an emergency, and not for the device's own reminder checks.
+      const announcing = (a[0] as { announce?: boolean } | undefined)?.announce === true;
+      if (result.isError || result.structuredContent?.emergency || announcing) return result;
+      const notices = takeNotices();
+      if (!notices.length) return result;
+      const [first, ...rest] = result.content;
+      const content = first?.type === 'text' ? [{ ...first, text: `${notices.join(' ')} ${first.text}`.trim() }, ...rest] : [{ type: 'text' as const, text: notices.join(' ') }, ...result.content];
+      return { ...result, content, structuredContent: { ...(result.structuredContent ?? {}), notices } };
+    };
+
+  // Joined to the whole base URL, which on the demo includes the house (/h/<id>), not just the origin.
+  const abs = (path: string | null) =>
+    !path ? null : /^https?:\/\//.test(path) ? path : `${publicUrl.replace(/\/$/, '')}${path.startsWith('/') ? '' : '/'}${path}`;
   const clockTime = (d: Date) => formatTime(localTime(householdTz(db), d).minutes);
   const carerLang = () => languageCode(activeHandoff(db)?.language);
   /** A result spoken in the carer's language; the parents' original words stay in the data and on screen. */
   const localized = async (view: string, data: Record<string, unknown>, text: string): Promise<CallToolResult> => {
     const lang = carerLang();
     if (lang === 'en' || !text) return plain(view, data, text);
-    const spoken = await translateOne(db, ai, text, lang);
+    const parts = await translateAll(db, ai, sentences(text), lang);
+    const spoken = parts.every((p): p is string => Boolean(p)) ? parts.join(' ') : null;
     return plain(view, { ...data, language: lang, spoken, english: text }, spoken ?? text);
   };
+
+  /** The carer's words in English for the safety rules: the device's rendering, else ours. */
+  const inEnglish = async (said: string, given: string | undefined) => given || (await englishOf(db, ai, said, carerLang()));
 
   /** Alerts the parents about a possible allergen exposure and returns what to tell the carer. */
   const allergyAlert = (what: string, allergens: string[]) => {
@@ -318,7 +360,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       _meta: ui,
     },
     async ({ answer: spokenAnswer, answer_english, skip, restart }) => {
-      const answer = spokenAnswer === undefined ? undefined : [spokenAnswer, answer_english].filter(Boolean).join(' ');
+      const english = spokenAnswer === undefined ? undefined : await inEnglish(spokenAnswer, answer_english);
+      const answer = spokenAnswer === undefined ? undefined : [spokenAnswer, english !== spokenAnswer ? english : null].filter(Boolean).join(' ');
       if (answer && isEmergency(answer)) {
         return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
@@ -333,7 +376,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
             ? `All ${s.total} right. The parents can see the handover is confirmed.`
             : s.skipped === s.total
               ? 'Check skipped. The answers are on the screen, and the parents can see it was skipped.'
-              : `${s.right} of ${s.total} right${s.skipped ? `, ${s.skipped} skipped` : ''}. I've shown the correct answers, and the parents can see the result.`;
+              : `You got ${s.right} out of ${s.total} right${s.skipped ? ` and skipped ${s.skipped}` : ''}. I've shown the correct answers, and the parents can see the result.`;
         return localized('teachback', { ...step, carer: activeHandoff(db)?.carer_name }, [said, end].filter(Boolean).join(' '));
       }
       const intro = step.number === 1 && !fb ? `Quick check before the parents leave, ${step.total} questions. ` : '';
@@ -350,7 +393,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       inputSchema: { announce: z.boolean().default(false) },
       _meta: ui,
     },
-    async ({ announce }) => {
+    withNotices(async ({ announce }) => {
       const tz = householdTz(db);
       const due = announce ? takeDueAnnouncements(db, tz) : [];
       const plan = tonightPlan(db, tz);
@@ -365,14 +408,27 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
           : plan.items.length
             ? 'Everything on tonight\'s plan is done.'
             : "The parents haven't given times for tonight.";
-      // Lights out: the parents' goodnight message, if they left one for bedtime.
-      const goodnight = due.some((i) => i.key === 'bedtime') ? pickMessage(db, 'bedtime') : undefined;
+      // Lights out: the house gets ready for bed (simulated smart home), and the parents'
+      // goodnight message plays if they left one for bedtime.
+      const bedtime = due.some((i) => i.key === 'bedtime');
+      const scene = bedtime ? bedtimeScene(db) : null;
+      const picked = bedtime ? pickMessage(db, 'bedtime') : undefined;
+      const justPlayed = picked?.played_at ? now().getTime() - Date.parse(picked.played_at) < 15 * 60_000 : false;
+      const goodnight = justPlayed ? undefined : picked;
       if (goodnight && goodnight.when_to_play !== 'missing') {
         markPlayed(db, goodnight);
-        return localized('message', { ...messageCard(goodnight), due: due.map((i) => i.key) }, `${say} ${goodnight.from_name} left a goodnight message for ${goodnight.for_name ?? 'you'}.`);
+        return localized(
+          'message',
+          { ...messageCard(goodnight), due: due.map((i) => i.key), smart_home: scene?.actions ?? null },
+          `${say} ${goodnight.from_name} left a goodnight message for ${goodnight.for_name ?? 'you'}. ${scene?.say ?? ''}`.trim(),
+        );
       }
-      return localized('plan', { items: plan.items, now: plan.now.hhmm, shift: plan.shift, shift_reason: plan.shift_reason, due: due.map((i) => i.key) }, say);
-    },
+      return localized(
+        'plan',
+        { items: plan.items, now: plan.now.hhmm, shift: plan.shift, shift_reason: plan.shift_reason, due: due.map((i) => i.key), smart_home: scene?.actions ?? null },
+        `${say} ${scene?.say ?? ''}`.trim(),
+      );
+    }),
   );
 
   server.registerTool(
@@ -449,9 +505,21 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       },
       _meta: ui,
     },
-    async ({ question: said, question_english }) => {
-      // Safety rules read the English rendering when there is one; an emergency in either language counts.
-      const question = question_english || said;
+    withNotices(async ({ question: said, question_english }) => {
+      // Safety rules read English; an emergency in either language counts.
+      const english = await inEnglish(said, question_english);
+      if (english === null && !isEmergency(said)) {
+        return localized(
+          'answer',
+          { category: 'general', facts: [], guard: null, suggest_ask_parent: true },
+          "I couldn't understand that well enough to answer safely. I can ask a parent.",
+        );
+      }
+      const question = english ?? said;
+      // "Where's the EpiPen?" in any language: the place, as the parents described it.
+      const where = /^(?:where(?:'s| is| are| do i find| can i find| do they keep)|find)\s+(?:the |her |his |my |their |maya'?s )?(.+?)\??$/i.exec(question.trim());
+      const place = where && !isEmergency(question) ? whereIs(db, where[1]) : null;
+      if (place) return localized('location', { ...place, photo_url: abs(place.photo_url) }, `${place.item}: ${place.description}`);
       if (isEmergency(said) || isEmergency(question)) {
         return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
@@ -493,7 +561,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const pool = a.exact ? facts : close ? [facts[closeAt]] : [];
       const spoken = fitSpoken(pool, SPOKEN_WORDS - wordCount([...tonight, ...lead, ...after].join(' ')));
       return localized('answer', { ...a, shadow, busy_until: busy ? clockTime(busy) : null, tonight_bedtime: moved?.time ?? null }, [...tonight, ...lead, ...spoken, ...after].join(' '));
-    },
+    }),
   );
 
   server.registerTool(
@@ -505,13 +573,13 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       annotations: { readOnlyHint: true },
       _meta: ui,
     },
-    async ({ item }) => {
+    withNotices(async ({ item }) => {
       if (isEmergency(item)) return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       const loc = whereIs(db, item);
       if (!loc)
         return localized('answer', { category: 'general', facts: [], guard: null, found: false, suggest_ask_parent: true }, `The parents haven't said where the ${item} is. I can ask them.`);
       return localized('location', { ...loc, photo_url: abs(loc.photo_url) }, `${loc.item}: ${loc.description}`);
-    },
+    }),
   );
 
   server.registerTool(
@@ -526,12 +594,12 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         kind: z.enum(['sleep', 'food', 'mood', 'health', 'pet', 'note']).default('note'),
       },
     },
-    async ({ text: said, text_english, kind }) => {
-      const text = text_english || said;
+    withNotices(async ({ text: said, text_english, kind }) => {
+      const text = (await inEnglish(said, text_english)) ?? said;
       if (!activeHandoff(db)) {
         return { content: [{ type: 'text', text: 'There is no handoff in progress, so there is nothing to log yet.' }], isError: true };
       }
-      const ev = logEvent(db, text_english ? `${said} (${text_english})` : said, kind);
+      const ev = logEvent(db, text !== said ? `${said} (${text})` : said, kind);
       // Logging must never bypass the safety checks the carer would get by asking.
       if (isEmergency(text) || isEmergency(said)) {
         return plain('logged', { event: ev, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
@@ -555,8 +623,16 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         const plan = tonightPlan(db, householdTz(db));
         return localized('plan', { event: ev, plan_change: change.message, items: plan.items, shift: plan.shift, shift_reason: plan.shift_reason }, `Got it. ${change.message}`);
       }
+      // The shopping list agent: something ran out, so a parent is asked to add it to the list.
+      const missing = suppliesMentioned(text).filter((item) => !shoppingList(db).includes(item));
+      if (missing.length) {
+        const item = missing[0];
+        const first = parentNames(db)[0] ?? 'the parents';
+        const ask = { question: shoppingQuestion(activeHandoff(db)?.carer_name ?? 'The sitter', item), shopping_item: item };
+        return localized('logged', { event: ev, shopping_ask: ask }, `Got it. I'm asking ${first} to add ${item} to the shopping list.`);
+      }
       return { content: [{ type: 'text', text: `Logged: ${ev.text}` }], structuredContent: { view: 'logged', event: ev } };
-    },
+    }),
   );
 
   server.registerTool(
@@ -607,6 +683,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       if (!q || q.handoff_id !== current) return { content: [{ type: 'text', text: 'No such question.' }], isError: true };
       const who = currentContactFor(db, q);
       const text = q.status === 'answered' ? `${q.answered_by} said: "${q.answer}"` : `No answer yet from ${who?.name ?? 'the parents'}.`;
+      if (q.status === 'answered') db.prepare('UPDATE questions SET heard = 1 WHERE id = ?').run(q.id);
       return localized('question', { ...q, asked: who ? `${who.name} (${who.relation})` : 'a parent' }, text);
     },
   );
@@ -623,18 +700,19 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         question: z.string().trim().min(1).max(MAX_TEXT),
         question_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer spoke another language'),
         door_event_id: z.number().int().positive().optional().describe('From door_check: attaches the doorbell photo, and the question is treated as urgent'),
+        shopping_item: z.string().trim().min(1).max(60).optional().describe('From log_event (shopping_ask): the parents answer "add to list" or "not now"'),
       },
       execution: { taskSupport: 'required' },
       _meta: ui,
     },
     {
-      async createTask({ question, question_english, door_event_id }, { taskStore: store, taskRequestedTtl }) {
+      async createTask({ question, question_english, door_event_id, shopping_item }, { taskStore: store, taskRequestedTtl }) {
         // Between 1 minute and 6 hours, whatever the client asks for.
         const ttl = Math.min(Math.max(taskRequestedTtl ?? 60 * 60 * 1000, 60_000), 6 * 60 * 60 * 1000);
         const task = await store.createTask({ ttl, pollInterval: 2000 });
         // Someone waiting at the door can't wait for busy mode: door questions are urgent.
         const door = getDoorEvent(db, door_event_id);
-        const q = createQuestion(db, question, task.taskId, door ? 'urgent' : undefined, question_english ?? null, door?.id ?? null);
+        const q = createQuestion(db, question, task.taskId, door ? 'urgent' : undefined, question_english ?? null, door?.id ?? null, shopping_item ?? null);
         attachTask(db, q.id, task.taskId);
         const first = currentContactFor(db, q);
         // Busy mode: non-urgent questions wait quietly and don't move down the contact chain.
@@ -707,7 +785,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
           await store
             .storeTaskResult(task.taskId, 'completed', {
               content: [{ type: 'text', text: `No answer: ${closed.reason}` }],
-              structuredContent: { view: 'question', ...getQuestion(db, q.id), asked: first?.name ?? 'a parent' },
+              structuredContent: { view: 'question', ...getQuestion(db, q.id), asked: first?.name ?? 'a parent', closed: true },
             })
             .catch(() => {});
         };
@@ -720,10 +798,21 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
           if (!open) return;
           await store
             .storeTaskResult(task.taskId, 'completed', {
-              content: [{ type: 'text', text: `${answered.answered_by} said: "${answered.answer}"` }],
+              content: [
+                {
+                  type: 'text',
+                  text: shopping_item
+                    ? answered.answer === SHOP_ANSWERS.yes
+                      ? `${answered.answered_by} added ${shopping_item} to the shopping list.`
+                      : `${answered.answered_by} said not now to ${shopping_item}.`
+                    : `${answered.answered_by} said: "${answered.answer}"`,
+                },
+              ],
               structuredContent: { view: 'question', ...getQuestion(db, q.id), asked: answered.answered_by, door_snapshot: abs(door?.snapshot_url ?? null) },
             })
             .catch(() => {});
+          // The device was waiting on this task, so it hears the answer now: not repeated later.
+          db.prepare('UPDATE questions SET heard = 1 WHERE id = ?').run(q.id);
         };
         events.on('answered', onAnswered);
         return { task };
@@ -734,7 +823,10 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         return t;
       },
       async getTaskResult(_args, { taskId, taskStore: store }) {
-        return (await store.getTaskResult(taskId)) as CallToolResult;
+        const result = (await store.getTaskResult(taskId)) as CallToolResult;
+        // The device has the answer now: it isn't repeated at the start of the next reply.
+        db.prepare("UPDATE questions SET heard = 1 WHERE task_id = ? AND status = 'answered'").run(taskId);
+        return result;
       },
     },
   );
@@ -885,14 +977,14 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       annotations: { readOnlyHint: true },
       _meta: ui,
     },
-    async ({ question }) => {
+    withNotices(async ({ question }) => {
       if (question && isEmergency(question)) {
         return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
       const c = doorCheck(db);
       const data = { ...c, event: c.event ? { ...c.event, snapshot_url: abs(c.event.snapshot_url), time: clockTime(new Date(c.event.at)) } : null };
       return localized('door', data, c.say);
-    },
+    }),
   );
 
   return server;

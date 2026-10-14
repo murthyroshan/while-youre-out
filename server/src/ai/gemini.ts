@@ -44,7 +44,10 @@ export interface ChatRequest {
 // Models whose free-tier quota is used up (Google says when it resets): skipped until then, so a
 // spent key fails in milliseconds instead of making the device wait.
 const exhaustedUntil = new Map<string, number>();
-const CHAT_TIMEOUT_MS = 8_000;
+// A device waits for this at most, across every model tried; then the rule brain answers.
+const CHAT_BUDGET_MS = 5_000;
+// "High demand" (503) usually passes in a minute or two: skip that model meanwhile.
+const BUSY_SKIP_MS = 60_000;
 
 /** Out of quota: skip this model until Google says it resets. */
 function noteQuota(model: string, json: any) {
@@ -69,7 +72,7 @@ export async function geminiChat(req: ChatRequest, fetchImpl: typeof fetch = fet
   // gemini-flash-lite-latest is left out: it often hangs on large tool lists.
   const all = process.env.WYO_GEMINI_CHAT_MODELS?.split(',').map((m) => m.trim()).filter(Boolean) ?? ['gemini-3.6-flash', 'gemini-flash-latest', 'gemini-3.5-flash'];
   const models = all.filter((m) => (exhaustedUntil.get(m) ?? 0) <= Date.now());
-  if (!models.length) throw new AiUnavailableError('The Gemini key has used its free quota for now.');
+  if (!models.length) throw new AiUnavailableError('Gemini is busy or out of quota for now.');
   const body = JSON.stringify({
     systemInstruction: { parts: [{ text: req.system }] },
     contents: req.contents,
@@ -77,18 +80,22 @@ export async function geminiChat(req: ChatRequest, fetchImpl: typeof fetch = fet
     generationConfig: { temperature: 0.2 },
   });
   const errors: string[] = [];
+  const deadline = Date.now() + CHAT_BUDGET_MS;
   for (const model of models) {
+    const left = deadline - Date.now();
+    if (left < 500) break;
     try {
       const res = await fetchImpl(`${API}/${model}:generateContent`, {
         method: 'POST',
         headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
         body,
-        signal: AbortSignal.timeout(CHAT_TIMEOUT_MS),
+        signal: AbortSignal.timeout(left),
       });
       const json = (await res.json().catch(() => ({}))) as any;
       if (!res.ok) {
         errors.push(`${model}: ${res.status} ${json?.error?.message?.slice(0, 100) ?? ''}`);
         if (res.status === 429) noteQuota(model, json);
+        if (res.status === 503) exhaustedUntil.set(model, Date.now() + BUSY_SKIP_MS);
         if ((res.status === 400 && /api key/i.test(json?.error?.message ?? '')) || res.status === 403) break;
         continue;
       }
@@ -100,6 +107,8 @@ export async function geminiChat(req: ChatRequest, fetchImpl: typeof fetch = fet
       return { parts, model };
     } catch (e) {
       errors.push(`${model}: ${e instanceof Error ? e.message : String(e)}`);
+      // It hung until the budget ran out: as good as busy.
+      exhaustedUntil.set(model, Date.now() + BUSY_SKIP_MS);
     }
   }
   throw new AiUnavailableError(`No Gemini model could answer right now. ${errors.join(' | ')}`);
@@ -113,7 +122,7 @@ export function geminiFromEnv(): AiClient {
     async generateJson<T>({ system, parts, schema, timeoutMs = 20_000 }: JsonRequest) {
       if (!key) throw new AiUnavailableError('GEMINI_API_KEY is not set. Add it to server/.env.');
       const usable = models.filter((m) => (exhaustedUntil.get(m) ?? 0) <= Date.now());
-      if (!usable.length) throw new AiUnavailableError('The Gemini key has used its free quota for now.');
+      if (!usable.length) throw new AiUnavailableError('Gemini is busy or out of quota for now.');
       const body = JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
         contents: [{ role: 'user', parts }],

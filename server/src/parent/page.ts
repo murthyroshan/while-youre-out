@@ -23,6 +23,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
 <style>
   :root { --bg:#f6f2ec; --card:#fff; --ink:#1d2433; --muted:#667085; --green:#16815a; --red:#c81e28; --amber:#9a6200; --blue:#1f5fae; --line:#ebe5db; --shadow:0 1px 2px rgba(29,36,51,.05), 0 8px 24px rgba(29,36,51,.06); }
   * { box-sizing: border-box; }
+  main, .card { overflow-wrap: anywhere; }
   body { margin: 0; font: 16px/1.45 "Amazon Ember", Inter, system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); padding-bottom: 88px; -webkit-font-smoothing: antialiased; }
   .hero { background: radial-gradient(520px 260px at 0% 0%, rgba(99,179,255,.28), transparent 70%), linear-gradient(160deg, #16233a, #0b1322); color: #fff; padding: 16px 16px 20px; border-radius: 0 0 26px 26px; }
   .hero .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 560px; margin: 0 auto; }
@@ -245,7 +246,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
         <button data-reset="demo">Reset to the demo family</button>
         <button data-reset="fresh">Start fresh with my family</button>
       </div>
-      <p class="muted" id="resetNote">Clears tonight, past evenings, photos and saved rules. Tap again to confirm.</p>
+      <p class="muted" id="resetNote">Clears tonight, past evenings, messages and saved rules. Tap again to confirm.</p>
     </section>
   </div>
 </main>
@@ -375,7 +376,9 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       return '<div class="card" data-id="' + q.id + '">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') +
         '<p class="asker">' + esc(s.handoff ? s.handoff.carer_name : 'The sitter') + ' asks · ' + esc(time(q.asked_at)) + '</p><p class="q">“' + esc(q.text) + '”</p>' +
         (q.text_english ? '<p class="en">In English: “' + esc(q.text_english) + '”</p>' : '') +
-        (q.door_snapshot
+        (q.shopping_item
+          ? '<div class="btns"><button class="ok" data-a="Yes, add it to the list.">Add to list</button><button class="no" data-a="Not now.">Not now</button></div>'
+          : q.door_snapshot
           ? '<img class="doorcam" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' +
             '<div class="btns"><button class="ok" data-a="It\\'s fine, you can let them in.">Let them in</button><button class="no" data-a="Don\\'t open the door. I\\'ll call you.">Don\\'t open</button><button data-a="Please call me.">Call me</button></div>'
           : '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>') +
@@ -858,7 +861,13 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     var r = await post('/parent/api/visitors', body).catch(function () { return null; });
     var out = r ? await r.json().catch(function () { return {}; }) : {};
     if (!r || !r.ok) { vErr.textContent = out.error || 'Could not save.'; return; }
-    if (add) { document.getElementById('vName').value = ''; document.getElementById('vWhen').value = ''; }
+    if (add) {
+      var added = (out.visitors || []).filter(function (v) { return v.name === body.name.trim().slice(0, 60); }).pop();
+      if (added && added.from_minutes === null && body.window.trim()) {
+        vErr.textContent = 'I couldn\u2019t read \u201c' + body.window.trim() + '\u201d as a time, so ' + added.name + ' is expected any time tonight.';
+      }
+      document.getElementById('vName').value = ''; document.getElementById('vWhen').value = '';
+    }
     lastVisitors = JSON.stringify(out.visitors);
     renderVisitors(out.visitors);
   });

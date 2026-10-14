@@ -6,7 +6,7 @@ The Echo Show in the kitchen becomes the sitter's guide for the evening, in the 
 
 Built for the Build, Ship, Shape: Amazon Developer Hackathon (Alexa+ track).
 
-**Live demo:** [while-youre-out-wpj3.onrender.com](https://while-youre-out-wpj3.onrender.com) (the Echo Show simulator; follow the **Guided demo** panel) · **MCP endpoint:** `https://while-youre-out-wpj3.onrender.com/mcp` (Streamable HTTP, MCP 2025-11-25). It's on a free host: if nobody has visited for a while, the first load can take up to a minute.
+**Live demo:** [while-youre-out-wpj3.onrender.com](https://while-youre-out-wpj3.onrender.com) (the Echo Show simulator; follow the **Guided demo** panel; every visitor gets their own copy of the demo house) · **MCP endpoint:** `https://while-youre-out-wpj3.onrender.com/mcp` (Streamable HTTP, MCP 2025-11-25; a shared house; `/h/<any 16+ letters>/mcp` gives you a private one) · **Which version is live:** `/version`. It's on a free host: if nobody has visited for a while, the first load can take up to a minute.
 
 ## An evening with While You're Out
 
@@ -58,6 +58,9 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 | Goodnight message | A parent records voice or video before leaving; it plays at lights out or when the child misses them, and the parent hears that it played |
 | Pay the sitter | Hours (house clock, rounded up to the quarter hour) times the rate from the handoff form, plus a tip, approved on the parent's phone through MCP URL elicitation; the Echo Show hears it's done (`notifications/elicitation/complete`). Demo only: no money moves |
 | Ask on screen | "We're heading out" with no name: an MCP form on the Echo Show asks who, their language and their rate |
+| Shopping list agent | "We ran out of diapers": the parents are asked at once, on their lock screen, "Add diapers to the shopping list?" (Add to list / Not now). A yes puts it on the list (the family's Alexa shopping list in production; simulated here) and the Echo Show says so. Never a house rule |
+| Lights out for the house | At bedtime the device dims the child's room, turns on the night light and checks the front door is locked. Simulated, and labelled so on screen: in production Alexa+ does this with the family's own smart home |
+| Sitter first | Alexa+ add-ons can't start talking on their own. So whatever the sitter hasn't heard yet (a parent's answer, a reminder that came due) is told at the start of their next reply. Answers the device already announced are never repeated |
 | Live Tonight Plan | Tonight's timeline from the parents' routine, day-specific rules, the parents' own timing rules ("napped till 5" moves bedtime), reminders as steps come due |
 | Teach-back | Three questions before the parents leave, checked without AI; wrong answers get the parents' words |
 | Shadow Parent | How the parents usually answer small questions, by weekday or weekend; never decides, never for food, medicine or safety |
@@ -81,7 +84,7 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 | `where_is` | Where something is kept, with the parents' photo |
 | `log_event` | The evening's log; allergen and medicine alerts; plan changes |
 | `ask_parent` / `check_parent_answer` | Ask a parent without blocking |
-| `ask_parent_and_wait` | MCP task: completes when a parent answers, escalates down the call order; door questions carry the photo |
+| `ask_parent_and_wait` | MCP task: completes when a parent answers, escalates down the call order; door questions carry the photo; shopping questions (`shopping_item`) put the item on the list on a yes |
 | `door_check` | Front Door Guard |
 | `emergency` | Fixed safety script from the family's own data; alerts every contact; opens the guide |
 | `emergency_step` | Move the guide on: done, next, back, resolved |
@@ -102,12 +105,19 @@ Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
 - Connects with the official MCP client over Streamable HTTP and declares elicitation (form and URL), like Alexa+.
 - An MCP Apps host: sandboxed `ui://` cards, `ui/initialize` with host context, `tools/call` from cards (only for tools whose visibility includes `app`), `ui/message` from card buttons, display modes.
 - Runs `ask_parent_and_wait` as an MCP task, shows its status, and announces the answer.
-- Voice in and out (Chrome or Edge), or type. Two "brains" stand in for the Alexa+ language model:
-  - **Rules** (the default): pattern matching, instant, no key needed. Every guided demo line works with it.
-  - **Gemini** (under Settings): free speech in any language, function calling, one model call per turn. The key stays on the server behind `/host/llm` (local pages only, 30 requests a minute). The free tier allows about 20 requests a day per model, so a model out of quota is skipped until it resets and the rule brain answers within seconds.
+- Voice in and out (Chrome or Edge), or type. "Brains" stand in for the Alexa+ language model:
+  - **Rules first, Gemini when needed** (the default): the built-in rules answer everything they recognise at once (every guided demo line, "where's the EpiPen", "she's asleep", the door) with no model call. Other languages and phrasings they don't know go to Gemini, and both share the conversation.
+  - **Rules only**: pattern matching, instant, English, no key needed.
+  - **Gemini for everything**: free speech in any language, function calling, one model call per turn.
+  - The key stays on the server behind `/host/llm` (local pages only, 30 requests a minute). A model that is out of quota, busy or hanging is skipped for a while, and a turn never waits more than about 5 seconds before the rules answer.
+- The server reads the carer's words in English for its safety rules and the handover check, translating them itself if the device didn't. If it can't, a question is never guessed at: "I can ask a parent".
+- Each browser gets its own demo house (`/h/<id>` on the server: its own database, events and clock), so judges never see each other's evening. The guided demo's first step resets it.
+- `?film=1` shows only the Echo Show, for recording; Space or → says the next guided demo line.
 - Either way the device speaks the server's own text, never a model paraphrase, and emergencies, the emergency guide and the door photo are handled by fixed rules before any model call.
 - Spoken replies stay within 30 words (a test plays the whole guided demo and checks every reply); the card shows the rest. The fixed emergency script is the one exception: it is always read in full.
 - Simulated device features: Alexa calling and the Ring doorbell alert.
+
+Checks against a running server (not unit tests): `npx tsx test/e2e-houses.ts http://127.0.0.1:8787` (two judges at once), `test/e2e-hybrid.ts` (timing), `test/e2e-language.ts` (a Hindi-speaking sitter, real Gemini).
 
 ## Settings (environment variables)
 

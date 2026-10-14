@@ -6,10 +6,10 @@ import { formatTime, localTime, now, nowIso } from '../clock.js';
 import { classifyQuestion } from './safety.js';
 import { householdTz } from './house.js';
 import { tonightPlan } from './plan.js';
+import { suppliesMentioned } from './shopping.js';
 
 const WOKE = /\b(woke|waking|nightmare|crying|cried|up again|couldn'?t sleep|bad dream)\b/i;
 const ASLEEP = /\b(asleep|fell asleep|sleeping|lights out)\b/i;
-const RAN_OUT = /\b(?:last|ran out of|run out of|out of|finished the|no more|running low on|used the last)\s+(?:the\s+)?([a-z][a-z' -]{1,30}?)(?=[.,!;]|$|\s+(?:so|and|but|for)\b)/gi;
 
 export interface Debrief {
   handoff_id: number;
@@ -78,11 +78,7 @@ export function buildDebrief(db: DB, h: Handoff): Debrief {
     .map((q) => ({ question_id: q.id, text: q.text, answer: q.answer!, by: q.answered_by ?? 'Parent' }));
 
   // Things that ran out.
-  const supplies = [
-    ...new Set(
-      log.flatMap((e) => [...e.text.matchAll(RAN_OUT)].map((m) => m[1].trim().replace(/\s+(today|tonight|now)$/i, '').toLowerCase())),
-    ),
-  ].slice(0, 6);
+  const supplies = [...new Set(log.flatMap((e) => suppliesMentioned(e.text)))].slice(0, 6);
   if (supplies.length) insights.push(`Running low: ${supplies.join(', ')}.`);
 
   return {

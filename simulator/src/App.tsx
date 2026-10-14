@@ -6,11 +6,28 @@ import type { ElicitRequest, ElicitResult } from '@modelcontextprotocol/sdk/type
 import { AppFrame } from './AppFrame';
 import { RuleBrain } from './brain/rules';
 import { GeminiBrain } from './brain/gemini';
+import { HybridBrain } from './brain/hybrid';
 import type { Brain, DeviceIO } from './brain/types';
 import { canListen, listenOnce, speak, stopSpeaking } from './voice';
 
 // Served by the MCP server itself (the hosted demo): talk to that server. In development: the local one.
-const DEFAULT_URL = import.meta.env.VITE_MCP_URL ?? (location.port === '5173' ? 'http://127.0.0.1:8787/mcp' : `${location.origin}/mcp`);
+// Each browser gets its own demo house on the server (/h/<id>), so visitors never share an evening.
+function houseId(): string {
+  const make = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
+  try {
+    const saved = localStorage.getItem('wyo.house');
+    if (saved && /^[A-Za-z0-9_-]{16,64}$/.test(saved)) return saved;
+    const id = make();
+    localStorage.setItem('wyo.house', id);
+    return id;
+  } catch {
+    return make();
+  }
+}
+// ?film=1: only the Echo Show, for recording the video. Space or → says the next tour line.
+const FILM = new URLSearchParams(location.search).has('film');
+const SERVER = location.port === '5173' ? 'http://127.0.0.1:8787' : location.origin;
+const DEFAULT_URL = import.meta.env.VITE_MCP_URL ?? `${SERVER}/h/${houseId()}/mcp`;
 const PARENT_KEY = import.meta.env.VITE_PARENT_KEY ?? 'demo-parent-key';
 /** An answer card goes back to the Tonight screen after this long without anyone talking. */
 const CARD_TIMEOUT_MS = 40_000;
@@ -71,6 +88,8 @@ interface Call {
 }
 
 
+type BrainKind = 'hybrid' | 'rules' | 'gemini';
+
 let nextId = 1;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -104,17 +123,19 @@ export function App() {
   const emergencyTurnRef = useRef(0);
   const [caption, setCaption] = useState<Line | null>(null);
   const rules = useRef(new RuleBrain());
-  // Instant built-in rules by default: the free Gemini key only allows a few replies a day.
-  const [brainKind, setBrainKind] = useState<'gemini' | 'rules'>(() => {
+  // Rules first, Gemini only when the rules don't understand: instant, and the free key lasts.
+  const [brainKind, setBrainKind] = useState<BrainKind>(() => {
     try {
-      return localStorage.getItem('wyo.brain2') === 'gemini' ? 'gemini' : 'rules';
+      const saved = localStorage.getItem('wyo.brain3');
+      return saved === 'gemini' || saved === 'rules' ? saved : 'hybrid';
     } catch {
-      return 'rules';
+      return 'hybrid';
     }
   });
   const [tour, setTour] = useState<[number, number]>([0, 0]);
   const [tourBusy, setTourBusy] = useState(false);
   const gemini = useRef<GeminiBrain | null>(null);
+  const hybrid = useRef<HybridBrain | null>(null);
   const brain = useRef<Brain>(rules.current);
   // Read through refs so replies from long-running tasks respect the current state.
   const voiceRef = useRef(voiceOn);
@@ -164,7 +185,8 @@ export function App() {
       if (seq !== connectSeq.current) return;
       setConn(null);
       setConnState('error');
-      setConnError(e instanceof Error ? e.message : String(e));
+      const message = e instanceof Error ? e.message : String(e);
+      setConnError(/failed to fetch|networkerror|load failed/i.test(message) ? `Can't reach the add-on at ${(() => { try { return new URL(target).host; } catch { return target; } })()}. Is the server running?` : message);
     }
   }, []);
 
@@ -177,24 +199,30 @@ export function App() {
     };
   }, [connect]);
 
+  // Where the server's other routes are: the MCP URL without /mcp (it includes the house).
   const serverOrigin = (() => {
     try {
-      return new URL(url).origin;
+      const u = new URL(url);
+      return `${u.origin}${u.pathname.replace(/\/mcp\/?$/, '')}`.replace(/\/$/, '');
     } catch {
       return '';
     }
   })();
 
-  useEffect(() => {
-    if (!conn || !serverOrigin) return;
+  const makeModelBrains = useCallback(() => {
     gemini.current = new GeminiBrain({
       serverOrigin,
       tools: () => connRef.current?.tools ?? [],
       instructions: () => connRef.current?.instructions,
       fallback: rules.current,
     });
-  }, [conn, serverOrigin]);
-  brain.current = brainKind === 'gemini' && gemini.current ? gemini.current : rules.current;
+    hybrid.current = new HybridBrain(rules.current, gemini.current);
+  }, [serverOrigin]);
+  useEffect(() => {
+    if (conn && serverOrigin) makeModelBrains();
+  }, [conn, serverOrigin, makeModelBrains]);
+  const pickBrain = (kind: BrainKind): Brain => (kind === 'gemini' ? gemini.current : kind === 'hybrid' ? hybrid.current : null) ?? rules.current;
+  brain.current = pickBrain(brainKind);
 
   const addLine = (who: Line['who'], text: string) => {
     const line = { id: nextId++, who, text };
@@ -214,6 +242,8 @@ export function App() {
       const html = await c.uiHtml(uri);
       const s = result.structuredContent;
       setCarer(s.mode === 'carer' ? String(s.carer ?? '') : null);
+      const parents = (s.parents as Array<{ name: string }> | undefined) ?? [];
+      rules.current.sync({ carer: s.mode === 'carer' ? String(s.carer ?? '') : null, firstContact: parents[0]?.name ?? null, busyUntil: (s.busy_until as string | null) ?? null });
       // Keep the same frame (it refreshes itself); replace it only when the data changed.
       setHome((old) => (old && JSON.stringify(old.result.structuredContent) === JSON.stringify(s) ? old : { id: old?.id ?? nextId++, tool: 'home_screen', args: {}, result, html, mode: 'fullscreen' }));
     } catch {
@@ -358,9 +388,12 @@ export function App() {
                 setTasks((ts) => ts.map((t) => (t.id === id && t.statuses.at(-1) !== update.status ? { ...t, statuses: [...t.statuses, update.status!] } : t)));
               }
               if (update.result) {
-                setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, done: true } : t)));
-                await showCard(c, name, args, update.result, true);
+                const closed = Boolean(update.result.structuredContent?.closed);
+                const outcome = closed ? 'Closed: the evening ended.' : textOf(update.result);
+                setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, done: true, statuses: [...t.statuses, outcome] } : t)));
                 void refreshHome(c);
+                if (closed) continue;
+                await showCard(c, name, args, update.result, true);
                 onDone(update.result);
               }
             }
@@ -404,6 +437,8 @@ export function App() {
       const text = utterance.trim();
       if (!text || !conn) return;
       stopSpeaking();
+      // Whoever spoke has seen the doorbell photo; the answer must not hide behind it.
+      setRing(null);
       addLine('you', text);
       armCardTimer();
       lastActivity.current = Date.now();
@@ -442,6 +477,13 @@ export function App() {
     }, 4000);
     return () => clearInterval(t);
   }, [conn, emergencyOn, io]);
+
+  // Tonight can change from the parent's phone (busy mode, a new rule): keep what the device knows fresh.
+  useEffect(() => {
+    if (!conn) return;
+    const t = setInterval(() => void refreshHome(conn), 20_000);
+    return () => clearInterval(t);
+  }, [conn, refreshHome]);
 
   // While someone is babysitting, the device reminds them when a step of tonight's plan comes due.
   useEffect(() => {
@@ -497,13 +539,8 @@ export function App() {
     stopSpeaking();
     await fetch(`${serverOrigin}/demo/reset`, { method: 'POST' }).catch(() => null);
     rules.current = new RuleBrain();
-    gemini.current = new GeminiBrain({
-      serverOrigin,
-      tools: () => connRef.current?.tools ?? [],
-      instructions: () => connRef.current?.instructions,
-      fallback: rules.current,
-    });
-    brain.current = brainKind === 'gemini' ? gemini.current : rules.current;
+    makeModelBrains();
+    brain.current = pickBrain(brainKind);
     emergencyRef.current = false;
     setEmergencyOn(false);
     setCard(null);
@@ -512,7 +549,8 @@ export function App() {
     if (connRef.current) await refreshHome(connRef.current);
   };
   const runTour = async () => {
-    if (!nextAction) return;
+    if (tourBusy) return;
+    if (!nextAction) return setTour([tourStep < GUIDE.length - 1 ? tourStep + 1 : 0, 0]);
     setTourBusy(true);
     try {
       if (tourStep === 0 && tourAt === 0 && demoTime) await resetDemo();
@@ -524,6 +562,20 @@ export function App() {
       setTourBusy(false);
     }
   };
+  // Filming: the keyboard drives the tour, since the panel is hidden.
+  const runTourRef = useRef(runTour);
+  runTourRef.current = runTour;
+  useEffect(() => {
+    if (!FILM) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        void runTourRef.current();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const fullscreen = card?.mode === 'fullscreen';
   const showingHome = !card && Boolean(home);
   const activeTasks = tasks.filter((t) => !t.done || t.id === tasks.at(-1)?.id);
@@ -543,7 +595,7 @@ export function App() {
   });
 
   return (
-    <div className="page">
+    <div className={`page ${FILM ? 'film' : ''}`}>
       <section className="wall" aria-label="Echo Show simulator">
         <div className="device">
           <div className="bezel">
@@ -622,6 +674,7 @@ export function App() {
         </div>
       </section>
 
+      {!FILM && (
       <aside className="panel">
         <header className="panel-head">
           <h1>While You’re Out</h1>
@@ -737,17 +790,18 @@ export function App() {
               <select
                 value={brainKind}
                 onChange={(e) => {
-                  const v = e.target.value === 'gemini' ? 'gemini' : 'rules';
+                  const v: BrainKind = e.target.value === 'gemini' || e.target.value === 'rules' ? e.target.value : 'hybrid';
                   setBrainKind(v);
                   try {
-                    localStorage.setItem('wyo.brain2', v);
+                    localStorage.setItem('wyo.brain3', v);
                   } catch {
                     /* not persisted */
                   }
                 }}
               >
-                <option value="rules">Built-in rules (instant)</option>
-                <option value="gemini">Gemini AI (any language; slower, a few replies a day)</option>
+                <option value="hybrid">Rules first, Gemini when needed (recommended)</option>
+                <option value="rules">Built-in rules only (instant, English)</option>
+                <option value="gemini">Gemini for everything (slower, uses the daily quota)</option>
               </select>
             </label>
             {demoTime && (
@@ -782,6 +836,7 @@ export function App() {
           </div>
         </details>
       </aside>
+      )}
     </div>
   );
 }

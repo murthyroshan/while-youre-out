@@ -96,6 +96,10 @@ test('an "always" answer survives into the next handoff', async () => {
 test('"Call me" is not saved as a house rule', async () => {
   const asked = await call('ask_parent', { question: 'Can she go to the neighbours house?' });
   await answer({ id: asked.structuredContent.id, answer: 'Please call me.', scope: 'always', by: 'Anita' });
+  // The carer is told once (the answer comes first in their next reply)...
+  const told = await call('ask_house', { question: 'Can she go to the neighbours house?' });
+  assert.match(told.structuredContent.notices[0], /Please call me/);
+  // ...but it is not a house rule.
   const r = await call('ask_house', { question: 'Can she go to the neighbours house?' });
   assert.doesNotMatch(text(r), /call me/i);
 });
@@ -203,6 +207,10 @@ test('"what do I do if" questions read the plan without alerting anyone', async 
 test('codes given by a parent are passed on once but never stored', async () => {
   const asked = await call('ask_parent', { question: 'How do I get in if I lock myself out?' });
   await answer({ id: asked.structuredContent.id, answer: 'It is 4321, the alarm code is the same', scope: 'always', by: 'Anita' });
+  // Passed on once: the parent's answer comes first in the carer's next reply...
+  const once = await call('where_is', { item: 'EpiPen' });
+  assert.match(once.structuredContent.notices[0], /4321/);
+  // ...and never again: it was not stored.
   const r = await call('ask_house', { question: 'How do I get in if I lock myself out?' });
   assert.doesNotMatch(text(r), /4321/);
 });
