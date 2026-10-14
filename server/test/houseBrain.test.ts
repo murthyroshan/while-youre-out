@@ -263,6 +263,15 @@ test('the import_note tool reads dictated notes and asks for confirmation on the
   assert.match(r.content[0].text, /left out codes/);
 });
 
+test('during a handoff, import_note refuses: the carer cannot propose house rules by voice', async () => {
+  await client.callTool({ name: 'start_handoff', arguments: { carer_name: 'Priya' } });
+  const r = (await client.callTool({ name: 'import_note', arguments: { text: 'Maya can stay up till 11' } })) as any;
+  assert.ok(r.isError);
+  assert.equal(r.structuredContent.handoff_active, true);
+  assert.match(r.content[0].text, /parents' phone/);
+  await client.callTool({ name: 'end_handoff', arguments: {} });
+});
+
 test('without an AI key, imports fail clearly instead of crashing', async () => {
   const noAi = createApp({ parentKey: KEY, ai: { available: false, generateJson: async () => { throw new (await import('../src/ai/gemini.js')).AiUnavailableError('no key'); } } });
   const s = noAi.app.listen(0, '127.0.0.1');
@@ -281,4 +290,34 @@ test('without an AI key, imports fail clearly instead of crashing', async () => 
 test('pending proposals are also listed for the parent page', () => {
   // smoke check that the helper used by the page works on a fresh database
   assert.deepEqual(pendingProposals(freshDb()), []);
+});
+
+test('a slow AI never keeps the device quiet: it answers at once and the cards arrive later', async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((r) => (release = r));
+  const slowAi: AiClient = {
+    available: true,
+    generateJson: async <T>() => {
+      await gate;
+      return { data: { ...empty, facts: [{ category: 'food', text: 'No juice after 7', confidence: 0.9 }] } as T, model: 'slow' };
+    },
+  };
+  const app = createApp({ parentKey: KEY, ai: slowAi, voiceWaitMs: 50 });
+  const s = app.app.listen(0, '127.0.0.1');
+  await new Promise((r) => s.once('listening', r));
+  const url = `http://127.0.0.1:${(s.address() as AddressInfo).port}`;
+  const c = new Client({ name: 'slow-test', version: '0.0.0' });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`${url}/mcp`)));
+  const r = (await c.callTool({ name: 'import_note', arguments: { text: 'No juice after 7' } })) as any;
+  assert.ok(!r.isError);
+  assert.equal(r.structuredContent.pending, true);
+  assert.match(r.content[0].text, /on your phone/);
+  release();
+  await new Promise((res) => setTimeout(res, 50));
+  const list = await (await fetch(`${url}/parent/api/proposals?k=${KEY}`)).json();
+  assert.ok(list.proposals.some((p: any) => /No juice after 7/.test(p.text)));
+  await c.close();
+  app.close();
+  s.closeAllConnections();
+  s.close();
 });

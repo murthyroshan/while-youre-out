@@ -6,6 +6,7 @@
 import { type DB, nowIso } from '../db.js';
 import { formatTime, localTime, now } from '../clock.js';
 import { activeHandoff, events, getQuestion, householdTz, visibleFacts } from './house.js';
+import { firstSentence } from './safety.js';
 
 export interface DoorEvent {
   id: number;
@@ -129,7 +130,8 @@ export function doorCheck(db: DB): DoorCheck {
   const all = visitors(db);
   const expected = all.filter((v) => v.kind === 'person' && fits(v, minutes));
   const deliveries = all.filter((v) => v.kind === 'delivery' && fits(v, minutes));
-  const ruleLine = rule ? ` ${rule.said_by}'s rule: "${rule.text}"` : '';
+  // Spoken in the parents' exact words, first sentence only; the card shows the whole rule.
+  const ruleLine = rule ? ` ${rule.said_by}'s rule: "${firstSentence(rule.text)}"` : '';
   const base = { event, rule, expected, deliveries, ask_parent: null, decision: null };
 
   // A parent already answered about this visitor.
@@ -177,7 +179,7 @@ export function doorCheck(db: DB): DoorCheck {
     ...base,
     verdict: 'unknown',
     ask_parent: ask,
-    say: `Don't open the door. The parents aren't expecting anyone else right now.${ruleLine} You can talk through the door. I'm sending the doorbell photo to the parents.`,
+    say: `Don't open the door. Nobody is expected now.${ruleLine} I'm sending the doorbell photo to the parents.`,
   };
 }
 

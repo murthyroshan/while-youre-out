@@ -44,7 +44,6 @@ test('on a Saturday: "The parents said yes 4 out of 5 times on weekends"', () =>
   setDemoTime('19:30', TZ, 'Sat');
   const s = shadowSuggestion(db, 'Can she watch another episode?')!;
   assert.deepEqual([s.likely, s.agree, s.total, s.days], ['yes', 4, 5, 'weekends']);
-  assert.match(s.message, /it's Saturday/);
   assert.match(s.message, /your call/);
   resetClock();
 });
@@ -124,7 +123,7 @@ test('ask_house adds the suggestion and never claims to decide', async () => {
   setDemoTime('19:30', TZ, 'Sat');
   const r = await call('ask_house', { question: 'Can she watch another episode?' });
   assert.equal(r.structuredContent.shadow.likely, 'yes');
-  assert.match(r.content[0].text, /would likely say yes, but it's your call/);
+  assert.match(r.content[0].text, /said yes to this \d of \d times.*It's your call, or I can ask/);
   const food = await call('ask_house', { question: 'Can she have another cookie?' });
   assert.equal(food.structuredContent.shadow, null);
   resetClock();

@@ -4,40 +4,16 @@ import { InMemoryTaskMessageQueue } from '@modelcontextprotocol/sdk/experimental
 import { ErrorCode, McpError, type CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import * as z from 'zod/v4';
 import type { DB } from '../db.js';
-import { isEmergency, mentionsMedicine } from '../domain/safety.js';
-import {
-  activeHandoff,
-  allergenMentions,
-  answerQuestion,
-  attachTask,
-  briefing,
-  contacts,
-  parentNames,
-  createQuestion,
-  currentContactFor,
-  endHandoff,
-  escalateQuestion,
-  eveningLog,
-  expireQuestion,
-  events,
-  getQuestion,
-  HandoffInProgressError,
-  householdTz,
-  logEvent,
-  startHandoff,
-  visibleFacts,
-  whereIs,
-  type Role,
-} from '../domain/house.js';
+import { FOOD_GUARD, FOOD_GUARD_SPOKEN, MEDICINE_GUARD, MEDICINE_GUARD_SPOKEN, SPOKEN_WORDS, firstSentence, fitSpoken, isEmergency, mentionsMedicine, wordCount } from '../domain/safety.js';
+import { activeHandoff, allergenMentions, answerQuestion, attachTask, briefing, contacts, createQuestion, currentContactFor, endHandoff, escalateQuestion, eveningLog, events, expireQuestion, getQuestion, HandoffInProgressError, householdTz, logEvent, parentNames, type Role, sharesWords, startHandoff, visibleFacts, whereIs } from '../domain/house.js';
 import { startEmergency } from '../domain/emergency.js';
-import { PhotoError, savePhoto } from '../domain/photos.js';
 import { homeScreen, homeSentence } from '../domain/home.js';
 import { doorCheck, getDoorEvent } from '../domain/door.js';
 import { markPlayed, pickMessage, type MessageInfo } from '../domain/messages.js';
 import { createPayment, dollars, duration, getPayment, payableHandoff, PaymentError, type Payment } from '../domain/payments.js';
 import { activeIncident, incidentView, latestIncident, stepIncident, takeIncidentAnnouncements } from '../domain/incident.js';
 import { importNote, ImportError } from '../domain/houseBrain.js';
-import { applyLogToPlan, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
+import { applyLogToPlan, inSentence, nextItem, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
 import { teachback } from '../domain/teachback.js';
 import { busyUntil, shadowSuggestion } from '../domain/shadow.js';
 import { buildDebrief, sinceLastVisit } from '../domain/debrief.js';
@@ -57,6 +33,8 @@ export interface ServerDeps {
   publicUrl: string;
   /** AI client used by House Brain to read notes. */
   ai: AiClient;
+  /** How long a spoken note may take to read before the device answers anyway (default 8 s). */
+  voiceWaitMs?: number;
 }
 
 const ui = { ui: { resourceUri: CARD_URI }, 'ui/resourceUri': CARD_URI };
@@ -75,7 +53,7 @@ const INGESTED = /\b(ate|eaten|has eaten|had|has had|swallowed|drank|took a bite
 const MAX_TEXT = 1000;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: ServerDeps) {
+export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voiceWaitMs = 8_000 }: ServerDeps) {
   const abs = (path: string | null) => (path ? new URL(path, publicUrl).href : null);
   const clockTime = (d: Date) => formatTime(localTime(householdTz(db), d).minutes);
   const carerLang = () => languageCode(activeHandoff(db)?.language);
@@ -126,7 +104,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
           uri: CARD_URI,
           mimeType: CARD_MIME,
           text: cardHtml(),
-          // Lets MCP Apps hosts load the parents' photos from this server.
+          // Lets MCP Apps hosts load images from this server (doorbell snapshots, where things are).
           _meta: { ui: { csp: { resourceDomains: [new URL(publicUrl).origin] } } },
         },
       ],
@@ -184,21 +162,15 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       }
       const b = briefing(db);
       const plan = tonightPlan(db, householdTz(db), h);
-      // A carer who has been here before hears only what changed since their last visit.
+      // A carer who has been here before sees what changed since their last visit (on the card).
       const since = sinceLastVisit(db, h.carer_name, h.id);
-      const sinceText = since
-        ? `Welcome back, ${h.carer_name}. Since your last visit: ${[...since.added.slice(0, 3).map((a) => `"${a.text}"`), ...since.removed.slice(0, 2).map((r) => `no longer "${r.text}"`)].join('; ')}.`
-        : '';
-      const text = [
-        `Handoff started for ${h.carer_name}.`,
-        sinceText,
-        b.must_know.length ? `Most important: ${b.must_know.join(' ')}` : '',
-        b.epipen ? `The EpiPen is here: ${b.epipen}` : '',
-        plan.items.length ? `Tonight: ${plan.items.map((i) => `${i.title.toLowerCase()} at ${i.time}`).join(', ')}.` : '',
-        b.first_contact ? `If anything comes up, ${b.first_contact} is first to call.` : '',
-      ]
-        .filter(Boolean)
-        .join(' ');
+      // Spoken: only what could save a life. Tonight's plan, what changed and who to call are on screen.
+      const text = fitSpoken([
+        since ? `Welcome back, ${h.carer_name}.` : `Handoff started for ${h.carer_name}.`,
+        b.must_know.length ? `Most important: ${b.must_know.slice(0, 2).map(firstSentence).join(' ')}` : '',
+        b.epipen ? `The EpiPen: ${b.epipen}` : '',
+        b.first_contact ? `${b.first_contact} is first to call.` : '',
+      ].filter(Boolean)).join(' ');
       return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since }, text);
     },
   );
@@ -303,7 +275,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       description: 'Whether the sitter has been paid. The payment card refreshes itself with this.',
       inputSchema: { id: z.number().int().positive() },
       annotations: { readOnlyHint: true },
-      _meta: { ui: { resourceUri: CARD_URI, visibility: ['model', 'app'] }, 'ui/resourceUri': CARD_URI },
+      // Only the payment card and the device call this.
+      _meta: { ui: { resourceUri: CARD_URI, visibility: ['app'] }, 'ui/resourceUri': CARD_URI },
     },
     async ({ id }) => {
       const p = getPayment(db, id);
@@ -381,11 +354,14 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       const tz = householdTz(db);
       const due = announce ? takeDueAnnouncements(db, tz) : [];
       const plan = tonightPlan(db, tz);
-      const next = plan.items.find((i) => i.status !== 'done');
+      const next = nextItem(plan.items);
+      const names = (db.prepare('SELECT name FROM members').all() as Array<{ name: string }>).map((m) => m.name);
       const say = due.length
-        ? due.map((i) => `It's ${i.time}: ${i.title.toLowerCase()}${i.checklist.length ? ` (${i.checklist.join(', ').toLowerCase()})` : ''}. ${i.said_by}'s plan.`).join(' ')
+        ? due.map((i) => `It's ${i.time}: ${inSentence(i.title, names)}${i.checklist.length ? ` (${i.checklist.join(', ').toLowerCase()})` : ''}. ${i.said_by}'s plan.`).join(' ')
         : next
-          ? `Next is ${next.title.toLowerCase()} at ${next.time}.`
+          ? plan.now.minutes > next.minutes
+            ? `${next.title.charAt(0).toUpperCase()}${next.title.slice(1)} was due at ${next.time}.`
+            : `Next is ${inSentence(next.title, names)} at ${next.time}.`
           : plan.items.length
             ? 'Everything on tonight\'s plan is done.'
             : "The parents haven't given times for tonight.";
@@ -420,22 +396,37 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
     {
       title: 'Teach the house a note',
       description:
-        'Use when a parent dictates or shares the text of a note for carers ("Alexa, remember: no sweets after 6, bath at 7"). Reads it into proposed house-manual cards. Nothing is used until a parent confirms the cards on their phone, so tell them that. Codes and passwords are never stored.',
+        'Only for a PARENT teaching a standing house rule or fact for future carers, when nobody is babysitting ("Alexa, remember: no juice after 7, bath at 7:15"). Not for something that happened tonight ("remember she napped till 5"): that is log_event. Reads the note into proposed house-manual cards; nothing is used until a parent confirms them on their phone, so tell them that. Codes and passwords are never stored. Refused during a handoff.',
       inputSchema: {
         text: z.string().trim().min(1).max(MAX_TEXT * 5).describe('The note, in the parent\'s words'),
         label: z.string().trim().max(80).default('Note told to Alexa'),
       },
     },
     async ({ text, label }) => {
+      // During a handoff the person talking is most likely the carer, and carers don't set house rules.
+      if (activeHandoff(db)) {
+        return {
+          isError: true,
+          content: [{ type: 'text', text: "Someone is babysitting right now, so new house rules come from the parents' phone. If this happened tonight, I can log it." }],
+          structuredContent: { view: 'import', handoff_active: true },
+        };
+      }
       try {
-        const out = await importNote(db, ai, { kind: 'text', text, label, author: 'Told to Alexa' });
+        // A device can't go quiet for half a minute: if the AI is slow, answer now and finish in the
+        // background. The cards appear on the parent's phone either way.
+        const job = importNote(db, ai, { kind: 'text', text, label, author: 'Told to Alexa' });
+        const out = await Promise.race([job, new Promise<null>((r) => setTimeout(() => r(null), voiceWaitMs))]);
+        if (!out) {
+          job.catch((e) => console.error('Reading a spoken note failed', e instanceof Error ? e.message : e));
+          return localized('import', { pending: true }, "Got it. I'm writing that up; it'll be on your phone to confirm in a minute.");
+        }
         const n = out.proposals.length;
         const conflicts = out.proposals.filter((p) => p.conflict_fact_id || p.conflict_reason).length;
         const parts = [
           n ? `I found ${n} thing${n === 1 ? '' : 's'} to add to the house manual.` : "I couldn't find any rules in that note.",
           conflicts ? `${conflicts} of them disagree${conflicts === 1 ? 's' : ''} with what's already saved.` : '',
           out.dropped_secrets ? "I left out codes and passwords, which I never store." : '',
-          n ? 'Please check and confirm them on your phone before tonight.' : '',
+          n ? `Please check and confirm ${n === 1 ? 'it' : 'them'} on your phone before tonight.` : '',
         ];
         return localized('import', { count: n, conflicts, dropped_secrets: out.dropped_secrets }, parts.filter(Boolean).join(' '));
       } catch (e) {
@@ -474,18 +465,34 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
         const alert = allergyAlert(question, allergens);
         return localized('answer', { ...a, allergy_alert: alert, allergens }, alert);
       }
-      const lines = a.facts.map((f) =>
+      const facts = a.facts.map((f) =>
         f.source === 'parent_answer' ? `Earlier ${f.said_by} answered this. ${f.text}` : `${f.said_by} said: "${f.text}"`,
       );
-      if (!a.exact) lines.unshift("The parents haven't said exactly. Here's what's closest.");
-      if (a.guard) lines.push(a.guard);
       // Shadow Parent: on low-risk questions the manual doesn't settle, say how the parents usually answer.
       const shadow = a.suggest_ask_parent && !a.guard ? shadowSuggestion(db, question) : null;
       const busy = busyUntil(db);
-      if (shadow) lines.push(shadow.message);
-      else if (!a.facts.length && !a.guard) lines.push("The parents haven't covered this. I can ask them.");
-      if (busy && a.suggest_ask_parent) lines.push(`The parents asked for urgent questions only until ${clockTime(busy)}.`);
-      return localized('answer', { ...a, shadow, busy_until: busy ? clockTime(busy) : null }, lines.join(' '));
+      // Spoken: the best answer in the parents' words, then what must always be said. A note that only
+      // comes close is read out if it shares a word with the question ("YouTube"); otherwise ("Can she
+      // sleep in your bed?" vs the bedtime routine) the closest notes are on the card, not read out.
+      // The routine says "lights out at 8", but a late nap moved tonight's bedtime: say tonight's first.
+      const moved = /\bbed ?time\b|\blights out\b|\b(what time|when)\b.*\b(bed|sleep)\b/i.test(question) && activeHandoff(db)?.plan_shift
+        ? tonightPlan(db, householdTz(db)).items.find((i) => i.key === 'bedtime')
+        : undefined;
+      const tonight = moved ? [`Tonight, bedtime is ${moved.time}; the late nap moved it.`] : [];
+      const closeAt = a.exact ? -1 : a.facts.findIndex((f) => sharesWords(f.text, question));
+      const close = closeAt >= 0;
+      // How the parents usually answer says it better than "not exactly".
+      const lead = a.exact || !a.facts.length || (shadow && !close) ? [] : [close ? "The parents haven't said exactly. Closest:" : "The parents haven't said exactly; their closest notes are on screen."];
+      const offer = shadow || a.guard ? null : !a.facts.length ? "The parents haven't covered this. I can ask them." : !a.exact ? 'I can ask them.' : null;
+      const after = [
+        a.guard === FOOD_GUARD ? FOOD_GUARD_SPOKEN : a.guard === MEDICINE_GUARD ? MEDICINE_GUARD_SPOKEN : a.guard,
+        shadow?.message,
+        offer,
+        busy && a.suggest_ask_parent ? `The parents asked for urgent questions only until ${clockTime(busy)}.` : null,
+      ].filter((l): l is string => Boolean(l));
+      const pool = a.exact ? facts : close ? [facts[closeAt]] : [];
+      const spoken = fitSpoken(pool, SPOKEN_WORDS - wordCount([...tonight, ...lead, ...after].join(' ')));
+      return localized('answer', { ...a, shadow, busy_until: busy ? clockTime(busy) : null, tonight_bedtime: moved?.time ?? null }, [...tonight, ...lead, ...spoken, ...after].join(' '));
     },
   );
 
@@ -512,7 +519,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
     {
       title: 'Log the evening',
       description:
-        'Records something that happened during the handoff, in the carer\'s words ("asleep at 8:10", "woke up crying at 9"). The parents see it in the morning summary. If the result has `emergency: true`, call the `emergency` tool right away. If it has an `allergy_alert`, read it aloud.',
+        'Records something that happened during the handoff, in the carer\'s words ("asleep at 8:10", "woke up crying at 9", "remember she napped till 5"). The parents see it in the morning summary. A parent\'s standing house rule is import_note, not this. If the result has `emergency: true`, call the `emergency` tool right away. If it has an `allergy_alert`, read it aloud.',
       inputSchema: {
         text: z.string().min(1).max(MAX_TEXT),
         text_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer spoke another language'),
@@ -750,7 +757,9 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       const lang = carerLang();
       const fixed = lang === 'en' ? null : fixedTranslation(e.say_first, lang);
       const address = e.address?.trim() ? e.address : null;
-      const english = [e.say_first, address ? `The address is ${address}.` : '', e.action_plan.steps[0]?.text ?? ''].filter(Boolean).join(' ');
+      const first = e.action_plan.steps[0]?.text ?? '';
+      // The general script starts with the same "Call 911" sentence; say it once.
+      const english = [e.say_first, address ? `The address is ${address}.` : '', first === e.say_first ? '' : first].filter(Boolean).join(' ');
       // Emergencies never wait for an AI: a fixed translation of the first line if we have one, English otherwise.
       const spoken = fixed ? [fixed, address].filter(Boolean).join(' ') : null;
       return plain('emergency', { ...e, address, language: lang, spoken }, spoken ? `${spoken}. ${english}` : english);
@@ -797,7 +806,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
         "The emergency in progress: which step the carer is on, the plan's timers, and which parent is on the way. The emergency screen refreshes itself with this. With announce=true it also returns what should be said now, once each (\"One minute left on the EpiPen timer\").",
       inputSchema: { announce: z.boolean().default(false) },
       annotations: { readOnlyHint: true },
-      _meta: { ui: { resourceUri: CARD_URI, visibility: ['model', 'app'], preferredDisplayMode: 'fullscreen' }, 'ui/resourceUri': CARD_URI },
+      // Only the emergency screen and the device call this; the model has emergency and emergency_step.
+      _meta: { ui: { resourceUri: CARD_URI, visibility: ['app'], preferredDisplayMode: 'fullscreen' }, 'ui/resourceUri': CARD_URI },
     },
     async ({ announce }) => {
       const say = announce ? takeIncidentAnnouncements(db) : [];
@@ -825,13 +835,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       const d = buildDebrief(db, h);
       // Raw timestamps: the card formats them in the viewer's own time zone.
       const questions = d.questions.map((q) => (q.answer ? `${q.text} → ${q.answered_by}: "${q.answer}"` : `${q.text} (unanswered)`));
-      const text = [
+      const text = fitSpoken([
         `Evening with ${h.carer_name}: ${plural(d.timeline.length, 'note')}, ${plural(questions.length, 'question')}.`,
         ...d.insights,
         d.rule_suggestions.length ? `${plural(d.rule_suggestions.length, "of tonight's answers")} could become house rules; they're on your phone.` : '',
-      ]
-        .filter(Boolean)
-        .join(' ');
+      ].filter(Boolean)).join(' ');
       return localized('summary', { carer: h.carer_name, timezone: householdTz(db), timeline: d.timeline, questions, insights: d.insights, rule_suggestions: d.rule_suggestions, supplies: d.supplies }, text);
     },
   );
@@ -861,7 +869,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
     },
     async ({ when }) => {
       const m = pickMessage(db, when);
-      if (!m) return localized('answer', { category: 'general', facts: [], guard: null }, "The parents haven't left a message tonight. I can call them, or you could send them a photo.");
+      if (!m) return localized('answer', { category: 'general', facts: [], guard: null }, "The parents haven't left a message tonight. I can call them if you like.");
       markPlayed(db, m);
       return localized('message', messageCard(m), `${m.from_name} left a message for ${m.for_name ?? 'you'}.`);
     },
@@ -884,35 +892,6 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }: S
       const c = doorCheck(db);
       const data = { ...c, event: c.event ? { ...c.event, snapshot_url: abs(c.event.snapshot_url), time: clockTime(new Date(c.event.at)) } : null };
       return localized('door', data, c.say);
-    },
-  );
-
-  server.registerTool(
-    'send_photo',
-    {
-      title: 'Send a photo to the parents',
-      description:
-        'Call when the carer asks to send the parents a photo ("send Mom a picture", "take a photo of us"). The device camera takes the picture and the host attaches it as image_base64; the parents get it on their phones. Photos are never shown to anyone else.',
-      inputSchema: {
-        image_base64: z.string().max(2_600_000).optional().describe('The JPEG/PNG/WebP photo from the device camera, base64. Attached by the device, not the model.'),
-        mime_type: z.enum(['image/jpeg', 'image/png', 'image/webp']).optional(),
-        caption: z.string().trim().max(200).optional().describe('What the carer said to go with the photo, e.g. "Maya says good night"'),
-      },
-      _meta: ui,
-    },
-    async ({ image_base64, mime_type, caption }) => {
-      if (!image_base64) {
-        return { isError: true, content: [{ type: 'text', text: "I need the camera for that. This device couldn't take a photo." }], structuredContent: { view: 'photo', needs_camera: true } };
-      }
-      try {
-        const photo = savePhoto(db, { data: Buffer.from(image_base64, 'base64'), mime: mime_type ?? 'image/jpeg', caption });
-        const names = parentNames(db);
-        const to = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0] ?? 'the parents';
-        return localized('photo', { photo_id: photo.id, caption: photo.caption, sent_to: names }, `Sent. ${to} will see it on their phone.`);
-      } catch (e) {
-        if (e instanceof PhotoError) return { isError: true, content: [{ type: 'text', text: e.message }] };
-        throw e;
-      }
     },
   );
 

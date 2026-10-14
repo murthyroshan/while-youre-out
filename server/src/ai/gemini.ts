@@ -46,6 +46,14 @@ export interface ChatRequest {
 const exhaustedUntil = new Map<string, number>();
 const CHAT_TIMEOUT_MS = 8_000;
 
+/** Out of quota: skip this model until Google says it resets. */
+function noteQuota(model: string, json: any) {
+  // "retryDelay": "25532s" for a daily quota; a per-minute limit says a few seconds.
+  const delay = (json?.error?.details ?? []).find((d: any) => String(d?.['@type']).endsWith('RetryInfo'))?.retryDelay;
+  const seconds = Math.min(24 * 3600, Math.max(30, parseFloat(String(delay ?? '60')) || 60));
+  exhaustedUntil.set(model, Date.now() + seconds * 1000);
+}
+
 /** For tests. */
 export function resetChatQuota() {
   exhaustedUntil.clear();
@@ -80,12 +88,7 @@ export async function geminiChat(req: ChatRequest, fetchImpl: typeof fetch = fet
       const json = (await res.json().catch(() => ({}))) as any;
       if (!res.ok) {
         errors.push(`${model}: ${res.status} ${json?.error?.message?.slice(0, 100) ?? ''}`);
-        if (res.status === 429) {
-          // "retryDelay": "25532s" for a daily quota; a per-minute limit says a few seconds.
-          const delay = (json?.error?.details ?? []).find((d: any) => String(d?.['@type']).endsWith('RetryInfo'))?.retryDelay;
-          const seconds = Math.min(24 * 3600, Math.max(30, parseFloat(String(delay ?? '60')) || 60));
-          exhaustedUntil.set(model, Date.now() + seconds * 1000);
-        }
+        if (res.status === 429) noteQuota(model, json);
         if ((res.status === 400 && /api key/i.test(json?.error?.message ?? '')) || res.status === 403) break;
         continue;
       }
@@ -107,8 +110,10 @@ export function geminiFromEnv(): AiClient {
   const models = process.env.WYO_GEMINI_MODELS?.split(',').map((m) => m.trim()).filter(Boolean) ?? DEFAULT_MODELS;
   return {
     available: Boolean(key),
-    async generateJson<T>({ system, parts, schema, timeoutMs = 30_000 }: JsonRequest) {
+    async generateJson<T>({ system, parts, schema, timeoutMs = 20_000 }: JsonRequest) {
       if (!key) throw new AiUnavailableError('GEMINI_API_KEY is not set. Add it to server/.env.');
+      const usable = models.filter((m) => (exhaustedUntil.get(m) ?? 0) <= Date.now());
+      if (!usable.length) throw new AiUnavailableError('The Gemini key has used its free quota for now.');
       const body = JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
         contents: [{ role: 'user', parts }],
@@ -129,6 +134,7 @@ export function geminiFromEnv(): AiClient {
           const msg = json?.error?.message ?? '';
           // A bad key won't work on any model, so stop trying.
           if ((res.status === 400 && /api key/i.test(msg)) || res.status === 403) fatal = true;
+          if (res.status === 429) noteQuota(model, json);
           throw new Error(`${model}: ${res.status} ${msg.slice(0, 120)}`);
         }
         const text = (json.candidates?.[0]?.content?.parts ?? []).map((p: any) => p.text ?? '').join('');
@@ -139,7 +145,7 @@ export function geminiFromEnv(): AiClient {
       // The free tier is often "busy": ask a few models at once and take the first good answer,
       // then fall back to the rest one at a time.
       const PARALLEL = 3;
-      const first = models.slice(0, PARALLEL);
+      const first = usable.slice(0, PARALLEL);
       const controller = new AbortController();
       try {
         const winner = await Promise.any(
@@ -155,7 +161,7 @@ export function geminiFromEnv(): AiClient {
       } catch {
         // all of the first batch failed
       }
-      for (const model of models.slice(PARALLEL)) {
+      for (const model of usable.slice(PARALLEL)) {
         if (fatal) break;
         try {
           return await attempt(model, new AbortController().signal);

@@ -158,6 +158,9 @@ function contentWords(text: string) {
   return new Set(text.toLowerCase().match(/[a-z']+/g)?.filter((w) => w.length > 2 && !STOP.has(w)) ?? []);
 }
 
+/** Whether a note and a question share a real word ("YouTube"), not just a topic. */
+export const sharesWords = (note: string, question: string) => wholeWordOverlap(note, question) >= 1;
+
 function wholeWordOverlap(a: string, b: string) {
   const wa = contentWords(a);
   return [...contentWords(b)].filter((w) => wa.has(w)).length;

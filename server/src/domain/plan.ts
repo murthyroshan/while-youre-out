@@ -137,18 +137,34 @@ export function tonightPlan(db: DB, tz: string, h: Handoff | undefined = activeH
   return { items, now, shift, shift_reason: h?.plan_shift_reason ?? null };
 }
 
+/** A step's title inside a sentence: "next is bath", but "next is Bruno gets one cup" (a name stays). */
+export function inSentence(title: string, names: string[]): string {
+  const first = title.split(/\s/)[0] ?? '';
+  return names.some((n) => n.toLowerCase() === first.toLowerCase()) ? title : title.charAt(0).toLowerCase() + title.slice(1);
+}
+
+/**
+ * What's next: the first step that is due or still to come. A step more than half an hour past
+ * that nobody logged stays on the timeline as late, but the evening moves on without it.
+ */
+export const nextItem = (items: PlanItem[]) => items.find((i) => i.status === 'due' || i.status === 'upcoming') ?? null;
+
+// A reminder is only said while it's fresh: "It's 7:45: bath" at 8:10 would be wrong.
+const ANNOUNCE_WITHIN_MINUTES = 10;
+
 /** Items that just became due and haven't been announced yet; marks them announced. */
 export function takeDueAnnouncements(db: DB, tz: string): PlanItem[] {
   const h = activeHandoff(db);
   if (!h) return [];
-  const { items } = tonightPlan(db, tz, h);
+  const { items, now } = tonightPlan(db, tz, h);
   const announced = new Set(parse(h.plan_announced));
   const due = items.filter((i) => i.status === 'due' && !announced.has(`${i.key}@${i.minutes}`));
   if (due.length) {
     for (const i of due) announced.add(`${i.key}@${i.minutes}`);
     db.prepare('UPDATE handoffs SET plan_announced = ? WHERE id = ?').run(JSON.stringify([...announced]), h.id);
   }
-  return due;
+  // Stale ones (the clock jumped, or the device was off) are marked but not said.
+  return due.filter((i) => now.minutes - i.minutes <= ANNOUNCE_WITHIN_MINUTES);
 }
 
 // ---------- reacting to the evening log ----------
@@ -194,7 +210,7 @@ export function applyLogToPlan(db: DB, tz: string, text: string): PlanChange | n
   db.prepare('UPDATE handoffs SET plan_shift = ?, plan_shift_reason = ? WHERE id = ?').run(rule.shift, reason, h.id);
   const bed = tonightPlan(db, tz).items.find((i) => i.key === 'bedtime');
   const change = {
-    message: `${reason} So tonight's bedtime moves ${Math.abs(rule.shift)} minutes ${rule.shift > 0 ? 'later' : 'earlier'}${bed ? `, to ${bed.time}` : ''}.`,
+    message: bed ? `${reason} So bedtime is now ${bed.time}.` : `${reason} So bedtime moves ${Math.abs(rule.shift)} minutes ${rule.shift > 0 ? 'later' : 'earlier'}.`,
     new_bedtime: bed?.time,
   };
   events.emit('plan_changed', change);

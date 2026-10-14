@@ -114,7 +114,7 @@ after(async () => {
 
 test('the briefing welcomes a returning carer with what changed', async () => {
   const r = await call('start_handoff', { carer_name: 'Priya' });
-  assert.match(r.content[0].text, /Welcome back, Priya\. Since your last visit:/);
+  assert.match(r.content[0].text, /^Welcome back, Priya\./); // what changed is on the card
   assert.ok(r.structuredContent.since_last_visit.added.length >= 2);
 });
 

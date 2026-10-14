@@ -35,7 +35,7 @@ npm run dev:sim      # Echo Show simulator on http://127.0.0.1:5173 (second term
 npm test             # 248 server tests and 63 simulator tests
 ```
 
-For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator then shows a **house clock** and the **Ring doorbell** buttons, and its **Guided demo** panel walks through the whole evening. "Open the parent's phone" opens the parent page.
+For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator's **guided demo** then walks through the whole evening one step at a time: one button says the next line, and it moves the house clock and rings the doorbell for you. Its first step resets the demo family, so a reload mid-demo starts clean (`POST /demo/reset`, demo mode only). The house clock is under Settings. "Open the parent's phone" opens the parent page.
 
 **One URL for everything (hosting):** `npm run build -w simulator`, then the server also serves the simulator at `/`. The `Dockerfile` builds that into one container. The live demo runs it on Render's free plan (Docker, health check `/health`, `HOST=0.0.0.0`, `WYO_DEMO=1`, `WYO_PUBLIC_URL`, `ALLOWED_HOSTS`, plus the `WYO_PARENT_KEY` and `GEMINI_API_KEY` secrets). UptimeRobot checks `/health` every 5 minutes so the free instance doesn't sleep; `.github/workflows/keepalive.yml` is a backup ping (set the repository variable `DEMO_URL`).
 
@@ -46,13 +46,13 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 | Where | What to try |
 | --- | --- |
 | Echo Show | The **Tonight** screen (refreshes itself), every answer card, the doorbell, the emergency guide, the goodnight message, the who's-babysitting form, paying the sitter |
-| Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", photos, goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
+| Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
 
 ## Features
 
 | Feature | What it does |
 | --- | --- |
-| Tonight screen | The Echo Show's home screen during a handoff: what's next with a countdown ring, the plan as tiles, children and pets with allergy badges, the parents' latest answer, and big buttons (Ask a parent, Send a photo, Call Mom, Emergency). Dims to warm amber after lights out. An MCP App that calls `home_screen` through the host to stay current |
+| Tonight screen | The Echo Show's home screen during a handoff: what's next with a countdown ring, the plan as tiles, children and pets with allergy badges, the parents' latest answer, and big buttons (Ask a parent, What's next?, Call Mom, Emergency). Dims to warm amber after lights out. An MCP App that calls `home_screen` through the host to stay current |
 | Front Door Guard | Doorbell (Ring) + who the parents expect tonight + delivery windows + the parents' door rule. Deliveries: no need to open. Expected: check first, the parents confirm. Anyone else: don't open, and the doorbell photo goes to the parents as an urgent question they can answer from the lock screen. Never calls a stranger safe |
 | Emergency Copilot | The fixed script one step at a time ("done", "next", "it's over"), the plan's timers with spoken warnings, a paramedic sheet, and the parents' phones following live; a parent's "I'm on my way" shows and is spoken on the Echo Show |
 | Goodnight message | A parent records voice or video before leaving; it plays at lights out or when the child misses them, and the parent hears that it played |
@@ -64,7 +64,6 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 | Busy mode | "Urgent only" for 1–3 hours: small questions wait, urgent ones still come through |
 | Morning debrief | Night wakes across evenings, asleep time vs the plan, teach-back result, supplies to the shopping list, "save as a house rule", Pay |
 | Phone notifications | Web Push to the parents' phones with the page closed, routed by call order and escalation, with one-tap answers on the lock screen |
-| Photo check-in | "Send Mom a photo": countdown, picture, to the parents only (not the neighbour); deleted after a week |
 | Family setup | Children and pets with allergies in the parent's words, call order, doctors kept out of the question chain, address, time zone; reset to the demo family or start fresh |
 | House Brain | Photo of the fridge note, the doctor's PDF or a WhatsApp message becomes proposed rules the parent confirms; codes and passwords are left out |
 | Bilingual relay | Replies in the sitter's language, the parents' words kept on screen; emergency lines use fixed translations |
@@ -85,12 +84,13 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 | `ask_parent_and_wait` | MCP task: completes when a parent answers, escalates down the call order; door questions carry the photo |
 | `door_check` | Front Door Guard |
 | `emergency` | Fixed safety script from the family's own data; alerts every contact; opens the guide |
-| `emergency_step` / `emergency_status` | Move the guide on; the screen's live state, timers and spoken warnings |
+| `emergency_step` | Move the guide on: done, next, back, resolved |
+| `emergency_status` | Card and device only (MCP Apps visibility `app`): the screen's live state, timers and spoken warnings |
 | `play_message` | The parents' goodnight message |
-| `send_photo` | A photo from the device camera to the parents (the host attaches the image) |
-| `pay_sitter` / `payment_status` | Pay the sitter through URL elicitation |
+| `pay_sitter` | Pay the sitter through URL elicitation |
+| `payment_status` | Card and device only (visibility `app`): whether the payment went through |
 | `set_carer_language` | Replies in the carer's language |
-| `import_note` | A dictated note becomes proposed rules |
+| `import_note` | A parent's dictated rule ("remember: no juice after 7") becomes proposed rules they confirm on their phone. Refused during a handoff: a sitter's "remember she napped" is a log entry |
 | `end_handoff` | Ends sitter mode and returns the evening summary |
 
 Resources: `ui://while-youre-out/card.html` (the MCP App; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`.
@@ -103,10 +103,11 @@ Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
 - An MCP Apps host: sandboxed `ui://` cards, `ui/initialize` with host context, `tools/call` from cards (only for tools whose visibility includes `app`), `ui/message` from card buttons, display modes.
 - Runs `ask_parent_and_wait` as an MCP task, shows its status, and announces the answer.
 - Voice in and out (Chrome or Edge), or type. Two "brains" stand in for the Alexa+ language model:
-  - **Gemini**: free speech in any language, function calling. The key stays on the server behind `/host/llm` (local pages only, 30 requests a minute).
-  - **Rules**: pattern matching, no key needed; Gemini falls back to it if the model is busy.
+  - **Rules** (the default): pattern matching, instant, no key needed. Every guided demo line works with it.
+  - **Gemini** (under Settings): free speech in any language, function calling, one model call per turn. The key stays on the server behind `/host/llm` (local pages only, 30 requests a minute). The free tier allows about 20 requests a day per model, so a model out of quota is skipped until it resets and the rule brain answers within seconds.
 - Either way the device speaks the server's own text, never a model paraphrase, and emergencies, the emergency guide and the door photo are handled by fixed rules before any model call.
-- Simulated device features: the camera (webcam or a drawn sample), Alexa calling, the Ring doorbell alert.
+- Spoken replies stay within 30 words (a test plays the whole guided demo and checks every reply); the card shows the rest. The fixed emergency script is the one exception: it is always read in full.
+- Simulated device features: Alexa calling and the Ring doorbell alert.
 
 ## Settings (environment variables)
 
@@ -138,7 +139,7 @@ Simulator: `VITE_MCP_URL` (default: the server that serves it, or `http://127.0.
 - Each kind of emergency gets a fixed script: the parents' action plan for allergy or breathing, "get everyone out" for fire or gas, Poison Control for poisoning. Medical cases defer to the 911 dispatcher. The step-by-step guide and its timers come from the same plan.
 - A stranger at the door is never called safe; whether to open is the parents' call, with the photo.
 - Logging an allergen (including brand names such as Snickers or Nutella) or medicine alerts the parents immediately.
-- Photos of the children go to the parents only; payments are approved on the parent's own phone, never on the shared screen.
+- Payments are approved on the parent's own phone, never on the shared screen.
 
 The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider.
 

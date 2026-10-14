@@ -225,47 +225,6 @@ test('"ask mom if she can have dessert" asks the right question', async () => {
   assert.deepEqual(d.tasks[0].args, { question: 'she can have dessert' });
 });
 
-// ---------- photo check-in ----------
-
-test('"Send Mom a photo saying good night" takes a photo and sends it with the caption', async () => {
-  const brain = new RuleBrain();
-  const dev = fakeDevice({ send_photo: { content: [{ type: 'text', text: 'Sent. Anita will see it on their phone.' }] } });
-  dev.io.capture = async () => ({ data: 'AAAA', mime: 'image/jpeg' });
-  await brain.handle('Send Mom a photo saying good night', dev.io);
-  assert.deepEqual(dev.calls, [{ name: 'send_photo', args: { image_base64: 'AAAA', mime_type: 'image/jpeg', caption: 'Good night' } }]);
-  assert.deepEqual(dev.said, ['Okay, smile!', 'Sent. Anita will see it on their phone.']);
-});
-
-test('"take a picture of us" works without a caption; no camera is said plainly', async () => {
-  const brain = new RuleBrain();
-  const dev = fakeDevice();
-  dev.io.capture = async () => ({ data: 'BBBB', mime: 'image/jpeg' });
-  await brain.handle("Let's take a picture of us for Dad", dev.io);
-  assert.deepEqual(dev.calls[0].args, { image_base64: 'BBBB', mime_type: 'image/jpeg' });
-  const none = await run(['Send them a photo']);
-  assert.equal(none.calls.length, 0);
-  assert.match(none.said[0], /doesn't have a camera/);
-});
-
-test('"Can she take pictures with my phone?" is a question for the house, not a photo', async () => {
-  const d = await run(['Can she take pictures with my phone?']);
-  assert.equal(d.calls[0].name, 'ask_house');
-});
-
-test('a photo request during the teach-back is not taken as an answer, and the check carries on', async () => {
-  const brain = new RuleBrain();
-  const dev = fakeDevice({ teachback: { structuredContent: { kind: 'question' } } });
-  dev.io.capture = async () => ({ data: 'CCCC', mime: 'image/jpeg' });
-  await brain.handle('Priya is babysitting tonight', dev.io);
-  await brain.handle('Take a photo for Mom', dev.io);
-  await brain.handle('Peanuts', dev.io);
-  assert.deepEqual(
-    dev.calls.map((c) => c.name),
-    ['start_handoff', 'teachback', 'send_photo', 'teachback'],
-  );
-  assert.deepEqual(dev.calls[3].args, { answer: 'Peanuts' });
-});
-
 // ---------- Tonight screen buttons and calls ----------
 
 test('"Call Mom" places an Alexa call through the device', async () => {
@@ -366,4 +325,28 @@ test('"Pay Priya" pays the sitter; "pay attention" does not', async () => {
   assert.equal((await run(['Pay Priya'])).calls[0].name, 'pay_sitter');
   assert.equal((await run(['Pay the babysitter'])).calls[0].name, 'pay_sitter');
   assert.notEqual((await run(['Pay attention to the stove'])).calls[0]?.name, 'pay_sitter');
+});
+
+// ---------- "remember ..." ----------
+
+test('"Remember: no juice after 7" from a parent teaches the house (import_note)', async () => {
+  const d = await run(['Remember: no juice after 7']);
+  assert.deepEqual(d.calls, [{ name: 'import_note', args: { text: 'No juice after 7' } }]);
+});
+
+test('during a handoff, "remember she napped till 5" is logged, not a house rule', async () => {
+  const d = await run(['Priya is babysitting tonight', 'stop', 'Remember she napped till 5'], { start_handoff: { structuredContent: { carer: 'Priya' } }, teachback: { structuredContent: { kind: 'question' } } });
+  assert.deepEqual(d.calls.map((c) => c.name), ['start_handoff', 'teachback', 'log_event']);
+  assert.equal(d.calls[2].args.text, 'She napped till 5');
+});
+
+test('if the server says a handoff is on (e.g. after a reload), the note is logged instead', async () => {
+  const d = await run(['Remember she ate all her dinner'], { import_note: { isError: true, structuredContent: { handoff_active: true } } });
+  assert.deepEqual(d.calls.map((c) => c.name), ['import_note', 'log_event']);
+});
+
+test('"hello" is a greeting, not thanks', async () => {
+  const d = await run(['hello', 'thanks']);
+  assert.match(d.said[0], /^Hi\./);
+  assert.equal(d.said[1], "You're welcome.");
 });

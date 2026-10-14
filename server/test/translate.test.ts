@@ -105,7 +105,8 @@ test('safety rules read the English rendering: a Hindi emergency is an emergency
 test('food questions in another language are still guarded', async () => {
   const r = await call('ask_house', { question: 'क्या वह कुकी खा सकती है?', question_english: 'Can she eat a cookie?' });
   assert.equal(r.structuredContent.category, 'food');
-  assert.match(r.structuredContent.english, /Check the label/);
+  assert.match(r.structuredContent.guard, /Check the label/);
+  assert.match(r.structuredContent.english, /not sure, don't give it/);
 });
 
 test('parents see the question in English as well as the carer\'s own words', async () => {

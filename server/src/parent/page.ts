@@ -80,10 +80,6 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   .en { font-size: 14px; color: var(--muted); margin: -6px 0 10px; }
   .notify { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .notify p { margin: 4px 0 0; }
-  .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
-  .photos figure { margin: 0; }
-  .photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; display: block; background: #eee; }
-  .photos figcaption { font-size: 13px; color: var(--muted); margin-top: 4px; }
   .tl { list-style: none; padding: 0; margin: 8px 0 0; }
   .tl li { display: grid; grid-template-columns: 74px 1fr; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 15px; }
   .tl li:first-child { border-top: 0; }
@@ -178,7 +174,6 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <div id="setupBanner"></div>
     <div id="questions"></div>
     <section class="card notify" id="notify" hidden></section>
-    <section class="card" id="photos" hidden></section>
     <div id="debrief"></div>
     <section class="card" id="visitors">
       <strong>Expected tonight</strong>
@@ -319,22 +314,11 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     // Only redraw questions when the set changes, so typing and choices aren't wiped by polling.
     var qKey = s.questions.map(function (q) { return q.id; }).join(',');
     if (qKey !== lastQKey) { lastQKey = qKey; renderQuestions(s); }
-    var phKey = s.photos.map(function (p) { return p.id; }).join(',');
-    if (phKey !== lastPhotos) { lastPhotos = phKey; renderPhotos(s.photos); }
     document.getElementById('setupBanner').innerHTML = s.parents.length ? '' :
       '<div class="card banner"><strong>Set up your family to start</strong><p class="muted">Add who Alexa looks after and who to call. It takes a minute.</p><button class="ok" id="openFamily">Set up now</button></div>';
     document.getElementById('log').innerHTML = s.log.length ? '<ul>' + s.log.map(function (e) { return '<li>' + esc(time(e.at)) + ' ' + esc(e.text) + '</li>'; }).join('') + '</ul>' : 'Nothing logged yet.';
   }
-  var lastQKey = null, lastBusy = null, lastShadow = null, lastDebrief = null, lastPhotos = null;
-  function renderPhotos(photos) {
-    var box = document.getElementById('photos');
-    box.hidden = !photos.length;
-    box.innerHTML = '<strong>Photos from home</strong><div class="photos">' + photos.slice().reverse().map(function (p) {
-      var src = '/parent/api/photos/' + p.id + '?k=' + encodeURIComponent(key);
-      return '<figure><a href="' + src + '" target="_blank" rel="noopener"><img src="' + src + '" alt="Photo from ' + esc(p.taken_by || 'home') + '" loading="lazy"></a>' +
-        '<figcaption>' + esc(time(p.at)) + (p.taken_by ? ' · ' + esc(p.taken_by) : '') + (p.caption ? ' · “' + esc(p.caption) + '”' : '') + '</figcaption></figure>';
-    }).join('') + '</div>';
-  }
+  var lastQKey = null, lastBusy = null, lastShadow = null, lastDebrief = null;
   function renderDebrief(s) {
     var d = s.debrief;
     if (!d) { document.getElementById('debrief').innerHTML = ''; return; }
@@ -709,7 +693,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       fErr.style.color = 'var(--green)';
       fErr.textContent = b.dataset.reset === 'demo' ? 'Back to the demo family ✓' : 'Clean house ✓ Add your family above, then save.';
       if (b.dataset.reset === 'fresh') setTab('family');
-      lastQKey = lastBusy = lastShadow = lastDebrief = lastPhotos = lastPKey = null;
+      lastQKey = lastBusy = lastShadow = lastDebrief = lastPKey = null;
       parentsShown = null;
       load();
       loadProposals();
@@ -912,7 +896,6 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     if (tb) pills.push(tb.done ? '<span class="lp ' + (tb.right === tb.total ? 'ok' : 'warn') + '">Handover ' + tb.right + '/' + tb.total + (tb.right === tb.total ? ' ✓' : '') + '</span>' : '<span class="lp">Handover check ' + tb.answered + '/' + tb.total + '</span>');
     if (s.questions.length) pills.push('<span class="lp warn">' + s.questions.length + ' question' + (s.questions.length > 1 ? 's' : '') + ' for you</span>');
     if (h.last_log) pills.push('<span class="lp">' + esc(h.last_log.time) + ' · ' + esc(h.last_log.text.length > 34 ? h.last_log.text.slice(0, 32) + '…' : h.last_log.text) + '</span>');
-    if (s.photos && s.photos.length) pills.push('<span class="lp">📷 ' + s.photos.length + '</span>');
     if (s.busy_until) pills.push('<span class="lp">Urgent only till ' + esc(s.busy_until) + '</span>');
     document.getElementById('liveNow').innerHTML = now;
     document.getElementById('livePills').innerHTML = pills.join('');

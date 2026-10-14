@@ -22,7 +22,7 @@ export interface PushMessage {
   tag?: string;
   /** Emergencies and urgent questions stay on screen until tapped, and vibrate harder. */
   urgent?: boolean;
-  /** An image shown in the notification (Android), e.g. the sitter's photo. */
+  /** An image shown in the notification (Android), e.g. the doorbell snapshot. */
   image?: string;
   /** The question this asks, so the phone can answer it straight from the notification. */
   question_id?: number;
@@ -90,13 +90,12 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
 
   /**
    * Sends to the phones of the named people. If none of them has turned notifications on, every
-   * subscribed phone gets it: a missed question is worse than an extra buzz. Private messages
-   * (photos of the children) never fall back: only the named people's phones get them.
+   * subscribed phone gets it: a missed question is worse than an extra buzz.
    */
-  const notify = async (to: string[] | 'everyone', msg: PushMessage, opts: { endpoint?: string; private?: boolean } = {}) => {
+  const notify = async (to: string[] | 'everyone', msg: PushMessage, opts: { endpoint?: string } = {}) => {
     const all = subscribers().filter((s) => !opts.endpoint || s.endpoint === opts.endpoint);
     const named = to === 'everyone' ? all : all.filter((s) => s.member && to.includes(s.member));
-    const targets = named.length || opts.private ? named : all;
+    const targets = named.length ? named : all;
     const results = await Promise.allSettled(
       targets.map(async (s) => {
         // Each phone answers as its owner ("Answering as Anita").
@@ -181,15 +180,6 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
   const onEnded = (h: { carer_name: string }) => {
     void notify(parentNames(db), { title: 'Your morning debrief is ready', body: `How the evening with ${h.carer_name} went.`, tag: 'debrief' });
   };
-  const onPhoto = (p: { id: number; caption: string | null; taken_by: string | null }) => {
-    void notify(parentNames(db), {
-      title: `New photo from ${p.taken_by ?? 'home'}`,
-      body: p.caption || 'Tap to see it.',
-      tag: `photo${p.id}`,
-      image: `/parent/api/photos/${p.id}?k=${encodeURIComponent(opts.parentKey)}`,
-    }, { private: true });
-  };
-
   // The emergency, as it unfolds: one notification that updates in place (same tag).
   const onIncident = ({ incident: i, change }: { incident: Incident; change: string }) => {
     const last = i.updates.at(-1);
@@ -223,7 +213,6 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
     ['emergency', onEmergency],
     ['teachback', onTeachback],
     ['handoff_ended', onEnded],
-    ['photo', onPhoto],
   ];
   for (const [name, fn] of handlers) events.on(name, fn);
   const close = () => {

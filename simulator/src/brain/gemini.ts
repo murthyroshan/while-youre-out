@@ -28,6 +28,11 @@ export interface GeminiBrainOptions {
 
 // Tools the model should not use directly: the task version of ask_parent is preferred.
 const HIDDEN_TOOLS = new Set(['ask_parent', 'check_parent_answer']);
+/** MCP Apps: a tool whose visibility leaves out "model" is only for cards and the host. */
+const modelCanUse = (t: Tool) => {
+  const visibility = (t._meta as { ui?: { visibility?: unknown } } | undefined)?.ui?.visibility;
+  return !HIDDEN_TOOLS.has(t.name) && (!Array.isArray(visibility) || visibility.includes('model'));
+};
 const DEVICE_FUNCTIONS = [
   {
     name: 'call_contact',
@@ -56,8 +61,7 @@ How to act:
 - Call ask_parent_and_wait only after ask_house, when the carer then asks you to check with a parent or says yes to your offer.
 - Anything that sounds like an emergency: call emergency immediately.
 - The parents are back / "end the handoff": confirm, then call end_handoff.
-- A dictated note from a parent ("remember: ..."): call import_note.
-- "Send Mom a photo", "take a picture of us": call send_photo. The device camera takes the picture; pass only a caption if they said one ("saying good night").
+- A parent teaching a standing house rule when nobody is babysitting ("remember: no juice after 7"): call import_note. During a handoff, "remember she napped till 5" is something that happened: log_event.
 - "Call Mom", "phone Anita": call call_contact.
 - Anything about the front door ("someone's knocking", "should I open the door?", "who's at the door?"): call door_check. The device sends the doorbell photo to the parents itself; don't call ask_parent_and_wait for it.
 - "We're heading out" without saying who is babysitting: call start_handoff with no carer_name; the device asks the parent on screen.
@@ -79,15 +83,6 @@ function cleanSchema(schema: unknown): unknown {
     out[k] = cleanSchema(v);
   }
   return out;
-}
-
-/** The photo itself comes from the device camera, never from the model. */
-function withoutDeviceFields(t: Tool): unknown {
-  if (t.name !== 'send_photo') return t.inputSchema;
-  const props = { ...((t.inputSchema.properties ?? {}) as Record<string, unknown>) };
-  delete props.image_base64;
-  delete props.mime_type;
-  return { ...t.inputSchema, properties: props };
 }
 
 /** Keeps tool results small: the model needs the gist, the card shows the rest. */
@@ -114,8 +109,8 @@ export class GeminiBrain implements Brain {
     return [
       ...this.opts
         .tools()
-        .filter((t) => !HIDDEN_TOOLS.has(t.name))
-        .map((t) => ({ name: t.name, description: (t.description ?? '').slice(0, 1000), parametersJsonSchema: cleanSchema(withoutDeviceFields(t)) })),
+        .filter(modelCanUse)
+        .map((t) => ({ name: t.name, description: (t.description ?? '').slice(0, 1000), parametersJsonSchema: cleanSchema(t.inputSchema) })),
       // Things the device does itself, like Alexa calling.
       ...DEVICE_FUNCTIONS,
     ];
@@ -193,13 +188,7 @@ export class GeminiBrain implements Brain {
             response = { text: 'Question sent to the parents. The answer will be announced when it arrives.' };
             spoken.push('Okay, I\'m asking now. I\'ll tell you when they answer.');
           } else {
-            let callArgs = args;
-            if (name === 'send_photo') {
-              spoken.push('Okay, smile!');
-              const shot = io.capture ? await io.capture() : null;
-              callArgs = shot ? { ...args, image_base64: shot.data, mime_type: shot.mime } : args;
-            }
-            const r = await io.tool(name, callArgs);
+            const r = await io.tool(name, args);
             response = forModel(r);
             const s = r.structuredContent ?? {};
             // Someone at the door: the parents get the photo, decided by the add-on, not left to the model.

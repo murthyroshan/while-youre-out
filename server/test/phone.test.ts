@@ -158,46 +158,6 @@ test('a phone that unsubscribed is forgotten; if the named person has no phone, 
   await post('/parent/api/push/subscribe', { subscription: phone('anita'), member: 'Anita' });
 });
 
-// ---------- photos ----------
-
-const JPEG = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(200, 7)]);
-
-test('send_photo: the photo reaches the parents (page + notification) and nobody else', async () => {
-  // The neighbour has the page on her phone too, but photos of the children are for the parents.
-  await post('/parent/api/push/subscribe', { subscription: phone('lee'), member: 'Mrs. Lee' });
-  reset();
-  const r = await call('send_photo', { image_base64: JPEG.toString('base64'), mime_type: 'image/jpeg', caption: 'Maya says good night' });
-  assert.ok(!r.isError, r.content[0].text);
-  assert.match(r.content[0].text, /Anita and Rahul will see it/);
-  await settle();
-  const s = await state();
-  assert.equal(s.photos.length, 1);
-  assert.equal(s.photos[0].caption, 'Maya says good night');
-  assert.equal(s.photos[0].taken_by, 'Priya');
-  const img = await fetch(`${base}/parent/api/photos/${s.photos[0].id}?k=${KEY}`);
-  assert.equal(img.headers.get('content-type'), 'image/jpeg');
-  assert.deepEqual(Buffer.from(await img.arrayBuffer()), JPEG);
-  assert.equal((await fetch(`${base}/parent/api/photos/${s.photos[0].id}?k=wrong`)).status, 401);
-  const n = sent.find((x) => /New photo from Priya/.test(x.msg.title));
-  assert.ok(n);
-  assert.match(n!.msg.image, new RegExp(`/parent/api/photos/${s.photos[0].id}`));
-  assert.equal(to('lee').length, 0, 'not the neighbour');
-  assert.equal(to('anita').length + to('rahul').length, 2);
-  await post('/parent/api/push/unsubscribe', { endpoint: phone('lee').endpoint });
-});
-
-test('send_photo refuses non-images, oversized files, and a missing camera', async () => {
-  const fake = await call('send_photo', { image_base64: Buffer.from('<script>alert(1)</script>').toString('base64'), mime_type: 'image/jpeg' });
-  assert.ok(fake.isError);
-  assert.match(fake.content[0].text, /valid image/);
-  const big = await call('send_photo', { image_base64: Buffer.concat([JPEG, Buffer.alloc(1_600_000)]).toString('base64') });
-  assert.ok(big.isError);
-  assert.match(big.content[0].text, /too large/);
-  const none = await call('send_photo', {});
-  assert.ok(none.isError);
-  assert.equal(none.structuredContent.needs_camera, true);
-});
-
 // ---------- family setup ----------
 
 test('family form checks: a name, a real time zone, someone to call, sensible phones', () => {
@@ -245,7 +205,7 @@ test('start fresh: an empty house still works end to end, and nothing says "null
   assert.deepEqual([fam.household.timezone, fam.members.length, fam.contacts.length], ['Asia/Kolkata', 0, 0]);
   const s = await state();
   assert.equal(s.handoff, null);
-  assert.deepEqual([s.parents, s.photos, s.questions], [[], [], []]);
+  assert.deepEqual([s.parents, s.questions], [[], []]);
   await call('start_handoff', { carer_name: 'Nani' });
   const tb = await call('teachback', {});
   assert.match(tb.content[0].text, /doesn't have anything to check yet/);
@@ -298,7 +258,7 @@ test('reset to the demo family: clean Sharma house, waiting questions closed, no
   const final = await result;
   assert.match(final.content[0].text, /The house was reset/);
   const s = await state();
-  assert.deepEqual([s.handoff, s.emergency, s.questions.length, s.photos.length], [null, null, 0, 0]);
+  assert.deepEqual([s.handoff, s.emergency, s.questions.length], [null, null, 0]);
   assert.deepEqual(s.parents, ['Anita', 'Rahul', 'Mrs. Lee']);
   // Phones stay subscribed across a reset.
   assert.ok((db.prepare('SELECT COUNT(*) AS n FROM push_subscriptions').get() as { n: number }).n >= 1);

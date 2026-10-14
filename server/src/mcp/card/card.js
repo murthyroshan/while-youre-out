@@ -27,6 +27,12 @@
   }
 
   // ---------- helpers ----------
+  // A step's title inside a sentence: "bath 7:15 pm", but "Bruno gets one cup 7:00 pm" (a name stays).
+  function inSentence(title, members) {
+    var first = String(title).split(/\s/)[0].toLowerCase();
+    var named = (members || []).some(function (m) { return String(m.name).toLowerCase() === first; });
+    return named ? title : title.charAt(0).toLowerCase() + title.slice(1);
+  }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function cap(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
   function andList(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : (a[0] || ''); }
@@ -264,14 +270,6 @@
         '<div class="stepbtns" style="margin-top:1em"><button class="btn green" data-say="' + esc('Pay ' + d.carer) + '">' + icon('heart') + ' Pay ' + esc(d.carer) + '</button></div>');
     },
 
-    photo: function (d) {
-      if (d.needs_camera) return panel('<div class="empty">' + icon('camera') + '<span>This device couldn’t take a photo.</span></div>');
-      var to = d.sent_to || [];
-      return panel('<div class="confirm"><span class="tick">' + icon('camera') + '</span><div><div class="title" style="margin:0">Photo sent</div>' +
-        (d.caption ? '<p>“' + esc(d.caption) + '”</p>' : '') + '<p class="sub">' + (to.length ? esc(andList(to)) + ' will see it on their phone' : 'The parents will see it on their phone') + '</p></div></div>' +
-        '<p style="margin-top:.8em"><span class="pill">' + icon('shield') + ' Only the parents see photos · deleted after a week</span></p>');
-    },
-
     logged: function (d) {
       var e = d.event || {};
       var h = '<div class="confirm"><span class="tick">' + icon('check') + '</span><div><div class="eyebrow" style="margin:0">Noted for the parents</div><div class="title" style="margin:.1em 0 0">' + esc(e.text) + '</div></div></div>';
@@ -371,7 +369,7 @@
     if (d.mode === 'parent') {
       main = '<section class="next"><div class="eyebrow">' + icon('heart') + 'While You’re Out</div><div class="next-title">Going out tonight?</div>' +
         '<p class="next-when">Say <b>“Priya is babysitting tonight”</b> and this screen becomes the sitter’s guide.</p>' +
-        '<ol class="how"><li><span><b>Tonight’s plan</b> from your own routine' + (d.plan.length ? ': ' + esc(d.plan.map(function (p) { return p.title.toLowerCase() + ' ' + p.time; }).slice(0, 3).join(', ')) : '') + '</span></li>' +
+        '<ol class="how"><li><span><b>Tonight’s plan</b> from your own routine' + (d.plan.length ? ': ' + esc(d.plan.map(function (p) { return inSentence(p.title, d.members) + ' ' + p.time; }).slice(0, 3).join(', ')) : '') + '</span></li>' +
         '<li><span><b>A quick handover check</b> before you leave</span></li><li><span>Questions reach <b>your phone</b>; emergencies get a fixed script</span></li></ol></section>';
     } else if (d.night) {
       var kid = (d.members.filter(function (m) { return m.kind === 'child'; })[0] || {}).name;
@@ -407,7 +405,6 @@
     if (d.questions_waiting) rows.push('<div class="row">' + icon('send') + '<div>' + d.questions_waiting + ' question' + (d.questions_waiting > 1 ? 's' : '') + ' waiting for the parents</div></div>');
     if (d.last_log) rows.push('<div class="row">' + icon('clock') + '<div><span class="tab">' + esc(d.last_log.time) + '</span> · ' + esc(d.last_log.text) + '</div></div>');
     if (d.door) rows.push('<div class="row">' + icon('door') + '<div><span class="tab">' + esc(d.door.time) + '</span> · ' + esc(d.door.label) + (d.door.decision ? '<br><span class="sub">' + esc(d.door.decision) + '</span>' : '') + '</div></div>');
-    if (d.photos_sent) rows.push('<div class="row">' + icon('camera') + '<div>' + d.photos_sent + ' photo' + (d.photos_sent > 1 ? 's' : '') + ' sent to the parents</div></div>');
     if (d.mode === 'parent' && d.parents.length) rows.push('<div class="row">' + icon('phone') + '<div>Questions go to <b>' + esc(andList(d.parents.map(function (p) { return p.name; }))) + '</b>, in your call order</div></div>');
     if (!rows.length && d.mode === 'carer') rows.push('<div class="row">' + icon('info') + '<div>Ask me anything about the house, or tell me how it’s going.</div></div>');
     var side = '<section class="side"><div class="kids">' + kids + '</div>' + (rows.length ? '<div class="status">' + rows.join('') + '</div>' : '') + '</section>';
@@ -415,7 +412,7 @@
     var first = d.parents[0];
     var footer = d.mode === 'carer'
       ? '<footer><button class="btn blue" data-say="Ask the parents">' + icon('message') + ' Ask a parent</button>' +
-        '<button class="btn" data-say="Send the parents a photo">' + icon('camera') + ' Send a photo</button>' +
+        '<button class="btn" data-say="What’s next?">' + icon('clock') + ' What’s next?</button>' +
         '<button class="btn green" data-say="' + esc('Call ' + (first ? first.name : 'Mom')) + '">' + icon('phone') + ' Call ' + esc(first ? first.name : 'a parent') + '</button>' +
         '<button class="btn red" data-say="Emergency">' + icon('alert') + ' Emergency</button></footer>'
       : '';

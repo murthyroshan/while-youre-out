@@ -4,10 +4,9 @@
 import type { DB } from '../db.js';
 import { formatTime, localTime } from '../clock.js';
 import { activeHandoff, eveningLog, household, householdTz, parentNames, pendingQuestions, contacts, visibleFacts } from './house.js';
-import { tonightPlan } from './plan.js';
+import { inSentence, nextItem, tonightPlan } from './plan.js';
 import { busyUntil } from './shadow.js';
 import { summary, teachbackState } from './teachback.js';
-import { recentPhotos } from './photos.js';
 import { latestDoorEvent } from './door.js';
 
 const ALLERGENS = ['peanut', 'tree nut', 'egg', 'milk', 'dairy', 'wheat', 'gluten', 'soy', 'sesame', 'fish', 'shellfish', 'shrimp', 'bee', 'penicillin', 'latex', 'nut'];
@@ -38,7 +37,6 @@ export interface HomeScreen {
   last_answer: { by: string; answer: string; question: string; minutes_ago: number } | null;
   busy_until: string | null;
   teachback: { right: number; total: number; done: boolean } | null;
-  photos_sent: number;
   /** The doorbell in the last hour, and what a parent said about it. */
   door: { time: string; label: string; decision: string | null } | null;
 }
@@ -91,13 +89,12 @@ export function homeScreen(db: DB): HomeScreen {
     last_answer: null,
     busy_until: null,
     teachback: null,
-    photos_sent: 0,
     door: null,
   };
   if (!h) return { ...base, plan: tonightPlan(db, tz, undefined, now).items.map((i) => ({ key: i.key, title: i.title, time: i.time, status: 'upcoming' })) };
 
   const plan = tonightPlan(db, tz, h, now);
-  const next = plan.items.find((i) => i.status !== 'done') ?? null;
+  const next = nextItem(plan.items);
   const log = eveningLog(db, h.id);
   const timeOf = (iso: string) => formatTime(localTime(tz, new Date(iso)).minutes);
   // Asleep, unless something later says they woke up.
@@ -122,7 +119,6 @@ export function homeScreen(db: DB): HomeScreen {
       : null,
     busy_until: busy ? formatTime(localTime(tz, busy).minutes) : null,
     teachback: tb ? { ...summary(tb), done: tb.done } : null,
-    photos_sent: recentPhotos(db, h.id).filter((p) => p.handoff_id === h.id).length,
     door: (() => {
       const ev = latestDoorEvent(db, 60 * 60_000);
       if (!ev) return null;
@@ -141,5 +137,5 @@ export function homeSentence(s: HomeScreen) {
   if (!s.next) return s.plan.length ? "Everything on tonight's plan is done." : `${s.carer} is looking after things.`;
   const m = s.next.minutes_until;
   const when = m > 1 ? `, in ${m} minutes` : m >= -5 ? ', now' : `, ${-m} minutes ago`;
-  return `Next is ${s.next.title.toLowerCase()} at ${s.next.time}${when}.`;
+  return `Next is ${inSentence(s.next.title, s.members.map((m) => m.name))} at ${s.next.time}${when}.`;
 }

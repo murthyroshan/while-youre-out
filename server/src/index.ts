@@ -11,7 +11,6 @@ import { seedDemoHousehold } from './seed.js';
 import { buildServer } from './mcp/server.js';
 import { PARENT_HTML, SERVICE_WORKER_JS } from './parent/page.js';
 import { createPush, isValidSubscription, type PushSender } from './domain/push.js';
-import { getPhotoData, recentPhotos } from './domain/photos.js';
 import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './domain/family.js';
 import { homeScreen } from './domain/home.js';
 import { approvePayment, createPayment, declinePayment, payableHandoff, PaymentError, paymentByToken } from './domain/payments.js';
@@ -32,6 +31,8 @@ export interface AppOptions {
   dbPath?: string;
   parentKey?: string;
   escalateAfterMs?: number;
+  /** How long a spoken note may take to read before the device answers anyway. */
+  voiceWaitMs?: number;
   host?: string;
   allowedHosts?: string[];
   publicUrl?: string;
@@ -79,12 +80,12 @@ export function createApp(opts: AppOptions = {}) {
   events.on('reset', clearEmergency);
   const push = createPush(db, { sender: opts.pushSender, publicUrl, parentKey });
 
-  // Same as the SDK's createMcpExpressApp, with a body limit that fits a photo from the device camera.
+  // Same as the SDK's createMcpExpressApp, with our own host checks.
   const app = express();
   const bindHost = opts.host ?? '127.0.0.1';
   if (opts.allowedHosts) app.use(hostHeaderValidation(opts.allowedHosts));
   else if (['127.0.0.1', 'localhost', '::1'].includes(bindHost)) app.use(localhostHostValidation());
-  app.use(express.json({ limit: '3mb' }));
+  app.use(express.json({ limit: '1mb' }));
   // Browsers may only call us from local pages (the simulator) or origins listed in ALLOWED_ORIGINS.
   // Requests without an Origin header (MCP clients, curl, same-origin page loads) are not affected.
   const originAllowed = (origin: string | undefined, host: string | undefined) => {
@@ -157,7 +158,7 @@ export function createApp(opts: AppOptions = {}) {
             lastSeen.delete(t.sessionId);
           }
         };
-        await buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai }).connect(t);
+        await buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voiceWaitMs: opts.voiceWaitMs }).connect(t);
         transport = t;
       }
       if (transport.sessionId) lastSeen.set(transport.sessionId, Date.now());
@@ -250,7 +251,6 @@ export function createApp(opts: AppOptions = {}) {
         const sc = i.script as Record<string, unknown>;
         return { ...incidentView(db, i), description: i.description, say_first: sc.say_first, address: sc.address || null, carer: activeHandoff(db)?.carer_name ?? null };
       })(),
-      photos: recentPhotos(db, activeHandoff(db)?.id ?? latestDebrief(db)?.handoff_id),
       household: getFamily(db).household,
       home: homeScreen(db),
     });
@@ -385,16 +385,6 @@ export function createApp(opts: AppOptions = {}) {
     res.setHeader('Cache-Control', 'private, max-age=3600');
     res.setHeader('Accept-Ranges', 'none');
     res.type(m.mime).send(m.data);
-  });
-
-  // ---------- Photos from home (parents only) ----------
-  app.get('/parent/api/photos/:id', (req, res) => {
-    if (!authorised(req.query.k)) return void res.sendStatus(401);
-    const p = getPhotoData(db, Number(req.params.id));
-    if (!p) return void res.sendStatus(404);
-    res.setHeader('Cache-Control', 'private, max-age=3600');
-    res.setHeader('Content-Security-Policy', "default-src 'none'");
-    res.type(p.mime).send(p.data);
   });
 
   // ---------- Family setup ----------
@@ -589,6 +579,11 @@ export function createApp(opts: AppOptions = {}) {
       res.json({ ...ev, time: formatTime(localTime(householdTz(db), new Date(ev.at)).minutes) });
     });
     app.get('/demo/clock', (_req, res) => void res.json({ ...localTime(householdTz(db)), demo: true }));
+    // The guided demo starts every run from the demo family, even after a reload mid-demo.
+    app.post('/demo/reset', (_req, res) => {
+      resetClock();
+      res.json(resetToDemo(db));
+    });
     app.post('/demo/clock', (req, res) => {
       try {
         if (req.body?.reset) {

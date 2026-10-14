@@ -89,6 +89,9 @@ test('permission questions the manual only touches on offer to ask a parent', as
   assert.equal(r.structuredContent.exact, false);
   assert.equal(r.structuredContent.suggest_ask_parent, true);
   assert.match(text(r), /haven't said exactly/);
+  // The bedtime routine doesn't answer it, so it isn't read out (it's on the card).
+  assert.doesNotMatch(text(r), /Dinner|Bath at/);
+  assert.ok(r.structuredContent.facts.length > 0);
 });
 
 test('where_is returns the EpiPen location', async () => {
@@ -157,4 +160,10 @@ test('the evening log and summary reach the parents', async () => {
 test('the parent API rejects a wrong key', async () => {
   const res = await fetch(`${base}/parent/api/state?k=wrong`);
   assert.equal(res.status, 401);
+});
+
+test('a bare "Emergency" says "Call 911" once, not twice', async () => {
+  const r = await call('emergency', { description: 'Emergency' });
+  assert.equal(text(r).match(/Call 911 now/g)?.length, 1, text(r));
+  await call('emergency_step', { action: 'resolved' });
 });

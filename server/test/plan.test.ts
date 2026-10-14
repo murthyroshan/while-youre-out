@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { openDb } from '../src/db.js';
 import { seedDemoHousehold } from '../src/seed.js';
 import { startHandoff } from '../src/domain/house.js';
-import { applyLogToPlan, takeDueAnnouncements, timedSteps, tonightPlan } from '../src/domain/plan.js';
+import { applyLogToPlan, nextItem, takeDueAnnouncements, timedSteps, tonightPlan } from '../src/domain/plan.js';
 import { localTime, resetClock, setDemoTime, type LocalTime } from '../src/clock.js';
 import { createApp } from '../src/index.js';
 
@@ -109,6 +109,65 @@ test('due steps are announced once each, using the demo clock', () => {
   assert.deepEqual(takeDueAnnouncements(db, TZ), [], 'not repeated');
   assert.equal(localTime(TZ).hhmm, '19:16');
   resetClock();
+});
+
+test('a step nobody logged stops being "next" once it is late; the evening moves on', () => {
+  const db = fresh();
+  startHandoff(db, 'Priya');
+  const next = (hhmm: string) => nextItem(tonightPlan(db, TZ, undefined, at(hhmm)).items)?.key;
+  assert.equal(next('18:40'), 'dinner', 'ten minutes late is still next');
+  assert.notEqual(next('20:10'), 'dinner', 'not "dinner, 100 min late" at 8:10 pm');
+  assert.equal(tonightPlan(db, TZ, undefined, at('20:10')).items.find((i) => i.key === 'dinner')!.status, 'late', 'still shown as late');
+});
+
+test('a reminder that is no longer fresh (the clock jumped) is not said', () => {
+  const db = fresh();
+  startHandoff(db, 'Priya');
+  setDemoTime('19:40', TZ); // bath was 7:15: 25 minutes ago
+  assert.ok(!takeDueAnnouncements(db, TZ).some((i) => i.key === 'bath'));
+  resetClock();
+});
+
+test('after a late nap, "what time is bedtime?" leads with tonight\'s new bedtime, not the usual one', async () => {
+  const { app, close } = createApp({ parentKey: 'k' });
+  const http = app.listen(0, '127.0.0.1');
+  await new Promise((r) => http.once('listening', r));
+  const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
+  const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+  const c = new Client({ name: 't', version: '0' });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${(http.address() as any).port}/mcp`)));
+  await c.callTool({ name: 'start_handoff', arguments: { carer_name: 'Priya' } });
+  await c.callTool({ name: 'log_event', arguments: { text: 'She napped till 5', kind: 'sleep' } });
+  const r = (await c.callTool({ name: 'ask_house', arguments: { question: 'What time is bedtime?' } })) as any;
+  assert.match(r.content[0].text, /^Tonight, bedtime is 8:30 pm/);
+  assert.equal(r.structuredContent.tonight_bedtime, '8:30 pm');
+  const bed = (await c.callTool({ name: 'ask_house', arguments: { question: 'Can she sleep in your bed?' } })) as any;
+  assert.doesNotMatch(bed.content[0].text, /Tonight, bedtime/, 'not a question about the time');
+  await c.close();
+  close();
+  http.closeAllConnections();
+  http.close();
+});
+
+test('the demo reset (demo mode only) ends a running handoff and brings back the demo family', async () => {
+  const { app, close, db } = createApp({ parentKey: 'k', demo: true });
+  const http = app.listen(0, '127.0.0.1');
+  await new Promise((r) => http.once('listening', r));
+  const base = `http://127.0.0.1:${(http.address() as any).port}`;
+  startHandoff(db, 'Priya');
+  const r = await fetch(`${base}/demo/reset`, { method: 'POST' });
+  assert.equal(r.status, 200);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM handoffs WHERE ended_at IS NULL').get()!.n, 0);
+  close();
+  http.closeAllConnections();
+  http.close();
+  const plain = createApp({ parentKey: 'k' });
+  const h2 = plain.app.listen(0, '127.0.0.1');
+  await new Promise((res) => h2.once('listening', res));
+  assert.equal((await fetch(`http://127.0.0.1:${(h2.address() as any).port}/demo/reset`, { method: 'POST' })).status, 404);
+  plain.close();
+  h2.closeAllConnections();
+  h2.close();
 });
 
 test('the demo clock endpoint exists only in demo mode', async () => {

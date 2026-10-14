@@ -14,9 +14,8 @@ const NOT_A_NAME = new Set(
 // Confirmations only count when that's all the person said ("Okay, she can't breathe" is not a yes).
 const YES = /^(yes|yeah|yep|yup|sure|ok|okay|yes please|please|please do|go ahead|do it|ask (them|her|him)|ask)[.!]*$/i;
 const NO = /^(no|nope|no thanks|never ?mind|don'?t|not now|cancel|no,? don'?t)[.!]*$/i;
-// "Send Mom a photo", "take a picture of us saying good night" (a request to the device, not "can she take pictures?").
-const PHOTO = /^(?:(?:please|can you|could you|would you|let'?s|lets)\s+)?(?:send|take|snap|share)\b.{0,40}?\b(?:photo|picture|pic|selfie)s?\b(?:.*?\b(?:saying|that says|with the caption|and say|to say)\b[\s,:]*(.+))?/i;
-const SMALL_TALK = /^(thanks|thank you|thank you so much|cool|great|got it|alright|hi|hello|hey)[.!]*$/i;
+const THANKS = /^(thanks|thank you|thank you so much|cool|great|got it|alright|ok thanks|okay thanks)[.!]*$/i;
+const GREETING = /^(hi|hello|hey|hi there|hello there|good (morning|afternoon|evening))[.!]*$/i;
 
 const LANGS: Record<string, string> = {
   hindi: 'hi-IN', spanish: 'es-US', tamil: 'ta-IN', telugu: 'te-IN', bengali: 'bn-IN', marathi: 'mr-IN',
@@ -77,10 +76,6 @@ export class RuleBrain implements Brain {
       return io.say(textOf(e));
     }
 
-    // A photo request is never mistaken for a teach-back answer or a "yes"; the check carries on after.
-    const photo = PHOTO.exec(u);
-    if (photo) return this.sendPhoto(io, photo[1]?.replace(/[.!?]+$/, '').trim());
-
     // During the teach-back check, the carer's next replies are answers ("skip" moves on).
     if (this.pending?.kind === 'teachback') {
       const skip = /^(skip|pass|next|i don'?t know|not sure|no idea)[.!]*$/i.test(u);
@@ -125,7 +120,8 @@ export class RuleBrain implements Brain {
       this.pending = null;
       return io.say('Okay.');
     }
-    if (SMALL_TALK.test(u)) return io.say("You're welcome.");
+    if (THANKS.test(u)) return io.say("You're welcome.");
+    if (GREETING.test(u)) return io.say(this.carer ? `Hi ${this.carer}. Ask me anything about the house.` : 'Hi. Ask me anything about the house.');
 
     // Any other request replaces a pending offer, so a later "okay" can't fire a stale action.
     this.pending = null;
@@ -188,7 +184,14 @@ export class RuleBrain implements Brain {
       return this.askParent(q, io);
     }
 
-    const explicitLog = u.match(/^(?:log|note|write down)(?: that)?[:,]?\s+(.+)$/i);
+    // "Remember: no juice after 7" from a parent teaches the house; during a handoff it's a log entry.
+    const remember = /^(?:please )?remember(?: that)?[:,]?\s+(.+)$/i.exec(u);
+    if (remember && !this.carer) {
+      const r = await io.tool('import_note', { text: cap(remember[1]) });
+      if (!r.structuredContent?.handoff_active) return io.say(textOf(r));
+    }
+
+    const explicitLog = u.match(/^(?:log|note|write down|remember)(?: that)?[:,]?\s+(.+)$/i);
     if (explicitLog || (!QUESTION_START.test(u) && !u.endsWith('?') && LOG_STATUS.test(u))) {
       const text = explicitLog ? explicitLog[1] : u;
       const kind = /asleep|sleep|bed|woke/i.test(text) ? 'sleep' : /ate|eaten|dinner|milk|snack/i.test(text) ? 'food' : 'note';
@@ -219,8 +222,8 @@ export class RuleBrain implements Brain {
     io.say(textOf(r));
     if (s.suggest_ask_parent && !s.allergy_alert) {
       this.pending = { kind: 'ask', question: u };
-      // A Shadow Parent suggestion already ends with "or I can ask"; don't ask twice.
-      if (!s.shadow) io.say(`Want me to ask ${this.firstContact}?`);
+      // Food guards and Shadow Parent already end with "I can ask"; don't ask twice.
+      if (!/\bI can ask\b/i.test(textOf(r))) io.say(`Want me to ask ${this.firstContact}?`);
     }
   }
 
@@ -251,15 +254,6 @@ export class RuleBrain implements Brain {
   private async endHandoff(io: DeviceIO) {
     const r = await io.tool('end_handoff');
     this.carer = null;
-    return io.say(textOf(r));
-  }
-
-  private async sendPhoto(io: DeviceIO, caption?: string) {
-    if (!io.capture) return io.say("This device doesn't have a camera.");
-    io.say('Okay, smile!');
-    const shot = await io.capture();
-    if (!shot) return io.say("Sorry, I couldn't take a photo.");
-    const r = await io.tool('send_photo', { image_base64: shot.data, mime_type: shot.mime, ...(caption ? { caption: cap(caption) } : {}) });
     return io.say(textOf(r));
   }
 

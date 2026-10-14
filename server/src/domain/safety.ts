@@ -83,6 +83,7 @@ export function mentionsMedicine(text: string) {
 }
 
 // The guard sentence attached to every food or medicine answer. It never says "safe" or "yes".
+// The full sentence is on the card; the spoken one is shorter (Echo Show replies are heard).
 export const FOOD_GUARD =
   "I can't say whether a specific food is safe. Check the label, and if you're not sure, don't give it. I can ask a parent right now.";
 export const MEDICINE_GUARD =
@@ -96,3 +97,24 @@ export const SAFETY_INFO_NOTE =
 
 // Words the assistant must never use to describe food or medicine.
 export const FORBIDDEN_REASSURANCE = /\b(safe to (eat|give|have)|it'?s safe|that'?s safe|go ahead|yes,? (she|he|they) can (eat|have))\b/i;
+
+export const FOOD_GUARD_SPOKEN = "If you're not sure, don't give it. I can ask a parent.";
+export const MEDICINE_GUARD_SPOKEN = "Don't give any medicine unless a parent tells you to. I can ask them.";
+
+/** Echo Show replies are heard, not read: a spoken reply stays within this many words. */
+export const SPOKEN_WORDS = 30;
+export const wordCount = (s: string) => s.split(/\s+/).filter(Boolean).length;
+/** The first sentence of a parent's note, in their exact words (the card shows the rest). */
+export const firstSentence = (s: string) => /^.*?[.!?](?=\s|$)/.exec(s.trim())?.[0] ?? s.trim();
+/** Always the first line, then more lines while they fit in the budget. */
+export function fitSpoken(lines: string[], budget = SPOKEN_WORDS): string[] {
+  const out: string[] = [];
+  let used = 0;
+  for (const line of lines) {
+    const n = wordCount(line);
+    if (out.length && used + n > budget) continue;
+    out.push(line);
+    used += n;
+  }
+  return out;
+}

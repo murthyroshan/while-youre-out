@@ -109,12 +109,7 @@ export function shadowSuggestion(db: DB, question: string): ShadowSuggestion | n
   const answerers = new Set(pool.map((q) => q.answered_by));
   const by = answerers.size === 1 ? [...answerers][0] : 'The parents';
   const days = pool === sameDays ? (tonightWeekend ? 'weekends' : 'weekdays') : null;
-  const today = localTime(tz).weekday;
-  const dayName = { Sun: 'Sunday', Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday' }[today] ?? today;
-  const who = by === 'The parents' ? 'they' : by;
-  const message =
-    `${by} said ${likely} to this ${agree} out of ${pool.length} times${days ? ` on ${days}` : ''}${days ? `, and it's ${dayName}` : ''}. ` +
-    `${who === 'they' ? 'They' : who} would likely say ${likely}, but it's your call, or I can ask.`;
+  const message = `${by} said ${likely} to this ${agree} of ${pool.length} times${days ? ` on ${days}` : ''}. It's your call, or I can ask.`;
   return { topic, likely, agree, total: pool.length, days, by, examples: pool.slice(-3).map((q) => q.text), message };
 }
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { McpConnection, textOf, type ElicitationHandlers, type ToolResult } from './mcp';
+import { GUIDE } from './guide';
 import { Elicit } from './Elicit';
 import type { ElicitRequest, ElicitResult } from '@modelcontextprotocol/sdk/types.js';
 import { AppFrame } from './AppFrame';
@@ -7,7 +8,6 @@ import { RuleBrain } from './brain/rules';
 import { GeminiBrain } from './brain/gemini';
 import type { Brain, DeviceIO } from './brain/types';
 import { canListen, listenOnce, speak, stopSpeaking } from './voice';
-import { grab, openCamera, samplePhoto, type Shot } from './camera';
 
 // Served by the MCP server itself (the hosted demo): talk to that server. In development: the local one.
 const DEFAULT_URL = import.meta.env.VITE_MCP_URL ?? (location.port === '5173' ? 'http://127.0.0.1:8787/mcp' : `${location.origin}/mcp`);
@@ -35,13 +35,6 @@ interface TaskView {
   question: string;
   statuses: string[];
   done: boolean;
-}
-interface CameraView {
-  stream: MediaStream | null;
-  count: number;
-  still: string | null;
-  /** Waiting for the camera (or the browser's permission prompt). */
-  opening?: boolean;
 }
 interface Ring {
   snapshot: string;
@@ -77,26 +70,6 @@ interface Call {
   connected: boolean;
 }
 
-// The demo, in the order a judge would try it (and the video tells it): one step at a time.
-type TourAction = { say: string } | { ring: string };
-interface GuideStep {
-  title: string;
-  note: string;
-  /** Moves the house clock (demo mode) to [day, "HH:MM"] when the step starts. */
-  clock?: [string, string];
-  actions: TourAction[];
-}
-const say = (...lines: string[]): TourAction[] => lines.map((l) => ({ say: l }));
-const GUIDE: GuideStep[] = [
-  { title: 'Mom hands over to Priya', clock: ['Sat', '18:00'], note: 'The Echo Show becomes tonight’s screen, then checks Priya knows three key things.', actions: say('Priya is babysitting tonight', 'Peanuts', 'In the kitchen drawer by the stove', 'Anita') },
-  { title: 'Priya asks questions', note: 'Answers come in the parents’ own words. Food always gets a safety check.', actions: say('Can Maya have the cookies on the counter?', "Where's the EpiPen?", 'Can she watch another episode?') },
-  { title: 'The evening goes on', clock: ['Sat', '18:40'], note: 'A late nap moves bedtime, by the parents’ own rule.', actions: say('She napped till 5', "What's next?") },
-  { title: 'A knock at the door', clock: ['Sat', '21:00'], note: 'Nobody is expected, so: don’t open. The doorbell photo goes to Mom’s phone.', actions: [{ ring: 'stranger' }, ...say("Someone's knocking, should I open the door?")] },
-  { title: 'Ask a parent', note: 'Open the parent’s phone below and answer. The Echo Show reads the reply out.', actions: say('Can she sleep in your bed?', 'Yes') },
-  { title: 'Emergency', note: 'A fixed script, one step at a time, with the 5-minute EpiPen timer.', actions: say("Her lips are swelling and she can't breathe", 'I gave the EpiPen', 'Done') },
-  { title: 'Lights out', clock: ['Sat', '20:30'], note: 'Mom’s goodnight message plays for Maya, and the screen dims.', actions: say('Maya misses her mom', 'She fell asleep at 8:10') },
-  { title: 'The parents are back', clock: ['Sun', '07:30'], note: 'The morning summary, then pay Priya: Mom approves on her phone.', actions: say("We're back", 'Yes', 'Pay Priya') },
-];
 
 let nextId = 1;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -122,10 +95,13 @@ export function App() {
   const [draft, setDraft] = useState('');
   const [interim, setInterim] = useState('');
   const [now, setNow] = useState(new Date());
-  const [camera, setCamera] = useState<CameraView | null>(null);
   const [call, setCall] = useState<Call | null>(null);
   const [ring, setRing] = useState<Ring | null>(null);
   const [emergencyOn, setEmergencyOn] = useState(false);
+  // Each thing said is a turn; replies are tied to the turn that asked for them.
+  const turnRef = useRef(0);
+  const emergencyRef = useRef(false);
+  const emergencyTurnRef = useRef(0);
   const [caption, setCaption] = useState<Line | null>(null);
   const rules = useRef(new RuleBrain());
   // Instant built-in rules by default: the free Gemini key only allows a few replies a day.
@@ -151,16 +127,11 @@ export function App() {
   const homeRef = useRef<Card | null>(null);
   homeRef.current = home;
   const connRef = useRef<McpConnection | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const connectSeq = useRef(0);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // When someone last spoke or was answered: reminders wait so they never talk over a reply.
   const lastActivity = useRef(0);
   const captionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (videoRef.current && camera?.stream) videoRef.current.srcObject = camera.stream;
-  }, [camera?.stream]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 15_000);
@@ -333,25 +304,12 @@ export function App() {
     [armCardTimer],
   );
 
-  const takePhoto = async (): Promise<Shot> => {
-    // Like a real Echo Show: a live preview, a 3-2-1 countdown, then the photo on screen.
-    setCamera({ stream: null, count: 0, still: null, opening: true });
-    const stream = await openCamera();
-    for (const n of [3, 2, 1]) {
-      setCamera({ stream, count: n, still: null });
-      await sleep(900);
-    }
-    const shot: Shot = (stream && videoRef.current && grab(videoRef.current)) || samplePhoto();
-    stream?.getTracks().forEach((t) => t.stop());
-    setCamera({ stream: null, count: 0, still: `data:${shot.mime};base64,${shot.data}` });
-    setTimeout(() => setCamera((cv) => (cv?.still ? null : cv)), 2500);
-    return shot;
-  };
-
   const io = useCallback(
-    (c: McpConnection): DeviceIO => ({
+    (c: McpConnection, turn = turnRef.current): DeviceIO => ({
       say(text) {
         if (!text) return;
+        // A late reply to something said before an emergency began is never spoken over the guide.
+        if (emergencyRef.current && turn < emergencyTurnRef.current) return;
         addLine('alexa', text);
         armCardTimer();
         // Non-English replies are translated by the server; speak them with a voice for that language.
@@ -365,7 +323,11 @@ export function App() {
           if (name === 'start_handoff' && !result.isError) langRef.current = typeof args.language === 'string' ? args.language : 'en-US';
           if (name === 'end_handoff' && !result.isError) langRef.current = 'en-US';
           if (name === 'set_carer_language' && !result.isError && typeof args.language === 'string') langRef.current = args.language;
-          if (name === 'emergency' || name === 'emergency_step') setEmergencyOn(!result.structuredContent?.resolved);
+          if (name === 'emergency' || name === 'emergency_step') {
+            emergencyRef.current = !result.structuredContent?.resolved;
+            if (name === 'emergency') emergencyTurnRef.current = turn;
+            setEmergencyOn(emergencyRef.current);
+          }
           if (name === 'home_screen') {
             setCard(null);
             void refreshHome(c);
@@ -407,7 +369,6 @@ export function App() {
           }
         })();
       },
-      capture: takePhoto,
       async call(who) {
         // Alexa calling, simulated: find the contact on the Tonight screen ("Mom" finds Anita).
         const parents = (homeRef.current?.result.structuredContent?.parents as Array<{ name: string; relation: string }> | undefined) ?? [];
@@ -447,8 +408,9 @@ export function App() {
       armCardTimer();
       lastActivity.current = Date.now();
       setLight('thinking');
+      const turn = ++turnRef.current;
       try {
-        await brain.current.handle(text, io(conn));
+        await brain.current.handle(text, io(conn, turn));
         lastActivity.current = Date.now();
         setLight((l) => (l === 'thinking' ? 'idle' : l));
       } catch (e) {
@@ -466,7 +428,10 @@ export function App() {
       try {
         const r = await conn.call('emergency_status', { announce: true });
         const s = r.structuredContent ?? {};
-        if (!s.active) return setEmergencyOn(false);
+        if (!s.active) {
+          emergencyRef.current = false;
+          return setEmergencyOn(false);
+        }
         if ((s.announce as string[] | undefined)?.length) {
           setCard((c) => (c?.tool === 'emergency' || c?.tool === 'emergency_step' ? { ...c, result: r } : c));
           io(conn).say((s.announce as string[]).join(' '));
@@ -527,10 +492,30 @@ export function App() {
   const [tourStep, tourAt] = tour;
   const step = GUIDE[tourStep];
   const nextAction = step.actions[tourAt];
+  // A reload mid-demo keeps the server's house as it was; the tour's first step starts it afresh.
+  const resetDemo = async () => {
+    stopSpeaking();
+    await fetch(`${serverOrigin}/demo/reset`, { method: 'POST' }).catch(() => null);
+    rules.current = new RuleBrain();
+    gemini.current = new GeminiBrain({
+      serverOrigin,
+      tools: () => connRef.current?.tools ?? [],
+      instructions: () => connRef.current?.instructions,
+      fallback: rules.current,
+    });
+    brain.current = brainKind === 'gemini' ? gemini.current : rules.current;
+    emergencyRef.current = false;
+    setEmergencyOn(false);
+    setCard(null);
+    setTasks([]);
+    setCarer(null);
+    if (connRef.current) await refreshHome(connRef.current);
+  };
   const runTour = async () => {
     if (!nextAction) return;
     setTourBusy(true);
     try {
+      if (tourStep === 0 && tourAt === 0 && demoTime) await resetDemo();
       if (tourAt === 0 && step.clock && demoTime) await setClock(step.clock[1], step.clock[0]);
       if ('ring' in nextAction) await ringDoorbell(nextAction.ring);
       else await handle(nextAction.say);
@@ -602,22 +587,6 @@ export function App() {
                 <button className="dismiss" onClick={() => setCard(null)} aria-label="Back to the Tonight screen">
                   {fullscreen ? 'Close' : '✕'}
                 </button>
-              )}
-
-              {camera && (
-                <div className="overlay camera-view" aria-live="polite">
-                  {camera.still ? (
-                    <img src={camera.still} alt="The photo that was sent" />
-                  ) : camera.stream ? (
-                    <video ref={videoRef} autoPlay muted playsInline />
-                  ) : camera.opening ? (
-                    <div className="no-camera">Opening the camera…</div>
-                  ) : (
-                    <div className="no-camera">No camera found: sending a sample photo</div>
-                  )}
-                  {camera.count > 0 && <div className="countdown">{camera.count}</div>}
-                  {camera.still && <div className="sent">📷 Sending to the parents</div>}
-                </div>
               )}
 
               {ring && (
