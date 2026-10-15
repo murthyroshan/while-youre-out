@@ -3,6 +3,7 @@ import { McpConnection, textOf, type ElicitationHandlers, type ToolResult } from
 import { GUIDE } from './guide';
 import { Elicit } from './Elicit';
 import { PhoneFrame } from './PhoneFrame';
+import { Qr } from './Qr';
 import { Icon, LogoMark, Segmented, Switch } from './ui';
 import type { ElicitRequest, ElicitResult } from '@modelcontextprotocol/sdk/types.js';
 import { AppFrame } from './AppFrame';
@@ -625,12 +626,25 @@ export function App() {
     while (playingRef.current && Date.now() - started < max && (window.speechSynthesis?.speaking || lightRef.current === 'thinking' || lightRef.current === 'speaking')) await wait(250);
     await wait(500);
   };
-  /** What Mom would tap on her phone; the phone beside the Echo Show shows it happen. */
+  const pendingQuestions = async () => {
+    const s = await fetch(`${serverOrigin}/parent/api/state?k=${encodeURIComponent(parentKey)}`).then((x) => x.json()).catch(() => null);
+    return (s?.questions as Array<{ id: number; text: string }> | undefined) ?? null;
+  };
+  /** What Mom would tap on her phone; the phone beside the Echo Show shows it happen. When the
+   *  visitor's own phone is connected, they answer it there; Mom only steps in if they don't. */
   const answerAsMom = async (match: RegExp, answer: string) => {
     for (let i = 0; i < 24 && playingRef.current; i++) {
-      const s = await fetch(`${serverOrigin}/parent/api/state?k=${encodeURIComponent(parentKey)}`).then((x) => x.json()).catch(() => null);
-      const q = (s?.questions as Array<{ id: number; text: string }> | undefined)?.find((x) => match.test(x.text));
+      const q = (await pendingQuestions())?.find((x) => match.test(x.text));
       if (q) {
+        if (phonesRef.current > 0) {
+          setChapter((c) => (c ? { ...c, note: 'Check your phone: Priya is asking you. Answer it there.' } : c));
+          for (let t = 0; t < 45 && playingRef.current; t++) {
+            await wait(1000);
+            const still = await pendingQuestions();
+            if (still && !still.some((x) => x.id === q.id)) return quiet(1500);
+          }
+          if (!playingRef.current) return;
+        }
         await wait(3000); // long enough to see it arrive on the phone
         await fetch(`${serverOrigin}/parent/api/answer`, {
           method: 'POST',
@@ -730,6 +744,30 @@ export function App() {
     })();
   }, [ask, playing]);
   const showPhone = phoneOn && connState === 'connected' && parentUrl !== '#';
+  // Real phones with this house's parent page open ("Use your own phone").
+  const [phones, setPhones] = useState(0);
+  const [scan, setScan] = useState(false);
+  const closeScan = useCallback(() => setScan(false), []);
+  const phonesRef = useRef(0);
+  phonesRef.current = phones;
+  useEffect(() => {
+    if (connState !== 'connected' || !serverOrigin) return;
+    let alive = true;
+    const check = () =>
+      fetch(`${serverOrigin}/parent/api/presence?k=${encodeURIComponent(parentKey)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((p) => alive && setPhones(typeof p?.phones === 'number' ? p.phones : 0))
+        .catch(() => null);
+    void check();
+    const t = setInterval(check, 3000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [connState, serverOrigin, parentKey]);
+  // A phone can only open the hosted demo (a laptop's 127.0.0.1 means nothing to it).
+  // (In development it shows anyway, so the layout can be checked.)
+  const qrUrl = /^https:\/\//.test(parentUrl) || /^http:\/\/(?!127\.|localhost)/.test(parentUrl) || import.meta.env.DEV ? parentUrl : undefined;
   // Scale the device's screen to the space it has.
   const fitRef = useRef<HTMLDivElement>(null);
   const [screenScale, setScreenScale] = useState(0.5);
@@ -796,6 +834,11 @@ export function App() {
               <span className={`chip conn-chip ${connState}`}>
                 <i className="live-dot" /> {connState === 'connected' ? 'Your own demo house' : connState === 'connecting' ? 'Connecting…' : 'Offline'}
               </span>
+              {showPhone && qrUrl && (
+                <button className={`chip scan-pill ${phones > 0 ? 'joined' : ''}`} onClick={() => setScan((v) => !v)} aria-expanded={scan}>
+                  {phones > 0 ? 'Your phone is connected' : 'Use your own phone'}
+                </button>
+              )}
             </div>
           </header>
         )}
@@ -910,6 +953,10 @@ export function App() {
               time={clockText.replace(/\s?[AP]M$/i, '')}
               showHome={Boolean(phoneUrl)}
               onHome={() => setPhoneUrl(null)}
+              qrUrl={qrUrl}
+              phones={phones}
+              scan={scan}
+              onScanClose={closeScan}
             />
           )}
         </div>
@@ -921,6 +968,15 @@ export function App() {
               <p className="welcome-eyebrow">An Alexa+ add-on for Echo Show</p>
               <h2>Tonight, Priya is babysitting Maya.</h2>
               <p>The Echo Show in the kitchen becomes her guide. Mom’s phone, on the right, is how the parents stay in the loop. Watch the whole evening, or try it yourself.</p>
+              {qrUrl && showPhone && (
+                <div className="welcome-scan">
+                  <Qr text={qrUrl} label="QR code that opens Anita’s parent page on your phone" />
+                  <p>
+                    <b>{phones > 0 ? 'Your phone is connected.' : 'Got your phone? Be Mom.'}</b>
+                    {phones > 0 ? ' Priya’s questions will arrive on it while the evening plays.' : ' Scan this and Priya’s questions arrive on your phone. Your answer reaches the kitchen.'}
+                  </p>
+                </div>
+              )}
               <div className="welcome-btns">
                 <button className="primary" onClick={() => void playEvening()}>
                   <Icon name="play" /> Watch the evening <small>2 min</small>

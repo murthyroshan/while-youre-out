@@ -43,7 +43,7 @@ button:disabled { cursor: not-allowed; }
 
 /* ---------- the stage: a kitchen at night ---------- */
 .wall {
-  position: relative; isolation: isolate; overflow: hidden;
+  position: relative; isolation: isolate; overflow: clip; /* clip, not hidden: focus must never scroll the stage */
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 80px 40px 40px; min-height: 100vh;
   background: linear-gradient(180deg, #121a2b 0%, #0d1424 58%, #0a101d 100%);
@@ -203,6 +203,24 @@ button:disabled { cursor: not-allowed; }
 .phone-home { position: absolute; z-index: 4; bottom: 22px; left: 50%; transform: translateX(-50%); padding: 9px 20px; border-radius: 999px; border: 0; background: rgba(11, 18, 32, 0.88); color: #fff; font-weight: 600; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35); }
 .phone .device-label { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .phone .device-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--mint); animation: live 2.4s ease-out infinite; }
+/* "Use your own phone": a QR card over the phone screen, and the pill that opens it. */
+.phone-scan {
+  position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  padding: 28px 18px; text-align: center; color: #0b1220; background: rgba(246, 243, 238, 0.96); backdrop-filter: blur(6px);
+  animation: fade 0.25s var(--ease);
+}
+.phone-scan b { font-size: 15px; line-height: 1.25; letter-spacing: -0.01em; }
+.phone-scan p { margin: 0; font-size: 12px; line-height: 1.45; color: #4a5468; }
+.phone-scan .qr { width: 74%; height: auto; border-radius: 10px; box-shadow: 0 0 0 1px rgba(11, 18, 32, 0.08), 0 10px 24px rgba(11, 18, 32, 0.12); }
+.phone-scan button { min-height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(11, 18, 32, 0.14); background: #fff; color: #0b1220; font-weight: 600; font-size: 13px; }
+.phone-scan.joined .scan-tick { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #1f9d6b; color: #fff; font-size: 26px; font-weight: 800; animation: pop 0.45s var(--spring); }
+.scan-pill { cursor: pointer; color: var(--text); font-weight: 600; transition: background 0.15s, transform 0.15s var(--ease); }
+.scan-pill::before { content: ''; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--qr-icon) center / contain no-repeat; mask: var(--qr-icon) center / contain no-repeat; opacity: 0.85; }
+.scan-pill:hover { background: rgba(255, 255, 255, 0.1); }
+.scan-pill:active { transform: scale(0.97); }
+.scan-pill.joined { color: #6ee7b7; border-color: rgba(18, 183, 106, 0.45); }
+.scan-pill.joined::before { -webkit-mask: none; mask: none; border-radius: 50%; width: 7px; height: 7px; background: var(--mint); }
+:root { --qr-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M0 0h6v6H0zm2 2v2h2V2zM8 0h6v6H8zm2 2v2h2V2zM0 8h6v6H0zm2 2v2h2v-2zm6-2h2v2H8zm4 0h2v2h-2zm-2 2h2v2h-2zm-2 2h2v2H8zm4 0h2v2h-2z'/%3E%3C/svg%3E"); }
 @media (max-width: 1100px) { .phone { display: none; } }
 
 /* ---------- first visit ---------- */
@@ -352,3 +370,7 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+.welcome-scan { display: flex; align-items: center; gap: 16px; margin-top: 20px; padding: 12px 16px 12px 12px; border-radius: 16px; border: 1px solid var(--line-2); background: rgba(255, 255, 255, 0.04); }
+.welcome-scan .qr { flex: none; width: 108px; height: 108px; border-radius: 8px; }
+.welcome-card .welcome-scan p { font-size: 14px; line-height: 1.45; }
+.welcome-scan b { color: var(--text); }

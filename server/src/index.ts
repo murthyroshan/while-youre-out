@@ -228,8 +228,23 @@ export function createApp(opts: AppOptions = {}) {
     });
   });
 
+  // Real phones with the parent page open (it polls every 2 s), so the demo can wait for them.
+  // A phone stays counted for 90 s: a locked or backgrounded phone polls rarely, and its owner
+  // may be waiting for the notification. (If they've really gone, the demo answers after 45 s.)
+  const phonesSeen = new Map<string, number>();
+  const phonesNow = () => {
+    for (const [id, at] of phonesSeen) if (Date.now() - at > 90_000) phonesSeen.delete(id);
+    return phonesSeen.size;
+  };
+  app.get('/parent/api/presence', (req, res) => {
+    if (!authorised(req.query.k)) return void res.sendStatus(401);
+    res.json({ phones: phonesNow() });
+  });
+
   app.get('/parent/api/state', (req, res) => {
     if (!authorised(req.query.k)) return void res.sendStatus(401);
+    const solo = typeof req.query.solo === 'string' && /^[a-z0-9]{4,16}$/.test(req.query.solo) ? req.query.solo : null;
+    if (solo && (phonesSeen.has(solo) || phonesNow() < 20)) phonesSeen.set(solo, Date.now());
     res.json({
       handoff: activeHandoff(db) ?? null,
       timezone: householdTz(db),

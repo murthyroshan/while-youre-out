@@ -2,14 +2,32 @@
 // both screens react together (a question arrives, she taps an answer, the kitchen hears it).
 // The page is laid out at a real phone width (390 px) below a status bar, and scaled to fit.
 import { useEffect, useRef, useState } from 'react';
+import { Qr } from './Qr';
 
 const PHONE_WIDTH = 390;
 const PHONE_HEIGHT = 844;
 const STATUS_BAR = 50;
 
-export function PhoneFrame(props: { src: string; time: string; onHome?: () => void; showHome?: boolean }) {
+export function PhoneFrame(props: {
+  src: string;
+  time: string;
+  onHome?: () => void;
+  showHome?: boolean;
+  /** "Use your own phone": the QR card shows over this phone's screen until a real phone joins. */
+  qrUrl?: string;
+  phones?: number;
+  scan?: boolean;
+  onScanClose?: () => void;
+}) {
   const viewport = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.7);
+  const { scan, onScanClose } = props;
+  const joined = (props.phones ?? 0) > 0;
+  useEffect(() => {
+    if (!scan || !joined) return;
+    const t = setTimeout(() => onScanClose?.(), 2600);
+    return () => clearTimeout(t);
+  }, [scan, joined, onScanClose]);
   useEffect(() => {
     const el = viewport.current;
     if (!el) return;
@@ -50,6 +68,24 @@ export function PhoneFrame(props: { src: string; time: string; onHome?: () => vo
             style={{ top: STATUS_BAR * scale, height: (PHONE_HEIGHT - STATUS_BAR), transform: `scale(${scale})` }}
           />
           <i className="phone-indicator" aria-hidden="true" />
+          {scan && props.qrUrl && (
+            <div className={`phone-scan ${joined ? 'joined' : ''}`} role="dialog" aria-label="Use your own phone">
+              {joined ? (
+                <>
+                  <span className="scan-tick" aria-hidden="true">✓</span>
+                  <b>Your phone is Anita’s now</b>
+                  <p>Priya’s questions will arrive on it. Answer them there.</p>
+                </>
+              ) : (
+                <>
+                  <b>Be Anita on your own phone</b>
+                  <Qr text={props.qrUrl} label="QR code that opens Anita’s parent page on your phone" />
+                  <p>Scan with your camera. Priya’s questions reach your phone, and the Echo Show hears your answer.</p>
+                  <button onClick={() => onScanClose?.()}>Not now</button>
+                </>
+              )}
+            </div>
+          )}
         </div>
         {props.showHome && props.onHome && (
           <button className="phone-home" onClick={props.onHome} aria-label="Back to the parent page">

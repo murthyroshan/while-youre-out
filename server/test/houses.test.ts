@@ -116,3 +116,18 @@ test('/version says which commit is running', async () => {
   assert.equal(typeof v.commit, 'string');
   assert.ok(Date.parse(v.started_at));
 });
+
+test('a real phone with the parent page open is counted in its own house only', async () => {
+  const { base } = await start();
+  const presence = async (id: string, k = KEY) => (await fetch(`${base}/h/${id}/parent/api/presence?k=${k}`)).json();
+  assert.equal((await fetch(`${base}/h/${A}/parent/api/presence?k=wrong`)).status, 401);
+  assert.deepEqual(await presence(A), { phones: 0 });
+  // The demo's phone frame polls without "solo"; it is not a real phone.
+  await fetch(`${base}/h/${A}/parent/api/state?k=${KEY}`);
+  assert.deepEqual(await presence(A), { phones: 0 });
+  await fetch(`${base}/h/${A}/parent/api/state?k=${KEY}&solo=phone1`);
+  await fetch(`${base}/h/${A}/parent/api/state?k=${KEY}&solo=phone1`);
+  await fetch(`${base}/h/${A}/parent/api/state?k=${KEY}&solo=..%2Fx`);
+  assert.deepEqual(await presence(A), { phones: 1 }, 'the same phone counts once; malformed ids are ignored');
+  assert.deepEqual(await presence(B), { phones: 0 }, 'another house sees no phones');
+});

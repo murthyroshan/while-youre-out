@@ -517,9 +517,11 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     if (el && el.textContent !== text) el.textContent = text;
     return el;
   }
+  // A real phone (not the demo's phone frame) says it is here, so the demo can wait for its answers.
+  var solo = window.top === window ? Math.random().toString(36).slice(2, 12) : '';
   async function load() {
     var r;
-    try { r = await fetch('/parent/api/state?k=' + encodeURIComponent(key)); } catch (e) { setText('status', 'Offline, retrying…'); document.body.classList.add('stalled'); return; }
+    try { r = await fetch('/parent/api/state?k=' + encodeURIComponent(key) + (solo ? '&solo=' + solo : '')); } catch (e) { setText('status', 'Offline, retrying…'); document.body.classList.add('stalled'); return; }
     if (!r.ok) {
       setText('status', 'Not authorised');
       document.body.classList.add('stalled');
