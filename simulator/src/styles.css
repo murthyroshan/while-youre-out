@@ -383,3 +383,16 @@ button:disabled { cursor: not-allowed; }
 .skip-spin { width: 34px; height: 34px; margin-bottom: 8px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.12); border-top-color: var(--amber); animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .skip-spin { animation-duration: 2.4s; } }
+
+/* Phones: the stage only as tall as the Echo Show needs, so the controls are right below it, and
+   a header that fits (the brand on one line, the chips on the next). */
+@media (max-width: 640px) {
+  .wall { min-height: 0; padding: 104px 14px 30px; z-index: 30; } /* above the panel, so the welcome card covers it */
+  .stage-top { top: 14px; left: 14px; right: 14px; flex-wrap: wrap; gap: 10px; }
+  .brand small { display: none; }
+  .stage-chips { flex-wrap: wrap; gap: 6px; }
+  .chip { height: 28px; padding: 0 10px; font-size: 12px; white-space: nowrap; }
+  .welcome { position: fixed; overflow-y: auto; padding: 16px; }
+  .welcome-card { padding: 26px 22px; }
+  .welcome-card h2 { font-size: 24px; }
+}

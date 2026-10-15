@@ -49,11 +49,11 @@
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.22), 0 8px 20px -8px rgba(0, 0, 0, 0.35);
   --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.2), 0 24px 48px -20px rgba(0, 0, 0, 0.6);
 
-  /* Type: exact sizes at the Echo Show's 1280 px width, smaller only on narrow previews. */
-  --fs-xs: clamp(12px, 1.17vw, 15px);
-  --fs-s: clamp(14px, 1.41vw, 18px);
-  --fs-m: clamp(16px, 1.72vw, 22px);
-  --fs-l: clamp(20px, 2.34vw, 30px);
+  /* Type: an Echo Show is read from across the room, so small screens never go below these sizes. */
+  --fs-xs: 15px;
+  --fs-s: 18px;
+  --fs-m: clamp(20px, 1.72vw, 22px);
+  --fs-l: clamp(23px, 2.34vw, 30px);
   --fs-xl: clamp(28px, 3.75vw, 48px);
   --fs-xxl: clamp(40px, 6.9vw, 88px);
 }
@@ -433,7 +433,7 @@ p.pill { white-space: normal; }
 .home .strip .st.done::after { background: rgba(18, 183, 106, 0.5); }
 .home .strip .node { position: relative; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 17px; background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.14); color: var(--muted); }
 .home .strip b { font-size: var(--fs-xs); font-weight: 650; line-height: 1.2; color: #DCE4F0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.home .strip .tm { font-size: 13px; color: var(--muted); font-weight: 600; }
+.home .strip .tm { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; }
 .home .strip .st.done .node { background: rgba(18, 183, 106, 0.2); border-color: rgba(18, 183, 106, 0.55); color: var(--mint-text); }
 .home .strip .st.done b, .home .strip .st.done .tm { opacity: 0.6; }
 .home .strip .st.due .node { background: var(--amber); border-color: var(--amber); color: #2B1A00; transform: scale(1.12); box-shadow: 0 0 0 5px rgba(247, 185, 85, 0.18), 0 0 22px rgba(247, 185, 85, 0.55); }

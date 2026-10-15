@@ -58,7 +58,7 @@
     if (d < 60) return Math.round(d / 7) + ' weeks ago';
     return Math.round(d / 30) + ' months ago';
   }
-  var SOURCE = { voice: 'told Alexa', photo: 'fridge note', whatsapp: 'WhatsApp', pdf: "doctor's letter", parent_answer: 'answered a question', setup: 'family setup', text: 'note' };
+  var SOURCE = { voice: 'told Alexa', photo: 'fridge note', whatsapp: 'texted', pdf: "doctor's letter", parent_answer: 'answered a question', setup: 'family setup', text: 'note' };
 
   var ICONS = {
     check: '<path d="M20 6 9 17l-5-5"/>',

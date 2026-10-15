@@ -439,7 +439,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   <div class="tabpane" data-tab="house">
     <section class="card" id="teach">
       <strong>Teach the house</strong>
-      <p class="muted">Snap the fridge note, upload the doctor's plan, or paste a WhatsApp message. Nothing is used until you confirm it. Codes and passwords are never stored.</p>
+      <p class="muted">Snap the fridge note, upload the doctor's plan, or paste a message from your chats. Nothing is used until you confirm it. Codes and passwords are never stored.</p>
       <label class="upload" id="drop"><span class="up-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5Z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="up-t">Add a photo or PDF</span><span class="up-s">Tap to choose, or drop a file here</span><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"></label>
       <textarea id="paste" rows="3" placeholder="Or paste a message or note here…" aria-label="Paste a message or note"></textarea>
       <button id="readText" class="ok wide">Read it</button>
@@ -889,7 +889,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     try { r = await fetch('/parent/api/proposals?k=' + encodeURIComponent(key)); } catch (e) { return; }
     if (!r.ok) return;
     var s = await r.json();
-    if (!s.ai_available) teachStatus.textContent = 'Reading notes needs a Gemini key on the server.';
+    if (!s.ai_available) teachStatus.textContent = 'Reading notes needs an AI key on the server.';
     var pKey = s.proposals.map(function (p) { return p.id; }).join(',');
     if (pKey === lastPKey) return;
     lastPKey = pKey;

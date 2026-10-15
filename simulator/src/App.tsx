@@ -1035,7 +1035,11 @@ export function App() {
               <LogoMark size={52} />
               <p className="welcome-eyebrow">An Alexa+ add-on for Echo Show</p>
               <h2>Tonight, Priya is babysitting Maya.</h2>
-              <p>The Echo Show in the kitchen becomes her guide. Mom’s phone, on the right, is how the parents stay in the loop. Watch the whole evening, or try it yourself.</p>
+              <p>
+                The Echo Show in the kitchen becomes her guide.{' '}
+                {showPhone ? 'Mom’s phone, on the right, is how the parents stay in the loop.' : 'Mom’s phone stays in the loop (open it from the demo controls).'} Watch the whole evening, or try it
+                yourself.
+              </p>
               {qrUrl && showPhone && (
                 <div className="welcome-scan">
                   <Qr text={qrUrl} label="QR code that opens Anita’s parent page on your phone" />

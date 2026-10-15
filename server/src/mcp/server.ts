@@ -161,6 +161,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'start_handoff',
     {
       title: 'Start a handoff',
+      annotations: { destructiveHint: false },
       description:
         'Call when a parent hands the home over to a carer ("Priya is babysitting tonight"). Switches the device into carer mode and returns tonight\'s briefing to read aloud.',
       inputSchema: {
@@ -265,6 +266,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'pay_sitter',
     {
       title: 'Pay the sitter',
+      annotations: { destructiveHint: false, openWorldHint: true },
       description:
         "When the parents are back and say 'pay Priya': works out the evening (hours times the rate the parent gave, rounded up to the quarter hour) and asks the parent to approve it on their phone through a link (the payment is never made on the shared screen). Tell them to check their phone.",
       inputSchema: {},
@@ -310,7 +312,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     {
       title: 'Payment status',
       description: 'Whether the sitter has been paid. The payment card refreshes itself with this.',
-      inputSchema: { id: z.number().int().positive() },
+      inputSchema: { id: z.number().int().positive().describe('The payment id that pay_sitter returned') },
       annotations: { readOnlyHint: true },
       // Only the payment card and the device call this.
       _meta: { ui: { resourceUri: CARD_URI, visibility: ['app'] }, 'ui/resourceUri': CARD_URI },
@@ -327,6 +329,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'set_carer_language',
     {
       title: "Set the carer's language",
+      annotations: { destructiveHint: false, idempotentHint: true },
       description:
         "Call when the carer speaks (or asks to be spoken to in) another language, e.g. a grandparent speaking Hindi. From then on replies are given in that language, with the parents' original words kept on screen.",
       inputSchema: { language: z.string().trim().min(2).max(20).describe('BCP-47 code such as hi-IN, es-US, ta-IN') },
@@ -344,13 +347,14 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'teachback',
     {
       title: 'Teach-back check',
+      annotations: { destructiveHint: false },
       description:
         'A quick check that the carer understood the essentials before the parents leave (allergy, where the EpiPen is, who to call first). Call with no arguments to start, then pass the carer\'s spoken answer as `answer` (or skip=true). Read out the question and any correction. The parents see the result on their phone.',
       inputSchema: {
-        answer: z.string().trim().max(MAX_TEXT).optional(),
+        answer: z.string().trim().max(MAX_TEXT).optional().describe("The carer's answer to the current handover question, in their words"),
         answer_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer answered in another language'),
-        skip: z.boolean().default(false),
-        restart: z.boolean().default(false),
+        skip: z.boolean().default(false).describe('true when the carer wants to skip this question'),
+        restart: z.boolean().default(false).describe('true to start the handover check again from the first question'),
       },
       _meta: ui,
     },
@@ -383,9 +387,10 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'tonight_plan',
     {
       title: "Tonight's plan",
+      annotations: { destructiveHint: false },
       description:
         "Tonight's timeline from the parents' routine (dinner, bath, bedtime…), adjusted by their rules as the evening goes. With announce=true it also returns the steps that just became due, once each, so the device can say them aloud (\"It's 7:15: bath time\").",
-      inputSchema: { announce: z.boolean().default(false) },
+      inputSchema: { announce: z.boolean().default(false).describe('true to also return the steps that just came due, once each, to say aloud') },
       _meta: ui,
     },
     withNotices(async ({ announce }) => {
@@ -446,11 +451,12 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'import_note',
     {
       title: 'Teach the house a note',
+      annotations: { destructiveHint: false },
       description:
         'Only for a PARENT teaching a standing house rule or fact for future carers, when nobody is babysitting ("Alexa, remember: no juice after 7, bath at 7:15"). Not for something that happened tonight ("remember she napped till 5"): that is log_event. Reads the note into proposed house-manual cards; nothing is used until a parent confirms them on their phone, so tell them that. Codes and passwords are never stored. Refused during a handoff.',
       inputSchema: {
         text: z.string().trim().min(1).max(MAX_TEXT * 5).describe('The note, in the parent\'s words'),
-        label: z.string().trim().max(80).default('Note told to Alexa'),
+        label: z.string().trim().max(80).default('Note told to Alexa').describe('Where the note came from, in a few words, e.g. "Fridge note"'),
       },
     },
     async ({ text, label }) => {
@@ -492,6 +498,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'ask_house',
     {
       title: 'Ask the house manual',
+      annotations: { destructiveHint: false },
       description:
         "Answers a carer's question using only the parents' own words (food, bedtime, screen time, rules, pets). For food and medicine it also returns a guard sentence that must be said. If `emergency` is true, call the `emergency` tool right away. If `allergy_alert` is set, read it aloud: the parents have been alerted.",
       inputSchema: {
@@ -564,7 +571,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     {
       title: 'Where is something',
       description: 'Finds where something is kept in the house (EpiPen, first aid kit, pyjamas, dog food) and shows the parents\' photo if there is one.',
-      inputSchema: { item: z.string().trim().min(1).max(100) },
+      inputSchema: { item: z.string().trim().min(1).max(100).describe('The thing to find, e.g. "EpiPen", "first aid kit", "dog food"') },
       annotations: { readOnlyHint: true },
       _meta: ui,
     },
@@ -581,12 +588,13 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'log_event',
     {
       title: 'Log the evening',
+      annotations: { destructiveHint: false },
       description:
         'Records something that happened during the handoff, in the carer\'s words ("asleep at 8:10", "woke up crying at 9", "remember she napped till 5"). The parents see it in the morning summary. A parent\'s standing house rule is import_note, not this. If the result has `emergency: true`, call the `emergency` tool right away. If it has an `allergy_alert`, read it aloud.',
       inputSchema: {
-        text: z.string().min(1).max(MAX_TEXT),
+        text: z.string().min(1).max(MAX_TEXT).describe('What happened, in the carer\'s words, e.g. "she fell asleep at 8:10"'),
         text_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer spoke another language'),
-        kind: z.enum(['sleep', 'food', 'mood', 'health', 'pet', 'note']).default('note'),
+        kind: z.enum(['sleep', 'food', 'mood', 'health', 'pet', 'note']).default('note').describe('What it is about: sleep, food, mood, health, pet, or note'),
       },
     },
     withNotices(async ({ text: said, text_english, kind }) => {
@@ -634,10 +642,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'ask_parent',
     {
       title: 'Ask a parent',
+      annotations: { destructiveHint: false, openWorldHint: true },
       description:
         "Sends the carer's question to a parent's phone when the manual doesn't answer it. Returns immediately with a question id; use `check_parent_answer` to see the reply. Hosts that support MCP tasks should prefer `ask_parent_and_wait`.",
       inputSchema: {
-        question: z.string().trim().min(1).max(MAX_TEXT),
+        question: z.string().trim().min(1).max(MAX_TEXT).describe('What the carer wants to ask the parents, in their words'),
         question_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer spoke another language'),
       },
       _meta: ui,
@@ -667,7 +676,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     {
       title: 'Check for a parent\'s answer',
       description: 'Checks whether a parent has answered a question sent with `ask_parent`.',
-      inputSchema: { question_id: z.number().int().positive() },
+      inputSchema: { question_id: z.number().int().positive().describe('The id that ask_parent returned') },
       annotations: { readOnlyHint: true },
       _meta: ui,
     },
@@ -689,10 +698,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'ask_parent_and_wait',
     {
       title: 'Ask a parent and wait for the answer',
+      annotations: { destructiveHint: false, openWorldHint: true },
       description:
         "Sends the carer's question to the parents and runs as a task until someone answers. If the first contact doesn't answer in time, the next contact is asked.",
       inputSchema: {
-        question: z.string().trim().min(1).max(MAX_TEXT),
+        question: z.string().trim().min(1).max(MAX_TEXT).describe('What the carer wants to ask the parents, in their words'),
         question_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer spoke another language'),
         door_event_id: z.number().int().positive().optional().describe('From door_check: attaches the doorbell photo, and the question is treated as urgent'),
         shopping_item: z.string().trim().min(1).max(60).optional().describe('From log_event (shopping_ask): the parents answer "add to list" or "not now"'),
@@ -830,6 +840,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'emergency',
     {
       title: 'Emergency',
+      annotations: { destructiveHint: false, openWorldHint: true },
       description:
         'Call immediately if the carer describes an emergency (trouble breathing, swelling, choking, unconscious, seizure, swallowed something, serious injury, fire). Returns a fixed safety script from the family\'s own information and alerts every contact. Read `say_first` aloud before anything else.',
       inputSchema: {
@@ -870,9 +881,10 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'emergency_step',
     {
       title: 'Emergency: next step',
+      annotations: { destructiveHint: false },
       description:
         'During an emergency, moves the step-by-step guide on. Call with action "done" when the carer says they did the step ("done", "I gave the EpiPen", "called 911"), "next" to skip ahead, "back" to repeat, and "resolved" only when the carer says it is over (paramedics have taken over, she is fine). Read the returned text aloud.',
-      inputSchema: { action: z.enum(['done', 'next', 'back', 'resolved']) },
+      inputSchema: { action: z.enum(['done', 'next', 'back', 'resolved']).describe('done (the step is done), next (skip ahead), back (repeat it), or resolved (help has taken over)') },
       _meta: { ...ui, ui: { resourceUri: CARD_URI, preferredDisplayMode: 'fullscreen' } },
     },
     async ({ action }) => {
@@ -897,7 +909,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       title: 'Emergency status',
       description:
         "The emergency in progress: which step the carer is on, the plan's timers, and which parent is on the way. The emergency screen refreshes itself with this. With announce=true it also returns what should be said now, once each (\"One minute left on the EpiPen timer\").",
-      inputSchema: { announce: z.boolean().default(false) },
+      inputSchema: { announce: z.boolean().default(false).describe('true to also return what should be said now (timer warnings, a parent on the way), once each') },
       annotations: { readOnlyHint: true },
       // Only the emergency screen and the device call this; the model has emergency and emergency_step.
       _meta: { ui: { resourceUri: CARD_URI, visibility: ['app'], preferredDisplayMode: 'fullscreen' }, 'ui/resourceUri': CARD_URI },
@@ -917,6 +929,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'end_handoff',
     {
       title: 'End the handoff',
+      annotations: { destructiveHint: true },
       description: 'Call when the parents are back. Ends carer mode and returns the evening summary for the parents.',
       inputSchema: {},
       _meta: ui,
@@ -955,6 +968,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'play_message',
     {
       title: "Play the parents' message",
+      annotations: { destructiveHint: false, idempotentHint: true },
       description:
         "Plays the voice or video message a parent recorded for the child. Call when the child misses a parent or is sad (\"Maya misses her mom\", \"she's crying for her dad\"), or when the carer asks to play it. At lights out the tonight_plan reminder plays the bedtime message by itself.",
       inputSchema: { when: z.enum(['bedtime', 'missing', 'any']).default('missing').describe('bedtime, or missing when the child misses the parents') },

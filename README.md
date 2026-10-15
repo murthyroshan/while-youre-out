@@ -121,6 +121,10 @@ Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
 
 Checks against a running server (not unit tests): `npx tsx test/e2e-houses.ts http://127.0.0.1:8787` (two judges at once), `test/e2e-hybrid.ts` (timing), `test/e2e-language.ts` (a Hindi-speaking sitter, real Gemini).
 
+## Built alongside: the Alexa+ add-on simulator
+
+[alexa-addon-simulator](https://github.com/murthyroshan/alexa-addon-simulator) is a separate open-source tool we made from this project's simulator: point it at any MCP server to talk to it like Alexa+, see its MCP Apps cards on seven Echo screens, and get a readiness score (protocol, tools, cards, voice, speed, robustness). Running it on While You're Out found tool parameters without descriptions, tools without safety hints, and card text that shrank on the smallest Echo Show; all three are fixed here.
+
 ## What Alexa+ would need
 
 Everything below works in the demo, but some of it is simulated because an add-on can't do it today. This is the list we would bring to the Alexa+ team, in the order it matters to families.
@@ -170,7 +174,7 @@ Simulator: `VITE_MCP_URL` (default: the server that serves it, or `http://127.0.
 - Logging an allergen (including brand names such as Snickers or Nutella) or medicine alerts the parents immediately.
 - Payments are approved on the parent's own phone, never on the shared screen.
 
-The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider.
+The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider. All media in the repository is our own: the doorbell snapshots are drawn by a script, and the lullaby is *Twinkle Twinkle Little Star* (a traditional melody) synthesized note by note.
 
 ## License
 
