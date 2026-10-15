@@ -143,6 +143,17 @@ export function answerQuestion(db: DB, question: string, role: Role = 'carer'): 
     ...base,
     facts: matched.slice(0, 5).map(toAnswerFact),
   };
+  // "Who do I call?": the family's call order is in their contacts, not in a note.
+  if (WHO_TO_CALL.test(question)) {
+    const chain = contacts(db).filter((c) => c.priority < 9);
+    const doctor = contacts(db).find((c) => c.priority >= 9);
+    if (chain.length) {
+      const order = chain.map((c) => `${c.name} (${c.relation.replace(/\s*\((.*)\)/, ', $1')})`).join(', then ');
+      const text = `Call order: ${order}.${doctor ? ` For a doctor's question: ${doctor.name} (${doctor.relation}).` : ''} In an emergency, call 911 first. Say "Call ${chain[0].name}" to call from here.`;
+      out.facts.unshift({ text, said_by: 'The family contacts', source: 'contacts', when: nowIso(), category: 'contacts', risk: 'normal' });
+      return { ...out, exact: true, suggest_ask_parent: false };
+    }
+  }
   if (category === 'food') {
     out.guard = FOOD_GUARD;
     out.suggest_ask_parent = true;
@@ -160,6 +171,8 @@ export function answerQuestion(db: DB, question: string, role: Role = 'carer'): 
 }
 
 const toAnswerFact = (f: Fact) => ({ text: f.text, said_by: f.author, source: f.source, when: f.created_at, category: f.category, risk: f.risk });
+
+const WHO_TO_CALL = /\b(who|whom)\b.{0,30}\b(call|phone|ring|contact|reach)\b|\b(call order|phone numbers?|emergency contacts?|contact list)\b/i;
 
 const PERMISSION =
   /\b(can|could|may|is (she|he|they) allowed|are (they|we) allowed|is it ok(ay)?|is (that|this) (ok|okay|alright|all right|fine)|would it be (ok|okay|fine)|do you think (she|he|they) can|should (i|we)|mind if)\b|\b(ok|okay|alright|fine|allowed)\s*\?\s*$/i;
@@ -185,7 +198,7 @@ function rank(f: Fact) {
 }
 
 const STOP = new Set(
-  'a an the is are can could should may might i we she he it to of in on for and or do does what when where how my her his this that be have has with at me you your our their them they allowed okay ok tonight one more another some any little bit just please really very much also too get got let lets let\'s if so then now still maya'.split(' '),
+  'a an the is are can could should may might i we she he it to of in on for and or do does what when where how my her his this that be have has with at me you your our their them they allowed okay ok tonight one more another some any little bit just please really very much also too get got let lets let\'s if so then now still maya won\'t wont don\'t dont can\'t cant isn\'t doesn\'t didn\'t wouldn\'t shouldn\'t will would stop keep keeps going want wants need needs make'.split(' '),
 );
 
 function keywordMatch(facts: Fact[], q: string, minScore = 1): Fact[] {

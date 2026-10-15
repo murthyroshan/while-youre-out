@@ -534,7 +534,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         return localized('answer', { ...a, allergy_alert: alert, allergens }, alert);
       }
       const facts = a.facts.map((f) =>
-        f.source === 'parent_answer' ? `Earlier ${f.said_by} answered this. ${f.text}` : `${f.said_by} said: "${f.text}"`,
+        f.source === 'parent_answer' ? `Earlier ${f.said_by} answered this. ${f.text}` : f.source === 'contacts' ? f.text : `${f.said_by} said: "${f.text}"`,
       );
       // Shadow Parent: on low-risk questions the manual doesn't settle, say how the parents usually answer.
       const shadow = a.suggest_ask_parent && !a.guard ? shadowSuggestion(db, question) : null;

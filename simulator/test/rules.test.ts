@@ -307,6 +307,17 @@ test('"Maya misses her mom" plays the parents\' message; "play Mom\'s message" t
   assert.notEqual(question.calls[0].name, 'play_message');
 });
 
+test('an upset child gets Mom\'s message too, but a hurt or ill one never does', async () => {
+  for (const u of ["Maya won't stop crying", "She's upset", 'Maya is sad and can’t settle']) {
+    const r = await run([u]);
+    assert.deepEqual(r.calls[0], { name: 'play_message', args: { when: 'missing' } }, u);
+  }
+  for (const u of ['She fell and is crying', "She's crying, she has a fever"]) {
+    const r = await run([u]);
+    assert.ok(!r.calls.some((c) => c.name === 'play_message'), u);
+  }
+});
+
 // ---------- the add-on asking on screen, and paying the sitter ----------
 
 test('"We\'re heading out" starts sitter mode without a name: the add-on asks on screen', async () => {

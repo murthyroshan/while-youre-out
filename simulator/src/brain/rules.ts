@@ -38,6 +38,9 @@ const CALL = /^(?:please |can you |could you )?(?:call|phone|ring|video call|fac
 const DOOR = /\b(knock\w*|doorbell|bell rang|ring(ing|s)?|someone|somebody|who'?s|who is)\b.*\b(door|outside|porch)\b|\b(should|can|do|shall) i (open|answer|get) (the|that) door\b|\blet (him|her|them) in\b|\bdoorbell\b/i;
 // "Maya misses her mom", "she's crying for her dad", "play Mom's message".
 const MISSING = /\b(miss(es|ing)?|crying for|asking for|wants?) (her |his |their )?(mom|mum|mommy|mummy|mama|dad|daddy|papa|parents|mother|father)\b/i;
+// "She won't stop crying", "Maya is upset": comfort, so Mom's message helps. Not when she's hurt or ill.
+const UPSET = /\b(won'?t stop crying|keeps? crying|(is|she'?s|he'?s|they'?re) (crying|upset|sad|homesick)|can'?t (settle|calm down|stop crying)|inconsolable)\b/i;
+const HURT = /\b(hurt|fell|fall(en)?|bump(ed)?|bleed|blood|pain|cut|sick|fever|vomit|threw up|burn|rash|hit)\b/i;
 const PLAY_MESSAGE = /\bplay (the |mom'?s |mum'?s |dad'?s |the parents'? |their |her |his )?(goodnight |good night |bedtime )?(message|video|recording)\b/i;
 const HOW_IS_IT_GOING = /^(how'?s it going|how is it going|how are things|what'?s happening( tonight)?|home|go home|show (the )?home( screen)?|tonight)[.!?]*$/i;
 
@@ -166,7 +169,7 @@ export class RuleBrain implements Brain {
 
     if (DOOR.test(u) && !/\b(key|code|lock)\b/i.test(u)) return this.door(u, io);
 
-    if (PLAY_MESSAGE.test(u) || (MISSING.test(u) && !QUESTION_START.test(u))) {
+    if (PLAY_MESSAGE.test(u) || ((MISSING.test(u) || (UPSET.test(u) && !HURT.test(u))) && !QUESTION_START.test(u))) {
       const r = await io.tool('play_message', { when: PLAY_MESSAGE.test(u) ? 'any' : 'missing' });
       return io.say(textOf(r));
     }

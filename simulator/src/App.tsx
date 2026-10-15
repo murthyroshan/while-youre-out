@@ -29,6 +29,10 @@ function houseId(): string {
 }
 // ?film=1: only the Echo Show, for recording the video. Space or → says the next tour line.
 const FILM = new URLSearchParams(location.search).has('film');
+// ?moment=door (or handover, questions, evening, ask, emergency, goodnight, pay): skip ahead to
+// that part of the evening and play from there, for links straight to a highlight.
+const MOMENTS = ['handover', 'questions', 'evening', 'door', 'ask', 'emergency', 'goodnight', 'pay'];
+const MOMENT = MOMENTS.indexOf(new URLSearchParams(location.search).get('moment') ?? '');
 // ?phone=0 hides Mom's phone (it shows beside the Echo Show on wide screens).
 const PHONE_PARAM = new URLSearchParams(location.search).get('phone');
 const stored = (key: string) => {
@@ -145,7 +149,10 @@ export function App() {
   const [playing, setPlaying] = useState(false);
   const playingRef = useRef(false);
   const [chapter, setChapter] = useState<{ time: string | null; title: string; note: string } | null>(null);
-  const [welcome, setWelcome] = useState(() => !FILM && !stored('wyo.welcomed'));
+  const [welcome, setWelcome] = useState(() => !FILM && MOMENT < 0 && !stored('wyo.welcomed'));
+  // While the evening skips ahead to a moment: what it is skipping to.
+  const [skipping, setSkipping] = useState<{ time: string | null; title: string } | null>(null);
+  const hushRef = useRef(false);
   const [voiceOn, setVoiceOn] = useState(() => {
     try {
       return localStorage.getItem('wyo.voice') !== 'off';
@@ -351,7 +358,7 @@ export function App() {
     chime();
     setRing({ snapshot: `${serverOrigin}${ev.snapshot_url}`, label: ev.label, time: ev.time });
     addLine('alexa', 'Someone is at the front door.');
-    if (voiceRef.current) void speak('Someone is at the front door.', 'en-US', () => setLight('speaking'), () => setLight('idle'));
+    if (voiceRef.current && !hushRef.current) void speak('Someone is at the front door.', 'en-US', () => setLight('speaking'), () => setLight('idle'));
     setTimeout(() => setRing((x) => (x?.snapshot.endsWith(ev.snapshot_url) ? null : x)), 9000);
     if (connRef.current) void refreshHome(connRef.current);
   };
@@ -387,7 +394,7 @@ export function App() {
         armCardTimer();
         // Non-English replies are translated by the server; speak them with a voice for that language.
         const lang = /[^ -ɏ]/.test(text) || langRef.current !== 'en-US' ? langRef.current : 'en-US';
-        if (voiceRef.current) void speak(text, lang, () => setLight('speaking'), () => setLight('idle'));
+        if (voiceRef.current && !hushRef.current) void speak(text, lang, () => setLight('speaking'), () => setLight('idle'));
       },
       async tool(name, args = {}) {
         setLight('thinking');
@@ -632,11 +639,11 @@ export function App() {
   };
   /** What Mom would tap on her phone; the phone beside the Echo Show shows it happen. When the
    *  visitor's own phone is connected, they answer it there; Mom only steps in if they don't. */
-  const answerAsMom = async (match: RegExp, answer: string) => {
+  const answerAsMom = async (match: RegExp, answer: string, fast = false) => {
     for (let i = 0; i < 24 && playingRef.current; i++) {
       const q = (await pendingQuestions())?.find((x) => match.test(x.text));
       if (q) {
-        if (phonesRef.current > 0) {
+        if (phonesRef.current > 0 && !fast) {
           setChapter((c) => (c ? { ...c, note: 'Check your phone: Priya is asking you. Answer it there.' } : c));
           for (let t = 0; t < 45 && playingRef.current; t++) {
             await wait(1000);
@@ -645,34 +652,34 @@ export function App() {
           }
           if (!playingRef.current) return;
         }
-        await wait(3000); // long enough to see it arrive on the phone
+        if (!fast) await wait(3000); // long enough to see it arrive on the phone
         await fetch(`${serverOrigin}/parent/api/answer`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ k: parentKey, id: q.id, answer, by: 'Anita', scope: 'tonight' }),
         }).catch(() => null);
-        return quiet(1500);
+        return fast ? undefined : quiet(1500);
       }
-      await wait(500);
+      await wait(fast ? 200 : 500);
     }
   };
-  const directions: Record<string, () => Promise<unknown>> = {
-    '2:We ran out of diapers': () => answerAsMom(/shopping list/i, 'Yes, add it to the list.'),
-    "3:Someone's knocking, should I open the door?": () => answerAsMom(/front door/i, "Don't open the door. I'll call you."),
-    '4:Yes': () => answerAsMom(/sleep in your bed/i, "Yes, that's fine."),
-    '5:I gave the EpiPen': async () => {
-      await wait(1500);
+  const directions: Record<string, (fast: boolean) => Promise<unknown>> = {
+    '2:We ran out of diapers': (fast) => answerAsMom(/shopping list/i, 'Yes, add it to the list.', fast),
+    "3:Someone's knocking, should I open the door?": (fast) => answerAsMom(/front door/i, "Don't open the door. I'll call you.", fast),
+    '4:Yes': (fast) => answerAsMom(/sleep in your bed/i, "Yes, that's fine.", fast),
+    '5:I gave the EpiPen': async (fast) => {
+      if (!fast) await wait(1500);
       await fetch(`${serverOrigin}/parent/api/incident`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ k: parentKey, action: 'on_the_way', minutes: 10, by: 'Anita' }),
       }).catch(() => null);
-      await quiet(2500);
+      if (!fast) await quiet(2500);
     },
-    '6:Maya misses her mom': async () => {
-      await wait(6000); // the message plays
+    '6:Maya misses her mom': async (fast) => {
+      if (!fast) await wait(6000); // the message plays
       await checkReminders.current(); // lights out: the house gets ready for bed
-      await quiet(1500);
+      if (!fast) await quiet(1500);
     },
   };
   const stopPlaying = () => {
@@ -681,7 +688,8 @@ export function App() {
     setChapter(null);
     stopSpeaking();
   };
-  const playEvening = async () => {
+  /** Plays the evening from chapter `from`; the chapters before it happen first, silently and fast. */
+  const playEvening = async (from = 0) => {
     if (playingRef.current || !conn) return;
     playingRef.current = true;
     setPlaying(true);
@@ -690,29 +698,57 @@ export function App() {
     try {
       for (let si = 0; si < GUIDE.length && playingRef.current; si++) {
         const g = GUIDE[si];
+        const fast = si < from;
         setTour([si, 0]);
-        setChapter({ time: g.clock ? clockLabel(g.clock[1]) : null, title: g.title, note: g.note });
+        if (fast) {
+          const target = GUIDE.slice(0, from + 1).reverse().find((x) => x.clock);
+          setSkipping({ time: target?.clock ? clockLabel(target.clock[1]) : null, title: GUIDE[from].title });
+          hushRef.current = true;
+        } else if (hushRef.current) {
+          // Late replies from the skipped part land behind the curtain, then the stage is cleared.
+          await wait(900);
+          hushRef.current = false;
+          brain.current = pickBrain(brainKind);
+          stopSpeaking();
+          setCard(null);
+          setRing(null);
+          setSkipping(null);
+        }
+        if (!fast) setChapter({ time: g.clock ? clockLabel(g.clock[1]) : null, title: g.title, note: g.note });
         if (si === 0) await resetDemo();
+        // While skipping, the rules answer: they know every line of the tour, and answer at once.
+        if (fast) brain.current = rules.current;
         if (g.clock && demoTime) await setClock(g.clock[1], g.clock[0]);
-        await wait(1800);
+        if (!fast) await wait(1800);
         for (let ai = 0; ai < g.actions.length && playingRef.current; ai++) {
           const a = g.actions[ai];
           lastSaid.current = '';
           if ('ring' in a) await ringDoorbell(a.ring);
           else await handle(a.say);
           setTour([si, ai + 1]);
+          if (fast) setRing(null);
           const words = lastSaid.current.split(/\s+/).filter(Boolean).length;
-          await quiet(Math.min(9000, Math.max(2200, words * 330)));
-          if ('say' in a) await directions[`${si}:${a.say}`]?.();
+          if (!fast) await quiet(Math.min(9000, Math.max(2200, words * 330)));
+          if ('say' in a) await directions[`${si}:${a.say}`]?.(fast);
         }
-        await wait(1200);
+        if (!fast) await wait(1200);
       }
     } finally {
+      if (hushRef.current) brain.current = pickBrain(brainKind);
+      hushRef.current = false;
+      setSkipping(null);
       playingRef.current = false;
       setPlaying(false);
       setChapter(null);
     }
   };
+  // A link to a moment plays from there as soon as the house is connected.
+  const momentStarted = useRef(false);
+  useEffect(() => {
+    if (MOMENT < 0 || momentStarted.current || connState !== 'connected' || !conn || demoTime === null) return;
+    momentStarted.current = true;
+    void playEvening(MOMENT);
+  });
 
   // The keyboard drives the tour too (Space or →), unless someone is typing.
   const runTourRef = useRef(runTour);
@@ -961,6 +997,16 @@ export function App() {
           )}
         </div>
 
+        {skipping && (
+          <div className="skipping" role="status" aria-live="polite">
+            <div className="skip-card">
+              <span className="skip-spin" aria-hidden="true" />
+              <small>Skipping ahead{skipping.time ? ` to ${skipping.time}` : ''}</small>
+              <b>{skipping.title}</b>
+            </div>
+          </div>
+        )}
+
         {welcome && connState === 'connected' && (
           <div className="welcome" role="dialog" aria-label="Welcome">
             <div className="welcome-card">
@@ -979,7 +1025,7 @@ export function App() {
               )}
               <div className="welcome-btns">
                 <button className="primary" onClick={() => void playEvening()}>
-                  <Icon name="play" /> Watch the evening <small>2 min</small>
+                  <Icon name="play" /> Watch the evening <small>3 min</small>
                 </button>
                 <button
                   onClick={() => {
@@ -1011,7 +1057,7 @@ export function App() {
             </span>
             <span className="watch-text">
               <b>{playing ? 'Stop watching' : 'Watch the whole evening'}</b>
-              <small>{playing ? `${GUIDE[tourStep].title} · ${tourStep + 1} of ${GUIDE.length}` : '2 min · hands-free · Mom answers on her phone'}</small>
+              <small>{playing ? `${GUIDE[tourStep].title} · ${tourStep + 1} of ${GUIDE.length}` : '3 min · hands-free · Mom answers on her phone'}</small>
             </span>
             {playing && <i className="watch-progress" style={{ transform: `scaleX(${(tourStep + 1) / GUIDE.length})` }} />}
           </button>
