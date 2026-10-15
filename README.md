@@ -6,7 +6,7 @@ The Echo Show in the kitchen becomes the sitter's guide for the evening, in the 
 
 Built for the Build, Ship, Shape: Amazon Developer Hackathon (Alexa+ track).
 
-**Live demo:** [while-youre-out-wpj3.onrender.com](https://while-youre-out-wpj3.onrender.com) (the Echo Show simulator; follow the **Guided demo** panel; every visitor gets their own copy of the demo house) · **MCP endpoint:** `https://while-youre-out-wpj3.onrender.com/mcp` (Streamable HTTP, MCP 2025-11-25; a shared house; `/h/<any 16+ letters>/mcp` gives you a private one) · **Which version is live:** `/version`. It's on a free host: if nobody has visited for a while, the first load can take up to a minute.
+**Live demo:** [while-youre-out-wpj3.onrender.com](https://while-youre-out-wpj3.onrender.com) (the Echo Show simulator: press **Watch the whole evening**, 3 minutes, hands-free; or scan the QR code and be Mom on your own phone; every visitor gets their own copy of the demo house) · **MCP endpoint:** `https://while-youre-out-wpj3.onrender.com/mcp` (Streamable HTTP, MCP 2025-11-25; a shared house; `/h/<any 16+ letters>/mcp` gives you a private one) · **Which version is live:** `/version`. It's on a free host: if nobody has visited for a while, the first load can take up to a minute.
 
 ## An evening with While You're Out
 
@@ -32,12 +32,12 @@ Requires Node.js 22.13 or newer (the server uses the built-in `node:sqlite`; tes
 npm install
 npm run dev          # MCP server on http://127.0.0.1:8787/mcp
 npm run dev:sim      # Echo Show simulator on http://127.0.0.1:5173 (second terminal)
-npm test             # 248 server tests and 63 simulator tests
+npm test             # 285 server tests and 75 simulator tests
 ```
 
 For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator's **guided demo** then walks through the whole evening one step at a time: one button says the next line, and it moves the house clock and rings the doorbell for you. Its first step resets the demo family, so a reload mid-demo starts clean (`POST /demo/reset`, demo mode only). The house clock is under Settings. "Open the parent's phone" opens the parent page.
 
-**One URL for everything (hosting):** `npm run build -w simulator`, then the server also serves the simulator at `/`. The `Dockerfile` builds that into one container. The live demo runs it on Render's free plan (Docker, health check `/health`, `HOST=0.0.0.0`, `WYO_DEMO=1`, `WYO_PUBLIC_URL`, `ALLOWED_HOSTS`, plus the `WYO_PARENT_KEY` and `GEMINI_API_KEY` secrets). UptimeRobot checks `/health` every 5 minutes so the free instance doesn't sleep; `.github/workflows/keepalive.yml` is a backup ping (set the repository variable `DEMO_URL`).
+**One URL for everything (hosting):** `npm run build -w simulator`, then the server also serves the simulator at `/`. The `Dockerfile` builds that into one container. The live demo runs it on Render's free plan (Docker, health check `/health`, `HOST=0.0.0.0`, `WYO_DEMO=1`, `WYO_PUBLIC_URL`, `ALLOWED_HOSTS`, plus the `WYO_PARENT_KEY` and `GEMINI_API_KEY` secrets). UptimeRobot checks `/health` every 5 minutes so the free instance doesn't sleep; `.github/workflows/keepalive.yml` is a backup ping (set the repository variable `DEMO_URL`). Twice a day `.github/workflows/smoke.yml` uses the live demo the way a judge does (`node scripts/smoke.mjs <url>`: a fresh house over MCP, a house-manual answer, an emergency, the parent page) and fails loudly if anything is broken.
 
 **Notifications on the parent's phone:** tap "Turn on" on the parent page. Android Chrome and desktop browsers work straight away; on an iPhone, first use Share → Add to Home Screen and open it from there (iOS 16.4+). Push needs https, or `localhost` on the same computer.
 
@@ -45,6 +45,8 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 
 | Where | What to try |
 | --- | --- |
+| Straight to a moment | [The knock at the door](https://while-youre-out-wpj3.onrender.com/?moment=door) · [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) · [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight) · [paying the sitter](https://while-youre-out-wpj3.onrender.com/?moment=pay). Also `handover`, `questions`, `evening`, `ask`. The evening skips ahead silently, then plays from there |
+| Your own phone | "Use your own phone" (or the QR code on the welcome card) opens the parent page for your demo house on your phone. Priya's questions arrive there, and "Watch the evening" waits for your answer |
 | Echo Show | The **Tonight** screen (refreshes itself), every answer card, the doorbell, the emergency guide, the goodnight message, the who's-babysitting form, paying the sitter |
 | Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
 
@@ -118,6 +120,23 @@ Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
 - Simulated device features: Alexa calling and the Ring doorbell alert.
 
 Checks against a running server (not unit tests): `npx tsx test/e2e-houses.ts http://127.0.0.1:8787` (two judges at once), `test/e2e-hybrid.ts` (timing), `test/e2e-language.ts` (a Hindi-speaking sitter, real Gemini).
+
+## What Alexa+ would need
+
+Everything below works in the demo, but some of it is simulated because an add-on can't do it today. This is the list we would bring to the Alexa+ team, in the order it matters to families.
+
+| Gap | What we did instead | What would make it real |
+| --- | --- | --- |
+| An add-on can't speak first | "Sitter first": a parent's answer or a due reminder is told at the start of the sitter's next reply; MCP Tasks for answers that take minutes | A proactive announcement API for add-ons (rate-limited, per household), so "Anita says yes" is heard when it arrives |
+| Who is speaking | Voice always gets the sitter's view: anyone in the room can talk to the device | Speaker roles for guests, so a sitter can't change the parents' rules and a parent can (Voice ID with a guest role) |
+| Reaching the parents | Web Push to the parent page, with lock-screen buttons | Alexa app notifications to household members, with actions, from an add-on |
+| Emergencies | A fixed script from the family's own plan, timers, every parent phone live; the sitter calls 911 | A hand-off to Alexa Emergency Assist (agent call with the address and the plan), triggered by the add-on |
+| The doorbell | Sample snapshots and a simulated Ring chime | Ring doorbell events and the latest snapshot, for add-ons the household allows |
+| Lights out for the house | Simulated and labelled so on screen | Scoped smart-home actions from an add-on (dim a room, check a lock) |
+| The shopping list | Our own list | Write access to the family's Alexa shopping list |
+| Paying the sitter | MCP URL elicitation to a demo approval page on the parent's phone; no money moves | Amazon Pay for a person-to-person payment, approved by the parent |
+| Timers | The card counts down and the device speaks the warnings | Device timers an add-on can start ("5 minutes to the second EpiPen") |
+| The screen | MCP Apps cards that refresh themselves and ask for full screen | Echo Show support for MCP Apps display modes and cards calling tools, as in our simulator |
 
 ## Settings (environment variables)
 

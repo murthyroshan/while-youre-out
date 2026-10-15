@@ -7,7 +7,8 @@ import { activeHandoff, events } from './house.js';
 
 export const MESSAGE_TYPES = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/x-wav', 'video/webm', 'video/mp4', 'video/quicktime'];
 export const MAX_MESSAGE_BYTES = 8_000_000;
-const KEEP = 6;
+/** The public demo: a minute at the parent page's demo bitrate fits, and every house shares one server's memory. */
+export const DEMO_MESSAGE_BYTES = 3_000_000;
 
 export class MessageError extends Error {}
 
@@ -30,12 +31,13 @@ const COLUMNS = 'id, from_name, for_name, kind, mime, when_to_play, caption, tok
 
 export function saveMessage(
   db: DB,
+  limits: { maxBytes: number; keep: number },
   input: { data: Buffer; mime: string; from: string; for_name?: string | null; when?: string; caption?: string | null },
 ): MessageInfo {
   const mime = input.mime.split(';')[0].trim().toLowerCase();
   if (!MESSAGE_TYPES.includes(mime)) throw new MessageError('Record audio or video (WebM, MP4, M4A, MP3 or WAV).');
   if (!input.data.length) throw new MessageError('The recording is empty.');
-  if (input.data.length > MAX_MESSAGE_BYTES) throw new MessageError('Keep it under a minute (8 MB at most).');
+  if (input.data.length > limits.maxBytes) throw new MessageError(`Keep it under a minute (${Math.round(limits.maxBytes / 1_000_000)} MB at most).`);
   const when: MessageWhen = input.when === 'missing' || input.when === 'any' ? input.when : 'bedtime';
   const info = db
     .prepare('INSERT INTO messages (from_name, for_name, kind, mime, data, when_to_play, caption, token, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
@@ -50,7 +52,7 @@ export function saveMessage(
       randomBytes(16).toString('hex'),
       nowIso(),
     );
-  db.prepare(`DELETE FROM messages WHERE id NOT IN (SELECT id FROM messages ORDER BY id DESC LIMIT ${KEEP})`).run();
+  db.prepare(`DELETE FROM messages WHERE id NOT IN (SELECT id FROM messages ORDER BY id DESC LIMIT ${Math.max(1, Math.floor(limits.keep))})`).run();
   return getMessage(db, Number(info.lastInsertRowid))!;
 }
 

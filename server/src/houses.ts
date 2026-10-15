@@ -6,6 +6,7 @@
 import { EventEmitter } from 'node:events';
 import express from 'express';
 import { houseStore, type HouseContext } from './context.js';
+import { newHouseAllowed } from './limits.js';
 
 /** House ids are made by the simulator (random, unguessable); nothing else identifies a house. */
 export const HOUSE_ID = /^[A-Za-z0-9_-]{16,64}$/;
@@ -54,12 +55,15 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
     houseStore.run(h.ctx, () => h.close());
   };
 
-  const get = (id: string): House<T> | null => {
+  /** The house, or null if a new one can't be made now, or undefined if this request can't make one. */
+  const get = (id: string, visitor: string | null): House<T> | null | undefined => {
     const found = houses.get(id);
     if (found) {
       found.lastUsed = Date.now();
       return found;
     }
+    if (visitor === null) return undefined;
+    if (!newHouseAllowed(visitor)) return null;
     const t = Date.now();
     while (recentlyMade.length && recentlyMade[0] < t - 60_000) recentlyMade.shift();
     if (recentlyMade.length >= newPerMinute) return null;
@@ -85,6 +89,10 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
 
   const app = express();
   app.disable('x-powered-by');
+  if (process.env.RENDER || process.env.WYO_TRUST_PROXY === '1') app.set('trust proxy', 1);
+  // Only what starts a visit makes a house (the simulator connecting, the parent page, the demo
+  // controls); anything else for a house that doesn't exist is simply not found.
+  const startsVisit = (url: string) => /^\/(mcp|parent|demo|host)(\/|\?|$)/.test(url);
   app.use((req, res, next) => {
     const m = PREFIX.exec(req.url);
     let id = m?.[1];
@@ -100,7 +108,8 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
       if (fromCookie && HOUSE_ID.test(fromCookie)) id = fromCookie;
     }
     if (!id) return shared.app(req, res, next);
-    const house = get(id);
+    const house = get(id, startsVisit(req.url) ? (req.ip ?? 'unknown') : null);
+    if (house === undefined) return void res.status(404).json({ error: 'No such demo house.' });
     if (!house) return void res.status(429).json({ error: 'The demo is very busy right now. Try again in a minute.' });
     houseStore.run(house.ctx, () => house.app(req, res, next));
   });

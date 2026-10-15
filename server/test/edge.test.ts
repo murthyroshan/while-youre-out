@@ -285,6 +285,30 @@ test('an emergency said during teach-back is still an emergency', async () => {
   assert.equal(r.structuredContent.emergency, true);
 });
 
+test('security headers: no sniffing, no referrer, and only the simulator may frame the parent page', async () => {
+  const parent = await fetch(`${base}/parent?k=${KEY}`);
+  assert.equal(parent.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(parent.headers.get('referrer-policy'), 'no-referrer');
+  assert.equal(parent.headers.get('x-powered-by'), null);
+  assert.match(parent.headers.get('content-security-policy') ?? '', /^frame-ancestors 'self' http:\/\/127\.0\.0\.1:\*/);
+  const health = await fetch(`${base}/health`);
+  assert.equal(health.headers.get('content-security-policy'), null, 'other pages (the simulator) may be embedded');
+});
+
+test('notifications only go to the browsers\' own push services, never to any URL a caller names', async () => {
+  const sub = (endpoint: string) =>
+    fetch(`${base}/parent/api/push/subscribe`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ k: KEY, subscription: { endpoint, keys: { p256dh: 'x'.repeat(87), auth: 'auth-secret-16b' } } }),
+    });
+  assert.equal((await sub('https://fcm.googleapis.com/fcm/send/abc')).status, 200, 'Chrome and Android');
+  assert.equal((await sub('https://web.push.apple.com/abc')).status, 200, 'Safari and iPhone');
+  for (const bad of ['https://evil.example.org/hook', 'https://fcm.googleapis.com.evil.org/x', 'https://fcm.googleapis.com:8443/x', 'http://fcm.googleapis.com/x', 'https://169.254.169.254/latest']) {
+    assert.equal((await sub(bad)).status, 400, bad);
+  }
+});
+
 test('browsers from other websites are refused', async () => {
   const evil = await fetch(`${base}/parent/api/state?k=${KEY}`, { headers: { origin: 'https://evil.example' } });
   assert.equal(evil.status, 403);

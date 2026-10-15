@@ -602,7 +602,7 @@
       var html = views[d.view](d);
       // Bilingual relay: what the carer heard, in their language, above the parents' own words.
       if (d.spoken && d.language && d.language !== 'en' && d.view !== 'home' && d.view !== 'language') {
-        html = d.view === 'emergency' ? html.replace('<h1>', spokenBanner(d) + '<h1>') : html.replace(/<div class="panel [^"]*">/, function (m) { return m + spokenBanner(d); });
+        html = d.view === 'emergency' ? html.replace(/<h1[\s>]/, function (m) { return spokenBanner(d) + m; }) : html.replace(/<div class="panel [^"]*">/, function (m) { return m + spokenBanner(d); });
       }
       root.innerHTML = html;
     }

@@ -17,7 +17,9 @@ import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './d
 import { homeScreen } from './domain/home.js';
 import { approvePayment, createPayment, declinePayment, payableHandoff, PaymentError, paymentByToken } from './domain/payments.js';
 import { payPage } from './parent/pay.js';
-import { listMessages, MAX_MESSAGE_BYTES, MessageError, messageMedia, removeMessage, saveMessage } from './domain/messages.js';
+import { DEMO_MESSAGE_BYTES, listMessages, MAX_MESSAGE_BYTES, MessageError, messageMedia, removeMessage, saveMessage } from './domain/messages.js';
+import { aiAllowed, pushTestAllowed, startHeavy } from './limits.js';
+import { HOST_SYSTEM, ADDON_INSTRUCTIONS } from './ai/hostPrompt.js';
 import { activeIncident, incidentView, latestIncident, markOnTheWay } from './domain/incident.js';
 import { addVisitor, getDoorEvent, recordDoorEvent, removeVisitor, VisitorError, visitors } from './domain/door.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
@@ -86,7 +88,29 @@ export function createApp(opts: AppOptions = {}) {
   const push = createPush(db, { sender: opts.pushSender, publicUrl, parentKey });
 
   // Same as the SDK's createMcpExpressApp, with our own host checks.
+  const demo = opts.demo ?? process.env.WYO_DEMO === '1';
   const app = express();
+  app.disable('x-powered-by');
+  // Behind Render's proxy, the visitor's address is the one it forwards (for per-visitor limits).
+  if (process.env.RENDER || process.env.WYO_TRUST_PROXY === '1') app.set('trust proxy', 1);
+  const ipOf = (req: express.Request) => req.ip ?? 'unknown';
+  // Big bodies (recordings, files) are read one or two at a time, and not while memory is high.
+  const heavyBody: express.RequestHandler = (_req, res, next) => {
+    const done = startHeavy();
+    if (!done) return void res.status(503).json({ error: 'The demo is busy right now. Try again in a minute.' });
+    res.on('close', done);
+    next();
+  };
+  // The parent link carries its key in the URL and the pay link its token: never send either on as
+  // a referrer. The parent and pay pages may only be framed by the simulator (no clickjacking).
+  const framers = ["'self'", ...(allowedOrigins?.length ? allowedOrigins : ['http://127.0.0.1:*', 'http://localhost:*'])].join(' ');
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    if (publicUrl.startsWith('https://')) res.setHeader('Strict-Transport-Security', 'max-age=15552000');
+    if (/^\/(parent|pay)(\/|$)/.test(req.path) && !req.path.startsWith('/parent/api/')) res.setHeader('Content-Security-Policy', `frame-ancestors ${framers}`);
+    next();
+  });
   const bindHost = opts.host ?? '127.0.0.1';
   if (opts.allowedHosts) app.use(hostHeaderValidation(opts.allowedHosts));
   else if (['127.0.0.1', 'localhost', '::1'].includes(bindHost)) app.use(localhostHostValidation());
@@ -304,6 +328,7 @@ export function createApp(opts: AppOptions = {}) {
   app.post('/parent/api/push/test', async (req, res) => {
     const { k, endpoint } = req.body ?? {};
     if (!authorised(k)) return void res.sendStatus(401);
+    if (!pushTestAllowed(ipOf(req))) return void res.status(429).json({ error: 'Too many test notifications; try again in a minute.' });
     const sent = await push.notify(
       'everyone',
       { title: "While You're Out", body: "Notifications are on. Questions and emergencies will reach you here.", tag: 'test' },
@@ -377,12 +402,14 @@ export function createApp(opts: AppOptions = {}) {
 
   // ---------- Goodnight messages ----------
   // Recorded on the phone (the raw audio/video is the body), played on the Echo Show.
-  app.post('/parent/api/messages', express.raw({ type: ['audio/*', 'video/*'], limit: MAX_MESSAGE_BYTES }), (req, res) => {
+  // The public demo keeps recordings small and few: every house's messages share one server's memory.
+  const messageLimits = demo ? { maxBytes: DEMO_MESSAGE_BYTES, keep: 2 } : { maxBytes: MAX_MESSAGE_BYTES, keep: 6 };
+  app.post('/parent/api/messages', heavyBody, express.raw({ type: ['audio/*', 'video/*'], limit: messageLimits.maxBytes }), (req, res) => {
     if (!authorised(req.query.k)) return void res.sendStatus(401);
     if (!Buffer.isBuffer(req.body)) return void res.status(400).json({ error: 'Send the recording as audio or video.' });
     try {
       const q = req.query;
-      const m = saveMessage(db, {
+      const m = saveMessage(db, messageLimits, {
         data: req.body,
         mime: String(req.headers['content-type'] ?? ''),
         from: parentName(q.by),
@@ -520,15 +547,18 @@ export function createApp(opts: AppOptions = {}) {
     const { k, text, label, by } = req.body ?? {};
     if (!authorised(k)) return void res.sendStatus(401);
     if (typeof text !== 'string') return void res.status(400).json({ error: 'text required' });
+    if (!aiAllowed(ipOf(req), 'import')) return void res.status(429).json({ error: 'That is a lot of notes at once. Try again in a minute.' });
     await runImport(res, { kind: 'text', text, label: typeof label === 'string' && label.trim() ? label.trim() : 'Typed note', author: parentName(by) });
   });
 
   // A photo or PDF, sent as the raw file body (too big for the JSON limit).
   app.post(
     '/parent/api/import/file',
+    heavyBody,
     express.raw({ type: [...IMAGE_TYPES, 'application/pdf'], limit: MAX_IMPORT_BYTES }),
     async (req, res) => {
       if (!authorised(req.query.k)) return void res.sendStatus(401);
+      if (!aiAllowed(ipOf(req), 'import')) return void res.status(429).json({ error: 'That is a lot of notes at once. Try again in a minute.' });
       const mime = String(req.headers['content-type'] ?? '').split(';')[0].trim();
       if (!Buffer.isBuffer(req.body) || req.body.length === 0) return void res.status(400).json({ error: 'Send a PNG, JPEG, WebP, HEIC or PDF file.' });
       const kind = mime === 'application/pdf' ? 'pdf' : 'photo';
@@ -561,26 +591,35 @@ export function createApp(opts: AppOptions = {}) {
   // ---------- The simulator's "Alexa" brain: a Gemini proxy so the key never reaches a browser ----------
   // In production Alexa+ is the brain; this exists only for the Echo Show simulator.
   if (opts.hostLlm ?? process.env.WYO_HOST_LLM !== '0') {
-    const recent: number[] = [];
+    // It is not a general Gemini proxy: the server writes the system prompt itself, the turns may
+    // only be text and tool calls (no files or images), the tools must look like ours, and the
+    // whole server and each visitor have a budget (shared by every demo house).
+    const system = `${HOST_SYSTEM}\n\nAdd-on instructions: ${ADDON_INSTRUCTIONS}`;
+    const PART_KEYS = new Set(['text', 'functionCall', 'functionResponse', 'thoughtSignature']);
+    const validTurn = (t: any) =>
+      t && (t.role === 'user' || t.role === 'model') && Array.isArray(t.parts) && t.parts.length <= 12 && t.parts.every((p: any) => p && typeof p === 'object' && Object.keys(p).every((k) => PART_KEYS.has(k)));
+    const validFunction = (f: any) => f && typeof f.name === 'string' && /^[a-z][a-z_]{1,39}$/.test(f.name) && (f.description === undefined || (typeof f.description === 'string' && f.description.length <= 1500));
     app.post('/host/llm', async (req, res) => {
-      const now = Date.now();
-      while (recent.length && recent[0] < now - 60_000) recent.shift();
-      if (recent.length >= 30) return void res.status(429).json({ error: 'Too many requests; try again in a minute.' });
-      recent.push(now);
-      const { system, contents, functions } = req.body ?? {};
-      if (typeof system !== 'string' || !Array.isArray(contents) || !Array.isArray(functions) || contents.length > 60 || functions.length > 40) {
-        return void res.status(400).json({ error: 'system, contents and functions required' });
+      const { contents, functions } = req.body ?? {};
+      if (!Array.isArray(contents) || !Array.isArray(functions) || contents.length > 60 || functions.length > 40) {
+        return void res.status(400).json({ error: 'contents and functions required' });
       }
+      if (!contents.every(validTurn) || !functions.every(validFunction) || JSON.stringify(req.body).length > 64_000) {
+        return void res.status(400).json({ error: "Only the simulator's own conversation can be sent." });
+      }
+      if (!aiAllowed(ipOf(req), 'chat')) return void res.status(429).json({ error: 'Too many requests; try again in a minute.' });
       try {
-        res.json(await (opts.chat ?? geminiChat)({ system: system.slice(0, 8000), contents, functions }));
+        res.json(await (opts.chat ?? geminiChat)({ system, contents, functions }));
       } catch (e) {
-        res.status(503).json({ error: e instanceof Error ? e.message : 'unavailable' });
+        // The device falls back to its rules; Google's own error text stays in the server log.
+        console.warn('host/llm:', e instanceof Error ? e.message : e);
+        res.status(503).json({ error: e instanceof Error && /GEMINI_API_KEY/.test(e.message) ? 'No model key on this server.' : 'The model is unavailable right now.' });
       }
     });
   }
 
   // ---------- Demo clock (only with WYO_DEMO=1): lets a video jump to 7:40 pm ----------
-  if (opts.demo ?? process.env.WYO_DEMO === '1') {
+  if (demo) {
     // The demo deployment is public, so the simulator may link straight to the parent page.
     app.get('/demo/config', (_req, res) => void res.json({ parent_url: `/parent?k=${encodeURIComponent(parentKey)}` }));
     // Stands in for a Ring doorbell event (Ring's API in production): who pressed the bell.
@@ -590,7 +629,8 @@ export function createApp(opts: AppOptions = {}) {
       grandma: { kind: 'person', label: 'Person at the front door', snapshot_url: '/static/door/grandma.jpg' },
     };
     app.post('/demo/ring', (req, res) => {
-      const r = RINGERS[String(req.body?.who)];
+      const who = String(req.body?.who);
+      const r = Object.hasOwn(RINGERS, who) ? RINGERS[who] : undefined;
       if (!r) return void res.status(400).json({ error: 'who must be delivery, stranger or grandma' });
       const ev = recordDoorEvent(db, { ...r, source: 'ring (simulated)' });
       res.json({ ...ev, time: formatTime(localTime(householdTz(db), new Date(ev.at)).minutes) });

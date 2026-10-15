@@ -21,6 +21,8 @@ export function PhoneFrame(props: {
 }) {
   const viewport = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.7);
+  // The status bar's time and icons stay readable when the phone is drawn small.
+  const ui = Math.max(scale, 0.68);
   const { scan, onScanClose } = props;
   const joined = (props.phones ?? 0) > 0;
   useEffect(() => {
@@ -42,19 +44,19 @@ export function PhoneFrame(props: {
       <div className="phone-body">
         <div className="phone-notch" />
         <div className="phone-viewport" ref={viewport}>
-          <div className="phone-status" style={{ height: STATUS_BAR * scale, fontSize: 15 * scale, padding: `0 ${26 * scale}px` }} aria-hidden="true">
+          <div className="phone-status" style={{ height: STATUS_BAR * scale, fontSize: 15 * ui, padding: `0 ${26 * scale}px` }} aria-hidden="true">
             <b>{props.time}</b>
             <span className="phone-icons">
-              <svg viewBox="0 0 18 12" style={{ height: 11 * scale, width: 16.5 * scale }}>
+              <svg viewBox="0 0 18 12" style={{ height: 11 * ui, width: 16.5 * ui }}>
                 <rect x="0" y="8" width="3" height="4" rx="1" />
                 <rect x="5" y="5.5" width="3" height="6.5" rx="1" />
                 <rect x="10" y="3" width="3" height="9" rx="1" />
                 <rect x="15" y="0" width="3" height="12" rx="1" />
               </svg>
-              <svg viewBox="-2 -1 20 13" style={{ height: 11 * scale, width: 16 * scale }}>
+              <svg viewBox="-2 -1 20 13" style={{ height: 11 * ui, width: 16 * ui }}>
                 <path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5Zm-4.2-4.3L2.2 5.6a8.2 8.2 0 0 1 11.6 0l-1.6 1.6a5.9 5.9 0 0 0-8.4 0ZM.2 3.6-1.4 2a11 11 0 0 1 18.8 0l-1.6 1.6a8.8 8.8 0 0 0-15.6 0Z" />
               </svg>
-              <svg viewBox="0 0 27 13" style={{ height: 12 * scale, width: 25 * scale }}>
+              <svg viewBox="0 0 27 13" style={{ height: 12 * ui, width: 25 * ui }}>
                 <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity="0.4" />
                 <rect x="2.5" y="2.5" width="16" height="8" rx="2" />
                 <rect x="24.5" y="4.5" width="2" height="4" rx="1" opacity="0.4" />

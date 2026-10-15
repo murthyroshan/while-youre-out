@@ -1,3 +1,4 @@
+import { ADDON_INSTRUCTIONS } from '../ai/hostPrompt.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { TaskStore } from '@modelcontextprotocol/sdk/experimental/tasks/interfaces.js';
 import { InMemoryTaskMessageQueue } from '@modelcontextprotocol/sdk/experimental/tasks/stores/in-memory.js';
@@ -126,13 +127,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       capabilities: { tasks: { requests: { tools: { call: {} } } } },
       taskStore,
       taskMessageQueue: new InMemoryTaskMessageQueue(),
-      instructions: [
-        "You are helping a carer (babysitter, grandparent, nanny) who is looking after the family's children while the parents are out.",
-        "Only ever repeat the parents' own words returned by these tools. Never invent rules.",
-        "Never tell the carer that a food or medicine is safe, and never suggest doses. Always say the guard sentence the tools return.",
-        "If anything sounds like an emergency, call the `emergency` tool immediately and read its first line out loud.",
-        "If the manual does not answer a question, offer to ask a parent with `ask_parent`.",
-      ].join(' '),
+      instructions: ADDON_INSTRUCTIONS,
     },
   );
 

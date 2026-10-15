@@ -1,0 +1,21 @@
+# Every morning until judging ends (Nov 20): use the live demo the way a judge does, and fail
+# loudly if anything is broken. GitHub emails the repository owner when a scheduled run fails.
+# Uses the repository variable DEMO_URL (the same one the keep-alive ping uses).
+name: Check the live demo
+on:
+  schedule:
+    - cron: '30 3 * * *' # 9:00 am in India, 8:30 pm in Seattle
+    - cron: '30 15 * * *' # 9:00 pm in India, 8:30 am in Seattle
+  workflow_dispatch:
+jobs:
+  smoke:
+    if: vars.DEMO_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Use the demo like a judge
+        run: node scripts/smoke.mjs "${{ vars.DEMO_URL }}"

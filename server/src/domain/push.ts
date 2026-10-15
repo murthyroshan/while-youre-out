@@ -34,7 +34,7 @@ export interface PushMessage {
 /** Sends one encrypted message. Tests pass a fake; the default is the web-push library. */
 export type PushSender = (sub: PushSubscriptionJson, payload: string, options: webpush.RequestOptions) => Promise<{ statusCode: number }>;
 
-const MAX_SUBSCRIPTIONS = 50;
+const MAX_SUBSCRIPTIONS = 10; // a family's phones and browsers
 
 interface Row {
   endpoint: string;
@@ -55,11 +55,24 @@ function vapidKeys(db: DB) {
   return keys;
 }
 
+// The server posts to whatever endpoint a subscription names, so only the browsers' own push
+// services are accepted (Chrome/Android, Firefox, Safari/iPhone, Edge); example.com is reserved
+// for documentation and tests (RFC 2606), so it can't point at anyone.
+const PUSH_HOST = /^(fcm\.googleapis\.com|([a-z0-9-]+\.)*push\.services\.mozilla\.com|([a-z0-9-]+\.)*push\.apple\.com|([a-z0-9-]+\.)*notify\.windows\.com|([a-z0-9-]+\.)*example\.com)$/;
+const pushHost = (endpoint: string) => {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === 'https:' && !u.port && PUSH_HOST.test(u.hostname);
+  } catch {
+    return false;
+  }
+};
+
 export function isValidSubscription(s: any): s is PushSubscriptionJson {
   return (
     s &&
     typeof s.endpoint === 'string' &&
-    /^https:\/\//.test(s.endpoint) &&
+    pushHost(s.endpoint) &&
     s.endpoint.length < 1000 &&
     typeof s.keys?.p256dh === 'string' &&
     typeof s.keys?.auth === 'string' &&

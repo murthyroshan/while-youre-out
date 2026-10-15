@@ -99,8 +99,9 @@ test('houses are bounded: the least recently used goes first, and new ones are r
   assert.deepEqual([...small.houses.houses.keys()].sort(), [B, C]);
 
   const slow = await start({ newPerMinute: 1 });
-  assert.equal((await fetch(`${slow.base}/h/${A}/health`)).status, 200);
-  assert.equal((await fetch(`${slow.base}/h/${B}/health`)).status, 429);
+  assert.equal((await fetch(`${slow.base}/h/${C}/health`)).status, 404, 'only starting a visit makes a house');
+  assert.equal((await fetch(`${slow.base}/h/${A}/demo/clock`)).status, 200);
+  assert.equal((await fetch(`${slow.base}/h/${B}/demo/clock`)).status, 429);
   assert.equal((await fetch(`${slow.base}/h/${A}/health`)).status, 200, 'existing houses still work');
 });
 
@@ -115,6 +116,16 @@ test('/version says which commit is running', async () => {
   const v = await (await fetch(`${base}/version`)).json();
   assert.equal(typeof v.commit, 'string');
   assert.ok(Date.parse(v.started_at));
+});
+
+test('the public demo keeps goodnight recordings small and few (every house shares the memory)', async () => {
+  const { base } = await start();
+  const upload = (bytes: number) =>
+    fetch(`${base}/h/${A}/parent/api/messages?k=${KEY}&by=Anita`, { method: 'POST', headers: { 'content-type': 'audio/webm' }, body: Buffer.alloc(bytes, 1) });
+  assert.equal((await upload(3_500_000)).status, 413, 'over 3 MB');
+  for (let i = 0; i < 3; i++) assert.equal((await upload(10_000)).status, 200);
+  const s = await (await fetch(`${base}/h/${A}/parent/api/state?k=${KEY}`)).json();
+  assert.equal(s.messages.length, 2, 'two kept per house');
 });
 
 test('a real phone with the parent page open is counted in its own house only', async () => {

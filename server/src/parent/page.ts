@@ -1289,7 +1289,8 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     try { recStream = await navigator.mediaDevices.getUserMedia(video ? { audio: true, video: { facingMode: 'user' } } : { audio: true }); }
     catch (e) { return gnErr('Allow the microphone' + (video ? ' and camera' : '') + ' to record, or upload a recording.'); }
     recChunks = [];
-    recorder = new MediaRecorder(recStream);
+    // A minute stays small (about 2.3 MB): a goodnight message plays on a kitchen screen, not a cinema.
+    recorder = new MediaRecorder(recStream, { audioBitsPerSecond: 64000, videoBitsPerSecond: 240000 });
     recorder.ondataavailable = function (e) { if (e.data && e.data.size) recChunks.push(e.data); };
     recorder.onstop = function () {
       recStream.getTracks().forEach(function (t) { t.stop(); });
