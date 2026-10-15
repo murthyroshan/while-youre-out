@@ -19,6 +19,8 @@ const answer = (id: number, text: string) =>
   fetch(`${base}/parent/api/answer`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k: KEY, id, answer: text, by: 'Anita', scope: 'tonight' }) });
 
 before(async () => {
+  // A quiet hour: no plan reminder comes due unless a test moves the clock.
+  setDemoTime('10:00', 'America/Los_Angeles');
   const created = createApp({ parentKey: KEY, escalateAfterMs: 60_000, ai: { available: false } as any });
   close = created.close;
   http = created.app.listen(0, '127.0.0.1');
@@ -67,6 +69,7 @@ test('a reminder that came due is told when the carer next talks; the device\'s 
   const next = await call('ask_house', { question: 'What time is bedtime?' });
   assert.match(next.content[0].text, /^Anita answered "Can Bruno sleep inside\?"/);
   assert.doesNotMatch(next.content[0].text, /It's 7:15/, 'the reminder was already said');
+  setDemoTime('10:00', 'America/Los_Angeles');
 });
 
 test('nothing is put in front of an emergency', async () => {

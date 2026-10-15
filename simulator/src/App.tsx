@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { McpConnection, textOf, type ElicitationHandlers, type ToolResult } from './mcp';
 import { GUIDE } from './guide';
 import { Elicit } from './Elicit';
+import { PhoneFrame } from './PhoneFrame';
 import type { ElicitRequest, ElicitResult } from '@modelcontextprotocol/sdk/types.js';
 import { AppFrame } from './AppFrame';
 import { RuleBrain } from './brain/rules';
@@ -26,6 +27,32 @@ function houseId(): string {
 }
 // ?film=1: only the Echo Show, for recording the video. Space or → says the next tour line.
 const FILM = new URLSearchParams(location.search).has('film');
+// ?phone=0 hides Mom's phone (it shows beside the Echo Show on wide screens).
+const PHONE_PARAM = new URLSearchParams(location.search).get('phone');
+const stored = (key: string) => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+const store = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* not persisted */
+  }
+};
+type DeviceSize = '15' | '10' | '8';
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/** "18:00" -> "6:00 pm" */
+const clockLabel = (hhmm: string) => {
+  const [h, m] = hhmm.split(':').map(Number);
+  return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'}`;
+};
+const DEVICE_NAMES: Record<DeviceSize, string> = { '15': 'Echo Show 15', '10': 'Echo Show 10', '8': 'Echo Show 8' };
+// The screen's own resolution: cards lay out exactly as on the device, then the screen is scaled.
+const SCREEN: Record<DeviceSize, { w: number; h: number }> = { '15': { w: 1280, h: 720 }, '10': { w: 1280, h: 800 }, '8': { w: 1280, h: 800 } };
 const SERVER = location.port === '5173' ? 'http://127.0.0.1:8787' : location.origin;
 const DEFAULT_URL = import.meta.env.VITE_MCP_URL ?? `${SERVER}/h/${houseId()}/mcp`;
 const PARENT_KEY = import.meta.env.VITE_PARENT_KEY ?? 'demo-parent-key';
@@ -104,6 +131,19 @@ export function App() {
   const [carer, setCarer] = useState<string | null>(null);
   const [tasks, setTasks] = useState<TaskView[]>([]);
   const [light, setLight] = useState<Light>('idle');
+  const lightRef = useRef(light);
+  const lastSaid = useRef('');
+  lightRef.current = light;
+  // Mom's phone beside the Echo Show; the pay page opens in it.
+  const [phoneOn, setPhoneOn] = useState(() => PHONE_PARAM !== '0' && stored('wyo.phone') !== 'off' && window.innerWidth >= 1100);
+  const [phoneUrl, setPhoneUrl] = useState<string | null>(null);
+  const [phoneRev, setPhoneRev] = useState(0);
+  const [deviceSize, setDeviceSize] = useState<DeviceSize>(() => (stored('wyo.size') === '8' || stored('wyo.size') === '10' ? (stored('wyo.size') as DeviceSize) : '15'));
+  // "Watch the evening": the whole story plays by itself.
+  const [playing, setPlaying] = useState(false);
+  const playingRef = useRef(false);
+  const [chapter, setChapter] = useState<{ time: string | null; title: string; note: string } | null>(null);
+  const [welcome, setWelcome] = useState(() => !FILM && !stored('wyo.welcomed'));
   const [voiceOn, setVoiceOn] = useState(() => {
     try {
       return localStorage.getItem('wyo.voice') !== 'off';
@@ -338,6 +378,7 @@ export function App() {
     (c: McpConnection, turn = turnRef.current): DeviceIO => ({
       say(text) {
         if (!text) return;
+        lastSaid.current = text;
         // A late reply to something said before an emergency began is never spoken over the guide.
         if (emergencyRef.current && turn < emergencyTurnRef.current) return;
         addLine('alexa', text);
@@ -439,6 +480,9 @@ export function App() {
       stopSpeaking();
       // Whoever spoke has seen the doorbell photo; the answer must not hide behind it.
       setRing(null);
+      // A full-screen card from before (the goodnight message, a summary) gives way to what's next;
+      // the emergency guide stays until it is over.
+      setCard((c) => (c && c.mode === 'fullscreen' && c.tool !== 'emergency' && c.tool !== 'emergency_step' ? null : c));
       addLine('you', text);
       armCardTimer();
       lastActivity.current = Date.now();
@@ -485,13 +529,14 @@ export function App() {
     return () => clearInterval(t);
   }, [conn, refreshHome]);
 
+  const checkReminders = useRef<() => Promise<void>>(async () => {});
   // While someone is babysitting, the device reminds them when a step of tonight's plan comes due.
   useEffect(() => {
     if (!conn || !carer) return;
     let stopped = false;
-    const tick = async () => {
+    const tick = async (now = false) => {
       // Taking an announcement marks it said, so only ask when the device is free to say it.
-      if (Date.now() - lastActivity.current < 8000) return;
+      if (!now && Date.now() - lastActivity.current < 8000) return;
       const started = Date.now();
       try {
         const r = await conn.call('tonight_plan', { announce: true });
@@ -505,10 +550,12 @@ export function App() {
       }
     };
     void tick();
+    checkReminders.current = () => tick(true);
     const t = setInterval(tick, 15_000);
     return () => {
       stopped = true;
       clearInterval(t);
+      checkReminders.current = async () => {};
     };
   }, [conn, carer, io, showCard, refreshHome, demoTime]);
 
@@ -562,12 +609,103 @@ export function App() {
       setTourBusy(false);
     }
   };
-  // Filming: the keyboard drives the tour, since the panel is hidden.
+  // ---------- "Watch the evening": the guided demo plays itself, and Mom answers on her phone ----------
+  const parentKey = (() => {
+    try {
+      return new URL(parentUrl).searchParams.get('k') ?? PARENT_KEY;
+    } catch {
+      return PARENT_KEY;
+    }
+  })();
+  /** Until Alexa has finished talking (and thinking), within limits. */
+  const quiet = async (min = 900, max = 14_000) => {
+    const started = Date.now();
+    await wait(min);
+    while (playingRef.current && Date.now() - started < max && (window.speechSynthesis?.speaking || lightRef.current === 'thinking' || lightRef.current === 'speaking')) await wait(250);
+    await wait(500);
+  };
+  /** What Mom would tap on her phone; the phone beside the Echo Show shows it happen. */
+  const answerAsMom = async (match: RegExp, answer: string) => {
+    for (let i = 0; i < 24 && playingRef.current; i++) {
+      const s = await fetch(`${serverOrigin}/parent/api/state?k=${encodeURIComponent(parentKey)}`).then((x) => x.json()).catch(() => null);
+      const q = (s?.questions as Array<{ id: number; text: string }> | undefined)?.find((x) => match.test(x.text));
+      if (q) {
+        await wait(3000); // long enough to see it arrive on the phone
+        await fetch(`${serverOrigin}/parent/api/answer`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ k: parentKey, id: q.id, answer, by: 'Anita', scope: 'tonight' }),
+        }).catch(() => null);
+        return quiet(1500);
+      }
+      await wait(500);
+    }
+  };
+  const directions: Record<string, () => Promise<unknown>> = {
+    '2:We ran out of diapers': () => answerAsMom(/shopping list/i, 'Yes, add it to the list.'),
+    "3:Someone's knocking, should I open the door?": () => answerAsMom(/front door/i, "Don't open the door. I'll call you."),
+    '4:Yes': () => answerAsMom(/sleep in your bed/i, "Yes, that's fine."),
+    '5:I gave the EpiPen': async () => {
+      await wait(1500);
+      await fetch(`${serverOrigin}/parent/api/incident`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ k: parentKey, action: 'on_the_way', minutes: 10, by: 'Anita' }),
+      }).catch(() => null);
+      await quiet(2500);
+    },
+    '6:Maya misses her mom': async () => {
+      await wait(6000); // the message plays
+      await checkReminders.current(); // lights out: the house gets ready for bed
+      await quiet(1500);
+    },
+  };
+  const stopPlaying = () => {
+    playingRef.current = false;
+    setPlaying(false);
+    setChapter(null);
+    stopSpeaking();
+  };
+  const playEvening = async () => {
+    if (playingRef.current || !conn) return;
+    playingRef.current = true;
+    setPlaying(true);
+    setWelcome(false);
+    store('wyo.welcomed', '1');
+    try {
+      for (let si = 0; si < GUIDE.length && playingRef.current; si++) {
+        const g = GUIDE[si];
+        setTour([si, 0]);
+        setChapter({ time: g.clock ? clockLabel(g.clock[1]) : null, title: g.title, note: g.note });
+        if (si === 0) await resetDemo();
+        if (g.clock && demoTime) await setClock(g.clock[1], g.clock[0]);
+        await wait(1800);
+        for (let ai = 0; ai < g.actions.length && playingRef.current; ai++) {
+          const a = g.actions[ai];
+          lastSaid.current = '';
+          if ('ring' in a) await ringDoorbell(a.ring);
+          else await handle(a.say);
+          setTour([si, ai + 1]);
+          const words = lastSaid.current.split(/\s+/).filter(Boolean).length;
+          await quiet(Math.min(9000, Math.max(2200, words * 330)));
+          if ('say' in a) await directions[`${si}:${a.say}`]?.();
+        }
+        await wait(1200);
+      }
+    } finally {
+      playingRef.current = false;
+      setPlaying(false);
+      setChapter(null);
+    }
+  };
+
+  // The keyboard drives the tour too (Space or →), unless someone is typing.
   const runTourRef = useRef(runTour);
   runTourRef.current = runTour;
   useEffect(() => {
-    if (!FILM) return;
     const onKey = (e: KeyboardEvent) => {
+      const typing = e.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+      if (typing || playingRef.current) return;
       if (e.key === ' ' || e.key === 'ArrowRight') {
         e.preventDefault();
         void runTourRef.current();
@@ -576,6 +714,38 @@ export function App() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+  useEffect(() => {
+    if (!ask || !playing || ask.params.mode !== 'url') return;
+    const url = String((ask.params as { url?: string }).url ?? '');
+    ask.resolve({ action: 'accept' });
+    setAsk(null);
+    setPhoneUrl(url);
+    void (async () => {
+      await wait(4500);
+      await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'pay', tip: 1000 }) }).catch(() => null);
+      setPhoneRev((v) => v + 1);
+      await wait(6000);
+      setPhoneUrl(null);
+    })();
+  }, [ask, playing]);
+  const showPhone = phoneOn && connState === 'connected' && parentUrl !== '#';
+  // Scale the device's screen to the space it has.
+  const fitRef = useRef<HTMLDivElement>(null);
+  const [screenScale, setScreenScale] = useState(0.5);
+  useEffect(() => {
+    const el = fitRef.current;
+    if (!el) return;
+    const fit = () => setScreenScale(el.clientWidth / SCREEN[deviceSize].w || 0.5);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [deviceSize]);
+  // A new card starts at the top of the screen.
+  const stageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (stageRef.current) stageRef.current.scrollTop = 0;
+  }, [card?.id]);
   const fullscreen = card?.mode === 'fullscreen';
   const showingHome = !card && Boolean(home);
   const activeTasks = tasks.filter((t) => !t.done || t.id === tasks.at(-1)?.id);
@@ -596,11 +766,23 @@ export function App() {
 
   return (
     <div className={`page ${FILM ? 'film' : ''}`}>
-      <section className="wall" aria-label="Echo Show simulator">
-        <div className="device">
+      <section className={`wall ${showPhone ? 'with-phone' : ''}`} aria-label="Echo Show simulator">
+        {chapter && (
+          <div className="chapter" aria-live="polite" key={chapter.title}>
+            {chapter.time && <span className="chapter-time">{chapter.time}</span>}
+            <b>{chapter.title}</b>
+            <span className="chapter-note">{chapter.note}</span>
+          </div>
+        )}
+        <div className="stage-row">
+        <div className={`device size-${deviceSize}`}>
           <div className="bezel">
             <div className="camera" />
-            <div className={`screen ${fullscreen || showingHome ? 'is-fullscreen' : ''}`}>
+            <div className="screen-fit" ref={fitRef}>
+            <div
+              className={`screen ${fullscreen || showingHome ? 'is-fullscreen' : ''}`}
+              style={{ width: SCREEN[deviceSize].w, height: SCREEN[deviceSize].h, transform: `scale(${screenScale})` }}
+            >
               {!fullscreen && !showingHome && (
                 <header className="statusbar">
                   <span className="clock">{clockText}</span>
@@ -608,7 +790,7 @@ export function App() {
                 </header>
               )}
 
-              <div className="stage">
+              <div className="stage" ref={stageRef}>
                 {home && (
                   <div className={`home-layer ${showingHome ? '' : 'hidden'}`}>
                     <AppFrame key={home.id} {...cardProps(home)} displayMode="fullscreen" />
@@ -616,7 +798,8 @@ export function App() {
                 )}
                 {card && (
                   <AppFrame
-                    key={card.id}
+                    key="card"
+                    resetKey={card.id}
                     {...cardProps(card)}
                     displayMode={card.mode}
                     onDisplayMode={(mode) => setCard((c) => (c && c.id === card.id ? { ...c, mode } : c))}
@@ -648,9 +831,10 @@ export function App() {
                   <div className="ring-bottom">Someone is at the front door. Ask “Should I open the door?”</div>
                 </div>
               )}
-              {ask && (
+              {ask && !(playing && ask.params.mode === 'url') && (
                 <Elicit
                   params={ask.params}
+                  openUrl={showPhone ? (u) => setPhoneUrl(u) : undefined}
                   onDone={(r) => {
                     ask.resolve(r);
                     setAsk(null);
@@ -669,9 +853,41 @@ export function App() {
               )}
               <div className={`glow ${light}`} />
             </div>
+            </div>
           </div>
-          <p className="device-label">Echo Show 15 · simulated</p>
+          <p className="device-label">{DEVICE_NAMES[deviceSize]} · simulated</p>
         </div>
+        {showPhone && (
+          <PhoneFrame
+            key={`${phoneUrl ?? parentUrl}#${phoneRev}`}
+            src={phoneUrl ?? parentUrl}
+            showHome={Boolean(phoneUrl)}
+            onHome={() => setPhoneUrl(null)}
+          />
+        )}
+        </div>
+        {welcome && connState === 'connected' && (
+          <div className="welcome" role="dialog" aria-label="Welcome">
+            <div className="welcome-card">
+              <p className="welcome-eyebrow">An Alexa+ add-on · Echo Show</p>
+              <h2>Tonight, Priya is babysitting Maya.</h2>
+              <p>The Echo Show in the kitchen becomes her guide, and Mom’s phone (right) is how the parents stay in the loop. Watch the whole evening play out, or try it yourself.</p>
+              <div className="welcome-btns">
+                <button className="primary" onClick={() => void playEvening()}>
+                  ▶ Watch the evening · 2 min
+                </button>
+                <button
+                  onClick={() => {
+                    setWelcome(false);
+                    store('wyo.welcomed', '1');
+                  }}
+                >
+                  Try it myself
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {!FILM && (
@@ -681,7 +897,11 @@ export function App() {
           <p className="muted">An Alexa+ add-on that turns the Echo Show into a guide for whoever is babysitting. This page plays Alexa.</p>
         </header>
 
-        <section className="tour" aria-label="Guided demo">
+        <button className={`watch ${playing ? 'on' : ''}`} onClick={() => (playing ? stopPlaying() : void playEvening())} disabled={!conn}>
+          {playing ? '■  Stop watching' : '▶  Watch the whole evening · 2 min'}
+        </button>
+
+        <section className={`tour ${playing ? 'auto' : ''}`} aria-label="Guided demo">
           <div className="tour-top">
             <span>
               Step {tourStep + 1} of {GUIDE.length}
@@ -702,7 +922,7 @@ export function App() {
             ))}
           </ol>
           {nextAction ? (
-            <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy}>
+            <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy || playing}>
               {tourBusy ? 'Alexa is answering…' : 'ring' in nextAction ? '🔔  Ring the doorbell' : `▶  Say “${nextAction.say}”`}
             </button>
           ) : (
@@ -784,6 +1004,32 @@ export function App() {
                 }}
               />{' '}
               Speak replies out loud
+            </label>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={phoneOn}
+                onChange={(e) => {
+                  setPhoneOn(e.target.checked);
+                  store('wyo.phone', e.target.checked ? 'on' : 'off');
+                }}
+              />{' '}
+              Show Mom’s phone beside the Echo Show
+            </label>
+            <label className="check">
+              Device{' '}
+              <select
+                value={deviceSize}
+                onChange={(e) => {
+                  const v = (['15', '10', '8'].includes(e.target.value) ? e.target.value : '15') as DeviceSize;
+                  setDeviceSize(v);
+                  store('wyo.size', v);
+                }}
+              >
+                <option value="15">Echo Show 15 (16:9)</option>
+                <option value="10">Echo Show 10 (16:10)</option>
+                <option value="8">Echo Show 8 (16:10, smaller)</option>
+              </select>
             </label>
             <label className="check">
               Understanding{' '}

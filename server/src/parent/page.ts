@@ -21,63 +21,86 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   })();
 </script>
 <style>
-  :root { --bg:#f6f2ec; --card:#fff; --ink:#1d2433; --muted:#667085; --green:#16815a; --red:#c81e28; --amber:#9a6200; --blue:#1f5fae; --line:#ebe5db; --shadow:0 1px 2px rgba(29,36,51,.05), 0 8px 24px rgba(29,36,51,.06); }
+  :root { --bg:#f6f2ec; --card:#fff; --ink:#1d2433; --muted:#5b6475; --green:#16815a; --red:#c81e28; --amber:#8a5700; --blue:#1f5fae; --line:#e6dfd3; --field:#fcfbf8; --focus:#1f5fae; --shadow:0 1px 2px rgba(29,36,51,.05), 0 8px 24px rgba(29,36,51,.06); --nav-h:64px; --sheet-h:0px; --r:18px; }
   * { box-sizing: border-box; }
-  main, .card { overflow-wrap: anywhere; }
-  body { margin: 0; font: 16px/1.45 "Amazon Ember", Inter, system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); padding-bottom: 88px; -webkit-font-smoothing: antialiased; }
+  main, .card, .qsheet, .toast, .live { overflow-wrap: anywhere; }
+  body { margin: 0; font: 16px/1.45 "Amazon Ember", Inter, system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); padding-bottom: calc(var(--nav-h) + var(--sheet-h) + 24px); -webkit-font-smoothing: antialiased; }
+  :focus { outline: none; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+  button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible, .upload:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .hero :focus-visible, .alert :focus-visible { outline-color: #ffd27a; }
+  .sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ---------- header ---------- */
   .hero { background: radial-gradient(520px 260px at 0% 0%, rgba(99,179,255,.28), transparent 70%), linear-gradient(160deg, #16233a, #0b1322); color: #fff; padding: 16px 16px 20px; border-radius: 0 0 26px 26px; }
   .hero .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 560px; margin: 0 auto; }
   .brand { display: flex; gap: 10px; align-items: center; min-width: 0; }
   .brand img { width: 38px; height: 38px; border-radius: 11px; flex: none; }
-  .brand b { display: block; font-size: 17px; }
-  .brand small { display: block; color: #b8c3d6; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .me { font-size: 13px; color: #b8c3d6; white-space: nowrap; }
-  .me select { font: inherit; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: 5px 10px; margin-left: 4px; }
+  .brand > div { min-width: 0; }
+  .brand b { display: block; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand small { display: block; color: #c3cddd; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* "Answering as" sits above the selector so the header fits a 390 px phone without squeezing the name. */
+  .me { flex: none; font-size: 12px; color: #c3cddd; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .me select { font: inherit; font-size: 14px; font-weight: 600; max-width: 140px; text-overflow: ellipsis; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: 4px 12px; min-height: 44px; }
   .me select option { color: #1d2433; }
   .live { max-width: 560px; margin: 16px auto 0; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 14px 16px; }
-  .live #status { font-size: 14px; color: #cfd8e6; }
-  .live .now { font-size: 25px; font-weight: 800; letter-spacing: -.01em; margin-top: 2px; line-height: 1.2; }
-  .live .now small { display: block; font-size: 15px; font-weight: 600; color: #f7b955; margin-top: 2px; }
-  .live .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-  .lp { white-space: nowrap; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.12); color: #e6ecf5; }
-  .lp.ok { background: rgba(61,220,151,.18); color: #7eecc0; }
-  .lp.warn { background: rgba(247,185,85,.2); color: #ffd27a; }
-  .lp.bad { background: rgba(255,90,95,.22); color: #ffb3b5; }
+  .live #status { font-size: 14px; color: #d3dbe8; }
+  .live .now { font-size: 24px; font-weight: 800; letter-spacing: -.01em; margin-top: 2px; line-height: 1.25; min-height: 30px; }
+  .live .now small { display: block; font-size: 15px; font-weight: 600; color: #f7c26b; margin-top: 2px; letter-spacing: 0; }
+  .prog { margin-top: 12px; }
+  .prog-bar { display: flex; gap: 3px; height: 6px; }
+  .prog-bar i { flex: 1; border-radius: 999px; background: rgba(255,255,255,.18); }
+  .prog-bar i.done { background: #5fd7a4; }
+  .prog-bar i.late { background: #f7b955; }
+  .prog-bar i.due { background: #9cc8ff; animation: pulse 1.6s infinite; }
+  .prog-cap { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: #c3cddd; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .live .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .live .pills:empty { display: none; }
+  .lp { white-space: nowrap; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.12); color: #e6ecf5; }
+  .lp.ok { background: rgba(61,220,151,.18); color: #8ff0c9; }
+  .lp.warn { background: rgba(247,185,85,.2); color: #ffd98f; }
+  .lp.bad { background: rgba(255,90,95,.22); color: #ffc2c4; }
+
+  /* ---------- layout and cards ---------- */
   main { padding: 4px 16px 24px; max-width: 560px; margin: 0 auto; }
   .tabpane { display: none; }
   body[data-tab=tonight] .tabpane[data-tab=tonight], body[data-tab=house] .tabpane[data-tab=house], body[data-tab=family] .tabpane[data-tab=family] { display: block; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; margin: 14px 0; box-shadow: var(--shadow); }
-  .card > strong:first-child { display: block; font-size: 17px; margin: 0 0 2px; }
-  h2.sec { font-size: 12.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 24px 6px 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; margin: 14px 0; box-shadow: var(--shadow); }
+  .card > strong:first-child { display: block; font-size: 17px; line-height: 1.3; margin: 0 0 4px; }
+  h2.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 24px 6px 0; }
   .q { font-size: 19px; font-weight: 650; margin: 0 0 12px; line-height: 1.3; }
   .asker { font-size: 13px; color: var(--muted); margin: 0 0 4px; }
-  .btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  button { font: inherit; font-weight: 600; padding: 12px 10px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+  .btns { display: flex; gap: 8px; }
+  .btns > button { flex: 1 1 0; min-width: 0; padding-left: 6px; padding-right: 6px; overflow-wrap: normal; }
+  button { font: inherit; font-weight: 600; min-height: 44px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; touch-action: manipulation; transition: transform .08s ease, background-color .15s ease; }
   button:active { transform: scale(.98); }
-  button:disabled { opacity: .6; }
+  button:disabled { opacity: .6; cursor: default; }
   button.ok { background: var(--green); color: #fff; border-color: var(--green); }
-  button.no { color: var(--red); border-color: #f1b7ba; background: #fff7f7; }
-  .scope { display: flex; gap: 14px; margin: 10px 0 0; color: var(--muted); font-size: 14px; }
-  .alert { background: linear-gradient(160deg, #e0323b, #a5121a); color: #fff; border: 0; }
+  button.no { color: var(--red); border-color: #efb1b5; background: #fff7f7; }
+  .scope { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+  .scope label { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+  .scope input { width: 20px; height: 20px; margin: 0; accent-color: var(--green); }
+  .alert { background: linear-gradient(160deg, #d92d36, #a5121a); color: #fff; border: 0; }
   .alert p { margin: 6px 0 0; }
   .alert a.call { display: block; text-align: center; margin-top: 12px; background: #fff; color: #a5121a; font-weight: 800; padding: 12px; border-radius: 14px; text-decoration: none; }
   .muted { color: var(--muted); font-size: 14px; }
   ul { padding-left: 18px; margin: 6px 0; }
-  .urgent { display: inline-block; font-size: 12px; font-weight: 700; background: #fdecea; color: var(--red); padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
+  .urgent { display: inline-block; font-size: 12px; font-weight: 700; background: #fdecea; color: #b0151e; padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
   .always-note { display: none; margin: 8px 0 0; font-size: 14px; color: var(--amber); background: #fff4d6; padding: 6px 8px; border-radius: 8px; }
   .card:has(input[value=always]:checked) .always-note { display: block; }
-  textarea { width: 100%; margin-top: 10px; font: inherit; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: #fcfbf8; }
-  .upload { display: flex; gap: 8px; justify-content: center; align-items: center; padding: 16px; border: 2px dashed #d9d0c2; border-radius: 16px; margin-top: 12px; cursor: pointer; font-weight: 650; background: #fcfbf8; }
-  .upload input { display: none; }
+  textarea { width: 100%; margin-top: 10px; font: inherit; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); color: var(--ink); min-height: 48px; }
+  .upload { position: relative; display: flex; gap: 8px; justify-content: center; align-items: center; min-height: 56px; padding: 16px; border: 2px dashed #d3c9b9; border-radius: 16px; margin-top: 12px; cursor: pointer; font-weight: 650; background: var(--field); }
+  .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
   .wide { width: 100%; margin-top: 10px; }
-  .from { font-size: 12.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 4px; }
+  .from { font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 4px; }
   .pcard textarea.ptext { margin-top: 6px; }
   .chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #eef2f7; color: #334e68; margin-right: 6px; }
-  .chip.safety { background: #fdecea; color: var(--red); }
+  .chip.safety { background: #fdecea; color: #b0151e; }
   .warn { font-size: 13px; color: var(--amber); background: #fff4d6; padding: 6px 10px; border-radius: 10px; margin-top: 8px; }
   .conflict { background: #fff7e6; border: 1px solid #f0c36d; border-radius: 12px; padding: 10px; margin-top: 8px; font-size: 14px; }
   .pbtns { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 10px; }
   .perr { color: var(--red); font-size: 14px; margin-top: 6px; }
+  .perr:empty { display: none; }
   .en { font-size: 14px; color: var(--muted); margin: -6px 0 10px; }
   .notify { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .notify p { margin: 4px 0 0; }
@@ -86,56 +109,66 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   .tl li:first-child { border-top: 0; }
   .tl .t { color: var(--muted); font-variant-numeric: tabular-nums; }
   .field { display: block; margin: 12px 0 0; font-size: 14px; color: var(--muted); }
-  .field input, .field select, .row input, .row select { display: block; width: 100%; font: inherit; color: var(--ink); padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: #fcfbf8; margin-top: 4px; }
+  .field input, .field select, .row input, .row select { display: block; width: 100%; font: inherit; color: var(--ink); min-height: 44px; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); margin-top: 4px; }
   .row { border: 1px solid var(--line); border-radius: 16px; padding: 12px; margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #fff; }
   .row .full { grid-column: 1 / -1; }
   .row label { font-size: 13px; color: var(--muted); }
   .row .tools { grid-column: 1 / -1; display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
-  .row .tools button { padding: 7px 11px; font-size: 14px; }
+  .row .tools button { padding: 8px 12px; font-size: 14px; min-width: 44px; }
   .row .tools .grow { flex: 1; font-size: 13px; color: var(--muted); }
-  .row .tools label { display: flex; gap: 6px; align-items: center; }
-  .row .tools label input { display: inline; width: auto; margin: 0; }
+  .row .tools label { display: flex; gap: 8px; align-items: center; min-height: 44px; }
+  .row .tools label input { display: inline; width: 20px; height: 20px; min-height: 0; margin: 0; accent-color: var(--green); }
   .order { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #eef2f7; color: #334e68; font-size: 13px; font-weight: 800; }
   .ferr { color: var(--red); font-size: 14px; min-height: 1em; margin: 10px 0 0; }
   .banner { background: #fff8e6; border-color: #f0d08a; }
-  .danger button { border-color: #f1b7ba; color: var(--red); background: #fff; }
+  .danger button { border-color: #efb1b5; color: var(--red); background: #fff; }
   .danger button.armed { background: var(--red); color: #fff; }
+
+  /* ---------- emergency live view ---------- */
   .inc { padding: 18px; }
   .inc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .inc-head .elapsed { font-variant-numeric: tabular-nums; opacity: .85; font-size: 14px; }
-  .inc-desc { font-size: 15px; opacity: .92; }
+  .inc-head .elapsed { font-variant-numeric: tabular-nums; opacity: .9; font-size: 14px; }
+  .inc-desc { font-size: 15px; opacity: .95; }
   .inc-now { background: #fff; color: #7a0b10; border-radius: 14px; padding: 12px 14px; margin-top: 12px; font-size: 18px; font-weight: 700; line-height: 1.3; }
   .inc-now small { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #b3141b; margin-bottom: 4px; }
   .inc-timer { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.22); border-radius: 14px; padding: 10px 14px; margin-top: 10px; font-weight: 700; }
   .inc-timer b { font-size: 24px; font-variant-numeric: tabular-nums; }
   .inc-timer.up { background: #fff3c4; color: #7a4a00; animation: pulse 1s infinite; }
   .inc-steps { margin: 12px 0 0; padding-left: 20px; font-size: 14px; }
-  .inc-steps li { margin: 4px 0; opacity: .7; }
-  .inc-steps li.done { text-decoration: line-through; opacity: .55; }
+  .inc-steps li { margin: 4px 0; opacity: .8; }
+  .inc-steps li.done { text-decoration: line-through; opacity: .7; }
   .inc-steps li.now { opacity: 1; font-weight: 700; }
   .inc-otw { background: rgba(255,255,255,.16); border-radius: 12px; padding: 8px 12px; font-weight: 600; }
-  .inc-label { margin: 14px 0 6px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; font-weight: 700; }
+  .inc-label { margin: 16px 0 8px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
   .inc .btns button { background: rgba(255,255,255,.95); color: #8a0d14; border: 0; }
-  .inc-log { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13px; opacity: .9; }
-  .inc-log li { padding: 4px 0; border-top: 1px solid rgba(255,255,255,.18); }
-  .inc-log span { font-variant-numeric: tabular-nums; margin-right: 6px; opacity: .8; }
+  .otw { display: flex; background: rgba(0,0,0,.2); border-radius: 18px; padding: 4px; gap: 4px; }
+  .otw button { flex: 1 1 0; min-width: 0; min-height: 64px; border: 0; border-radius: 14px; background: #fff; color: #8a0d14; font-size: 24px; font-weight: 800; line-height: 1.05; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+  .otw button small { font-size: 13px; font-weight: 700; letter-spacing: .02em; color: #a3121b; }
+  .otw button:focus-visible { outline: 3px solid #ffd27a; outline-offset: 2px; }
+  .inc-log { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13px; opacity: .95; }
+  .inc-log li { padding: 4px 0; border-top: 1px solid rgba(255,255,255,.22); }
+  .inc-log span { font-variant-numeric: tabular-nums; margin-right: 6px; opacity: .85; }
   .inc.over { border-color: #b7e4cf; background: #f1fbf6; }
   .inc.over .inc-log li { border-color: var(--line); }
-  .inc-addr { font-size: 13px; opacity: .85; margin: 10px 0 0; }
+  .inc-addr { font-size: 13px; opacity: .9; margin: 10px 0 0; }
   @keyframes pulse { 50% { opacity: .65; } }
+
+  /* ---------- goodnight message ---------- */
   .gn-item { border-top: 1px solid var(--line); padding: 10px 0; }
   .gn-item:first-child { border-top: 0; }
   .gn-item .gn-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 14px; }
   .gn-item audio, .gn-item video, #gnDraftMedia audio, #gnDraftMedia video { width: 100%; margin-top: 6px; border-radius: 12px; }
   .gn-item video, #gnDraftMedia video, #gnPreview { max-height: 260px; background: #000; }
-  .gn-rec { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .gn-rec { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
   #gnPreview { width: 100%; border-radius: 14px; margin-top: 10px; }
   .gn-timer { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; }
   .gn-timer .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); animation: pulse 1s infinite; }
   .gn-timer button { margin-left: auto; padding: 8px 14px; }
-  .gn-upload { display: block; margin-top: 10px; }
-  .gn-upload input { font-size: 13px; }
+  .gn-upload { display: block; margin-top: 12px; }
+  .gn-upload input { font-size: 13px; min-height: 44px; }
   .doorcam { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; margin: 0 0 12px; background: #111; }
+
+  /* ---------- expected visitors ---------- */
   .vlist { list-style: none; padding: 0; margin: 10px 0 0; }
   .vlist li { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
   .vlist li:first-child { border-top: 0; }
@@ -143,30 +176,87 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   .vlist .vt { flex: 1; min-width: 0; }
   .vlist .vt b { display: block; }
   .vlist .vt small { color: var(--muted); }
-  .vlist button { padding: 6px 10px; font-size: 13px; }
+  .vlist button { padding: 8px 12px; font-size: 14px; }
   .vadd { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 6px; margin-top: 10px; }
-  .vadd input, .vadd select { min-width: 0; font: inherit; padding: 9px; border-radius: 12px; border: 1px solid var(--line); background: #fcfbf8; }
+  .vadd input, .vadd select { min-width: 0; min-height: 44px; font: inherit; color: var(--ink); padding: 9px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); }
   @media (max-width: 420px) { .vadd { grid-template-columns: 1fr 1fr; } }
   .switch { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 15px; }
   .switch input { width: 20px; height: 20px; accent-color: var(--green); }
-  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 4px; background: rgba(255,255,255,.95); backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); }
-  nav.tabs button { flex: 0 1 150px; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 12px; color: var(--muted); padding: 6px; position: relative; border-radius: 12px; }
+  #shadow label { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 2px 0; cursor: pointer; }
+  #shadow input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--green); }
+
+  /* ---------- tonight so far: one feed ---------- */
+  .feed { list-style: none; padding: 0; margin: 8px 0 0; }
+  .feed li { display: grid; grid-template-columns: 32px 1fr auto; gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line); }
+  .feed li:first-child { border-top: 0; }
+  .feed .fi-ic { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #eef2f7; color: #334e68; }
+  .feed .fi-ic svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .feed .k-sleep .fi-ic { background: #ece9fb; color: #4b3fa6; }
+  .feed .k-food .fi-ic { background: #fff1dc; color: #8a5700; }
+  .feed .k-health .fi-ic { background: #fdecea; color: #b0151e; }
+  .feed .k-door .fi-ic { background: #e6f0fb; color: #1f5fae; }
+  .feed .k-answer .fi-ic { background: #e3f5ec; color: #11684a; }
+  .feed .k-shop .fi-ic { background: #f1ede6; color: #5b4a2e; }
+  .feed .fi-tx { min-width: 0; font-size: 15px; color: var(--ink); line-height: 1.35; padding-top: 5px; }
+  .feed .fi-tx small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .feed .fi-t { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: 6px; }
+  .feed-empty { margin: 6px 0 0; }
+
+  /* ---------- question sheet, toasts ---------- */
+  .qsheet { position: fixed; left: 0; right: 0; bottom: var(--nav-h); z-index: 9; padding: 0 10px 8px; pointer-events: none; transform: translateY(calc(100% + var(--nav-h))); visibility: hidden; transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s linear .3s; }
+  .qsheet.open { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s; }
+  .qsheet .qs { pointer-events: auto; max-width: 560px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 14px 14px 12px; box-shadow: 0 -2px 6px rgba(29,36,51,.05), 0 12px 40px rgba(29,36,51,.22); }
+  .qsheet .qs.urgent-q { border-color: #efb1b5; box-shadow: 0 0 0 2px #f6c9cc, 0 12px 40px rgba(29,36,51,.22); }
+  .qsheet.bump .qs { animation: bump .45s ease; }
+  @keyframes bump { 30% { transform: translateY(-6px); } 60% { transform: translateY(1px); } }
+  .qs-top { display: flex; gap: 12px; align-items: flex-start; }
+  .qs-thumb { width: 72px; height: 54px; flex: none; object-fit: cover; border-radius: 10px; background: #111; }
+  .qs-txt { min-width: 0; flex: 1; }
+  .qs-txt .asker { margin: 0 0 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .qs-txt .asker .urgent { margin: 0; }
+  .qs .q { font-size: 18px; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .qs .en { margin: 4px 0 0; font-size: 13px; }
+  .qs .btns { margin-top: 12px; }
+  .qs .btns button { min-height: 52px; font-size: 16px; }
+  .qs-more { display: block; width: 100%; min-height: 44px; margin-top: 6px; padding: 8px; border: 0; background: none; color: var(--blue); font-size: 15px; }
+  .toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + var(--sheet-h) + 12px); z-index: 11; max-width: min(92vw, 420px); transform: translate(-50%, 16px); opacity: 0; pointer-events: none; background: #1d2433; color: #fff; font-size: 15px; font-weight: 600; padding: 12px 18px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); transition: opacity .2s ease, transform .2s ease; text-align: center; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.bad { background: #8a0d14; }
+
+  /* ---------- skeletons, before the first state arrives ---------- */
+  .sk { display: block; height: 14px; border-radius: 8px; margin: 10px 0; background: linear-gradient(90deg, #eee8de 0%, #f7f3ec 40%, #eee8de 80%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
+  .sk.w40 { width: 40%; } .sk.w60 { width: 60%; } .sk.w80 { width: 80%; } .sk.tall { height: 44px; border-radius: 14px; }
+  .hero .sk { background: linear-gradient(90deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.2) 40%, rgba(255,255,255,.1) 80%) 0 0 / 300% 100%; margin: 6px 0; }
+  .hero .sk.big { height: 26px; width: 70%; }
+  .hero .sk.pill { display: inline-block; width: 110px; height: 24px; border-radius: 999px; margin: 0; }
+  body.stalled .sk { animation: none; }
+  @keyframes shimmer { to { background-position: -300% 0; } }
+
+  /* ---------- tab bar ---------- */
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 4px; background: rgba(255,255,255,.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); }
+  nav.tabs button { flex: 0 1 150px; min-height: 52px; border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12px; color: var(--muted); padding: 6px; position: relative; border-radius: 12px; }
   nav.tabs svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  nav.tabs button[aria-selected=true] { color: var(--blue); background: #eef4fc; }
+  nav.tabs button[aria-selected=true] { color: var(--blue); background: #eaf2fc; }
   nav.tabs .badge { position: absolute; top: 2px; left: calc(50% + 6px); background: var(--red); color: #fff; font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 999px; display: grid; place-items: center; padding: 0 5px; }
   nav.tabs .badge:empty { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    button:active { transform: none; }
+  }
 </style>
 </head>
-<body data-tab="tonight">
+<body data-tab="tonight" class="loading">
 <header class="hero">
   <div class="top">
     <div class="brand"><img src="/static/icon-192.png" alt=""><div><b>While You're Out</b><small id="household">Your home</small></div></div>
-    <label class="me">Answering as <select id="me"></select></label>
+    <label class="me"><span>Answering as</span><select id="me"></select></label>
   </div>
   <section class="live" aria-live="polite">
     <div id="status">Connecting…</div>
-    <div class="now" id="liveNow"></div>
-    <div class="pills" id="livePills"></div>
+    <div class="now" id="liveNow"><span class="sk big" aria-hidden="true"></span></div>
+    <div class="prog" id="liveProg" hidden></div>
+    <div class="pills" id="livePills"><span class="sk pill" aria-hidden="true"></span><span class="sk pill" aria-hidden="true"></span></div>
   </section>
 </header>
 <main>
@@ -174,12 +264,14 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <div id="emergency"></div>
     <div id="setupBanner"></div>
     <div id="questions"></div>
-    <section class="card notify" id="notify" hidden></section>
     <div id="debrief"></div>
+    <section class="card" aria-labelledby="feedTitle"><strong id="feedTitle">Tonight so far</strong><div id="log"><span class="sk w80" aria-hidden="true"></span><span class="sk w60" aria-hidden="true"></span><span class="sk w80" aria-hidden="true"></span></div></section>
+    <div class="card" id="busy"><span class="sk w40" aria-hidden="true"></span><span class="sk tall" aria-hidden="true"></span></div>
+    <section class="card notify" id="notify" hidden></section>
     <section class="card" id="visitors">
       <strong>Expected tonight</strong>
       <p class="muted">Who might come to the door. When the doorbell rings, Alexa checks this list; anyone else and the sitter is told not to open, and you get the doorbell photo.</p>
-      <ul class="vlist" id="vlist"></ul>
+      <ul class="vlist" id="vlist"><li aria-hidden="true"><span class="sk tall w60"></span></li></ul>
       <div class="vadd">
         <input id="vName" maxlength="60" placeholder="Who? e.g. Nani, pizza">
         <input id="vWhen" maxlength="40" placeholder="When? e.g. around 7">
@@ -206,8 +298,6 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       <label class="muted gn-upload">or upload a recording <input type="file" id="gnFile" accept="audio/*,video/*"></label>
       <p class="perr" id="gnErr"></p>
     </section>
-    <div class="card" id="busy"></div>
-    <div class="card"><strong>Tonight so far</strong><div id="log" class="muted">Nothing logged yet.</div></div>
   </div>
   <div class="tabpane" data-tab="house">
     <section class="card" id="teach">
@@ -222,7 +312,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <section class="card">
       <strong>Suggestions from your past answers</strong>
       <p class="muted">When a sitter asks something small you've answered before, Alexa can tell them how you usually answer. It never decides for you, and never for food, medicine or safety.</p>
-      <div id="shadow"></div>
+      <div id="shadow"><span class="sk w60" aria-hidden="true"></span><span class="sk w40" aria-hidden="true"></span><span class="sk w60" aria-hidden="true"></span></div>
     </section>
   </div>
   <div class="tabpane" data-tab="family">
@@ -250,6 +340,8 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     </section>
   </div>
 </main>
+<aside class="qsheet" id="qsheet" aria-label="Question waiting for you"></aside>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <nav class="tabs" role="tablist">
   <button role="tab" data-tabbtn="tonight" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Tonight<span class="badge" id="badgeTonight"></span></button>
   <button role="tab" data-tabbtn="house" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>House<span class="badge" id="badgeHouse"></span></button>
@@ -271,11 +363,25 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   var sel = document.getElementById('me');
   sel.addEventListener('change', function () { me = sel.value; try { localStorage.setItem('wyo.me', me); } catch (e) {} });
   var parentsShown = null;
+  var lastState = null; // the latest /parent/api/state, for toasts and the sheet
+  function setHtml(id, html) {
+    // Only touch the DOM when something changed, so live regions don't repeat themselves.
+    var el = document.getElementById(id);
+    if (el && el.innerHTML !== html) el.innerHTML = html;
+    return el;
+  }
   async function load() {
     var r;
-    try { r = await fetch('/parent/api/state?k=' + encodeURIComponent(key)); } catch (e) { document.getElementById('status').textContent = 'Offline, retrying…'; return; }
-    if (!r.ok) { document.getElementById('status').textContent = 'Not authorised'; return; }
+    try { r = await fetch('/parent/api/state?k=' + encodeURIComponent(key)); } catch (e) { document.getElementById('status').textContent = 'Offline, retrying…'; document.body.classList.add('stalled'); return; }
+    if (!r.ok) {
+      document.getElementById('status').textContent = 'Not authorised';
+      document.body.classList.add('stalled');
+      if (!lastState) setHtml('liveNow', 'This link isn\\'t working<small>Open the parent link you were sent again.</small>');
+      return;
+    }
     var s = await r.json();
+    lastState = s;
+    document.body.classList.remove('loading', 'stalled');
     houseTz = s.timezone || undefined;
     if (s.parents.join('|') !== parentsShown) {
       parentsShown = s.parents.join('|');
@@ -309,7 +415,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       lastShadow = shadowKey;
       var names = { screen: 'TV and screens', play: 'Play', bedtime: 'Staying up and bedtime extras' };
       document.getElementById('shadow').innerHTML = Object.keys(s.shadow).map(function (t) {
-        return '<label style="display:block;margin:6px 0"><input type="checkbox" data-shadow="' + t + '"' + (s.shadow[t] ? ' checked' : '') + '> ' + esc(names[t] || t) + '</label>';
+        return '<label><input type="checkbox" data-shadow="' + t + '"' + (s.shadow[t] ? ' checked' : '') + '> ' + esc(names[t] || t) + '</label>';
       }).join('');
     }
     // Only redraw questions when the set changes, so typing and choices aren't wiped by polling.
@@ -317,8 +423,112 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     if (qKey !== lastQKey) { lastQKey = qKey; renderQuestions(s); }
     document.getElementById('setupBanner').innerHTML = s.parents.length ? '' :
       '<div class="card banner"><strong>Set up your family to start</strong><p class="muted">Add who Alexa looks after and who to call. It takes a minute.</p><button class="ok" id="openFamily">Set up now</button></div>';
-    document.getElementById('log').innerHTML = s.log.length ? '<ul>' + s.log.map(function (e) { return '<li>' + esc(time(e.at)) + ' ' + esc(e.text) + '</li>'; }).join('') + '</ul>' : 'Nothing logged yet.';
+    renderFeed(s);
   }
+
+  // ---------- small icons (inline SVG, no assets) ----------
+  var ICONS = {
+    sleep: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    food: '<path d="M7 3v8M5 3v4a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 2-3 5s1 4 3 4v9"/>',
+    mood: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4 4 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/>',
+    health: '<path d="M12 21s-7-4.5-9-9.5C1.6 7.6 4.3 4 8 4c2 0 3.2 1 4 2.2C12.8 5 14 4 16 4c3.7 0 6.4 3.6 5 7.5-2 5-9 9.5-9 9.5Z"/>',
+    pet: '<circle cx="5.5" cy="10" r="2"/><circle cx="9.5" cy="5.5" r="2"/><circle cx="14.5" cy="5.5" r="2"/><circle cx="18.5" cy="10" r="2"/><path d="M12 12c-3 0-5.5 3.5-5.5 6 0 1.7 1.5 2.5 3 2.2 1-.2 1.7-.7 2.5-.7s1.5.5 2.5.7c1.5.3 3-.5 3-2.2 0-2.5-2.5-6-5.5-6Z"/>',
+    note: '<path d="M4 20h4L19 9l-4-4L4 16v4Z"/>',
+    door: '<path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M3 21h18M14 12h.01"/>',
+    answer: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/>',
+    shop: '<circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.4 11h10.2L20 8H6.2"/>'
+  };
+  function icon(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[n] || ICONS.note) + '</svg>'; }
+
+  // ---------- clock helpers: minutes since midnight in the household's time zone ----------
+  function clockMinutes(str) {
+    // "7:42 pm", "19:42", "7:42 p.m." -> 1182
+    var m = /(\\d{1,2})[:.](\\d{2})\\s*([ap])?/i.exec(String(str || ''));
+    if (!m) return null;
+    var h = Number(m[1]) % 24;
+    if (m[3]) { h = h % 12; if (/p/i.test(m[3])) h += 12; }
+    return h * 60 + Number(m[2]);
+  }
+  function minutesOf(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return null;
+    try { return clockMinutes(d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: houseTz })); }
+    catch (e) { return d.getHours() * 60 + d.getMinutes(); }
+  }
+  function fmtMinutes(min) {
+    min = ((min % 1440) + 1440) % 1440;
+    var h = Math.floor(min / 60), m = min % 60;
+    return (h % 12 === 0 ? 12 : h % 12) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm');
+  }
+
+  // ---------- "Tonight so far": the log, the doorbell, the last answer and the shopping list in one feed ----------
+  var lastFeed = null;
+  var LOG_ICON = { sleep: 'sleep', food: 'food', mood: 'mood', health: 'health', pet: 'pet', note: 'note' };
+  function renderFeed(s) {
+    var h = s.home || {};
+    var la = h.last_answer;
+    var fKey = JSON.stringify([s.log, h.door, la && [la.by, la.answer, la.question], s.shopping, houseTz]);
+    if (fKey === lastFeed) return;
+    lastFeed = fKey;
+    var now = h.clock && typeof h.clock.minutes === 'number' ? h.clock.minutes : minutesOf(new Date().toISOString());
+    // How long ago, in minutes, wrapping past midnight (an evening can run past 12).
+    function ago(min) {
+      if (min == null) return 0;
+      var d = ((now - min) % 1440 + 1440) % 1440;
+      return d > 1380 ? 0 : d; // a minute or two ahead of the clock is just now, not yesterday
+    }
+    var items = [];
+    (s.log || []).forEach(function (e, i) {
+      var min = minutesOf(e.at);
+      items.push({ ago: ago(min), order: i, kind: LOG_ICON[e.kind] ? e.kind : 'note', text: esc(e.text), t: min == null ? time(e.at) : fmtMinutes(min) });
+    });
+    if (h.door) {
+      var dm = clockMinutes(h.door.time);
+      items.push({ ago: ago(dm), order: -1, kind: 'door', text: 'Doorbell: ' + esc(h.door.label),
+        sub: h.door.decision ? esc(h.door.decision) : 'No answer yet', t: h.door.time });
+    }
+    if (la) {
+      items.push({ ago: la.minutes_ago, order: -1, kind: 'answer', text: esc(la.by) + ' answered “' + esc(la.answer) + '”',
+        sub: esc(la.question), t: la.minutes_ago < 1 ? 'Just now' : fmtMinutes(now - la.minutes_ago) });
+    }
+    // Newest first; the shopping list has no time, so it sits at the end.
+    items.sort(function (a, b) { return a.ago - b.ago || b.order - a.order; });
+    if (s.shopping && s.shopping.length) {
+      items.push({ kind: 'shop', text: 'On the shopping list', sub: s.shopping.map(esc).join(', '), t: '' });
+    }
+    document.getElementById('log').innerHTML = items.length
+      ? '<ul class="feed">' + items.map(function (it) {
+          return '<li class="k-' + it.kind + '"><span class="fi-ic">' + icon(it.kind) + '</span><span class="fi-tx">' + it.text +
+            (it.sub ? '<small>' + it.sub + '</small>' : '') + '</span><span class="fi-t">' + esc(it.t) + '</span></li>';
+        }).join('') + '</ul>'
+      : '<p class="muted feed-empty">Nothing logged yet.</p>';
+  }
+
+  // ---------- toasts ----------
+  var toastTimer = null;
+  function toast(msg, bad) {
+    var t = document.getElementById('toast');
+    clearTimeout(toastTimer);
+    t.classList.toggle('bad', Boolean(bad));
+    t.textContent = msg;
+    t.classList.add('show');
+    toastTimer = setTimeout(function () {
+      t.classList.remove('show');
+      toastTimer = setTimeout(function () { t.textContent = ''; }, 300);
+    }, 3200);
+  }
+  function carerName() { return lastState && lastState.handoff ? lastState.handoff.carer_name : 'the sitter'; }
+
+  // ---------- the bottom sheet sits above the tab bar; keep the page padded for it ----------
+  var navEl = document.querySelector('nav.tabs');
+  var sheetEl = document.getElementById('qsheet');
+  function dock() {
+    var root = document.documentElement.style;
+    root.setProperty('--nav-h', navEl.offsetHeight + 'px');
+    root.setProperty('--sheet-h', (sheetEl.classList.contains('open') ? sheetEl.offsetHeight : 0) + 'px');
+  }
+  window.addEventListener('resize', dock);
+  dock();
   var lastQKey = null, lastBusy = null, lastShadow = null, lastDebrief = null;
   function renderDebrief(s) {
     var d = s.debrief;
@@ -372,34 +582,90 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     var waiting = s.busy_until ? s.questions.filter(function (q) { return q.urgency !== 'urgent'; }) : [];
     document.getElementById('questions').innerHTML = urgent.map(questionCard).join('') +
       (waiting.length ? '<p class="from">Waiting until you\\'re free (' + waiting.length + ')</p>' + waiting.map(questionCard).join('') : '');
+    renderSheet(s, urgent);
     function questionCard(q) {
       return '<div class="card" data-id="' + q.id + '">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') +
         '<p class="asker">' + esc(s.handoff ? s.handoff.carer_name : 'The sitter') + ' asks · ' + esc(time(q.asked_at)) + '</p><p class="q">“' + esc(q.text) + '”</p>' +
         (q.text_english ? '<p class="en">In English: “' + esc(q.text_english) + '”</p>' : '') +
-        (q.shopping_item
-          ? '<div class="btns"><button class="ok" data-a="Yes, add it to the list.">Add to list</button><button class="no" data-a="Not now.">Not now</button></div>'
-          : q.door_snapshot
-          ? '<img class="doorcam" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' +
-            '<div class="btns"><button class="ok" data-a="It\\'s fine, you can let them in.">Let them in</button><button class="no" data-a="Don\\'t open the door. I\\'ll call you.">Don\\'t open</button><button data-a="Please call me.">Call me</button></div>'
-          : '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>') +
-        '<textarea placeholder="Or type an answer…"></textarea>' +
+        (q.door_snapshot && !q.shopping_item ? '<img class="doorcam" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' : '') +
+        answerButtons(q) +
+        '<textarea placeholder="Or type an answer…" aria-label="Type your own answer"></textarea>' +
         (q.urgency === 'urgent'
           ? '<input type="radio" name="s' + q.id + '" value="tonight" checked hidden><p class="muted">Food, medicine and safety answers apply to tonight only.</p></div>'
           : '<div class="scope"><label><input type="radio" name="s' + q.id + '" value="tonight" checked> Just tonight</label><label><input type="radio" name="s' + q.id + '" value="always"> Always</label></div>' +
             '<p class="always-note">Your answer will be saved as a house rule for every future handoff.</p></div>');
     }
   }
+  // The one-tap answers for a question. The same buttons (and data-a answers) on the card and the sheet.
+  function answerButtons(q) {
+    if (q.shopping_item) return '<div class="btns"><button class="ok" data-a="Yes, add it to the list.">Add to list</button><button class="no" data-a="Not now.">Not now</button></div>';
+    if (q.door_snapshot) return '<div class="btns"><button class="ok" data-a="It\\'s fine, you can let them in.">Let them in</button><button class="no" data-a="Don\\'t open the door. I\\'ll call you.">Don\\'t open</button><button data-a="Please call me.">Call me</button></div>';
+    return '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>';
+  }
+  // ---------- the question sheet: the newest question, one tap to answer ----------
+  var sheetId = null, knownQ = null;
+  function renderSheet(s, shown) {
+    var who = s.handoff ? s.handoff.carer_name : 'The sitter';
+    // A toast for questions that arrived while the page is open (not the ones there when it loaded).
+    var ids = {};
+    s.questions.forEach(function (q) { ids[q.id] = true; });
+    if (knownQ) {
+      var fresh = shown.filter(function (q) { return !knownQ[q.id]; }).pop();
+      if (fresh) toast(fresh.door_snapshot && !fresh.shopping_item ? 'Someone is at the door. ' + who + ' is asking.' : 'New question from ' + who);
+    }
+    knownQ = ids;
+    var q = shown[shown.length - 1];
+    if (!q) {
+      sheetId = null;
+      sheetEl.classList.remove('open', 'bump');
+      dock();
+      return;
+    }
+    var more = s.questions.length - 1;
+    sheetEl.innerHTML = '<div class="qs' + (q.urgency === 'urgent' ? ' urgent-q' : '') + '" data-id="' + q.id + '">' +
+      '<div class="qs-top">' +
+      (q.door_snapshot && !q.shopping_item ? '<img class="qs-thumb" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' : '') +
+      '<div class="qs-txt"><p class="asker">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') + '<span>' + esc(who) + ' asks · ' + esc(time(q.asked_at)) + '</span></p>' +
+      '<p class="q">“' + esc(q.text) + '”</p>' + (q.text_english ? '<p class="en">In English: “' + esc(q.text_english) + '”</p>' : '') + '</div></div>' +
+      '<input type="radio" name="qs' + q.id + '" value="tonight" checked hidden>' +
+      answerButtons(q) +
+      '<button class="qs-more" data-qmore="1">' + (more > 0 ? '+' + more + ' more question' + (more > 1 ? 's' : '') : 'Type an answer or save it as a rule') + '</button></div>';
+    var wasOpen = sheetEl.classList.contains('open');
+    sheetEl.classList.add('open');
+    if (wasOpen && sheetId !== q.id) {
+      // A newer question replaced the one showing: nudge it so the change is noticed.
+      sheetEl.classList.remove('bump');
+      void sheetEl.offsetWidth;
+      sheetEl.classList.add('bump');
+    }
+    sheetId = q.id;
+    dock();
+  }
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('button[data-qmore]')) return;
+    setTab('tonight');
+    var list = document.getElementById('questions');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    list.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    var first = list.querySelector('.card[data-id]');
+    if (first) { first.setAttribute('tabindex', '-1'); first.focus({ preventScroll: true }); }
+  });
   document.addEventListener('click', async function (e) {
     var b = e.target.closest('button[data-a]');
     if (!b) return;
-    var card = b.closest('.card');
-    var typed = card.querySelector('textarea').value.trim();
-    var scope = card.querySelector('input[type=radio]:checked').value;
+    var card = b.closest('.card, .qs');
+    var box = card.querySelector('textarea');
+    var typed = box ? box.value.trim() : '';
+    var picked = card.querySelector('input[type=radio]:checked');
+    var scope = picked ? picked.value : 'tonight';
     b.disabled = true;
     try {
-      await fetch('/parent/api/answer', { method: 'POST', headers: { 'content-type': 'application/json' },
+      var r = await fetch('/parent/api/answer', { method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ k: key, id: Number(card.dataset.id), answer: typed || b.dataset.a, scope: scope, by: me }) });
-    } catch (err) { b.disabled = false; }
+      if (r.ok) toast('Sent to ' + carerName() + ' ✓');
+      else if (r.status === 409) toast('Someone already answered that one.');
+      else { toast('Could not send. Try again.', true); b.disabled = false; }
+    } catch (err) { b.disabled = false; toast('Offline. Your answer was not sent.', true); }
     lastQKey = null; // redraw: the question was answered here or already closed elsewhere
     load();
   });
@@ -723,7 +989,8 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       i.timers.map(function (t) { return '<div class="inc-timer" data-left="' + t.remaining_seconds + '"><span>⏱ ' + esc(t.label) + '</span><b></b></div>'; }).join('') +
       '<ol class="inc-steps">' + i.steps.map(function (st) { return '<li class="' + st.state + '">' + esc(st.text) + '</li>'; }).join('') + '</ol>' +
       (i.on_the_way.length ? '<p class="inc-otw">' + i.on_the_way.map(function (o) { return '🚗 ' + esc(o.name) + ' · home by ' + esc(o.eta); }).join('<br>') + '</p>' : '') +
-      '<p class="inc-label">I’m on my way</p><div class="btns"><button data-otw="10">10 min</button><button data-otw="20">20 min</button><button data-otw="30">30 min</button></div>' +
+      '<p class="inc-label" id="otwLabel">I’m on my way · home in</p><div class="otw" role="group" aria-labelledby="otwLabel">' +
+        [10, 20, 30].map(function (n) { return '<button data-otw="' + n + '" aria-label="I\\'m on my way, home in ' + n + ' minutes">' + n + '<small>min</small></button>'; }).join('') + '</div>' +
       '<ul class="inc-log">' + i.updates.slice(-4).reverse().map(function (u) { return '<li><span>' + esc(u.time) + '</span>' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul>' +
       (i.address ? '<p class="inc-addr">Home: ' + esc(i.address) + '</p>' : '') + '</div>';
   }
@@ -742,7 +1009,9 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     var b = e.target.closest('button[data-otw]');
     if (!b) return;
     b.disabled = true;
-    await post('/parent/api/incident', { action: 'on_the_way', minutes: Number(b.dataset.otw), by: me }).catch(function () {});
+    var r = await post('/parent/api/incident', { action: 'on_the_way', minutes: Number(b.dataset.otw), by: me }).catch(function () { return null; });
+    if (r && r.ok) toast('Told ' + carerName() + ' you\\'re on your way ✓');
+    else { b.disabled = false; toast('Could not send. Try again.', true); }
     lastIncident = null;
     load();
   });
@@ -885,7 +1154,8 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   function renderLive(s, tb) {
     var h = s.home || {};
     document.getElementById('household').textContent = (s.household && s.household.name) || 'Your home';
-    var now = '', pills = [];
+    var now = '', pills = [], prog = '';
+    var carer = s.handoff ? esc(s.handoff.carer_name) + ' · ' : '';
     if (s.emergency) {
       now = 'Emergency reported<small>' + esc(time(s.emergency.at)) + ' · see below</small>';
       pills.push('<span class="lp bad">Every contact alerted</span>');
@@ -894,20 +1164,33 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     } else if (h.night) {
       var kid = ((h.members || []).filter(function (m) { return m.kind === 'child'; })[0] || {}).name;
       now = h.asleep_since
-        ? (kid ? esc(kid) + ' is asleep' : 'All asleep') + '<small>Since ' + esc(h.asleep_since) + '</small>'
-        : 'Past bedtime<small>Nobody has said ' + (kid ? esc(kid) + ' is' : 'they are') + ' asleep yet</small>';
+        ? carer + (kid ? esc(kid) + ' asleep since ' : 'Asleep since ') + esc(h.asleep_since)
+        : carer + 'Past bedtime<small>Nobody has said ' + (kid ? esc(kid) + ' is' : 'they are') + ' asleep yet</small>';
     } else if (h.next) {
       var m = h.next.minutes_until;
-      now = 'Next: ' + esc(h.next.title) + '<small>' + esc(h.next.time) + (m > 1 ? ' · in ' + m + ' min' : m >= -5 ? ' · now' : ' · ' + -m + ' min late') + '</small>';
+      now = carer + esc(h.next.title) + (m > 1 ? ' in ' + m + ' min' : m >= -5 ? ' now' : ' · ' + -m + ' min late');
+    } else if ((h.plan || []).length) {
+      now = carer + 'Tonight\\'s plan is done';
     } else {
       now = esc(s.handoff.carer_name) + ' is looking after things';
+    }
+    // How far through tonight's plan the evening is: done or late items count as passed.
+    var plan = h.plan || [];
+    if (s.handoff && !s.emergency && plan.length) {
+      var passed = plan.filter(function (p) { return p.status === 'done' || p.status === 'late'; }).length;
+      var late = plan.filter(function (p) { return p.status === 'late'; }).length;
+      var label = passed + ' of ' + plan.length + ' done' + (late ? ' · ' + late + ' late' : '');
+      prog = '<div class="prog-bar" role="progressbar" aria-label="Tonight\\'s plan" aria-valuemin="0" aria-valuemax="' + plan.length + '" aria-valuenow="' + passed + '" aria-valuetext="' + label + '">' +
+        plan.map(function (p) { return '<i class="' + esc(p.status) + '" title="' + esc(p.title + ' · ' + p.time) + '"></i>'; }).join('') + '</div>' +
+        '<div class="prog-cap"><span>' + label + '</span><span>' + (h.next ? esc(h.next.title) + ' at ' + esc(h.next.time) : h.night ? 'Night time' : '') + '</span></div>';
     }
     if (tb) pills.push(tb.done ? '<span class="lp ' + (tb.right === tb.total ? 'ok' : 'warn') + '">Handover ' + tb.right + '/' + tb.total + (tb.right === tb.total ? ' ✓' : '') + '</span>' : '<span class="lp">Handover check ' + tb.answered + '/' + tb.total + '</span>');
     if (s.questions.length) pills.push('<span class="lp warn">' + s.questions.length + ' question' + (s.questions.length > 1 ? 's' : '') + ' for you</span>');
     if (h.last_log) pills.push('<span class="lp">' + esc(h.last_log.time) + ' · ' + esc(h.last_log.text.length > 34 ? h.last_log.text.slice(0, 32) + '…' : h.last_log.text) + '</span>');
     if (s.busy_until) pills.push('<span class="lp">Urgent only till ' + esc(s.busy_until) + '</span>');
-    document.getElementById('liveNow').innerHTML = now;
-    document.getElementById('livePills').innerHTML = pills.join('');
+    setHtml('liveNow', now);
+    setHtml('livePills', pills.join(''));
+    setHtml('liveProg', prog).hidden = !prog;
   }
 
   load(); setInterval(load, 2000);

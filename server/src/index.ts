@@ -104,9 +104,13 @@ export function createApp(opts: AppOptions = {}) {
     return allowedOrigins?.length ? allowedOrigins.includes(origin) : LOCAL_ORIGIN.test(origin);
   };
 
+  // Media and static files only read, and messages need their token: the sandboxed card (origin
+  // "null") may load them, so its Web Audio can follow the goodnight message.
+  const readOnlyMedia = (req: express.Request) => (req.method === 'GET' || req.method === 'HEAD') && /^\/(media\/messages|static)\//.test(req.path);
+
   app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (!originAllowed(origin, req.headers.host)) {
+    if (!readOnlyMedia(req) && !originAllowed(origin, req.headers.host)) {
       // Stops any website the user happens to visit from driving the device or the parent API.
       return void res.status(403).json({ error: 'Origin not allowed' });
     }
@@ -389,6 +393,7 @@ export function createApp(opts: AppOptions = {}) {
     if (!m) return void res.sendStatus(404);
     res.setHeader('Cache-Control', 'private, max-age=3600');
     res.setHeader('Accept-Ranges', 'none');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.type(m.mime).send(m.data);
   });
 

@@ -20,6 +20,8 @@ export function AppFrame(props: {
   onToolCall?: (name: string, args: Record<string, unknown>) => Promise<ToolResult>;
   /** A card sending a message as the user (e.g. a big "Emergency" button). */
   onUserMessage?: (text: string) => void;
+  /** Changes when the frame is reused for a different card: its size is measured again. */
+  resetKey?: unknown;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(240);
@@ -99,6 +101,8 @@ export function AppFrame(props: {
     if (!ready.current) return;
     ref.current?.contentWindow?.postMessage({ jsonrpc: '2.0', method: 'ui/notifications/tool-result', params: props.toolResult }, '*');
   }, [props.toolResult]);
+
+  useEffect(() => setHeight(240), [props.resetKey]);
 
   // Tell the card when its display mode changes.
   useEffect(() => {

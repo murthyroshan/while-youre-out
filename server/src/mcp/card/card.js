@@ -43,8 +43,9 @@
   function cap(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
   function andList(a) { return a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : (a[0] || ''); }
   function hue(name) { var h = 0; for (var i = 0; i < String(name).length; i++) h = (h * 31 + String(name).charCodeAt(i)) % 360; return h; }
-  function avatar(name, cls) {
+  function avatar(name, cls, face) {
     var n = String(name || '?');
+    if (face) return '<span class="av face ' + (cls || '') + '" style="background:hsl(' + hue(n) + ' 70% 80%)" aria-hidden="true">' + face + '</span>';
     return '<span class="av ' + (cls || '') + '" style="background:hsl(' + hue(n) + ' 75% 72%)" aria-hidden="true">' + esc(n.replace(/^(Dr\.|Mrs\.|Mr\.|Ms\.)\s*/, '').charAt(0).toUpperCase()) + '</span>';
   }
   function ago(iso) {
@@ -305,7 +306,8 @@
         parent_decided: [d.decision && /let them in|fine|yes/i.test(d.decision.answer) ? 'ok' : 'safety', 'message', d.decision ? d.decision.by + ' answered' : 'A parent answered', d.decision ? '“' + d.decision.answer + '”' : ''],
       }[d.verdict] || ['info', 'door', 'Front door', ''];
       var cam = e && e.snapshot_url
-        ? '<figure class="doorcam"><img src="' + esc(e.snapshot_url) + '" alt="Doorbell camera: ' + esc(e.label) + '"><figcaption><i></i>Front door · ' + esc(e.time || '') + '</figcaption></figure>'
+        ? '<figure class="doorcam"><img src="' + esc(e.snapshot_url) + '" alt="Doorbell camera: ' + esc(e.label) + '"><figcaption><i></i>Front door · ' + esc(e.time || '') + '</figcaption>' +
+          ({ unknown: '<span class="verdict bad">Not expected</span>', expected: '<span class="verdict warn">Expected · check first</span>', delivery: '<span class="verdict ok">Delivery</span>' }[d.verdict] || '') + '</figure>'
         : '<div class="doorcam empty">' + icon('door') + '</div>';
       var people = (d.expected || []).concat(d.deliveries || []);
       var right = '<div class="banner ' + V[0] + ' big">' + icon(V[1]) + '<div><strong>' + esc(V[2]) + '</strong><span>' + esc(V[3]) + '</span></div></div>' +
@@ -319,14 +321,14 @@
       var who = d.relation && /mom|mum|mother/i.test(d.relation) ? 'Mom' : d.relation && /dad|father/i.test(d.relation) ? 'Dad' : d.from;
       var media = d.kind === 'video'
         ? '<video id="media" src="' + esc(d.url) + '" playsinline></video>'
-        : '<div class="wave" aria-hidden="true">' + Array(9).join('<i></i>') + '</div><audio id="media" src="' + esc(d.url) + '"></audio>';
+        : '<div class="wave" aria-hidden="true">' + Array(13).join('<i></i>') + '</div><audio id="media" crossorigin="anonymous" src="' + esc(d.url) + '"></audio>';
       // Alexa says who it's from first; then the message plays.
       setTimeout(function () { var m = document.getElementById('media'); if (m) m.play().catch(function () {}); }, 3500);
       return '<div class="goodnight ' + esc(d.kind) + '"><div class="gn-text"><div class="eyebrow" style="color:#e9c98f">' + icon('heart') + 'A message from home</div>' +
         '<h1>' + esc(who) + ' left a message for ' + esc(d.for_name || 'you') + '</h1>' +
         (d.caption ? '<p class="gn-caption">“' + esc(d.caption) + '”</p>' : '') +
         '<div class="stepbtns"><button class="btn" id="replay">' + icon('heart') + ' Play again</button></div></div>' +
-        '<div class="gn-media">' + media + '</div></div>' + scene(d.smart_home);
+        '<div class="gn-media">' + media + '</div><p class="gn-end" aria-live="polite">Sweet dreams, ' + esc(d.for_name || 'little one') + ' \u2728</p></div>' + scene(d.smart_home);
     },
 
     pay: function (d) {
@@ -403,7 +405,8 @@
     }
 
     var kids = d.members.map(function (m) {
-      return '<div class="kid">' + avatar(m.name) + '<div><b>' + esc(m.name) + '</b><span class="meta">' + esc(m.kind === 'pet' ? cap(m.age || 'pet') : m.age ? 'Age ' + m.age : 'Child') + '</span></div>' +
+      var face = m.kind === 'pet' ? (/cat|kitten/i.test(m.age || '') ? '\ud83d\udc31' : /fish/i.test(m.age || '') ? '\ud83d\udc1f' : '\ud83d\udc36') : '\ud83e\uddd2';
+      return '<div class="kid">' + avatar(m.name, '', face) + '<div><b>' + esc(m.name) + '</b><span class="meta">' + esc(m.kind === 'pet' ? cap(m.age || 'pet') : m.age ? 'Age ' + m.age : 'Child') + '</span></div>' +
         (m.allergy ? '<span class="pill red allergy">' + icon('shield') + ' ' + esc(m.allergy) + '</span>' : '') + '</div>';
     }).join('');
     var rows = [];
@@ -426,7 +429,8 @@
         '<button class="btn green" data-say="' + esc('Call ' + (first ? first.name : 'Mom')) + '">' + icon('phone') + ' Call ' + esc(first ? first.name : 'a parent') + '</button>' +
         '<button class="btn red" data-say="Emergency">' + icon('alert') + ' Emergency</button></footer>'
       : '';
-    return '<div class="home' + (d.night ? ' night' : '') + (d.mode === 'parent' ? ' parent' : '') + '">' + header + main + side + footer + '</div>';
+    var phase = mins < 17 * 60 ? 'day' : mins < 19 * 60 + 15 ? 'dusk' : 'evening';
+    return '<div class="home phase-' + phase + (d.night ? ' night' : '') + (d.mode === 'parent' ? ' parent' : '') + '"><i class="sky" aria-hidden="true"></i>' + header + main + side + footer + '</div>';
   }
 
   // ---------- the emergency guide: ticking clock, timers, refresh ----------
@@ -481,7 +485,38 @@
     if (m) { m.currentTime = 0; m.play().catch(function () {}); }
   });
   document.addEventListener('play', function (e) { var g = document.querySelector('.goodnight'); if (g && e.target.id === 'media') g.classList.add('playing'); }, true);
-  document.addEventListener('ended', function (e) { var g = document.querySelector('.goodnight'); if (g && e.target.id === 'media') g.classList.remove('playing'); }, true);
+  document.addEventListener('ended', function (e) { var g = document.querySelector('.goodnight'); if (g && e.target.id === 'media') { g.classList.remove('playing'); g.classList.add('ended'); } }, true);
+  // The waveform follows the real voice (Web Audio); without it the bars just breathe.
+  var waveCtx = null;
+  document.addEventListener('play', function (e) {
+    var m = e.target;
+    if (!m || m.id !== 'media' || m.tagName !== 'AUDIO' || m.dataset.wired) return;
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    var bars = document.querySelectorAll('.wave i');
+    if (!Ctx || !bars.length) return;
+    try {
+      m.dataset.wired = '1';
+      if (waveCtx) waveCtx.close();
+      waveCtx = new Ctx();
+      var an = waveCtx.createAnalyser();
+      an.fftSize = 64;
+      waveCtx.createMediaElementSource(m).connect(an);
+      an.connect(waveCtx.destination);
+      var data = new Uint8Array(an.frequencyBinCount);
+      document.querySelector('.wave').classList.add('live');
+      (function loop() {
+        if (!document.body.contains(m)) return;
+        an.getByteFrequencyData(data);
+        // Symmetric: the middle bars follow the low notes (where a voice or lullaby lives), the edges the higher ones.
+        var mid = (bars.length - 1) / 2;
+        for (var i = 0; i < bars.length; i++) {
+          var bin = Math.min(data.length - 1, Math.round((Math.abs(i - mid) / mid) * 10) + 1);
+          bars[i].style.transform = 'scaleY(' + (0.3 + (data[bin] / 255) * 2.2).toFixed(2) + ')';
+        }
+        requestAnimationFrame(loop);
+      })();
+    } catch (err) { /* the bars keep their gentle animation */ }
+  }, true);
 
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-sheet]');
@@ -515,10 +550,18 @@
   function spokenBanner(d) {
     return '<div class="spoken" lang="' + esc(d.language) + '"><span class="pill">' + icon('globe') + ' Said in ' + esc(d.language) + '</span><p>' + esc(d.spoken) + '</p></div>';
   }
+  var lastView = null;
   function render(result) {
     current = result;
     var d = result && result.structuredContent;
     var root = document.getElementById('root');
+    var view = (d && d.view) || 'text';
+    if (view !== lastView) {
+      root.classList.remove('enter');
+      void root.offsetWidth;
+      root.classList.add('enter');
+      lastView = view;
+    }
     document.body.style.background = '';
     if (!d || !d.view || !views[d.view]) {
       var text = (result && result.content && result.content[0] && result.content[0].text) || '';

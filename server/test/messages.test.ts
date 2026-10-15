@@ -55,6 +55,13 @@ test('the demo family has a bedtime message; the media needs its own token, not 
   assert.equal(ok.headers.get('content-type'), 'audio/wav');
   assert.equal((await fetch(`${base}/media/messages/${m.id}?t=wrong`)).status, 404);
   assert.equal((await fetch(`${base}/media/messages/${m.id}`)).status, 404);
+  // The sandboxed card (origin "null") can load it for its waveform; it still needs the token.
+  const fromCard = await fetch(`${base}${m.url}`, { headers: { origin: 'null' } });
+  assert.equal(fromCard.status, 200);
+  assert.equal(fromCard.headers.get('access-control-allow-origin'), '*');
+  assert.equal((await fetch(`${base}/media/messages/${m.id}?t=wrong`, { headers: { origin: 'null' } })).status, 404);
+  // Nothing else opens up to other sites.
+  assert.equal((await fetch(`${base}/parent/api/state?k=${KEY}`, { headers: { origin: 'https://evil.example' } })).status, 403);
 });
 
 test('a parent records a "missing you" video; bad uploads are refused', async () => {

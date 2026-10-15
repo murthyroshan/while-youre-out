@@ -8,12 +8,12 @@ type Field = { type?: string; title?: string; description?: string; enum?: strin
  * The Echo Show asking the person in front of it (MCP elicitation): a short form on screen, or a
  * link to open on their phone (URL mode, used for payments so they never happen on a shared screen).
  */
-export function Elicit({ params, onDone }: { params: Params; onDone: (r: ElicitResult) => void }) {
-  if (params.mode === 'url') return <UrlAsk params={params as Extract<Params, { mode: 'url' }>} onDone={onDone} />;
+export function Elicit({ params, onDone, openUrl }: { params: Params; onDone: (r: ElicitResult) => void; openUrl?: (url: string) => void }) {
+  if (params.mode === 'url') return <UrlAsk params={params as Extract<Params, { mode: 'url' }>} onDone={onDone} openUrl={openUrl} />;
   return <FormAsk params={params as Extract<Params, { message: string; requestedSchema: unknown }>} onDone={onDone} />;
 }
 
-function UrlAsk({ params, onDone }: { params: Extract<Params, { mode: 'url' }>; onDone: (r: ElicitResult) => void }) {
+function UrlAsk({ params, onDone, openUrl }: { params: Extract<Params, { mode: 'url' }>; onDone: (r: ElicitResult) => void; openUrl?: (url: string) => void }) {
   const host = (() => {
     try {
       return new URL(params.url).host;
@@ -31,8 +31,9 @@ function UrlAsk({ params, onDone }: { params: Extract<Params, { mode: 'url' }>; 
           <button
             className="primary"
             onClick={() => {
-              // In the demo the "phone" is a new browser tab.
-              window.open(params.url, '_blank', 'noopener');
+              // In the demo the "phone" is the one beside the Echo Show, or else a new tab.
+              if (openUrl) openUrl(params.url);
+              else window.open(params.url, '_blank', 'noopener');
               onDone({ action: 'accept' });
             }}
           >

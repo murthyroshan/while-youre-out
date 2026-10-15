@@ -9,6 +9,7 @@ import { openDb } from '../src/db.js';
 import { seedDemoHousehold } from '../src/seed.js';
 import { languageCode, translateAll } from '../src/domain/translate.js';
 import { createApp } from '../src/index.js';
+import { resetClock, setDemoTime } from '../src/clock.js';
 import type { AiClient, JsonRequest } from '../src/ai/gemini.js';
 
 let calls = 0;
@@ -67,6 +68,8 @@ const KEY = 'tr-key';
 const call = async (name: string, args: Record<string, unknown> = {}) => (await client.callTool({ name, arguments: args })) as any;
 
 before(async () => {
+  // A quiet hour: replies are exactly what each test asks for, whatever time the tests run.
+  setDemoTime('10:00', 'America/Los_Angeles');
   const created = createApp({ parentKey: KEY, ai: fakeAi });
   close = created.close;
   http = created.app.listen(0, '127.0.0.1');
@@ -78,6 +81,7 @@ before(async () => {
 });
 
 after(async () => {
+  resetClock();
   await client.close();
   close();
   http.closeAllConnections();
