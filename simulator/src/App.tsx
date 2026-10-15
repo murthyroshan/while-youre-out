@@ -509,6 +509,28 @@ export function App() {
     [conn, io, armCardTimer],
   );
 
+  // A reload mid-emergency: the server still has it, so the guide comes back on screen and the
+  // device listens for "done" and "it's over" again (not for house questions).
+  useEffect(() => {
+    if (!conn) return;
+    let stopped = false;
+    void (async () => {
+      try {
+        const r = await conn.call('emergency_status', { announce: false });
+        if (stopped || !r.structuredContent?.active) return;
+        emergencyRef.current = true;
+        setEmergencyOn(true);
+        rules.current.resumeEmergency();
+        await showCard(conn, 'emergency_status', { announce: false }, r);
+      } catch {
+        // no emergency to resume
+      }
+    })();
+    return () => {
+      stopped = true;
+    };
+  }, [conn, showCard]);
+
   // During an emergency the device says the plan's timers out loud ("One minute left on the EpiPen timer").
   useEffect(() => {
     if (!conn || !emergencyOn) return;

@@ -595,9 +595,11 @@ export function createApp(opts: AppOptions = {}) {
     // only be text and tool calls (no files or images), the tools must look like ours, and the
     // whole server and each visitor have a budget (shared by every demo house).
     const system = `${HOST_SYSTEM}\n\nAdd-on instructions: ${ADDON_INSTRUCTIONS}`;
-    const PART_KEYS = new Set(['text', 'functionCall', 'functionResponse', 'thoughtSignature']);
+    // Gemini's own replies come back in the next turn with whatever fields it added (thought
+    // signatures...), so only what a caller could misuse is refused: files and images.
+    const FILE_PARTS = ['inlineData', 'fileData'];
     const validTurn = (t: any) =>
-      t && (t.role === 'user' || t.role === 'model') && Array.isArray(t.parts) && t.parts.length <= 12 && t.parts.every((p: any) => p && typeof p === 'object' && Object.keys(p).every((k) => PART_KEYS.has(k)));
+      t && (t.role === 'user' || t.role === 'model') && Array.isArray(t.parts) && t.parts.length <= 12 && t.parts.every((p: any) => p && typeof p === 'object' && !FILE_PARTS.some((k) => k in p));
     const validFunction = (f: any) => f && typeof f.name === 'string' && /^[a-z][a-z_]{1,39}$/.test(f.name) && (f.description === undefined || (typeof f.description === 'string' && f.description.length <= 1500));
     app.post('/host/llm', async (req, res) => {
       const { contents, functions } = req.body ?? {};

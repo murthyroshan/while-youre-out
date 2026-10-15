@@ -32,7 +32,7 @@ Requires Node.js 22.13 or newer (the server uses the built-in `node:sqlite`; tes
 npm install
 npm run dev          # MCP server on http://127.0.0.1:8787/mcp
 npm run dev:sim      # Echo Show simulator on http://127.0.0.1:5173 (second terminal)
-npm test             # 285 server tests and 75 simulator tests
+npm test             # 286 server tests and 76 simulator tests
 ```
 
 For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator's **guided demo** then walks through the whole evening one step at a time: one button says the next line, and it moves the house clock and rings the doorbell for you. Its first step resets the demo family, so a reload mid-demo starts clean (`POST /demo/reset`, demo mode only). The house clock is under Settings. "Open the parent's phone" opens the parent page.

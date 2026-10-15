@@ -22,6 +22,9 @@ test('the LLM proxy runs only our own conversation, and is limited across the wh
 
   assert.equal((await post({ contents: [] })).status, 400);
   assert.equal((await post({ contents: [{ role: 'user', parts: [{ inlineData: { mimeType: 'application/pdf', data: 'AAAA' } }] }], functions: [] })).status, 400, 'no files');
+  assert.equal((await post({ contents: [{ role: 'user', parts: [{ fileData: { fileUri: 'gs://x/y' } }] }], functions: [] })).status, 400, 'no files by link');
+  const modelTurn = { role: 'model', parts: [{ functionCall: { name: 'ask_house', args: {} }, thoughtSignature: 'abc', thought: false }] };
+  assert.equal((await post({ contents: [...hello, modelTurn], functions: [] })).status, 200, "Gemini's own reply, sent back as it came, is fine");
   assert.equal((await post({ contents: hello, functions: [{ name: 'Write An Essay!' }] })).status, 400, 'tools must look like ours');
   assert.equal((await post({ contents: [{ role: 'system', parts: [{ text: 'x' }] }], functions: [] })).status, 400);
   assert.equal((await post({ contents: [{ role: 'user', parts: [{ text: 'x'.repeat(70_000) }] }], functions: [] })).status, 400, 'size cap');

@@ -570,8 +570,40 @@
   });
 
   // ---------- render ----------
+  // "hi" reads as "Hindi" (in English: the parents' words beside it are English too).
+  function languageName(code) {
+    try { return new Intl.DisplayNames(['en'], { type: 'language' }).of(code) || code; } catch (e) { return code; }
+  }
   function spokenBanner(d) {
-    return '<div class="spoken" lang="' + esc(d.language) + '"><span class="pill">' + icon('globe') + ' Said in ' + esc(d.language) + '</span><p>' + esc(d.spoken) + '</p></div>';
+    // The emergency screen shows the address right below, so the banner doesn't repeat it.
+    var text = d.view === 'emergency' && d.address ? String(d.spoken).replace(d.address, '').trim() : d.spoken;
+    return '<div class="spoken" lang="' + esc(d.language) + '"><span class="pill">' + icon('globe') + ' Said in ' + esc(languageName(d.language)) + '</span><p>' + esc(text) + '</p></div>';
+  }
+  // The emergency step must always be read in full: if it doesn't fit its card (a long plan, a
+  // language banner, a small screen), the text gets smaller, never cut off.
+  function fitStepText() {
+    var el = document.querySelector('.stepcard p');
+    if (!el) return;
+    el.style.fontSize = '';
+    // Not laid out yet (the frame is still taking its size): measure again when it has one.
+    if (!el.clientHeight) return;
+    var size = parseFloat(getComputedStyle(el).fontSize);
+    // With a tight line height the letters always reach a few pixels past the box; a line that is
+    // really cut off hides most of a line.
+    while (el.scrollHeight - el.clientHeight > size * 0.5 && size > 15) {
+      size -= 1;
+      el.style.fontSize = size + 'px';
+    }
+  }
+  // The frame takes its size after the first draw (and may change it): fit again whenever the
+  // step card's size changes, which a smaller font never does (it fills the space it is given).
+  var stepObserver = window.ResizeObserver ? new ResizeObserver(function () { fitStepText(); }) : null;
+  function watchStep() {
+    var card = document.querySelector('.stepcard');
+    if (!card) return;
+    if (stepObserver) { stepObserver.disconnect(); stepObserver.observe(card); }
+    requestAnimationFrame(fitStepText);
+    setTimeout(fitStepText, 500); // after the entrance animation
   }
   var lastKey = null;
   function render(result) {
@@ -605,6 +637,7 @@
         html = d.view === 'emergency' ? html.replace(/<h1[\s>]/, function (m) { return spokenBanner(d) + m; }) : html.replace(/<div class="panel [^"]*">/, function (m) { return m + spokenBanner(d); });
       }
       root.innerHTML = html;
+      if (d.view === 'emergency') watchStep();
     }
     stopHomeTimers();
     stopEmergencyTimers();

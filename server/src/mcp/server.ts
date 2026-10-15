@@ -856,8 +856,14 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
   /** The emergency screen's data: the fixed script plus where the carer is in it. */
   const incidentResult = (i: NonNullable<ReturnType<typeof activeIncident>>, text: string, extra: Record<string, unknown> = {}) => {
     const s = i.script as Record<string, unknown>;
+    // The sitter's language stays on the screen as it refreshes: the same fixed translation of the
+    // first line that the emergency started with (never an AI's).
+    const lang = carerLang();
+    // Only while it lasts: "call 911 now" must not stay on screen once help has taken over.
+    const fixed = lang === 'en' || i.status !== 'active' ? null : fixedTranslation(String(s.say_first ?? ''), lang);
+    const relay = fixed ? { language: lang, spoken: [fixed, s.address || null].filter(Boolean).join(' ') } : {};
     // Photos as absolute URLs: the card runs in a sandbox with no base address of its own.
-    return plain('emergency', { ...s, address: s.address || null, epipen_photo: abs((s.epipen_photo as string | null) ?? null), incident: incidentView(db, i), ...extra }, text);
+    return plain('emergency', { ...s, address: s.address || null, epipen_photo: abs((s.epipen_photo as string | null) ?? null), incident: incidentView(db, i), ...relay, ...extra }, text);
   };
 
   server.registerTool(

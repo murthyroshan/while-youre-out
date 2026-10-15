@@ -307,6 +307,16 @@ test('"Maya misses her mom" plays the parents\' message; "play Mom\'s message" t
   assert.notEqual(question.calls[0].name, 'play_message');
 });
 
+test('after a reload mid-emergency, "it\'s over" ends the emergency instead of going to the house manual', async () => {
+  const brain = new RuleBrain();
+  brain.resumeEmergency();
+  const dev = fakeDevice({ emergency_step: { structuredContent: { resolved: true } } });
+  await brain.handle("It's over, the paramedics are here", dev.io);
+  assert.deepEqual(dev.calls[0], { name: 'emergency_step', args: { action: 'resolved' } });
+  await brain.handle('Can she have a cookie?', dev.io);
+  assert.equal(dev.calls.at(-1)?.name, 'ask_house', 'once it is over, questions go to the house manual again');
+});
+
 test('an upset child gets Mom\'s message too, but a hurt or ill one never does', async () => {
   for (const u of ["Maya won't stop crying", "She's upset", 'Maya is sad and can’t settle']) {
     const r = await run([u]);

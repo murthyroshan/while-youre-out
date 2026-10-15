@@ -151,3 +151,17 @@ test('end to end: emergency → "done" → the phones follow → "on my way" rea
   assert.equal((await call('emergency_step', { action: 'done' })).isError, true);
   assert.equal((await post('/parent/api/incident', { action: 'on_the_way', minutes: 5 })).status, 409);
 });
+
+test('a Hindi-speaking sitter keeps the first line in Hindi while the guide refreshes, and not once it is over', async () => {
+  await call('start_handoff', { carer_name: 'Priya' });
+  await call('set_carer_language', { language: 'hi-IN' });
+  await call('emergency', { description: "Her lips are swelling and she can't breathe" });
+  for (const r of [await call('emergency_status'), await call('emergency_step', { action: 'next' })]) {
+    assert.equal(r.structuredContent.language, 'hi');
+    assert.match(r.structuredContent.spoken, /911/);
+    assert.match(r.content[0].text, /^[^\u0900-\u097F]*$/, 'what the device says is unchanged (the step, in English)');
+  }
+  const over = await call('emergency_step', { action: 'resolved' });
+  assert.equal(over.structuredContent.spoken, undefined, '"call 911 now" is gone once help has taken over');
+  await call('set_carer_language', { language: 'en' });
+});

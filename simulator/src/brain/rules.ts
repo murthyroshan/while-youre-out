@@ -63,6 +63,11 @@ export class RuleBrain implements Brain {
     this.busyUntil = state.busyUntil ?? null;
   }
 
+  /** The server has an emergency in progress (say, after a reload): short replies move its guide on. */
+  resumeEmergency() {
+    this.inEmergency = true;
+  }
+
   /**
    * With `out`, a phrase the rules don't recognise is declined (out.declined = true, nothing done)
    * instead of going to the house manual, so the hybrid brain can ask the model.
