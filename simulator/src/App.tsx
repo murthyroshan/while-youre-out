@@ -3,6 +3,7 @@ import { McpConnection, textOf, type ElicitationHandlers, type ToolResult } from
 import { GUIDE } from './guide';
 import { Elicit } from './Elicit';
 import { PhoneFrame } from './PhoneFrame';
+import { Icon, LogoMark, Segmented, Switch } from './ui';
 import type { ElicitRequest, ElicitResult } from '@modelcontextprotocol/sdk/types.js';
 import { AppFrame } from './AppFrame';
 import { RuleBrain } from './brain/rules';
@@ -764,117 +765,165 @@ export function App() {
     onUserMessage: (text: string) => void handle(text),
   });
 
+  // The room's light follows the device: Alexa's cyan while she listens or speaks, red in an
+  // emergency, a warm dim glow after lights out.
+  const night = Boolean(home?.result.structuredContent?.night);
+  const ambient = emergencyOn ? 'alert' : light !== 'idle' ? light : night ? 'night' : carer ? 'evening' : 'idle';
+  const houseTime = demoTime ? `${demoTime.slice(0, 3)} ${clockText.toLowerCase()}` : clockText;
+
   return (
-    <div className={`page ${FILM ? 'film' : ''}`}>
-      <section className={`wall ${showPhone ? 'with-phone' : ''}`} aria-label="Echo Show simulator">
+    <div className={`page ${FILM ? 'film' : ''} amb-${ambient}`}>
+      <section className={`wall ${showPhone ? 'with-phone' : ''} ${chapter ? 'playing' : ''}`} aria-label="Echo Show simulator">
+        <div className="scene" aria-hidden="true">
+          <i className="scene-lamp" />
+          <i className="scene-counter" />
+        </div>
+        <div className="ambient" aria-hidden="true" />
+
+        {!FILM && (
+          <header className="stage-top">
+            <div className="brand">
+              <LogoMark size={34} />
+              <span>
+                <b>While You’re Out</b>
+                <small>Alexa+ add-on · live demo</small>
+              </span>
+            </div>
+            <div className="stage-chips">
+              <span className="chip">
+                <Icon name="clock" size={14} /> {houseTime}
+              </span>
+              <span className={`chip conn-chip ${connState}`}>
+                <i className="live-dot" /> {connState === 'connected' ? 'Your own demo house' : connState === 'connecting' ? 'Connecting…' : 'Offline'}
+              </span>
+            </div>
+          </header>
+        )}
+
         {chapter && (
           <div className="chapter" aria-live="polite" key={chapter.title}>
+            <span className="chapter-step">
+              {tourStep + 1}/{GUIDE.length}
+            </span>
             {chapter.time && <span className="chapter-time">{chapter.time}</span>}
             <b>{chapter.title}</b>
             <span className="chapter-note">{chapter.note}</span>
+            <i className="chapter-progress" style={{ transform: `scaleX(${(tourStep + 1) / GUIDE.length})` }} />
           </div>
         )}
+
         <div className="stage-row">
-        <div className={`device size-${deviceSize}`}>
-          <div className="bezel">
-            <div className="camera" />
-            <div className="screen-fit" ref={fitRef}>
-            <div
-              className={`screen ${fullscreen || showingHome ? 'is-fullscreen' : ''}`}
-              style={{ width: SCREEN[deviceSize].w, height: SCREEN[deviceSize].h, transform: `scale(${screenScale})` }}
-            >
-              {!fullscreen && !showingHome && (
-                <header className="statusbar">
-                  <span className="clock">{clockText}</span>
-                  <span className={`mode ${carer ? 'carer' : ''}`}>{carer ? `Sitter mode · ${carer}` : 'Parent mode'}</span>
-                </header>
-              )}
+          <div className={`device size-${deviceSize}`}>
+            <div className="bezel">
+              <div className="camera" />
+              <div className="screen-fit" ref={fitRef}>
+                <div
+                  className={`screen ${fullscreen || showingHome ? 'is-fullscreen' : ''}`}
+                  style={{ width: SCREEN[deviceSize].w, height: SCREEN[deviceSize].h, transform: `scale(${screenScale})` }}
+                >
+                  {!fullscreen && !showingHome && (
+                    <header className="statusbar">
+                      <span className="clock">{clockText}</span>
+                      <span className={`mode ${carer ? 'carer' : ''}`}>{carer ? `Sitter mode · ${carer}` : 'Parent mode'}</span>
+                    </header>
+                  )}
 
-              <div className="stage" ref={stageRef}>
-                {home && (
-                  <div className={`home-layer ${showingHome ? '' : 'hidden'}`}>
-                    <AppFrame key={home.id} {...cardProps(home)} displayMode="fullscreen" />
+                  <div className="stage" ref={stageRef}>
+                    {home && (
+                      <div className={`home-layer ${showingHome ? '' : 'hidden'}`}>
+                        <AppFrame key={home.id} {...cardProps(home)} displayMode="fullscreen" />
+                      </div>
+                    )}
+                    {card && (
+                      <AppFrame
+                        key="card"
+                        resetKey={card.id}
+                        {...cardProps(card)}
+                        displayMode={card.mode}
+                        onDisplayMode={(mode) => setCard((c) => (c && c.id === card.id ? { ...c, mode } : c))}
+                      />
+                    )}
+                    {!card && !home && (
+                      <div className="idle">
+                        <div className="big-clock">{clockText}</div>
+                        <p>{connState === 'connected' ? 'Try “Priya is babysitting tonight”' : connState === 'connecting' ? 'Connecting…' : 'Not connected'}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-                {card && (
-                  <AppFrame
-                    key="card"
-                    resetKey={card.id}
-                    {...cardProps(card)}
-                    displayMode={card.mode}
-                    onDisplayMode={(mode) => setCard((c) => (c && c.id === card.id ? { ...c, mode } : c))}
-                  />
-                )}
-                {!card && !home && (
-                  <div className="idle">
-                    <div className="big-clock">{clockText}</div>
-                    <p>{connState === 'connected' ? 'Try “Priya is babysitting tonight”' : connState === 'connecting' ? 'Connecting…' : 'Not connected'}</p>
-                  </div>
-                )}
+
+                  {(interim || caption) && !fullscreen && (
+                    <div className={`caption ${interim ? 'you' : caption?.who}`} aria-live="polite" key={interim ? 'interim' : caption?.id}>
+                      {interim ? `${interim}…` : caption?.text}
+                    </div>
+                  )}
+                  {card && (
+                    <button className="dismiss" onClick={() => setCard(null)} aria-label="Back to the Tonight screen">
+                      {fullscreen ? 'Close' : '✕'}
+                    </button>
+                  )}
+
+                  {ring && (
+                    <div className="overlay ring-view" onClick={() => setRing(null)} role="alert">
+                      <img src={ring.snapshot} alt={`Doorbell camera: ${ring.label}`} />
+                      <div className="ring-top">
+                        <i className="live-dot" /> Front door · {ring.time}
+                      </div>
+                      <div className="ring-bottom">
+                        <b>Someone is at the front door.</b> Ask “Should I open the door?”
+                      </div>
+                    </div>
+                  )}
+                  {ask && !(playing && ask.params.mode === 'url') && (
+                    <Elicit
+                      params={ask.params}
+                      openUrl={showPhone ? (u) => setPhoneUrl(u) : undefined}
+                      onDone={(r) => {
+                        ask.resolve(r);
+                        setAsk(null);
+                      }}
+                    />
+                  )}
+                  {call && (
+                    <div className="overlay call-view" role="dialog" aria-label={`Calling ${call.name}`}>
+                      <div className={`call-avatar ${call.connected ? '' : 'ringing'}`}>{call.name.charAt(0)}</div>
+                      <h2>{call.connected ? call.name : `Calling ${call.name}…`}</h2>
+                      <p>
+                        {call.relation ? `${call.relation} · ` : ''}
+                        {call.connected ? 'Connected (simulated Alexa call)' : 'Alexa calling'}
+                      </p>
+                      <button className="hangup" onClick={() => setCall(null)} aria-label="End call">
+                        End call
+                      </button>
+                    </div>
+                  )}
+                  <div className={`glow ${light}`} />
+                  <i className="glass" aria-hidden="true" />
+                </div>
               </div>
-
-              {(interim || caption) && !fullscreen && (
-                <div className={`caption ${interim ? 'you' : caption?.who}`} aria-live="polite">
-                  {interim ? `${interim}…` : caption?.text}
-                </div>
-              )}
-              {card && (
-                <button className="dismiss" onClick={() => setCard(null)} aria-label="Back to the Tonight screen">
-                  {fullscreen ? 'Close' : '✕'}
-                </button>
-              )}
-
-              {ring && (
-                <div className="overlay ring-view" onClick={() => setRing(null)} role="alert">
-                  <img src={ring.snapshot} alt={`Doorbell camera: ${ring.label}`} />
-                  <div className="ring-top">🔔 Front Door · {ring.time}</div>
-                  <div className="ring-bottom">Someone is at the front door. Ask “Should I open the door?”</div>
-                </div>
-              )}
-              {ask && !(playing && ask.params.mode === 'url') && (
-                <Elicit
-                  params={ask.params}
-                  openUrl={showPhone ? (u) => setPhoneUrl(u) : undefined}
-                  onDone={(r) => {
-                    ask.resolve(r);
-                    setAsk(null);
-                  }}
-                />
-              )}
-              {call && (
-                <div className="overlay call-view" role="dialog" aria-label={`Calling ${call.name}`}>
-                  <div className={`call-avatar ${call.connected ? '' : 'ringing'}`}>{call.name.charAt(0)}</div>
-                  <h2>{call.connected ? call.name : `Calling ${call.name}…`}</h2>
-                  <p>{call.relation ? `${call.relation} · ` : ''}{call.connected ? 'Connected (simulated Alexa call)' : 'Alexa calling'}</p>
-                  <button className="hangup" onClick={() => setCall(null)} aria-label="End call">
-                    End call
-                  </button>
-                </div>
-              )}
-              <div className={`glow ${light}`} />
             </div>
-            </div>
+            <p className="device-label">{DEVICE_NAMES[deviceSize]} · simulated</p>
           </div>
-          <p className="device-label">{DEVICE_NAMES[deviceSize]} · simulated</p>
+          {showPhone && (
+            <PhoneFrame
+              key={`${phoneUrl ?? parentUrl}#${phoneRev}`}
+              src={phoneUrl ?? parentUrl}
+              time={clockText.replace(/\s?[AP]M$/i, '')}
+              showHome={Boolean(phoneUrl)}
+              onHome={() => setPhoneUrl(null)}
+            />
+          )}
         </div>
-        {showPhone && (
-          <PhoneFrame
-            key={`${phoneUrl ?? parentUrl}#${phoneRev}`}
-            src={phoneUrl ?? parentUrl}
-            showHome={Boolean(phoneUrl)}
-            onHome={() => setPhoneUrl(null)}
-          />
-        )}
-        </div>
+
         {welcome && connState === 'connected' && (
           <div className="welcome" role="dialog" aria-label="Welcome">
             <div className="welcome-card">
-              <p className="welcome-eyebrow">An Alexa+ add-on · Echo Show</p>
+              <LogoMark size={52} />
+              <p className="welcome-eyebrow">An Alexa+ add-on for Echo Show</p>
               <h2>Tonight, Priya is babysitting Maya.</h2>
-              <p>The Echo Show in the kitchen becomes her guide, and Mom’s phone (right) is how the parents stay in the loop. Watch the whole evening play out, or try it yourself.</p>
+              <p>The Echo Show in the kitchen becomes her guide. Mom’s phone, on the right, is how the parents stay in the loop. Watch the whole evening, or try it yourself.</p>
               <div className="welcome-btns">
                 <button className="primary" onClick={() => void playEvening()}>
-                  ▶ Watch the evening · 2 min
+                  <Icon name="play" /> Watch the evening <small>2 min</small>
                 </button>
                 <button
                   onClick={() => {
@@ -891,197 +940,212 @@ export function App() {
       </section>
 
       {!FILM && (
-      <aside className="panel">
-        <header className="panel-head">
-          <h1>While You’re Out</h1>
-          <p className="muted">An Alexa+ add-on that turns the Echo Show into a guide for whoever is babysitting. This page plays Alexa.</p>
-        </header>
-
-        <button className={`watch ${playing ? 'on' : ''}`} onClick={() => (playing ? stopPlaying() : void playEvening())} disabled={!conn}>
-          {playing ? '■  Stop watching' : '▶  Watch the whole evening · 2 min'}
-        </button>
-
-        <section className={`tour ${playing ? 'auto' : ''}`} aria-label="Guided demo">
-          <div className="tour-top">
-            <span>
-              Step {tourStep + 1} of {GUIDE.length}
-            </span>
-            <div className="dots">
-              {GUIDE.map((g, i) => (
-                <button key={g.title} className={`dot ${i === tourStep ? 'on' : i < tourStep ? 'past' : ''}`} onClick={() => setTour([i, 0])} aria-label={`Step ${i + 1}: ${g.title}`} title={g.title} />
-              ))}
+        <aside className="panel">
+          <header className="panel-head">
+            <div>
+              <p className="eyebrow">Demo controls</p>
+              <h1>Try the evening</h1>
+              <p>This page plays Alexa. Watch it all, tap a line below, or type and speak like Priya would.</p>
             </div>
-          </div>
-          <h2 className="tour-title">{step.title}</h2>
-          <p className="tour-note">{step.note}</p>
-          <ol className="tour-lines">
-            {step.actions.map((a, i) => (
-              <li key={i} className={i < tourAt ? 'done' : i === tourAt ? 'now' : ''}>
-                {'ring' in a ? '🔔 The doorbell rings' : `“${a.say}”`}
-              </li>
-            ))}
-          </ol>
-          {nextAction ? (
-            <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy || playing}>
-              {tourBusy ? 'Alexa is answering…' : 'ring' in nextAction ? '🔔  Ring the doorbell' : `▶  Say “${nextAction.say}”`}
-            </button>
-          ) : (
-            <button className="tour-go next" onClick={() => setTour([tourStep < GUIDE.length - 1 ? tourStep + 1 : 0, 0])}>
-              {tourStep < GUIDE.length - 1 ? `Next: ${GUIDE[tourStep + 1].title}  →` : 'Start over'}
-            </button>
-          )}
-        </section>
+          </header>
 
-        <div className="talk">
+          <button className={`watch ${playing ? 'on' : ''}`} onClick={() => (playing ? stopPlaying() : void playEvening())} disabled={!conn}>
+            <span className="watch-icon">
+              <Icon name={playing ? 'stop' : 'play'} size={20} />
+            </span>
+            <span className="watch-text">
+              <b>{playing ? 'Stop watching' : 'Watch the whole evening'}</b>
+              <small>{playing ? `${GUIDE[tourStep].title} · ${tourStep + 1} of ${GUIDE.length}` : '2 min · hands-free · Mom answers on her phone'}</small>
+            </span>
+            {playing && <i className="watch-progress" style={{ transform: `scaleX(${(tourStep + 1) / GUIDE.length})` }} />}
+          </button>
+
+          <section className={`timeline ${playing ? 'auto' : ''}`} aria-label="The evening, step by step">
+            <div className="timeline-head">
+              <span>The evening, step by step</span>
+              <span className="tab">
+                {tourStep + 1}/{GUIDE.length}
+              </span>
+            </div>
+            <ol>
+              {GUIDE.map((g, i) => (
+                <li key={g.title} className={`chap ${i < tourStep ? 'done' : i === tourStep ? 'now' : ''}`}>
+                  <button className="chap-row" onClick={() => setTour([i, 0])} disabled={playing} aria-current={i === tourStep ? 'step' : undefined}>
+                    <span className="chap-dot">{i < tourStep ? <Icon name="check" size={13} /> : i + 1}</span>
+                    <span className="chap-title">{g.title}</span>
+                    {g.clock && <span className="chap-time tab">{clockLabel(g.clock[1])}</span>}
+                  </button>
+                  {i === tourStep && (
+                    <div className="chap-body">
+                      <p className="chap-note">{g.note}</p>
+                      <ol className="tour-lines">
+                        {g.actions.map((a, j) => (
+                          <li key={j} className={j < tourAt ? 'done' : j === tourAt ? 'now' : ''}>
+                            {'ring' in a ? (
+                              <>
+                                <Icon name="bell" size={14} /> The doorbell rings
+                              </>
+                            ) : (
+                              `“${a.say}”`
+                            )}
+                          </li>
+                        ))}
+                      </ol>
+                      {nextAction ? (
+                        <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy || playing}>
+                          <Icon name={tourBusy ? 'spark' : 'ring' in nextAction ? 'bell' : 'play'} size={16} />
+                          <span>{tourBusy ? 'Alexa is answering…' : 'ring' in nextAction ? 'Ring the doorbell' : `Say “${nextAction.say}”`}</span>
+                        </button>
+                      ) : (
+                        <button className="tour-go next" onClick={() => setTour([tourStep < GUIDE.length - 1 ? tourStep + 1 : 0, 0])} disabled={playing}>
+                          <span>{tourStep < GUIDE.length - 1 ? `Next: ${GUIDE[tourStep + 1].title}` : 'Start over'}</span>
+                          <Icon name="send" size={16} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
+
           <form
+            className="composer talk"
             onSubmit={(e) => {
               e.preventDefault();
               void handle(draft);
               setDraft('');
             }}
           >
-            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Or type anything Priya would say…" disabled={!conn} aria-label="What you would say" />
+            <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type anything Priya would say…" disabled={!conn} aria-label="What you would say" />
+            <button type="button" className={`mic ${light === 'listening' ? 'on' : ''}`} onClick={() => void onMic()} disabled={!canListen || !conn} title={canListen ? 'Speak' : 'Speech recognition needs Chrome or Edge'} aria-label="Talk to Alexa">
+              <Icon name={light === 'listening' ? 'stop' : 'mic'} />
+            </button>
+            <button type="submit" className="send" disabled={!conn || !draft.trim()} aria-label="Send">
+              <Icon name="send" />
+            </button>
           </form>
-          <button className={`mic ${light === 'listening' ? 'on' : ''}`} onClick={() => void onMic()} disabled={!canListen || !conn} title={canListen ? 'Speak' : 'Speech recognition needs Chrome or Edge'} aria-label="Talk to Alexa">
-            {light === 'listening' ? '■' : '🎤'}
-          </button>
-        </div>
 
-        <a className="parent-link" href={parentUrl} target="_blank" rel="noreferrer">
-          <span>📱</span>
-          <span>
-            <b>Open the parent’s phone</b>
-            <small>Answer questions, get alerts</small>
-          </span>
-        </a>
+          {activeTasks.length > 0 && (
+            <section className="waiting">
+              <h2>Waiting on the parents</h2>
+              {activeTasks.map((t) => (
+                <div key={t.id} className={`task ${t.done ? 'done' : ''}`}>
+                  <strong>“{t.question}”</strong>
+                  <ul>
+                    {t.statuses.map((st, i) => (
+                      <li key={i}>{st}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          )}
 
-        {activeTasks.length > 0 && (
-          <section>
-            <h2>Asking the parents</h2>
-            {activeTasks.map((t) => (
-              <div key={t.id} className={`task ${t.done ? 'done' : ''}`}>
-                <strong>“{t.question}”</strong>
-                <ul>
-                  {t.statuses.map((st, i) => (
-                    <li key={i}>{st}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </section>
-        )}
+          <details className="drawer">
+            <summary>
+              <Icon name="chat" size={16} /> Conversation <span className="count">{lines.length}</span>
+            </summary>
+            <div className="log chat">
+              {lines.length ? (
+                lines.map((l) => (
+                  <p key={l.id} className={l.who}>
+                    <b>{l.who === 'you' ? 'You' : 'Alexa'}:</b> {l.text}
+                  </p>
+                ))
+              ) : (
+                <p className="empty">Nothing yet. Say something to the Echo Show.</p>
+              )}
+            </div>
+          </details>
 
-        <details>
-          <summary>Conversation</summary>
-          <div className="log">
-            {lines.length ? (
-              lines.map((l) => (
-                <p key={l.id} className={l.who}>
-                  <b>{l.who === 'you' ? 'You' : 'Alexa'}:</b> {l.text}
-                </p>
-              ))
-            ) : (
-              <p className="muted">Nothing yet.</p>
-            )}
-          </div>
-        </details>
-
-        <details>
-          <summary>Settings</summary>
-          <div className="settings">
-            <label className="check">
-              <input
-                type="checkbox"
+          <details className="drawer">
+            <summary>
+              <Icon name="gear" size={16} /> Settings
+            </summary>
+            <div className="settings">
+              <Switch
+                label="Speak replies out loud"
                 checked={voiceOn}
-                onChange={(e) => {
-                  setVoiceOn(e.target.checked);
-                  try {
-                    localStorage.setItem('wyo.voice', e.target.checked ? 'on' : 'off');
-                  } catch {
-                    /* storage unavailable: setting just won't persist */
-                  }
-                  if (!e.target.checked) stopSpeaking();
+                onChange={(on) => {
+                  setVoiceOn(on);
+                  store('wyo.voice', on ? 'on' : 'off');
+                  if (!on) stopSpeaking();
                 }}
-              />{' '}
-              Speak replies out loud
-            </label>
-            <label className="check">
-              <input
-                type="checkbox"
+              />
+              <Switch
+                label="Mom’s phone beside the Echo Show"
+                hint="The live parent page, so you see both sides"
                 checked={phoneOn}
-                onChange={(e) => {
-                  setPhoneOn(e.target.checked);
-                  store('wyo.phone', e.target.checked ? 'on' : 'off');
+                onChange={(on) => {
+                  setPhoneOn(on);
+                  store('wyo.phone', on ? 'on' : 'off');
                 }}
-              />{' '}
-              Show Mom’s phone beside the Echo Show
-            </label>
-            <label className="check">
-              Device{' '}
-              <select
+              />
+              <Segmented<DeviceSize>
+                label="Device"
                 value={deviceSize}
-                onChange={(e) => {
-                  const v = (['15', '10', '8'].includes(e.target.value) ? e.target.value : '15') as DeviceSize;
+                options={[
+                  ['8', 'Show 8'],
+                  ['10', 'Show 10'],
+                  ['15', 'Show 15'],
+                ]}
+                onChange={(v) => {
                   setDeviceSize(v);
                   store('wyo.size', v);
                 }}
-              >
-                <option value="15">Echo Show 15 (16:9)</option>
-                <option value="10">Echo Show 10 (16:10)</option>
-                <option value="8">Echo Show 8 (16:10, smaller)</option>
-              </select>
-            </label>
-            <label className="check">
-              Understanding{' '}
-              <select
+              />
+              <Segmented<BrainKind>
+                label="Understanding"
                 value={brainKind}
-                onChange={(e) => {
-                  const v: BrainKind = e.target.value === 'gemini' || e.target.value === 'rules' ? e.target.value : 'hybrid';
+                options={[
+                  ['hybrid', 'Rules + AI'],
+                  ['rules', 'Rules'],
+                  ['gemini', 'AI only'],
+                ]}
+                onChange={(v) => {
                   setBrainKind(v);
-                  try {
-                    localStorage.setItem('wyo.brain3', v);
-                  } catch {
-                    /* not persisted */
-                  }
+                  store('wyo.brain3', v);
                 }}
-              >
-                <option value="hybrid">Rules first, Gemini when needed (recommended)</option>
-                <option value="rules">Built-in rules only (instant, English)</option>
-                <option value="gemini">Gemini for everything (slower, uses the daily quota)</option>
-              </select>
-            </label>
-            {demoTime && (
-              <form
-                className="row"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void setClock(demoInput, demoDay);
-                }}
-              >
-                <span className="check">House clock</span>
-                <select value={demoDay} onChange={(e) => setDemoDay(e.target.value)} aria-label="Demo day">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                    <option key={d}>{d}</option>
-                  ))}
-                </select>
-                <input type="time" value={demoInput} onChange={(e) => setDemoInput(e.target.value)} aria-label="Demo time" />
-                <button type="submit">Set</button>
-              </form>
-            )}
-            <div className="row">
-              <input value={url} onChange={(e) => setUrl(e.target.value)} aria-label="MCP server URL" />
-              <button onClick={() => void connect(url)}>Connect</button>
+              />
+              {demoTime && (
+                <form
+                  className="row"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void setClock(demoInput, demoDay);
+                  }}
+                >
+                  <span className="seg-label">House clock</span>
+                  <select value={demoDay} onChange={(e) => setDemoDay(e.target.value)} aria-label="Demo day">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+                      <option key={d}>{d}</option>
+                    ))}
+                  </select>
+                  <input type="time" value={demoInput} onChange={(e) => setDemoInput(e.target.value)} aria-label="Demo time" />
+                  <button type="submit">Set</button>
+                </form>
+              )}
+              <div className="row">
+                <input value={url} onChange={(e) => setUrl(e.target.value)} aria-label="MCP server URL" />
+                <button type="button" onClick={() => void connect(url)}>
+                  Connect
+                </button>
+              </div>
+              <p className={`conn ${connState}`}>
+                {connState === 'connected' && conn
+                  ? `Connected to ${conn.serverName} · ${conn.tools.length} tools · MCP ${conn.protocolVersion ?? 'unknown'}`
+                  : connState === 'connecting'
+                    ? 'Connecting…'
+                    : `Not connected: ${connError}`}
+              </p>
             </div>
-            <p className={`conn ${connState}`}>
-              {connState === 'connected' && conn
-                ? `Connected to ${conn.serverName} · ${conn.tools.length} tools · MCP ${conn.protocolVersion ?? 'unknown'}`
-                : connState === 'connecting'
-                  ? 'Connecting…'
-                  : `Not connected: ${connError}`}
-            </p>
-          </div>
-        </details>
-      </aside>
+          </details>
+
+          <a className="parent-link" href={parentUrl} target="_blank" rel="noreferrer">
+            <Icon name="phone" size={16} /> Open Mom’s phone in a new tab <Icon name="external" size={14} />
+          </a>
+        </aside>
       )}
     </div>
   );

@@ -88,6 +88,8 @@
     globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
   };
   function icon(name) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[name] || ICONS.info) + '</svg>'; }
+  // An icon in a soft rounded chip (banners, status rows, the address).
+  function chip(name) { return '<span class="bic">' + icon(name) + '</span>'; }
   function stepIcon(key, title) {
     var t = (key + ' ' + title).toLowerCase();
     if (/dinner|supper|lunch|snack|eat/.test(t)) return 'utensils';
@@ -111,11 +113,11 @@
     return '<div class="say">' + avatar(f.said_by) + '<div><p>' + esc(text) + '</p><span class="by">' + by + '</span></div></div>';
   }
   function banner(kind, ic, title, body, by) {
-    return '<div class="banner ' + kind + '">' + icon(ic) + '<div>' + (title ? '<strong>' + esc(title) + '</strong>' : '') + (body ? '<span>' + esc(body) + '</span>' : '') + (by ? '<span class="by">' + esc(by) + '</span>' : '') + '</div></div>';
+    return '<div class="banner ' + kind + '">' + chip(ic) + '<div>' + (title ? '<strong>' + esc(title) + '</strong>' : '') + (body ? '<span>' + esc(body) + '</span>' : '') + (by ? '<span class="by">' + esc(by) + '</span>' : '') + '</div></div>';
   }
-  function timeline(items) {
+  function timeline(items, cls) {
     var tag = { done: '<span class="pill green">' + icon('check') + ' Done</span>', due: '<span class="pill amber">Now</span>', late: '<span class="pill red">Late</span>', upcoming: '' };
-    return '<ol class="tl">' + items.map(function (i) {
+    return '<ol class="tl' + (cls ? ' ' + cls : '') + '">' + items.map(function (i) {
       return '<li class="' + esc(i.status) + '"><span class="t">' + esc(i.time) + '</span><span class="ic">' + icon(i.status === 'done' ? 'check' : stepIcon(i.key, i.title)) + '</span>' +
         '<span class="what"><strong>' + esc(i.title) + '</strong>' + (i.checklist && i.checklist.length ? '<small>' + esc(i.checklist.join(' · ')) + '</small>' : '') + '</span>' + (tag[i.status] || '') + '</li>';
     }).join('') + '</ol>';
@@ -123,11 +125,15 @@
   function list(items) { return items && items.length ? '<ul>' + items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>' : ''; }
   function panel(inner, cls) { return '<div class="panel ' + (cls || '') + '">' + inner + '</div>'; }
 
+  // "Tell 911 this address": big, white, unmissable.
+  function addressCard(address) {
+    return address ? '<div class="addr">' + chip('pin') + '<div><small>Tell 911 this address</small>' + esc(address) + '</div></div>' : '';
+  }
   function legacyEmergency(d) {
-      document.body.style.background = '#7a0b10';
+      document.body.style.background = '#8a140e';
       var steps = d.action_plan.steps || [];
       return '<div class="emergency" role="alert"><span class="flag">' + icon('alert') + ' EMERGENCY</span><h1>' + esc(d.say_first) + '</h1>' +
-        (d.address ? '<div class="addr"><small>Tell 911 this address</small>' + esc(d.address) + '</div>' : '') +
+        addressCard(d.address) +
         '<div class="cols"><div><div class="eyebrow" style="color:#ffd7d8">' + esc(d.action_plan.source) + '</div><ol class="steps">' +
         steps.map(function (s, i) { return '<li class="' + (i === 0 ? 'now' : '') + '">' + esc(s.text) + (s.timer_seconds ? ' <span class="pill" style="background:rgba(0,0,0,.25);color:#fff">' + icon('timer') + ' ' + Math.round(s.timer_seconds / 60) + ' min</span>' : '') + '</li>'; }).join('') +
         '</ol></div><div class="side">' +
@@ -150,7 +156,10 @@
       if (d.allergy_alert) left += banner('safety', 'alert', 'Allergy alert · the parents have been told', d.allergy_alert);
       safety.forEach(function (f) { left += banner('safety', 'shield', f.category === 'allergy' ? 'Allergy' : 'Important', f.text, f.said_by + (f.source && SOURCE[f.source] ? ' · ' + SOURCE[f.source] : '')); });
       if (d.guard) left += banner('guard', 'info', '', d.guard);
-      var right = (d.exact === false && words.length ? '<p class="sub">The parents haven’t said exactly. This is the closest.</p>' : '') + words.map(quoteFact).join('');
+      // Not an exact answer: the closest notes stay visibly secondary.
+      var right = d.exact === false && words.length
+        ? '<p class="sub">The parents haven’t said exactly. This is the closest.</p><div class="closest">' + words.map(quoteFact).join('') + '</div>'
+        : words.map(quoteFact).join('');
       var h = '<div class="eyebrow">' + icon(cat[0]) + esc(cat[1]) + '</div>';
       h += left && right ? '<div class="split"><div class="stack">' + left + '</div><div class="stack">' + right + '</div></div><div class="stack" style="margin-top:.75em">' : '<div class="stack">' + left + right;
       if (d.shadow) {
@@ -172,12 +181,17 @@
       var dots = '';
       for (var i = 1; i <= total; i++) dots += '<i class="' + (i < number || d.kind === 'done' ? 'ok' : i === number ? 'on' : '') + '"></i>';
       var h = '<div class="eyebrow"><span class="dot"></span>Quick check before the parents leave' + (d.carer ? ' · ' + esc(d.carer) : '') + '</div><div class="dots">' + dots + '</div>';
-      if (fb) h += fb.correct ? banner('ok', 'check', 'That’s right', '') : fb.correct === null ? banner('info', 'info', 'Skipped. The parents said:', fb.answer) : banner('safety', 'x', 'Not quite. The parents said:', fb.answer);
-      if (d.kind === 'question') h += '<p class="sub" style="margin-top:.8em">Question ' + d.number + ' of ' + d.total + '</p><p class="q-big">' + esc(d.question) + '</p>';
+      if (fb) h += fb.correct ? banner('ok fb', 'check', 'That’s right', '') : fb.correct === null ? banner('info fb', 'info', 'Skipped. The parents said:', fb.answer) : banner('safety fb', 'x', 'Not quite. The parents said:', fb.answer);
+      if (d.kind === 'question') h += '<div class="qcard"><p class="sub">Question ' + d.number + ' of ' + d.total + '</p><p class="q-big">' + esc(d.question) + '</p></div>';
       if (d.kind === 'done') {
         var sm = d.summary;
         var all = sm.right === sm.total;
-        h += '<div class="score" style="margin-top:.6em"><span class="n" style="color:' + (all ? 'var(--green)' : 'var(--amber)') + '">' + sm.right + '/' + sm.total + '</span><div><div class="title" style="margin:0">' +
+        var colour = all ? 'var(--green)' : 'var(--amber)';
+        var SC = 2 * Math.PI * 44;
+        var frac = sm.total ? Math.max(0, Math.min(1, sm.right / sm.total)) : 0;
+        h += '<div class="score' + (all ? ' all' : '') + '"><div class="sring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="44" stroke-width="7" fill="none"/>' +
+          '<circle class="prog" cx="50" cy="50" r="44" stroke-width="7" fill="none" stroke-linecap="round" style="stroke:' + colour + '" stroke-dasharray="' + SC.toFixed(1) + '" stroke-dashoffset="' + (SC * (1 - frac)).toFixed(1) + '"/></svg>' +
+          '<span class="n" style="color:' + colour + '">' + sm.right + '/' + sm.total + '</span></div><div><div class="title" style="margin:0 0 .2em">' +
           (all ? 'Handover confirmed' : 'Handover checked') + '</div><span class="sub">The parents can see this on their phone.</span></div></div>';
       }
       return panel(h);
@@ -196,9 +210,9 @@
       var h = '<div class="eyebrow"><span class="dot"></span>Sitter mode is on</div><div class="title">Tonight with ' + esc(d.carer) + '</div>';
       if (since) {
         var changes = since.added.map(function (a) { return a.text + ' (' + a.said_by + ')'; }).concat(since.removed.map(function (r) { return 'No longer: ' + r.text; }));
-        h += '<div class="banner info">' + icon('sparkles') + '<div><strong>Welcome back. Since your last visit</strong>' + list(changes) + '</div></div>';
+        h += '<div class="banner info">' + chip('sparkles') + '<div><strong>Welcome back. Since your last visit</strong>' + list(changes) + '</div></div>';
       }
-      h += '<div class="grid2" style="margin-top:.9em">';
+      h += '<div class="grid2" style="margin-top:18px">';
       if (d.must_know.length || d.epipen) h += '<div class="tile must"><h3>' + icon('shield') + 'Must know</h3>' + list(d.must_know) + (d.epipen ? '<p><b>EpiPen:</b> ' + esc(d.epipen) + '</p>' : '') + '</div>';
       if (d.plan && d.plan.length) h += '<div class="tile"><h3>' + icon('list') + 'Tonight</h3>' + timeline(d.plan.slice(0, 4)) + '</div>';
       [['utensils', 'Dinner', d.dinner], ['tv', 'Screen time', d.screen], ['paw', 'Pets', d.pets], ['message', 'House rules', d.rules]].forEach(function (t) {
@@ -215,13 +229,16 @@
     },
 
     emergency: function (d) {
-      document.body.style.background = '#7a0b10';
+      document.body.style.background = '#8a140e';
       var inc = d.incident;
       if (!inc) return legacyEmergency(d);
       emergencyData = d;
       emergencyReceived = Date.now();
+      // A new step slides in; a refresh of the same step stays still.
+      var fresh = emergencyStep !== null && emergencyStep !== inc.current;
+      emergencyStep = inc.current;
       if (inc.status === 'resolved') {
-        document.body.style.background = '#0d2a20';
+        document.body.style.background = '#063f27';
         return '<div class="emergency over"><span class="flag">' + icon('check') + ' EMERGENCY OVER</span><h1>Help has taken over</h1>' +
           '<p class="sub" style="color:#c9f7e3">The parents have been told. Say “emergency” again if anything changes.</p>' +
           '<ul class="inc-log">' + inc.updates.slice(-6).map(function (u) { return '<li><b>' + esc(u.time) + '</b> ' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul></div>';
@@ -241,15 +258,15 @@
         (d.epipen_location ? '<div class="box"><strong>EpiPen</strong>' + esc(d.epipen_location) + '</div>' : '') +
         '<div class="box"><strong>Alerted</strong>' + esc((d.parents_alerted || []).join(', ') || 'The parents') + '</div>';
       return '<div class="emergency guided" role="alert"><div class="etop"><span class="flag">' + icon('alert') + ' EMERGENCY</span><span class="elapsed tab" id="elapsed"></span>' + otw + '</div>' +
-        '<h1 class="first">' + esc(d.say_first) + '</h1>' +
-        (d.address ? '<div class="addr"><small>Tell 911 this address</small>' + esc(d.address) + '</div>' : '') +
-        '<div class="cols"><div class="stepcard">' +
+        '<div class="cols"><div class="main"><h1 class="first">' + esc(d.say_first) + '</h1>' +
+        addressCard(d.address) +
+        '<div class="stepcard' + (fresh ? ' fresh' : '') + '">' +
         (step
           ? '<small>Step ' + (inc.current + 1) + ' of ' + inc.total + ' · ' + esc(d.action_plan.source) + '</small><p>' + esc(step.text) + '</p>'
           : '<small>All steps done</small><p>Stay with her and follow the 911 dispatcher until help arrives.</p>') +
         '<div class="stepdots">' + dots + '</div><div class="stepbtns">' +
         (step ? '<button class="btn green" data-say="Done">' + icon('check') + ' Done</button><button class="btn" data-say="Next step">Next ›</button>' : '<button class="btn green" data-say="It\'s over, the paramedics are here">' + icon('check') + ' Help has arrived</button>') +
-        '<button class="btn" data-sheet="1">' + icon('list') + ' For paramedics</button></div></div>' +
+        '<button class="btn" data-sheet="1">' + icon('list') + ' For paramedics</button></div></div></div>' +
         '<div class="side">' + side + '<p class="note">' + esc(d.note) + '</p></div></div></div>';
     },
 
@@ -259,9 +276,9 @@
         // About the front door: the doorbell photo beside the conversation.
         (d.door_snapshot ? '<div class="split door"><figure class="doorcam"><img src="' + esc(d.door_snapshot) + '" alt="Doorbell camera photo"></figure>' : '') +
         '<div class="chat"><div class="bubble me">“' + esc(d.text) + '”</div>';
-      if (d.answer) h += '<div class="bubble them"><b>' + esc(d.answer) + '</b><span class="by">' + esc(d.answered_by) + (d.scope === 'always' ? ' · saved as a house rule' : ' · just for tonight') + '</span></div>';
+      if (d.answer) h += '<div class="msgrow">' + avatar(d.answered_by) + '<div class="bubble them"><b>' + esc(d.answer) + '</b><span class="by">' + esc(d.answered_by) + (d.scope === 'always' ? ' · saved as a house rule' : ' · just for tonight') + '</span></div></div>';
       else if (d.status === 'expired') h += '<p class="sub">Nobody answered in time.</p>';
-      else h += '<div class="typing" aria-label="Waiting for an answer"><i></i><i></i><i></i><span style="margin-left:.5em">' + (d.busy_until ? 'Waiting until ' + esc(who) + ' is free' : 'Waiting for ' + esc(who)) + '</span></div>';
+      else h += '<div class="typing" aria-label="Waiting for an answer"><i></i><i></i><i></i><span style="margin-left:.4em">' + (d.busy_until ? 'Waiting until ' + esc(who) + ' is free' : 'Waiting for ' + esc(who)) + '</span></div>';
       return panel(h + '</div>' + (d.door_snapshot ? '</div>' : ''));
     },
 
@@ -272,23 +289,23 @@
       });
       return panel('<div class="eyebrow">' + icon('heart') + 'The evening</div><div class="title">Evening with ' + esc(d.carer) + '</div><div class="grid2">' +
         (d.insights && d.insights.length ? '<div class="tile"><h3>' + icon('sparkles') + 'Worth knowing</h3>' + list(d.insights) + '</div>' : '') +
-        '<div class="tile"><h3>' + icon('clock') + 'Timeline</h3>' + (times.length ? timeline(times) : '<p class="sub">Nothing was logged.</p>') + '</div>' +
+        '<div class="tile"><h3>' + icon('clock') + 'Timeline</h3>' + (times.length ? timeline(times, 'log') : '<p class="sub">Nothing was logged.</p>') + '</div>' +
         '<div class="tile"><h3>' + icon('message') + 'Questions</h3>' + (d.questions && d.questions.length ? list(d.questions) : '<p class="sub">No questions tonight.</p>') + '</div></div>' +
-        '<div class="stepbtns" style="margin-top:1em"><button class="btn green" data-say="' + esc('Pay ' + d.carer) + '">' + icon('heart') + ' Pay ' + esc(d.carer) + '</button></div>');
+        '<div class="stepbtns"><button class="btn green" data-say="' + esc('Pay ' + d.carer) + '">' + icon('heart') + ' Pay ' + esc(d.carer) + '</button></div>');
     },
 
     logged: function (d) {
       var e = d.event || {};
-      var h = '<div class="confirm"><span class="tick">' + icon('check') + '</span><div><div class="eyebrow" style="margin:0">Noted for the parents</div><div class="title" style="margin:.1em 0 0">' + esc(e.text) + '</div></div></div>';
-      if (d.allergy_alert) h += '<div style="margin-top:.8em">' + banner('safety', 'alert', 'Allergy alert · the parents have been told', d.allergy_alert) + '</div>';
-      if (d.medicine_alert) h += '<div style="margin-top:.8em">' + banner('guard', 'pill', 'Medicine', d.medicine_alert) + '</div>';
+      var h = '<div class="confirm"><span class="tick">' + icon('check') + '</span><div><div class="eyebrow" style="margin:0">Noted for the parents</div><div class="title" style="margin:.15em 0 0">' + esc(e.text) + '</div></div></div>';
+      if (d.allergy_alert) h += '<div style="margin-top:24px">' + banner('safety', 'alert', 'Allergy alert · the parents have been told', d.allergy_alert) + '</div>';
+      if (d.medicine_alert) h += '<div style="margin-top:' + (d.allergy_alert ? '14px' : '24px') + '">' + banner('guard', 'pill', 'Medicine', d.medicine_alert) + '</div>';
       return panel(h);
     },
 
-    language: function (d) { return panel('<div class="confirm"><span class="tick">' + icon('globe') + '</span><div><div class="title" style="margin:0">' + esc(d.spoken || d.english || 'Language changed') + '</div></div></div>'); },
+    language: function (d) { return panel('<div class="confirm"><span class="tick cyan">' + icon('globe') + '</span><div><div class="title" style="margin:0">' + esc(d.spoken || d.english || 'Language changed') + '</div></div></div>'); },
 
     import: function (d) {
-      return panel('<div class="confirm"><span class="tick">' + icon('sparkles') + '</span><div><div class="title" style="margin:0">' + (d.count ? d.count + ' thing' + (d.count > 1 ? 's' : '') + ' to confirm' : 'Nothing new found') + '</div>' +
+      return panel('<div class="confirm"><span class="tick lav">' + icon('sparkles') + '</span><div><div class="title" style="margin:0">' + (d.count ? d.count + ' thing' + (d.count > 1 ? 's' : '') + ' to confirm' : 'Nothing new found') + '</div>' +
         '<p class="sub">Nothing is used until a parent confirms it on their phone.' + (d.dropped_secrets ? ' Codes and passwords were left out.' : '') + '</p></div></div>');
     },
 
@@ -307,17 +324,17 @@
       }[d.verdict] || ['info', 'door', 'Front door', ''];
       var cam = e && e.snapshot_url
         ? '<figure class="doorcam"><img src="' + esc(e.snapshot_url) + '" alt="Doorbell camera: ' + esc(e.label) + '"><figcaption><i></i>Front door · ' + esc(e.time || '') + '</figcaption>' +
-          ({ unknown: '<span class="verdict bad">Not expected</span>', expected: '<span class="verdict warn">Expected · check first</span>', delivery: '<span class="verdict ok">Delivery</span>' }[d.verdict] || '') + '</figure>'
+          ({ unknown: '<span class="verdict bad">' + icon('alert') + 'Not expected</span>', expected: '<span class="verdict warn">' + icon('users') + 'Expected · check first</span>', delivery: '<span class="verdict ok">' + icon('check') + 'Delivery</span>' }[d.verdict] || '') + '</figure>'
         : '<div class="doorcam empty">' + icon('door') + '</div>';
       var people = (d.expected || []).concat(d.deliveries || []);
-      var right = '<div class="banner ' + V[0] + ' big">' + icon(V[1]) + '<div><strong>' + esc(V[2]) + '</strong><span>' + esc(V[3]) + '</span></div></div>' +
+      var right = '<div class="banner ' + V[0] + ' big">' + chip(V[1]) + '<div><strong>' + esc(V[2]) + '</strong><span>' + esc(V[3]) + '</span></div></div>' +
         (d.rule ? quoteFact({ text: d.rule.text, said_by: d.rule.said_by }) : '') +
         (people.length ? '<div class="tile"><h3>' + icon('users') + 'Expected tonight</h3>' + list(people.map(function (v) { return v.name + (v.window ? ' · ' + v.window : '') + (v.note ? ' · ' + v.note : ''); })) + '</div>' : '');
       return panel('<div class="eyebrow">' + icon('door') + 'Front door</div><div class="split door">' + cam + '<div class="stack">' + right + '</div></div>');
     },
 
     message: function (d) {
-      document.body.style.background = '#120c08';
+      document.body.style.background = '#0d0906';
       var who = d.relation && /mom|mum|mother/i.test(d.relation) ? 'Mom' : d.relation && /dad|father/i.test(d.relation) ? 'Dad' : d.from;
       var media = d.kind === 'video'
         ? '<video id="media" src="' + esc(d.url) + '" playsinline></video>'
@@ -327,22 +344,22 @@
       return '<div class="goodnight ' + esc(d.kind) + '"><div class="gn-text"><div class="eyebrow" style="color:#e9c98f">' + icon('heart') + 'A message from home</div>' +
         '<h1>' + esc(who) + ' left a message for ' + esc(d.for_name || 'you') + '</h1>' +
         (d.caption ? '<p class="gn-caption">“' + esc(d.caption) + '”</p>' : '') +
-        '<div class="stepbtns"><button class="btn" id="replay">' + icon('heart') + ' Play again</button></div></div>' +
-        '<div class="gn-media">' + media + '</div><p class="gn-end" aria-live="polite">Sweet dreams, ' + esc(d.for_name || 'little one') + ' \u2728</p></div>' + scene(d.smart_home);
+        '<div class="stepbtns"><button class="btn" id="replay">' + icon('heart') + ' Play again</button></div>' + scene(d.smart_home) + '</div>' +
+        '<div class="gn-media">' + media + '</div><p class="gn-end" aria-live="polite">Sweet dreams, ' + esc(d.for_name || 'little one') + ' \u2728</p></div>';
     },
 
     pay: function (d) {
       payData = d;
       if (d.status === 'paid') {
         return panel('<div class="confirm"><span class="tick">' + icon('check') + '</span><div><div class="eyebrow" style="margin:0">Demo payment · no money moved</div>' +
-          '<div class="title" style="margin:.1em 0 0">' + esc(d.carer) + ' has been paid ' + esc(d.total) + '</div><p class="sub">' + esc(d.hours) + ' at ' + esc(d.rate) + ' an hour' + (d.tip ? ' + ' + esc(d.tip) + ' tip' : '') + '. Thank you!</p></div></div>');
+          '<div class="title" style="margin:.15em 0 0">' + esc(d.carer) + ' has been paid ' + esc(d.total) + '</div><p class="sub">' + esc(d.hours) + ' at ' + esc(d.rate) + ' an hour' + (d.tip ? ' + ' + esc(d.tip) + ' tip' : '') + '. Thank you!</p></div></div>');
       }
       return panel('<div class="eyebrow">' + icon('heart') + 'Pay ' + esc(d.carer) + '</div><div class="split pay">' +
-        '<div><p class="q-big" style="margin:0">' + esc(d.amount) + '</p><p class="sub">' + esc(d.hours) + ' at ' + esc(d.rate) + ' an hour</p>' +
+        '<div><p class="q-big amount" style="margin:0">' + esc(d.amount) + '</p><p class="sub">' + esc(d.hours) + ' at ' + esc(d.rate) + ' an hour</p>' +
         (d.status === 'declined' || d.status === 'not_opened'
           ? '<p class="pill">Not paid. You can pay later from the parent page.</p>'
-          : '<div class="banner info" style="margin-top:1em">' + icon('phone') + '<div><strong>Approve it on your phone</strong><span>The payment happens there, never on this screen.</span></div></div>' +
-            '<div class="typing" style="margin-top:.8em"><i></i><i></i><i></i><span style="margin-left:.5em">Waiting for your approval</span></div>') +
+          : '<div class="banner info">' + chip('phone') + '<div><strong>Approve it on your phone</strong><span>The payment happens there, never on this screen.</span></div></div>' +
+            '<div class="typing" style="margin-top:16px"><i></i><i></i><i></i><span style="margin-left:.4em">Waiting for your approval</span></div>') +
         '</div>' + (d.qr_svg && d.status === 'pending' ? '<div class="qr">' + d.qr_svg + '<span>Or scan with your phone</span></div>' : '') + '</div>');
     },
 
@@ -361,12 +378,13 @@
     var h = Math.floor(((min % 1440) + 1440) % 1440 / 60), m = ((min % 60) + 60) % 60;
     return (h % 12 === 0 ? 12 : h % 12) + ':' + (m < 10 ? '0' : '') + m + '<span style="font-size:.45em;margin-left:.2em">' + (h < 12 ? 'AM' : 'PM') + '</span>';
   }
+  function dockIcon(name) { return '<span class="bi">' + icon(name) + '</span>'; }
   var WEEKDAY = { Sun: 'Sunday', Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday' };
 
   function home(d) {
     homeData = d;
     homeReceived = Date.now();
-    document.body.style.background = d.night ? '#07090d' : '#090f1b';
+    document.body.style.background = d.night ? '#06070b' : '#0b1220';
     var mins = houseMinutes();
     var header = '<header><div class="clock tab" id="clock">' + clockText(mins) + '<small>' + esc(WEEKDAY[d.clock.weekday] || '') + (d.household ? ' · ' + esc(d.household) : '') + '</small></div><div class="who">' +
       (d.carer ? '<span class="pill amber">' + icon('users') + ' Sitter mode · ' + esc(d.carer) + '</span>' : '<span class="pill">' + icon('users') + ' Parent mode</span>') +
@@ -390,15 +408,19 @@
       var whenText = until > 1 ? 'in <b class="tab">' + until + ' min</b>' : until >= -5 ? '<b>now</b>' : '<b class="tab">' + -until + ' min late</b>';
       var frac = Math.max(0.04, Math.min(1, 1 - Math.max(0, until) / 60));
       var C = 2 * Math.PI * 44;
-      main = '<section class="next' + (late ? ' late' : '') + '"><div class="eyebrow"><span class="dot"></span>Up next</div><div class="next-row"><div><div class="next-title">' + esc(n.title) + '</div>' +
+      var dash = ' stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - frac)).toFixed(1) + '"';
+      // The hero: a huge title, the time, and a ring that fills as it gets closer (soft glow behind it).
+      main = '<section class="next' + (late ? ' late' : '') + '"><div class="eyebrow"><span class="dot"></span>Up next</div><div class="next-row"><div class="next-text"><div class="next-title' + (n.title.length > 22 ? ' long' : n.title.length > 14 ? ' mid' : '') + '">' + esc(n.title) + '</div>' +
         '<div class="next-when" id="when"><span class="tab">' + esc(n.time) + '</span> · ' + whenText + '</div></div>' +
         '<div class="ring" aria-hidden="true"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="44" stroke-width="8" fill="none"/>' +
-        '<circle class="prog" cx="50" cy="50" r="44" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - frac)).toFixed(1) + '"' + (late ? ' style="stroke:var(--red)"' : '') + '/></svg>' +
+        '<circle class="glow" cx="50" cy="50" r="44" stroke-width="15" fill="none" stroke-linecap="round"' + dash + '/>' +
+        '<circle class="prog" cx="50" cy="50" r="44" stroke-width="8" fill="none" stroke-linecap="round"' + dash + '/></svg>' +
         '<span class="ic">' + icon(stepIcon(n.key, n.title)) + '</span></div></div>' +
         (n.checklist && n.checklist.length ? '<div class="checks">' + n.checklist.map(function (c) { return '<span class="pill">' + esc(c) + '</span>'; }).join('') + '</div>' : '') +
-        '<div class="strip">' + d.plan.map(function (p) {
-          return '<div class="st ' + esc(p.status) + '"><b>' + icon(p.status === 'done' ? 'check' : stepIcon(p.key, p.title)) + esc(p.title) + '</b><span>' + esc(p.time) + '</span></div>';
-        }).join('') + '</div></section>';
+        // Tonight's plan as a timeline: done, now (glowing), late, still to come.
+        '<ol class="strip">' + d.plan.map(function (p) {
+          return '<li class="st ' + esc(p.status) + '"><span class="node">' + icon(p.status === 'done' ? 'check' : stepIcon(p.key, p.title)) + '</span><b>' + esc(p.title) + '</b><span class="tm tab">' + esc(p.time) + '</span></li>';
+        }).join('') + '</ol></section>';
     } else {
       main = '<section class="next"><div class="eyebrow">' + icon('check') + 'Tonight</div><div class="next-title">' + (d.plan.length ? 'All done' : 'A quiet evening') + '</div>' +
         '<p class="next-when">' + (d.plan.length ? 'Everything on the parents’ plan is done.' : 'The parents didn’t set times for tonight. Ask me anything about the house.') + '</p></section>';
@@ -411,23 +433,23 @@
     }).join('');
     var rows = [];
     // A returning sitter: what the parents changed since their last visit (first hour).
-    if (d.changes && d.changes.length) rows.push('<div class="row">' + icon('info') + '<div><b>New since your last visit</b><br><span class="sub">' + esc(d.changes.join(' · ')) + '</span></div></div>');
-    if (d.smart_home && d.smart_home.length) rows.push('<div class="row">' + icon('moon') + '<div>' + esc(d.smart_home.map(function (a) { return a.device + ' ' + a.state; }).join(' · ')) + '<br><span class="sub">Simulated smart home</span></div></div>');
-    if (d.last_answer) rows.push('<div class="row">' + icon('message') + '<div><b>' + esc(d.last_answer.by) + '</b> answered <q>' + esc(d.last_answer.answer) + '</q><br><span class="sub">' + (d.last_answer.minutes_ago < 1 ? 'just now' : d.last_answer.minutes_ago + ' min ago') + '</span></div></div>');
-    if (d.questions_waiting) rows.push('<div class="row">' + icon('send') + '<div>' + d.questions_waiting + ' question' + (d.questions_waiting > 1 ? 's' : '') + ' waiting for the parents</div></div>');
-    if (d.last_log) rows.push('<div class="row">' + icon('clock') + '<div><span class="tab">' + esc(d.last_log.time) + '</span> · ' + esc(d.last_log.text) + '</div></div>');
-    if (d.door) rows.push('<div class="row">' + icon('door') + '<div><span class="tab">' + esc(d.door.time) + '</span> · ' + esc(d.door.label) + (d.door.decision ? '<br><span class="sub">' + esc(d.door.decision) + '</span>' : '') + '</div></div>');
-    if (d.mode === 'parent' && d.parents.length) rows.push('<div class="row">' + icon('phone') + '<div>Questions go to <b>' + esc(andList(d.parents.map(function (p) { return p.name; }))) + '</b>, in your call order</div></div>');
-    if (!rows.length && d.mode === 'carer') rows.push('<div class="row">' + icon('info') + '<div>Ask me anything about the house, or tell me how it’s going.</div></div>');
+    if (d.changes && d.changes.length) rows.push('<div class="row">' + chip('info') + '<div><b>New since your last visit</b><br><span class="sub">' + esc(d.changes.join(' · ')) + '</span></div></div>');
+    if (d.smart_home && d.smart_home.length) rows.push('<div class="row">' + chip('moon') + '<div>' + esc(d.smart_home.map(function (a) { return a.device + ' ' + a.state; }).join(' · ')) + '<br><span class="sub">Simulated smart home</span></div></div>');
+    if (d.last_answer) rows.push('<div class="row">' + chip('message') + '<div><b>' + esc(d.last_answer.by) + '</b> answered <q>' + esc(d.last_answer.answer) + '</q><br><span class="sub">' + (d.last_answer.minutes_ago < 1 ? 'just now' : d.last_answer.minutes_ago + ' min ago') + '</span></div></div>');
+    if (d.questions_waiting) rows.push('<div class="row">' + chip('send') + '<div>' + d.questions_waiting + ' question' + (d.questions_waiting > 1 ? 's' : '') + ' waiting for the parents</div></div>');
+    if (d.last_log) rows.push('<div class="row">' + chip('clock') + '<div><span class="tab">' + esc(d.last_log.time) + '</span> · ' + esc(d.last_log.text) + '</div></div>');
+    if (d.door) rows.push('<div class="row">' + chip('door') + '<div><span class="tab">' + esc(d.door.time) + '</span> · ' + esc(d.door.label) + (d.door.decision ? '<br><span class="sub">' + esc(d.door.decision) + '</span>' : '') + '</div></div>');
+    if (d.mode === 'parent' && d.parents.length) rows.push('<div class="row">' + chip('phone') + '<div>Questions go to <b>' + esc(andList(d.parents.map(function (p) { return p.name; }))) + '</b>, in your call order</div></div>');
+    if (!rows.length && d.mode === 'carer') rows.push('<div class="row">' + chip('info') + '<div>Ask me anything about the house, or tell me how it’s going.</div></div>');
     rows = rows.slice(0, 3);
     var side = '<section class="side"><div class="kids">' + kids + '</div>' + (rows.length ? '<div class="status">' + rows.join('') + '</div>' : '') + '</section>';
 
     var first = d.parents[0];
     var footer = d.mode === 'carer'
-      ? '<footer><button class="btn blue" data-say="Ask the parents">' + icon('message') + ' Ask a parent</button>' +
-        '<button class="btn" data-say="What\'s next?">' + icon('clock') + ' What’s next?</button>' +
-        '<button class="btn green" data-say="' + esc('Call ' + (first ? first.name : 'Mom')) + '">' + icon('phone') + ' Call ' + esc(first ? first.name : 'a parent') + '</button>' +
-        '<button class="btn red" data-say="Emergency">' + icon('alert') + ' Emergency</button></footer>'
+      ? '<footer><button class="btn blue" data-say="Ask the parents">' + dockIcon('message') + 'Ask a parent</button>' +
+        '<button class="btn" data-say="What\'s next?">' + dockIcon('clock') + 'What’s next?</button>' +
+        '<button class="btn green" data-say="' + esc('Call ' + (first ? first.name : 'Mom')) + '">' + dockIcon('phone') + 'Call ' + esc(first ? first.name : 'a parent') + '</button>' +
+        '<button class="btn red" data-say="Emergency">' + dockIcon('alert') + 'Emergency</button></footer>'
       : '';
     var phase = mins < 17 * 60 ? 'day' : mins < 19 * 60 + 15 ? 'dusk' : 'evening';
     return '<div class="home phase-' + phase + (d.night ? ' night' : '') + (d.mode === 'parent' ? ' parent' : '') + '"><i class="sky" aria-hidden="true"></i>' + header + main + side + footer + '</div>';
@@ -435,6 +457,7 @@
 
   // ---------- the emergency guide: ticking clock, timers, refresh ----------
   var emergencyData = null;
+  var emergencyStep = null; // the step on screen, so a new one can slide in
   var payData = null;
   var emergencyReceived = 0;
   var showSheet = false;
@@ -550,27 +573,36 @@
   function spokenBanner(d) {
     return '<div class="spoken" lang="' + esc(d.language) + '"><span class="pill">' + icon('globe') + ' Said in ' + esc(d.language) + '</span><p>' + esc(d.spoken) + '</p></div>';
   }
-  var lastView = null;
+  var lastKey = null;
   function render(result) {
     current = result;
     var d = result && result.structuredContent;
     var root = document.getElementById('root');
     var view = (d && d.view) || 'text';
-    if (view !== lastView) {
+    // A new screen glides in. The live screens (Tonight, the emergency guide) refresh themselves
+    // every few seconds: those refreshes must not replay the entrance, only real changes do.
+    var key = view;
+    if (d && view === 'home') key += ':' + d.mode + (d.night ? ':night' : '');
+    if (d && view === 'emergency') key += ':' + (d.incident ? d.incident.status : '') + (showSheet ? ':sheet' : '');
+    var live = view === 'home' || view === 'emergency';
+    if (key !== lastKey || !live) {
       root.classList.remove('enter');
       void root.offsetWidth;
       root.classList.add('enter');
-      lastView = view;
+    } else {
+      root.classList.remove('enter');
     }
+    lastKey = key;
+    if (view !== 'emergency') emergencyStep = null;
     document.body.style.background = '';
     if (!d || !d.view || !views[d.view]) {
       var text = (result && result.content && result.content[0] && result.content[0].text) || '';
-      root.innerHTML = panel('<div class="eyebrow">' + icon('message') + 'Alexa</div><p class="title" style="font-weight:600">' + esc(text) + '</p>');
+      root.innerHTML = panel('<div class="eyebrow">' + icon('message') + 'Alexa</div><p class="title" style="font-weight:600">' + esc(text) + '</p>', 'alexa');
     } else {
       var html = views[d.view](d);
       // Bilingual relay: what the carer heard, in their language, above the parents' own words.
       if (d.spoken && d.language && d.language !== 'en' && d.view !== 'home' && d.view !== 'language') {
-        html = d.view === 'emergency' ? html.replace('<h1>', spokenBanner(d) + '<h1>') : html.replace('<div class="panel ">', '<div class="panel ">' + spokenBanner(d));
+        html = d.view === 'emergency' ? html.replace('<h1>', spokenBanner(d) + '<h1>') : html.replace(/<div class="panel [^"]*">/, function (m) { return m + spokenBanner(d); });
       }
       root.innerHTML = html;
     }

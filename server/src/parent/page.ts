@@ -21,239 +21,375 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   })();
 </script>
 <style>
-  :root { --bg:#f6f2ec; --card:#fff; --ink:#1d2433; --muted:#5b6475; --green:#16815a; --red:#c81e28; --amber:#8a5700; --blue:#1f5fae; --line:#e6dfd3; --field:#fcfbf8; --focus:#1f5fae; --shadow:0 1px 2px rgba(29,36,51,.05), 0 8px 24px rgba(29,36,51,.06); --nav-h:64px; --sheet-h:0px; --r:18px; }
-  * { box-sizing: border-box; }
+  :root {
+    --bg:#F6F3EE; --card:#fff; --ink:#0B1220; --midnight:#111A2E; --text2:#5B6475; --fill:#F2EEE8; --fill2:#FAF8F4;
+    --cyan:#18C3E8; --amber:#F7B955; --coral:#F04438; --mint:#12B76A; --lav:#8B7CF6;
+    --coral-ink:#B42318; --mint-ink:#067647; --amber-ink:#8A5700; --cyan-ink:#0B6E85; --lav-ink:#5B4BD6;
+    /* older names the script still uses */
+    --muted:var(--text2); --green:var(--mint-ink); --red:var(--coral-ink); --blue:var(--cyan-ink); --line:rgba(11,18,32,.08);
+    --sh1:0 1px 2px rgba(11,18,32,.04), 0 6px 20px rgba(11,18,32,.06);
+    --sh2:0 2px 6px rgba(11,18,32,.06), 0 18px 48px rgba(11,18,32,.16);
+    --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.32,1.28,.6,1);
+    --nav-h:84px; --sheet-h:0px;
+    --font:"SF Pro Text", "SF Pro", -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", system-ui, sans-serif;
+    --font-d:"SF Pro Display", "SF Pro", -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   main, .card, .qsheet, .toast, .live { overflow-wrap: anywhere; }
-  body { margin: 0; font: 16px/1.45 "Amazon Ember", Inter, system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); padding-bottom: calc(var(--nav-h) + var(--sheet-h) + 24px); -webkit-font-smoothing: antialiased; }
+  html { background: var(--bg); }
+  body { margin: 0; font: 16px/1.45 var(--font); background: var(--bg); color: var(--ink); padding-bottom: calc(var(--nav-h) + var(--sheet-h) + 24px); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
   :focus { outline: none; }
-  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
-  button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible, .upload:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
-  .hero :focus-visible, .alert :focus-visible { outline-color: #ffd27a; }
+  :focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; border-radius: 8px; }
+  .live :focus-visible, .alert :focus-visible { outline-color: #fff; }
   .sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* ---------- header ---------- */
-  .hero { background: radial-gradient(520px 260px at 0% 0%, rgba(99,179,255,.28), transparent 70%), linear-gradient(160deg, #16233a, #0b1322); color: #fff; padding: 16px 16px 20px; border-radius: 0 0 26px 26px; }
-  .hero .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 560px; margin: 0 auto; }
-  .brand { display: flex; gap: 10px; align-items: center; min-width: 0; }
-  .brand img { width: 38px; height: 38px; border-radius: 11px; flex: none; }
-  .brand > div { min-width: 0; }
-  .brand b { display: block; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .brand small { display: block; color: #c3cddd; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* "Answering as" sits above the selector so the header fits a 390 px phone without squeezing the name. */
-  .me { flex: none; font-size: 12px; color: #c3cddd; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .me select { font: inherit; font-size: 14px; font-weight: 600; max-width: 140px; text-overflow: ellipsis; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: 4px 12px; min-height: 44px; }
-  .me select option { color: #1d2433; }
-  .live { max-width: 560px; margin: 16px auto 0; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 14px 16px; }
-  .live #status { font-size: 14px; color: #d3dbe8; }
-  .live .now { font-size: 24px; font-weight: 800; letter-spacing: -.01em; margin-top: 2px; line-height: 1.25; min-height: 30px; }
-  .live .now small { display: block; font-size: 15px; font-weight: 600; color: #f7c26b; margin-top: 2px; letter-spacing: 0; }
-  .prog { margin-top: 12px; }
-  .prog-bar { display: flex; gap: 3px; height: 6px; }
-  .prog-bar i { flex: 1; border-radius: 999px; background: rgba(255,255,255,.18); }
-  .prog-bar i.done { background: #5fd7a4; }
-  .prog-bar i.late { background: #f7b955; }
-  .prog-bar i.due { background: #9cc8ff; animation: pulse 1.6s infinite; }
-  .prog-cap { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: #c3cddd; margin-top: 6px; font-variant-numeric: tabular-nums; }
-  .live .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  /* ---------- large-title header ---------- */
+  .hero { max-width: 560px; margin: 0 auto; padding: calc(10px + env(safe-area-inset-top)) 16px 0; }
+  .hero .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+  .brand { display: flex; gap: 8px; align-items: center; min-width: 0; }
+  .mark { width: 32px; height: 32px; flex: none; border-radius: 10px; display: grid; place-items: center; color: var(--amber); background: linear-gradient(150deg, #1B2742, #0B1220); box-shadow: 0 2px 6px rgba(11,18,32,.25), inset 0 1px 0 rgba(255,255,255,.12); }
+  .mark svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .brand b { font-size: 15px; font-weight: 650; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .me { position: relative; flex: none; display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 12px 0 14px; border-radius: 999px; background: #fff; box-shadow: var(--sh1); font-size: 12px; color: var(--text2); white-space: nowrap; cursor: pointer; }
+  .me span { pointer-events: none; }
+  .me select { appearance: none; -webkit-appearance: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: transparent; border: 0; padding: 10px 18px 10px 4px; max-width: 120px; text-overflow: ellipsis; cursor: pointer; }
+  .me::after { content: ''; position: absolute; right: 14px; top: 50%; width: 6px; height: 6px; margin-top: -5px; border-right: 2px solid var(--text2); border-bottom: 2px solid var(--text2); transform: rotate(45deg); pointer-events: none; }
+  .me:focus-within { box-shadow: var(--sh1), 0 0 0 3px var(--cyan); }
+  .me select:focus-visible { outline: none; }
+  .ttl { margin: 14px 2px 0; }
+  .ttl h1 { margin: 0; font: 800 34px/1.1 var(--font-d); letter-spacing: -.028em; }
+  .ttl small { display: block; margin-top: 2px; font-size: 15px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---------- live status card ---------- */
+  .live { position: relative; margin: 16px 0 0; padding: 16px 16px 16px; border-radius: 24px; color: #fff; overflow: hidden;
+    background: radial-gradient(120% 90% at 0% 0%, rgba(24,195,232,.22), transparent 55%), radial-gradient(90% 70% at 100% 0%, rgba(247,185,85,.18), transparent 60%), linear-gradient(160deg, #1A2540, #0B1220 70%);
+    box-shadow: 0 2px 6px rgba(11,18,32,.12), 0 18px 40px rgba(11,18,32,.22); transition: background-color .3s var(--ease); }
+  .live.sos { background: radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,.18), transparent 55%), linear-gradient(160deg, #F04438, #A11A12); }
+  .live-top { display: flex; align-items: center; gap: 12px; }
+  .ava { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 800 18px/1 var(--font-d); color: #0B1220; background: linear-gradient(140deg, #FFD58A, #F7B955 55%, #F08A4B); box-shadow: 0 0 0 3px rgba(255,255,255,.12); }
+  .ava.home { color: var(--cyan); background: rgba(255,255,255,.08); }
+  .ava svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .live-who { flex: 1; min-width: 0; }
+  .live #status { font-size: 14px; line-height: 1.35; color: #C9D3E3; }
+  .live-dot { display: none; align-items: center; gap: 6px; flex: none; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #9BE8F8; padding: 5px 10px 5px 8px; border-radius: 999px; background: rgba(24,195,232,.12); }
+  .live.on .live-dot { display: inline-flex; }
+  .live-dot i { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); }
+  .live-dot i::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--cyan); animation: ping 2.4s var(--ease) infinite; }
+  .live.sos .live-dot { color: #fff; background: rgba(255,255,255,.18); }
+  .live.sos .live-dot i, .live.sos .live-dot i::after { background: #fff; }
+  @keyframes ping { 0% { transform: scale(1); opacity: .7; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+  .live .now { margin-top: 14px; font: 750 26px/1.2 var(--font-d); letter-spacing: -.02em; min-height: 32px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .live .now small { flex-basis: 100%; font: 600 15px/1.35 var(--font); letter-spacing: 0; color: #FFD58A; }
+  .cd { font: 700 14px/1 var(--font); letter-spacing: 0; padding: 6px 10px; border-radius: 999px; background: rgba(247,185,85,.16); color: #FFD58A; font-variant-numeric: tabular-nums; white-space: nowrap; transform: translateY(-3px); }
+  .cd.is-now { background: rgba(24,195,232,.16); color: #9BE8F8; }
+  .cd.late { background: rgba(240,68,56,.2); color: #FFB4AE; }
+  .prog { margin-top: 14px; }
+  .prog-bar { display: flex; gap: 4px; height: 6px; }
+  .prog-bar i { flex: 1; border-radius: 999px; background: rgba(255,255,255,.14); transform-origin: left; }
+  .prog-bar i.done { background: #4ADE9B; }
+  .prog-bar i.late { background: var(--amber); }
+  .prog-bar i.due { background: var(--cyan); }
+  .prog-cap { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: #AEB9CC; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .live .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
   .live .pills:empty { display: none; }
-  .lp { white-space: nowrap; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.12); color: #e6ecf5; }
-  .lp.ok { background: rgba(61,220,151,.18); color: #8ff0c9; }
-  .lp.warn { background: rgba(247,185,85,.2); color: #ffd98f; }
-  .lp.bad { background: rgba(255,90,95,.22); color: #ffc2c4; }
+  .lp { white-space: nowrap; font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.1); color: #E6ECF5; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .lp.ok { background: rgba(18,183,106,.2); color: #8EF0C2; }
+  .lp.warn { background: rgba(247,185,85,.18); color: #FFD58A; }
+  .lp.bad { background: rgba(255,255,255,.2); color: #fff; }
+  body:not([data-tab=tonight]) .live .prog, body:not([data-tab=tonight]) .live .pills { display: none; }
 
-  /* ---------- layout and cards ---------- */
-  main { padding: 4px 16px 24px; max-width: 560px; margin: 0 auto; }
+  /* ---------- layout, cards, type ---------- */
+  main { padding: 0 16px 24px; max-width: 560px; margin: 0 auto; }
   .tabpane { display: none; }
-  body[data-tab=tonight] .tabpane[data-tab=tonight], body[data-tab=house] .tabpane[data-tab=house], body[data-tab=family] .tabpane[data-tab=family] { display: block; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; margin: 14px 0; box-shadow: var(--shadow); }
-  .card > strong:first-child { display: block; font-size: 17px; line-height: 1.3; margin: 0 0 4px; }
-  h2.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 24px 6px 0; }
-  .q { font-size: 19px; font-weight: 650; margin: 0 0 12px; line-height: 1.3; }
-  .asker { font-size: 13px; color: var(--muted); margin: 0 0 4px; }
+  body[data-tab=tonight] .tabpane[data-tab=tonight], body[data-tab=house] .tabpane[data-tab=house], body[data-tab=family] .tabpane[data-tab=family] { display: block; animation: paneIn .28s var(--ease) both; }
+  @keyframes paneIn { from { opacity: 0; transform: translateY(8px); } }
+  .card { position: relative; background: var(--card); border: 0; border-radius: 24px; padding: 20px; margin: 16px 0; box-shadow: var(--sh1); }
+  .card > strong:first-child { display: block; font: 700 17px/1.3 var(--font-d); letter-spacing: -.012em; margin: 0 0 4px; }
+  .card > p.muted:first-of-type { margin-top: 4px; }
+  h2.sec { font: 700 13px/1.2 var(--font); text-transform: uppercase; letter-spacing: .08em; color: var(--text2); margin: 32px 4px -4px; }
+  .muted { color: var(--text2); font-size: 14px; line-height: 1.45; }
+  ul { padding-left: 18px; margin: 8px 0; }
+  .rise { animation: rise .32s var(--ease) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ---------- buttons and controls ---------- */
+  button { font: inherit; font-weight: 650; min-height: 44px; padding: 10px 16px; border-radius: 14px; border: 0; background: var(--fill); color: var(--ink); cursor: pointer; touch-action: manipulation; transition: transform .18s var(--ease), opacity .18s var(--ease), background-color .18s var(--ease); }
+  button * { pointer-events: none; }
+  button:active:not(:disabled) { transform: scale(.97); }
+  button:disabled { opacity: .5; cursor: default; }
+  button.ok { background: var(--ink); color: #fff; box-shadow: 0 1px 2px rgba(11,18,32,.2), 0 6px 16px rgba(11,18,32,.18); }
+  button.no { background: #FEECEB; color: var(--coral-ink); }
+  .wide { width: 100%; margin-top: 12px; min-height: 52px; font-size: 17px; border-radius: 16px; }
   .btns { display: flex; gap: 8px; }
-  .btns > button { flex: 1 1 0; min-width: 0; padding-left: 6px; padding-right: 6px; overflow-wrap: normal; }
-  button { font: inherit; font-weight: 600; min-height: 44px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; touch-action: manipulation; transition: transform .08s ease, background-color .15s ease; }
-  button:active { transform: scale(.98); }
-  button:disabled { opacity: .6; cursor: default; }
-  button.ok { background: var(--green); color: #fff; border-color: var(--green); }
-  button.no { color: var(--red); border-color: #efb1b5; background: #fff7f7; }
-  .scope { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 6px 0 0; color: var(--muted); font-size: 15px; }
-  .scope label { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
-  .scope input { width: 20px; height: 20px; margin: 0; accent-color: var(--green); }
-  .alert { background: linear-gradient(160deg, #d92d36, #a5121a); color: #fff; border: 0; }
-  .alert p { margin: 6px 0 0; }
-  .alert a.call { display: block; text-align: center; margin-top: 12px; background: #fff; color: #a5121a; font-weight: 800; padding: 12px; border-radius: 14px; text-decoration: none; }
-  .muted { color: var(--muted); font-size: 14px; }
-  ul { padding-left: 18px; margin: 6px 0; }
-  .urgent { display: inline-block; font-size: 12px; font-weight: 700; background: #fdecea; color: #b0151e; padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
-  .always-note { display: none; margin: 8px 0 0; font-size: 14px; color: var(--amber); background: #fff4d6; padding: 6px 8px; border-radius: 8px; }
-  .card:has(input[value=always]:checked) .always-note { display: block; }
-  textarea { width: 100%; margin-top: 10px; font: inherit; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); color: var(--ink); min-height: 48px; }
-  .upload { position: relative; display: flex; gap: 8px; justify-content: center; align-items: center; min-height: 56px; padding: 16px; border: 2px dashed #d3c9b9; border-radius: 16px; margin-top: 12px; cursor: pointer; font-weight: 650; background: var(--field); }
-  .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-  .wide { width: 100%; margin-top: 10px; }
-  .from { font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 4px; }
-  .pcard textarea.ptext { margin-top: 6px; }
-  .chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #eef2f7; color: #334e68; margin-right: 6px; }
-  .chip.safety { background: #fdecea; color: #b0151e; }
-  .warn { font-size: 13px; color: var(--amber); background: #fff4d6; padding: 6px 10px; border-radius: 10px; margin-top: 8px; }
-  .conflict { background: #fff7e6; border: 1px solid #f0c36d; border-radius: 12px; padding: 10px; margin-top: 8px; font-size: 14px; }
-  .pbtns { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 10px; }
-  .perr { color: var(--red); font-size: 14px; margin-top: 6px; }
+  .btns > button { flex: 1 1 0; min-width: 0; min-height: 48px; padding-left: 6px; padding-right: 6px; overflow-wrap: normal; }
+  .pbtns { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 12px; }
+  .seg { display: flex; gap: 4px; padding: 4px; margin-top: 12px; border-radius: 16px; background: var(--fill); }
+  .seg button { flex: 1 1 0; min-width: 0; min-height: 44px; background: transparent; border-radius: 12px; font-size: 15px; }
+  .seg button:hover { background: rgba(255,255,255,.6); }
+  .seg button:active:not(:disabled) { background: #fff; box-shadow: 0 1px 3px rgba(11,18,32,.12); }
+  .scope { display: inline-flex; gap: 2px; padding: 3px; margin: 12px 0 0; border-radius: 14px; background: var(--fill); font-size: 14px; font-weight: 600; color: var(--text2); }
+  .scope label { position: relative; display: flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 11px; cursor: pointer; transition: background-color .18s var(--ease), color .18s var(--ease); }
+  .scope input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .scope label:has(input:checked) { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(11,18,32,.12); }
+  .scope label:has(input:focus-visible) { outline: 3px solid var(--cyan); outline-offset: 1px; }
+  input.sw { appearance: none; -webkit-appearance: none; position: relative; flex: none; width: 51px; height: 31px; margin: 0; border-radius: 999px; background: #DDD7CC; cursor: pointer; transition: background-color .22s var(--ease); }
+  input.sw::before { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(11,18,32,.22); transition: transform .26s var(--spring); }
+  input.sw:checked { background: var(--mint); }
+  input.sw:checked::before { transform: translateX(20px); }
+  .sw-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 16px; cursor: pointer; }
+  .sw-row:first-child { border-top: 0; }
+  .switch { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 15px; }
+  .switch input { width: 20px; height: 20px; accent-color: var(--mint); }
+
+  /* ---------- forms ---------- */
+  textarea, .field input, .field select, .row input, .row select, .vadd input, .vadd select {
+    display: block; width: 100%; font: inherit; color: var(--ink); min-height: 48px; padding: 12px 14px; border-radius: 14px; border: 1px solid transparent; background: var(--fill); transition: background-color .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease); }
+  textarea { margin-top: 12px; resize: vertical; line-height: 1.4; }
+  textarea:focus, .field input:focus, .field select:focus, .row input:focus, .row select:focus, .vadd input:focus, .vadd select:focus { outline: none; background: #fff; border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(24,195,232,.18); }
+  ::placeholder { color: #737B8C; }
+  .field { display: block; margin: 16px 0 0; font-size: 13px; font-weight: 650; color: var(--text2); }
+  .field input, .field select { margin-top: 6px; }
+  .from { font: 700 13px/1.2 var(--font); text-transform: uppercase; letter-spacing: .07em; color: var(--text2); margin: 24px 0 6px; }
+  .perr { color: var(--coral-ink); font-size: 14px; margin: 8px 0 0; }
   .perr:empty { display: none; }
-  .en { font-size: 14px; color: var(--muted); margin: -6px 0 10px; }
+  .ferr { color: var(--coral-ink); font-size: 14px; font-weight: 600; min-height: 1em; margin: 12px 0 0; }
+  .en { font-size: 14px; color: var(--text2); margin: -6px 0 12px; }
+  .warn { font-size: 13px; color: var(--amber-ink); background: #FEF4DF; padding: 8px 12px; border-radius: 12px; margin-top: 8px; }
+  .conflict { background: #FFF8EA; border-radius: 16px; padding: 12px 14px; margin-top: 10px; font-size: 14px; box-shadow: inset 0 0 0 1px rgba(247,185,85,.45); }
+  .chip { display: inline-block; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #EEF1F6; color: #334E68; margin-right: 6px; }
+  .chip.safety { background: #FEECEB; color: var(--coral-ink); }
+  .upload { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 140px; padding: 20px 16px; margin-top: 16px; text-align: center; border: 2px dashed #D6CEC1; border-radius: 20px; background: var(--fill2); cursor: pointer; transition: transform .2s var(--ease), border-color .2s var(--ease), background-color .2s var(--ease); }
+  .upload:hover { border-color: #BDB3A3; }
+  .upload.drag { border-color: var(--cyan); background: #ECFAFD; transform: scale(1.01); }
+  .upload:focus-within { outline: 3px solid var(--cyan); outline-offset: 2px; }
+  .upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .up-ic { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; background: #fff; color: var(--ink); box-shadow: var(--sh1); margin-bottom: 6px; }
+  .up-ic svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .up-t { font-weight: 700; font-size: 16px; }
+  .up-s { font-size: 13px; color: var(--text2); }
+  .row { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; margin-top: 10px; border-radius: 18px; background: var(--fill2); box-shadow: inset 0 0 0 1px var(--line); }
+  .row .full { grid-column: 1 / -1; }
+  .row label { font-size: 13px; font-weight: 650; color: var(--text2); }
+  .row input, .row select { margin-top: 6px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+  .row .tools { grid-column: 1 / -1; display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+  .row .tools button { min-width: 44px; padding: 8px 12px; font-size: 14px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+  .row .tools .grow { flex: 1; font-size: 14px; color: var(--text2); }
+  .row .tools label { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+  .row .tools label input.sw { display: inline-block; width: 51px; height: 31px; border-radius: 999px; min-height: 0; margin: 0; padding: 0; border: 0; box-shadow: none; background: #DDD7CC; }
+  .row .tools label input.sw:checked { background: var(--mint); }
+  .order { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 13px; font-weight: 800; }
+  .banner { background: linear-gradient(160deg, #FFF6E0, #FFEFD0); }
+  .danger button { background: #fff; color: var(--coral-ink); box-shadow: inset 0 0 0 1px rgba(240,68,56,.35); }
+  .danger button.armed { background: var(--coral-ink); color: #fff; box-shadow: none; }
+
+  /* ---------- questions ---------- */
+  .q { font: 650 19px/1.3 var(--font-d); letter-spacing: -.01em; margin: 0 0 14px; }
+  .asker { font-size: 13px; color: var(--text2); margin: 0 0 6px; }
+  .urgent { display: inline-block; font-size: 12px; font-weight: 750; letter-spacing: .02em; background: #FEECEB; color: var(--coral-ink); padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
+  .always-note { display: none; margin: 10px 0 0; font-size: 14px; color: var(--amber-ink); background: #FEF4DF; padding: 8px 12px; border-radius: 12px; }
+  .card:has(input[value=always]:checked) .always-note { display: block; }
+  .card[data-id] { box-shadow: var(--sh1), inset 0 0 0 1px rgba(247,185,85,.0); }
+  .card[data-id]:has(.urgent) { box-shadow: var(--sh1), inset 0 0 0 2px rgba(240,68,56,.35); }
+  .card.leaving { opacity: 0; transform: scale(.97); transition: opacity .22s var(--ease), transform .22s var(--ease); }
+  .doorcam { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; margin: 0 0 14px; background: #111; }
+
+  /* ---------- question sheet ---------- */
+  .qsheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; padding: 0 8px calc(var(--nav-h) + 8px); pointer-events: none; visibility: hidden; transition: visibility 0s linear .42s; }
+  .qsheet.open { visibility: visible; transition: visibility 0s; }
+  .qsheet .scrim { position: absolute; left: 0; right: 0; bottom: 0; top: -56px; background: linear-gradient(rgba(11,18,32,0), rgba(11,18,32,.34) 42%); opacity: 0; transition: opacity .32s var(--ease); }
+  .qsheet.open .scrim { opacity: 1; }
+  .qs { position: relative; pointer-events: auto; max-width: 560px; margin: 0 auto; padding: 6px 16px 12px; border-radius: 28px; background: #fff; box-shadow: var(--sh2); transform: translateY(calc(100% + var(--nav-h) + 40px)); transition: transform .44s var(--spring); }
+  .qsheet.open .qs { transform: none; }
+  .qsheet.bump .qs { animation: bump .5s var(--ease); }
+  @keyframes bump { 30% { transform: translateY(-8px); } 60% { transform: translateY(2px); } }
+  .grab { display: block; width: 100%; min-height: 28px; padding: 0; margin: 0 0 2px; background: none; border-radius: 0; }
+  .grab::before { content: ''; display: block; width: 40px; height: 5px; margin: 0 auto; border-radius: 999px; background: #D9D3C8; }
+  .grab:active:not(:disabled) { transform: none; }
+  .qs-top { display: flex; gap: 12px; align-items: flex-start; }
+  .qs-ava { width: 36px; height: 36px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 800 15px/1 var(--font-d); color: #0B1220; background: linear-gradient(140deg, #FFD58A, #F7B955 55%, #F08A4B); }
+  .qs-txt { min-width: 0; flex: 1; }
+  .qs-txt .asker { margin: 0 0 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .qs-txt .asker .urgent { margin: 0; padding: 2px 8px; }
+  .qs .q { font-size: 19px; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .qs .en { margin: 4px 0 0; font-size: 13px; }
+  .qs-photo { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 34vh; object-fit: cover; border-radius: 18px; margin: 12px 0 0; background: #111; }
+  .qs .btns { flex-direction: column; gap: 8px; margin-top: 14px; }
+  .qs .btns > button { flex: none; width: 100%; min-height: 52px; font-size: 17px; border-radius: 16px; }
+  .qs .btns > button:not(.ok):not(.no) { min-height: 44px; background: transparent; color: var(--cyan-ink); font-size: 16px; }
+  .qs-more { display: block; width: 100%; min-height: 44px; margin-top: 2px; padding: 8px; background: none; color: var(--text2); font-size: 14px; font-weight: 600; }
+  .qsheet.peek .qs-body { display: none; }
+  .qsheet.peek .qs { padding-bottom: 14px; }
+  .qs-done { position: absolute; inset: 0; z-index: 2; border-radius: inherit; background: #fff; display: grid; place-content: center; justify-items: center; gap: 10px; font: 700 17px/1.3 var(--font-d); animation: fadeIn .2s var(--ease) both; }
+  .qs-done svg { width: 64px; height: 64px; }
+  .qs-done circle { fill: var(--mint); transform-origin: center; animation: pop .42s var(--spring) both; }
+  .qs-done path { fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw .36s var(--ease) .16s forwards; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fadeIn { from { opacity: 0; } }
+
+  /* ---------- toasts ---------- */
+  .toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + var(--sheet-h) + 12px); z-index: 11; display: flex; align-items: center; gap: 10px; max-width: min(92vw, 420px); padding: 12px 18px 12px 12px; border-radius: 999px; background: rgba(11,18,32,.94); color: #fff; font-size: 15px; font-weight: 600; box-shadow: 0 12px 32px rgba(11,18,32,.3); transform: translate(-50%, 16px) scale(.96); opacity: 0; pointer-events: none; transition: opacity .22s var(--ease), transform .3s var(--spring); }
+  .toast::before { content: ''; width: 24px; height: 24px; flex: none; border-radius: 50%; background: var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 16px no-repeat; }
+  .toast.bad::before { background: var(--coral) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 7v6M12 17h.01'/%3E%3C/svg%3E") center / 16px no-repeat; }
+  .toast.info::before { background: var(--cyan) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 8h.01M12 11v6'/%3E%3C/svg%3E") center / 16px no-repeat; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  .toast:empty { display: none; }
+
+  /* ---------- tonight so far: a timeline ---------- */
+  .feed { position: relative; list-style: none; padding: 0; margin: 14px 0 0; }
+  .feed::before { content: ''; position: absolute; left: 17px; top: 20px; bottom: 20px; width: 2px; border-radius: 2px; background: #EEE9E1; }
+  .feed li { position: relative; display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: start; padding: 8px 0; }
+  .feed.stagger li { animation: rise .34s var(--ease) both; animation-delay: calc(var(--i, 0) * 45ms); }
+  .feed li.new { animation: slideIn .38s var(--spring) both; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-14px); } }
+  .fi-ic { position: relative; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #F1EDE6; color: var(--text2); box-shadow: 0 0 0 4px #fff; }
+  .fi-ic svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .k-sleep .fi-ic { background: #E9ECF7; color: #2A3766; }
+  .k-food .fi-ic { background: #FEF3DC; color: var(--amber-ink); }
+  .k-mood .fi-ic { background: #E3F7FC; color: var(--cyan-ink); }
+  .k-health .fi-ic { background: #FEECEB; color: var(--coral-ink); }
+  .k-pet .fi-ic { background: #F4ECE2; color: #6B4E2E; }
+  .k-door .fi-ic { background: #E3F7FC; color: var(--cyan-ink); }
+  .k-answer .fi-ic { background: #EFECFE; color: var(--lav-ink); }
+  .k-shop .fi-ic { background: #E3F6EC; color: var(--mint-ink); }
+  .fi-tx { min-width: 0; padding-top: 7px; font-size: 15px; line-height: 1.38; }
+  .fi-tx small { display: block; margin-top: 2px; font-size: 13px; color: var(--text2); }
+  .fi-t { padding-top: 8px; font-size: 13px; color: var(--text2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .empty { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; color: var(--text2); font-size: 15px; }
+  .empty .fi-ic { box-shadow: none; flex: none; }
+  .feed-empty { margin: 6px 0 0; }
+
+  /* ---------- emergency ---------- */
+  .alert { color: #fff; background: radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,.18), transparent 55%), linear-gradient(160deg, #F04438, #A11A12); box-shadow: 0 4px 10px rgba(161,26,18,.2), 0 18px 40px rgba(240,68,56,.32); }
+  .alert p { margin: 8px 0 0; }
+  .alert a.call { display: block; text-align: center; margin-top: 12px; background: #fff; color: var(--coral-ink); font-weight: 800; padding: 14px; border-radius: 16px; text-decoration: none; }
+  .inc { padding: 20px; }
+  .inc.enter { animation: sosIn .6s var(--ease) both; }
+  .inc.enter::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 6px rgba(240,68,56,.5); pointer-events: none; animation: ring 1s var(--ease) .2s both; }
+  @keyframes sosIn { 0% { opacity: 0; transform: scale(.96); } 60% { opacity: 1; transform: scale(1.012); } 100% { transform: none; } }
+  @keyframes ring { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.05); } }
+  .inc-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .inc-head strong { font: 800 18px/1.25 var(--font-d); }
+  .inc-head .elapsed { font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(0,0,0,.18); white-space: nowrap; }
+  .inc-desc { font-size: 15px; opacity: .95; }
+  .inc-prog { display: flex; gap: 4px; height: 6px; margin-top: 16px; }
+  .inc-prog i { flex: 1; border-radius: 999px; background: rgba(255,255,255,.25); }
+  .inc-prog i.done { background: #fff; }
+  .inc-prog i.now { background: #FFD58A; }
+  .inc-now { margin-top: 10px; padding: 14px 16px; border-radius: 18px; background: #fff; color: #5C0E09; font: 700 19px/1.3 var(--font-d); box-shadow: 0 6px 18px rgba(0,0,0,.14); }
+  .inc-now small { display: block; margin-bottom: 4px; font: 750 12px/1.2 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--coral-ink); }
+  .inc-timer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; padding: 12px 16px; border-radius: 18px; background: rgba(0,0,0,.2); font-weight: 700; }
+  .inc-timer b { font: 800 40px/1 var(--font-d); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .inc-timer.up { background: #FFF3C4; color: #6B3F00; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .72; } }
+  .inc-steps { margin: 14px 0 0; padding-left: 22px; font-size: 14px; }
+  .inc-steps li { margin: 6px 0; opacity: .82; }
+  .inc-steps li.done { text-decoration: line-through; opacity: .7; }
+  .inc-steps li.now { opacity: 1; font-weight: 750; }
+  .inc-otw { margin-top: 12px; padding: 10px 14px; border-radius: 14px; background: rgba(255,255,255,.16); font-weight: 650; }
+  .inc-label { margin: 18px 0 8px; font: 750 13px/1.2 var(--font); letter-spacing: .06em; text-transform: uppercase; }
+  .otw { display: flex; gap: 4px; padding: 4px; border-radius: 20px; background: rgba(0,0,0,.2); }
+  .otw button { flex: 1 1 0; min-width: 0; min-height: 68px; border-radius: 16px; background: #fff; color: #8A0D14; font: 800 26px/1 var(--font-d); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,.16); }
+  .otw button small { font: 700 13px/1 var(--font); color: var(--coral-ink); }
+  .inc .btns button { background: rgba(255,255,255,.95); color: #8A0D14; }
+  .inc-log { list-style: none; padding: 0; margin: 14px 0 0; font-size: 13px; }
+  .inc-log li { padding: 6px 0; border-top: 1px solid rgba(255,255,255,.2); }
+  .inc-log span { font-variant-numeric: tabular-nums; margin-right: 8px; opacity: .85; }
+  .inc.over { color: var(--ink); background: linear-gradient(160deg, #EFFBF4, #E3F6EC); }
+  .inc.over .inc-log li { border-color: var(--line); }
+  .inc-addr { font-size: 13px; opacity: .9; margin: 12px 0 0; }
+
+  /* ---------- goodnight message ---------- */
+  .gn-item { border-top: 1px solid var(--line); padding: 12px 0; }
+  .gn-item:first-child { border-top: 0; }
+  .gn-item .gn-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 14px; }
+  .gn-item .gn-meta button { min-height: 40px; padding: 6px 12px; font-size: 14px; }
+  .gn-item audio, .gn-item video, #gnDraftMedia audio, #gnDraftMedia video { width: 100%; margin-top: 8px; border-radius: 14px; }
+  .gn-item video, #gnDraftMedia video, #gnPreview { max-height: 260px; background: #000; }
+  .gn-rec { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .gn-rec button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; }
+  .gn-rec button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #gnPreview { width: 100%; border-radius: 16px; margin-top: 12px; }
+  .gn-timer { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-variant-numeric: tabular-nums; }
+  .gn-timer .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--coral); animation: pulse 1.2s infinite; }
+  .gn-timer button { margin-left: auto; }
+  .gn-upload { display: block; margin-top: 14px; }
+  .gn-upload input { font-size: 13px; min-height: 44px; max-width: 100%; }
+  .gn-heart { color: var(--lav); }
+
+  /* ---------- expected visitors ---------- */
+  .vlist { list-style: none; padding: 0; margin: 12px 0 0; }
+  .vlist li { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .vlist li:first-child { border-top: 0; }
+  .vlist .vi { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #E3F7FC; color: var(--cyan-ink); flex: none; }
+  .vlist .vi.box { background: #FEF3DC; color: var(--amber-ink); }
+  .vlist .vi svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vlist .vt { flex: 1; min-width: 0; }
+  .vlist .vt b { display: block; font-weight: 650; }
+  .vlist .vt small { color: var(--text2); font-size: 13px; }
+  .vlist button { min-height: 40px; padding: 6px 12px; font-size: 14px; }
+  .vlist li.empty { border: 0; }
+  .vadd { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .vadd #vAdd { min-height: 48px; }
+
+  /* ---------- notifications, debrief ---------- */
+  [hidden] { display: none !important; }
   .notify { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .notify p { margin: 4px 0 0; }
+  .notify .on-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mint); margin-right: 8px; vertical-align: middle; }
   .tl { list-style: none; padding: 0; margin: 8px 0 0; }
   .tl li { display: grid; grid-template-columns: 74px 1fr; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 15px; }
   .tl li:first-child { border-top: 0; }
-  .tl .t { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .field { display: block; margin: 12px 0 0; font-size: 14px; color: var(--muted); }
-  .field input, .field select, .row input, .row select { display: block; width: 100%; font: inherit; color: var(--ink); min-height: 44px; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); margin-top: 4px; }
-  .row { border: 1px solid var(--line); border-radius: 16px; padding: 12px; margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #fff; }
-  .row .full { grid-column: 1 / -1; }
-  .row label { font-size: 13px; color: var(--muted); }
-  .row .tools { grid-column: 1 / -1; display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
-  .row .tools button { padding: 8px 12px; font-size: 14px; min-width: 44px; }
-  .row .tools .grow { flex: 1; font-size: 13px; color: var(--muted); }
-  .row .tools label { display: flex; gap: 8px; align-items: center; min-height: 44px; }
-  .row .tools label input { display: inline; width: 20px; height: 20px; min-height: 0; margin: 0; accent-color: var(--green); }
-  .order { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #eef2f7; color: #334e68; font-size: 13px; font-weight: 800; }
-  .ferr { color: var(--red); font-size: 14px; min-height: 1em; margin: 10px 0 0; }
-  .banner { background: #fff8e6; border-color: #f0d08a; }
-  .danger button { border-color: #efb1b5; color: var(--red); background: #fff; }
-  .danger button.armed { background: var(--red); color: #fff; }
+  .tl .t { color: var(--text2); font-variant-numeric: tabular-nums; }
+  .debrief { background: linear-gradient(170deg, #fff 60%, #F7F4FF); }
+  .debrief ul { padding-left: 20px; }
+  .debrief li { margin: 4px 0; }
 
-  /* ---------- emergency live view ---------- */
-  .inc { padding: 18px; }
-  .inc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .inc-head .elapsed { font-variant-numeric: tabular-nums; opacity: .9; font-size: 14px; }
-  .inc-desc { font-size: 15px; opacity: .95; }
-  .inc-now { background: #fff; color: #7a0b10; border-radius: 14px; padding: 12px 14px; margin-top: 12px; font-size: 18px; font-weight: 700; line-height: 1.3; }
-  .inc-now small { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #b3141b; margin-bottom: 4px; }
-  .inc-timer { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.22); border-radius: 14px; padding: 10px 14px; margin-top: 10px; font-weight: 700; }
-  .inc-timer b { font-size: 24px; font-variant-numeric: tabular-nums; }
-  .inc-timer.up { background: #fff3c4; color: #7a4a00; animation: pulse 1s infinite; }
-  .inc-steps { margin: 12px 0 0; padding-left: 20px; font-size: 14px; }
-  .inc-steps li { margin: 4px 0; opacity: .8; }
-  .inc-steps li.done { text-decoration: line-through; opacity: .7; }
-  .inc-steps li.now { opacity: 1; font-weight: 700; }
-  .inc-otw { background: rgba(255,255,255,.16); border-radius: 12px; padding: 8px 12px; font-weight: 600; }
-  .inc-label { margin: 16px 0 8px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
-  .inc .btns button { background: rgba(255,255,255,.95); color: #8a0d14; border: 0; }
-  .otw { display: flex; background: rgba(0,0,0,.2); border-radius: 18px; padding: 4px; gap: 4px; }
-  .otw button { flex: 1 1 0; min-width: 0; min-height: 64px; border: 0; border-radius: 14px; background: #fff; color: #8a0d14; font-size: 24px; font-weight: 800; line-height: 1.05; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.18); }
-  .otw button small { font-size: 13px; font-weight: 700; letter-spacing: .02em; color: #a3121b; }
-  .otw button:focus-visible { outline: 3px solid #ffd27a; outline-offset: 2px; }
-  .inc-log { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13px; opacity: .95; }
-  .inc-log li { padding: 4px 0; border-top: 1px solid rgba(255,255,255,.22); }
-  .inc-log span { font-variant-numeric: tabular-nums; margin-right: 6px; opacity: .85; }
-  .inc.over { border-color: #b7e4cf; background: #f1fbf6; }
-  .inc.over .inc-log li { border-color: var(--line); }
-  .inc-addr { font-size: 13px; opacity: .9; margin: 10px 0 0; }
-  @keyframes pulse { 50% { opacity: .65; } }
-
-  /* ---------- goodnight message ---------- */
-  .gn-item { border-top: 1px solid var(--line); padding: 10px 0; }
-  .gn-item:first-child { border-top: 0; }
-  .gn-item .gn-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 14px; }
-  .gn-item audio, .gn-item video, #gnDraftMedia audio, #gnDraftMedia video { width: 100%; margin-top: 6px; border-radius: 12px; }
-  .gn-item video, #gnDraftMedia video, #gnPreview { max-height: 260px; background: #000; }
-  .gn-rec { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  #gnPreview { width: 100%; border-radius: 14px; margin-top: 10px; }
-  .gn-timer { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; }
-  .gn-timer .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); animation: pulse 1s infinite; }
-  .gn-timer button { margin-left: auto; padding: 8px 14px; }
-  .gn-upload { display: block; margin-top: 12px; }
-  .gn-upload input { font-size: 13px; min-height: 44px; }
-  .doorcam { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; margin: 0 0 12px; background: #111; }
-
-  /* ---------- expected visitors ---------- */
-  .vlist { list-style: none; padding: 0; margin: 10px 0 0; }
-  .vlist li { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
-  .vlist li:first-child { border-top: 0; }
-  .vlist .vi { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #eef4fc; flex: none; }
-  .vlist .vt { flex: 1; min-width: 0; }
-  .vlist .vt b { display: block; }
-  .vlist .vt small { color: var(--muted); }
-  .vlist button { padding: 8px 12px; font-size: 14px; }
-  .vadd { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 6px; margin-top: 10px; }
-  .vadd input, .vadd select { min-width: 0; min-height: 44px; font: inherit; color: var(--ink); padding: 9px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); }
-  @media (max-width: 420px) { .vadd { grid-template-columns: 1fr 1fr; } }
-  .switch { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 15px; }
-  .switch input { width: 20px; height: 20px; accent-color: var(--green); }
-  #shadow label { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 2px 0; cursor: pointer; }
-  #shadow input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--green); }
-
-  /* ---------- tonight so far: one feed ---------- */
-  .feed { list-style: none; padding: 0; margin: 8px 0 0; }
-  .feed li { display: grid; grid-template-columns: 32px 1fr auto; gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid var(--line); }
-  .feed li:first-child { border-top: 0; }
-  .feed .fi-ic { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #eef2f7; color: #334e68; }
-  .feed .fi-ic svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .feed .k-sleep .fi-ic { background: #ece9fb; color: #4b3fa6; }
-  .feed .k-food .fi-ic { background: #fff1dc; color: #8a5700; }
-  .feed .k-health .fi-ic { background: #fdecea; color: #b0151e; }
-  .feed .k-door .fi-ic { background: #e6f0fb; color: #1f5fae; }
-  .feed .k-answer .fi-ic { background: #e3f5ec; color: #11684a; }
-  .feed .k-shop .fi-ic { background: #f1ede6; color: #5b4a2e; }
-  .feed .fi-tx { min-width: 0; font-size: 15px; color: var(--ink); line-height: 1.35; padding-top: 5px; }
-  .feed .fi-tx small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .feed .fi-t { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; padding-top: 6px; }
-  .feed-empty { margin: 6px 0 0; }
-
-  /* ---------- question sheet, toasts ---------- */
-  .qsheet { position: fixed; left: 0; right: 0; bottom: var(--nav-h); z-index: 9; padding: 0 10px 8px; pointer-events: none; transform: translateY(calc(100% + var(--nav-h))); visibility: hidden; transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s linear .3s; }
-  .qsheet.open { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s; }
-  .qsheet .qs { pointer-events: auto; max-width: 560px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 14px 14px 12px; box-shadow: 0 -2px 6px rgba(29,36,51,.05), 0 12px 40px rgba(29,36,51,.22); }
-  .qsheet .qs.urgent-q { border-color: #efb1b5; box-shadow: 0 0 0 2px #f6c9cc, 0 12px 40px rgba(29,36,51,.22); }
-  .qsheet.bump .qs { animation: bump .45s ease; }
-  @keyframes bump { 30% { transform: translateY(-6px); } 60% { transform: translateY(1px); } }
-  .qs-top { display: flex; gap: 12px; align-items: flex-start; }
-  .qs-thumb { width: 72px; height: 54px; flex: none; object-fit: cover; border-radius: 10px; background: #111; }
-  .qs-txt { min-width: 0; flex: 1; }
-  .qs-txt .asker { margin: 0 0 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .qs-txt .asker .urgent { margin: 0; }
-  .qs .q { font-size: 18px; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .qs .en { margin: 4px 0 0; font-size: 13px; }
-  .qs .btns { margin-top: 12px; }
-  .qs .btns button { min-height: 52px; font-size: 16px; }
-  .qs-more { display: block; width: 100%; min-height: 44px; margin-top: 6px; padding: 8px; border: 0; background: none; color: var(--blue); font-size: 15px; }
-  .toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + var(--sheet-h) + 12px); z-index: 11; max-width: min(92vw, 420px); transform: translate(-50%, 16px); opacity: 0; pointer-events: none; background: #1d2433; color: #fff; font-size: 15px; font-weight: 600; padding: 12px 18px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); transition: opacity .2s ease, transform .2s ease; text-align: center; }
-  .toast.show { opacity: 1; transform: translate(-50%, 0); }
-  .toast.bad { background: #8a0d14; }
-
-  /* ---------- skeletons, before the first state arrives ---------- */
-  .sk { display: block; height: 14px; border-radius: 8px; margin: 10px 0; background: linear-gradient(90deg, #eee8de 0%, #f7f3ec 40%, #eee8de 80%) 0 0 / 300% 100%; animation: shimmer 1.4s linear infinite; }
-  .sk.w40 { width: 40%; } .sk.w60 { width: 60%; } .sk.w80 { width: 80%; } .sk.tall { height: 44px; border-radius: 14px; }
-  .hero .sk { background: linear-gradient(90deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,.2) 40%, rgba(255,255,255,.1) 80%) 0 0 / 300% 100%; margin: 6px 0; }
-  .hero .sk.big { height: 26px; width: 70%; }
-  .hero .sk.pill { display: inline-block; width: 110px; height: 24px; border-radius: 999px; margin: 0; }
-  body.stalled .sk { animation: none; }
-  @keyframes shimmer { to { background-position: -300% 0; } }
+  /* ---------- skeletons ---------- */
+  .sk { position: relative; overflow: hidden; display: block; height: 14px; margin: 12px 0; border-radius: 8px; background: #ECE7DF; }
+  .sk::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); transform: translateX(-100%); animation: shimmer 1.5s var(--ease) infinite; }
+  .sk.w40 { width: 40%; } .sk.w60 { width: 60%; } .sk.w80 { width: 80%; } .sk.tall { height: 48px; border-radius: 14px; }
+  .sk.dot { width: 36px; height: 36px; border-radius: 50%; margin: 0; flex: none; }
+  .sk-row { display: flex; gap: 12px; align-items: center; margin: 10px 0; }
+  .sk-row .sk { flex: 1; margin: 0; }
+  .live .sk { background: rgba(255,255,255,.1); margin: 6px 0; }
+  .live .sk::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent); }
+  .live .sk.big { height: 28px; width: 70%; }
+  .live .sk.pill { display: inline-block; width: 110px; height: 26px; border-radius: 999px; margin: 0; }
+  body.stalled .sk::after { animation: none; }
+  @keyframes shimmer { to { transform: translateX(100%); } }
 
   /* ---------- tab bar ---------- */
-  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; justify-content: center; gap: 4px; background: rgba(255,255,255,.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); }
-  nav.tabs button { flex: 0 1 150px; min-height: 52px; border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12px; color: var(--muted); padding: 6px; position: relative; border-radius: 12px; }
+  nav.tabs { position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 10; max-width: 420px; margin: 0 auto; padding: 6px; border-radius: 28px; background: rgba(255,255,255,.8); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 10px 30px rgba(11,18,32,.16), 0 1px 2px rgba(11,18,32,.08), inset 0 0 0 1px rgba(255,255,255,.7); }
+  .tabs-in { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); }
+  .tab-ind { position: absolute; top: 0; bottom: 0; left: 0; width: calc(100% / 3); border-radius: 22px; background: var(--ink); box-shadow: 0 4px 12px rgba(11,18,32,.25); transform: translateX(calc(var(--ti, 0) * 100%)); transition: transform .34s var(--ease); }
+  nav.tabs button { position: relative; z-index: 1; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; border-radius: 22px; background: none; color: var(--text2); font-size: 12px; font-weight: 650; transition: color .25s var(--ease), transform .18s var(--ease); }
+  nav.tabs button[aria-selected=true] { color: #fff; }
   nav.tabs svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  nav.tabs button[aria-selected=true] { color: var(--blue); background: #eaf2fc; }
-  nav.tabs .badge { position: absolute; top: 2px; left: calc(50% + 6px); background: var(--red); color: #fff; font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 999px; display: grid; place-items: center; padding: 0 5px; }
+  nav.tabs .badge { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; background: var(--coral); color: #fff; font-size: 11px; font-weight: 800; box-shadow: 0 0 0 2px #fff; }
   nav.tabs .badge:empty { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-    button:active { transform: none; }
+    button:active:not(:disabled) { transform: none; }
+    .qs-done path { stroke-dashoffset: 0; }
   }
 </style>
 </head>
 <body data-tab="tonight" class="loading">
 <header class="hero">
   <div class="top">
-    <div class="brand"><img src="/static/icon-192.png" alt=""><div><b>While You're Out</b><small id="household">Your home</small></div></div>
+    <div class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M14.5 13.2a2.6 2.6 0 0 1-3.4-3.4 3 3 0 1 0 3.4 3.4Z"/></svg></span><b>While You're Out</b></div>
     <label class="me"><span>Answering as</span><select id="me"></select></label>
   </div>
-  <section class="live" aria-live="polite">
-    <div id="status">Connecting…</div>
+  <div class="ttl"><h1 id="pageTitle">Tonight</h1><small id="household">Your home</small></div>
+  <section class="live" id="live" aria-live="polite">
+    <div class="live-top">
+      <span class="ava home" id="liveAvatar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V20h12V9.5"/></svg></span>
+      <div class="live-who"><div id="status">Connecting…</div></div>
+      <span class="live-dot" aria-hidden="true"><i></i>Live</span>
+    </div>
     <div class="now" id="liveNow"><span class="sk big" aria-hidden="true"></span></div>
     <div class="prog" id="liveProg" hidden></div>
     <div class="pills" id="livePills"><span class="sk pill" aria-hidden="true"></span><span class="sk pill" aria-hidden="true"></span></div>
@@ -265,29 +401,30 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <div id="setupBanner"></div>
     <div id="questions"></div>
     <div id="debrief"></div>
-    <section class="card" aria-labelledby="feedTitle"><strong id="feedTitle">Tonight so far</strong><div id="log"><span class="sk w80" aria-hidden="true"></span><span class="sk w60" aria-hidden="true"></span><span class="sk w80" aria-hidden="true"></span></div></section>
+    <section class="card" aria-labelledby="feedTitle"><strong id="feedTitle">Tonight so far</strong><div id="log"><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w60"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div></div></section>
     <div class="card" id="busy"><span class="sk w40" aria-hidden="true"></span><span class="sk tall" aria-hidden="true"></span></div>
+    <h2 class="sec">Before you go</h2>
     <section class="card notify" id="notify" hidden></section>
     <section class="card" id="visitors">
       <strong>Expected tonight</strong>
-      <p class="muted">Who might come to the door. When the doorbell rings, Alexa checks this list; anyone else and the sitter is told not to open, and you get the doorbell photo.</p>
-      <ul class="vlist" id="vlist"><li aria-hidden="true"><span class="sk tall w60"></span></li></ul>
+      <p class="muted">Who might come to the door. Alexa checks this list when the bell rings. Anyone else, the sitter is told not to open and you get the doorbell photo.</p>
+      <ul class="vlist" id="vlist"><li aria-hidden="true"><span class="sk dot"></span><span class="sk w60" style="flex:1"></span></li></ul>
       <div class="vadd">
-        <input id="vName" maxlength="60" placeholder="Who? e.g. Nani, pizza">
-        <input id="vWhen" maxlength="40" placeholder="When? e.g. around 7">
-        <select id="vKind"><option value="person">Person</option><option value="delivery">Delivery</option></select>
-        <button id="vAdd">Add</button>
+        <input id="vName" maxlength="60" placeholder="Who? e.g. Nani, pizza" aria-label="Who is coming">
+        <input id="vWhen" maxlength="40" placeholder="When? e.g. around 7" aria-label="When">
+        <select id="vKind" aria-label="Person or delivery"><option value="person">Person</option><option value="delivery">Delivery</option></select>
+        <button id="vAdd" class="ok">Add</button>
       </div>
       <p class="perr" id="vErr"></p>
     </section>
     <section class="card" id="goodnight">
-      <strong>Goodnight message 💛</strong>
+      <strong>Goodnight message</strong>
       <p class="muted">Record a few words before you go. The Echo Show plays it at lights out, or when the sitter says your child is missing you.</p>
       <div id="gnList"></div>
       <div class="gn-rec">
-        <button id="gnVoice">🎙 Record voice</button><button id="gnVideo">🎥 Record video</button>
+        <button id="gnVoice"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Record voice</button><button id="gnVideo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3"/></svg>Record video</button>
       </div>
-      <div id="gnLive" hidden><video id="gnPreview" muted playsinline></video><p class="gn-timer"><span class="dot"></span><b id="gnTime">0:00</b> recording… <button id="gnStop" class="no">Stop</button></p></div>
+      <div id="gnLive" hidden><video id="gnPreview" muted playsinline></video><p class="gn-timer"><span class="dot"></span><b id="gnTime">0:00</b> Recording… <button id="gnStop" class="no">Stop</button></p></div>
       <div id="gnDraft" hidden>
         <div id="gnDraftMedia"></div>
         <label class="field">For<select id="gnFor"></select></label>
@@ -295,16 +432,16 @@ export const PARENT_HTML = /* html */ `<!doctype html>
         <label class="field">Words to show on screen (optional)<input id="gnCaption" maxlength="160" placeholder="Goodnight Maya, sweet dreams"></label>
         <div class="pbtns"><button class="ok" id="gnSave">Save message</button><button id="gnDiscard">Discard</button></div>
       </div>
-      <label class="muted gn-upload">or upload a recording <input type="file" id="gnFile" accept="audio/*,video/*"></label>
+      <label class="muted gn-upload">Or upload a recording <input type="file" id="gnFile" accept="audio/*,video/*"></label>
       <p class="perr" id="gnErr"></p>
     </section>
   </div>
   <div class="tabpane" data-tab="house">
     <section class="card" id="teach">
       <strong>Teach the house</strong>
-      <p class="muted">Snap the fridge note, upload the doctor's plan, or paste a WhatsApp message. Nothing is used until you confirm it, and codes or passwords are never stored.</p>
-      <label class="upload">📷 Photo or PDF<input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"></label>
-      <textarea id="paste" rows="3" placeholder="Or paste a message or note here…"></textarea>
+      <p class="muted">Snap the fridge note, upload the doctor's plan, or paste a WhatsApp message. Nothing is used until you confirm it. Codes and passwords are never stored.</p>
+      <label class="upload" id="drop"><span class="up-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5Z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="up-t">Add a photo or PDF</span><span class="up-s">Tap to choose, or drop a file here</span><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"></label>
+      <textarea id="paste" rows="3" placeholder="Or paste a message or note here…" aria-label="Paste a message or note"></textarea>
       <button id="readText" class="ok wide">Read it</button>
       <p id="teachStatus" class="muted" aria-live="polite"></p>
     </section>
@@ -342,10 +479,13 @@ export const PARENT_HTML = /* html */ `<!doctype html>
 </main>
 <aside class="qsheet" id="qsheet" aria-label="Question waiting for you"></aside>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-<nav class="tabs" role="tablist">
-  <button role="tab" data-tabbtn="tonight" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Tonight<span class="badge" id="badgeTonight"></span></button>
-  <button role="tab" data-tabbtn="house" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>House<span class="badge" id="badgeHouse"></span></button>
-  <button role="tab" data-tabbtn="family" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Family</button>
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <div class="tabs-in" role="presentation">
+    <span class="tab-ind" aria-hidden="true"></span>
+    <button role="tab" data-tabbtn="tonight" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Tonight<span class="badge" id="badgeTonight"></span></button>
+    <button role="tab" data-tabbtn="house" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>House<span class="badge" id="badgeHouse"></span></button>
+    <button role="tab" data-tabbtn="family" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Family</button>
+  </div>
 </nav>
 <script>
   var params = new URLSearchParams(location.search);
@@ -364,17 +504,24 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   sel.addEventListener('change', function () { me = sel.value; try { localStorage.setItem('wyo.me', me); } catch (e) {} });
   var parentsShown = null;
   var lastState = null; // the latest /parent/api/state, for toasts and the sheet
+  // Only touch the DOM when what we'd write has changed, so the 2 s poll never flashes or
+  // re-announces anything. (We remember what we wrote: browsers re-serialise innerHTML.)
+  var written = {};
   function setHtml(id, html) {
-    // Only touch the DOM when something changed, so live regions don't repeat themselves.
     var el = document.getElementById(id);
-    if (el && el.innerHTML !== html) el.innerHTML = html;
+    if (el && written[id] !== html) { written[id] = html; el.innerHTML = html; }
+    return el;
+  }
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el && el.textContent !== text) el.textContent = text;
     return el;
   }
   async function load() {
     var r;
-    try { r = await fetch('/parent/api/state?k=' + encodeURIComponent(key)); } catch (e) { document.getElementById('status').textContent = 'Offline, retrying…'; document.body.classList.add('stalled'); return; }
+    try { r = await fetch('/parent/api/state?k=' + encodeURIComponent(key)); } catch (e) { setText('status', 'Offline, retrying…'); document.body.classList.add('stalled'); return; }
     if (!r.ok) {
-      document.getElementById('status').textContent = 'Not authorised';
+      setText('status', 'Not authorised');
       document.body.classList.add('stalled');
       if (!lastState) setHtml('liveNow', 'This link isn\\'t working<small>Open the parent link you were sent again.</small>');
       return;
@@ -389,25 +536,34 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       sel.innerHTML = (s.parents.length ? s.parents : ['Parent']).map(function (p) { return '<option' + (p === me ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('');
     }
     var tb = s.teachback;
-    document.getElementById('status').textContent = s.handoff ? (s.handoff.carer_name + ' is looking after things' + (s.handoff.started_at ? ' · since ' + time(s.handoff.started_at) : '')) : 'No one is babysitting right now';
+    setText('status', s.handoff ? (s.handoff.carer_name + ' is looking after things' + (s.handoff.started_at ? ' · since ' + time(s.handoff.started_at) : '')) : 'No one is babysitting right now');
     renderLive(s, tb);
     var mKey = JSON.stringify(s.messages);
     if (mKey !== lastMessages) { lastMessages = mKey; renderMessages(s.messages || []); }
     var vKey = JSON.stringify(s.visitors);
     if (vKey !== lastVisitors) { lastVisitors = vKey; renderVisitors(s.visitors || []); }
-    document.getElementById('badgeTonight').textContent = s.questions.length ? String(s.questions.length) : '';
+    setText('badgeTonight', s.questions.length ? String(s.questions.length) : '');
     // Redraw only when something changed (not every second the clock moves), so buttons stay tappable.
     var incKey = s.incident ? JSON.stringify(Object.assign({}, s.incident, { elapsed_seconds: 0, timers: s.incident.timers.map(function (t) { return Object.assign({}, t, { remaining_seconds: 0 }); }) })) : '';
-    if (incKey !== lastIncident) { lastIncident = incKey; incReceived = Date.now(); document.getElementById('emergency').innerHTML = s.incident ? incidentCard(s.incident) : ''; tickIncident(); }
-    if (!s.incident) document.getElementById('emergency').innerHTML = s.emergency ? '<div class="card alert"><strong>Emergency reported · ' + esc(time(s.emergency.at)) + '</strong><p>' + esc(s.emergency.description) + '</p><p>Every contact has been alerted. Call ' + esc(s.handoff ? s.handoff.carer_name : 'the carer') + ' now.</p></div>' : '';
+    if (incKey !== lastIncident) {
+      lastIncident = incKey; incReceived = Date.now();
+      var em = document.getElementById('emergency');
+      em.innerHTML = s.incident ? incidentCard(s.incident) : '';
+      written.emergency = undefined;
+      // One gentle pulse when an emergency first appears, not on every update.
+      if (s.incident && !incShown && s.incident.status !== 'resolved' && em.firstChild) em.firstChild.classList.add('enter');
+      incShown = Boolean(s.incident);
+      tickIncident();
+    }
+    if (!s.incident) setHtml('emergency', s.emergency ? '<div class="card alert rise"><strong>Emergency reported · ' + esc(time(s.emergency.at)) + '</strong><p>' + esc(s.emergency.description) + '</p><p>Every contact has been alerted. Call ' + esc(s.handoff ? s.handoff.carer_name : 'the carer') + ' now.</p></div>' : '');
     var dKey = JSON.stringify([s.debrief && s.debrief.handoff_id, s.debrief && s.debrief.rule_suggestions.length, s.shopping, s.payment && s.payment.status]);
     if (dKey !== lastDebrief) { lastDebrief = dKey; renderDebrief(s); }
     var busyKey = String(s.busy_until);
     if (busyKey !== lastBusy) {
       lastBusy = busyKey;
       document.getElementById('busy').innerHTML = s.busy_until
-        ? '<strong>Urgent questions only</strong> until ' + esc(s.busy_until) + '<div class="pbtns"><button data-busy="0">I\\'m free now</button></div>'
-        : '<strong>Busy?</strong> <span class="muted">Only urgent questions will reach you.</span><div class="pbtns"><button data-busy="60">1 hour</button><button data-busy="120">2 hours</button><button data-busy="180">3 hours</button></div>';
+        ? '<strong>Urgent questions only</strong><p class="muted">Until ' + esc(s.busy_until) + '. Small questions wait here for you.</p><button class="ok wide" data-busy="0">I\\'m free now</button>'
+        : '<strong>Busy?</strong><p class="muted">Only urgent questions will reach you.</p><div class="seg" role="group" aria-label="Busy for"><button data-busy="60">1 hour</button><button data-busy="120">2 hours</button><button data-busy="180">3 hours</button></div>';
       lastQKey = null;
     }
     var shadowKey = JSON.stringify(s.shadow);
@@ -415,14 +571,14 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       lastShadow = shadowKey;
       var names = { screen: 'TV and screens', play: 'Play', bedtime: 'Staying up and bedtime extras' };
       document.getElementById('shadow').innerHTML = Object.keys(s.shadow).map(function (t) {
-        return '<label><input type="checkbox" data-shadow="' + t + '"' + (s.shadow[t] ? ' checked' : '') + '> ' + esc(names[t] || t) + '</label>';
+        return '<label class="sw-row"><span>' + esc(names[t] || t) + '</span><input type="checkbox" role="switch" class="sw" data-shadow="' + t + '"' + (s.shadow[t] ? ' checked' : '') + '></label>';
       }).join('');
     }
     // Only redraw questions when the set changes, so typing and choices aren't wiped by polling.
     var qKey = s.questions.map(function (q) { return q.id; }).join(',');
     if (qKey !== lastQKey) { lastQKey = qKey; renderQuestions(s); }
-    document.getElementById('setupBanner').innerHTML = s.parents.length ? '' :
-      '<div class="card banner"><strong>Set up your family to start</strong><p class="muted">Add who Alexa looks after and who to call. It takes a minute.</p><button class="ok" id="openFamily">Set up now</button></div>';
+    setHtml('setupBanner', s.parents.length ? '' :
+      '<div class="card banner rise"><strong>Set up your family to start</strong><p class="muted">Add who Alexa looks after and who to call. It takes a minute.</p><button class="ok" id="openFamily">Set up now</button></div>');
     renderFeed(s);
   }
 
@@ -480,52 +636,68 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     var items = [];
     (s.log || []).forEach(function (e, i) {
       var min = minutesOf(e.at);
-      items.push({ ago: ago(min), order: i, kind: LOG_ICON[e.kind] ? e.kind : 'note', text: esc(e.text), t: min == null ? time(e.at) : fmtMinutes(min) });
+      items.push({ id: 'l' + (e.id != null ? e.id : e.at + e.text), ago: ago(min), order: i, kind: LOG_ICON[e.kind] ? e.kind : 'note', text: esc(e.text), t: min == null ? time(e.at) : fmtMinutes(min) });
     });
     if (h.door) {
       var dm = clockMinutes(h.door.time);
-      items.push({ ago: ago(dm), order: -1, kind: 'door', text: 'Doorbell: ' + esc(h.door.label),
+      items.push({ id: 'd' + h.door.time + h.door.label + (h.door.decision || ''), ago: ago(dm), order: -1, kind: 'door', text: 'Doorbell: ' + esc(h.door.label),
         sub: h.door.decision ? esc(h.door.decision) : 'No answer yet', t: h.door.time });
     }
     if (la) {
-      items.push({ ago: la.minutes_ago, order: -1, kind: 'answer', text: esc(la.by) + ' answered “' + esc(la.answer) + '”',
+      items.push({ id: 'a' + la.by + la.answer + la.question, ago: la.minutes_ago, order: -1, kind: 'answer', text: esc(la.by) + ' answered “' + esc(la.answer) + '”',
         sub: esc(la.question), t: la.minutes_ago < 1 ? 'Just now' : fmtMinutes(now - la.minutes_ago) });
     }
     // Newest first; the shopping list has no time, so it sits at the end.
     items.sort(function (a, b) { return a.ago - b.ago || b.order - a.order; });
     if (s.shopping && s.shopping.length) {
-      items.push({ kind: 'shop', text: 'On the shopping list', sub: s.shopping.map(esc).join(', '), t: '' });
+      items.push({ id: 's' + s.shopping.join('|'), kind: 'shop', text: 'On the shopping list', sub: s.shopping.map(esc).join(', '), t: '' });
     }
+    // First paint: the list rises in, one item after another. After that only new items slide in from the top.
+    var first = feedSeen === null, seen = {};
+    items.forEach(function (it) { seen[it.id] = true; });
     document.getElementById('log').innerHTML = items.length
-      ? '<ul class="feed">' + items.map(function (it) {
-          return '<li class="k-' + it.kind + '"><span class="fi-ic">' + icon(it.kind) + '</span><span class="fi-tx">' + it.text +
+      ? '<ul class="feed' + (first ? ' stagger' : '') + '">' + items.map(function (it, i) {
+          var fresh = !first && !feedSeen[it.id];
+          return '<li class="k-' + it.kind + (fresh ? ' new' : '') + '"' + (first ? ' style="--i:' + Math.min(i, 8) + '"' : '') + '><span class="fi-ic">' + icon(it.kind) + '</span><span class="fi-tx">' + it.text +
             (it.sub ? '<small>' + it.sub + '</small>' : '') + '</span><span class="fi-t">' + esc(it.t) + '</span></li>';
         }).join('') + '</ul>'
-      : '<p class="muted feed-empty">Nothing logged yet.</p>';
+      : '<p class="empty k-note"><span class="fi-ic">' + icon('sleep') + '</span>Quiet so far. Updates from home show up here.</p>';
+    feedSeen = seen;
   }
+  var feedSeen = null;
 
   // ---------- toasts ----------
   var toastTimer = null;
-  function toast(msg, bad) {
+  function toast(msg, kind) {
     var t = document.getElementById('toast');
     clearTimeout(toastTimer);
-    t.classList.toggle('bad', Boolean(bad));
+    t.classList.toggle('bad', kind === true || kind === 'bad');
+    t.classList.toggle('info', kind === 'info');
     t.textContent = msg;
+    void t.offsetWidth; // restart the entrance if a toast is already showing
     t.classList.add('show');
     toastTimer = setTimeout(function () {
       t.classList.remove('show');
-      toastTimer = setTimeout(function () { t.textContent = ''; }, 300);
+      toastTimer = setTimeout(function () { t.textContent = ''; }, 320);
     }, 3200);
   }
   function carerName() { return lastState && lastState.handoff ? lastState.handoff.carer_name : 'the sitter'; }
 
-  // ---------- the bottom sheet sits above the tab bar; keep the page padded for it ----------
+  // ---------- the bottom sheet sits above the floating tab bar; keep the page padded for it ----------
   var navEl = document.querySelector('nav.tabs');
   var sheetEl = document.getElementById('qsheet');
+  var docked = '';
   function dock() {
+    // Read layout once, write CSS variables only if they changed (no layout thrash on every poll).
+    var navH = Math.round(window.innerHeight - navEl.getBoundingClientRect().top);
+    var card = sheetEl.classList.contains('open') && sheetEl.querySelector('.qs');
+    var sheetH = card ? card.offsetHeight + 8 : 0;
+    var next = navH + '|' + sheetH;
+    if (next === docked) return;
+    docked = next;
     var root = document.documentElement.style;
-    root.setProperty('--nav-h', navEl.offsetHeight + 'px');
-    root.setProperty('--sheet-h', (sheetEl.classList.contains('open') ? sheetEl.offsetHeight : 0) + 'px');
+    root.setProperty('--nav-h', navH + 'px');
+    root.setProperty('--sheet-h', sheetH + 'px');
   }
   window.addEventListener('resize', dock);
   dock();
@@ -533,7 +705,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   function renderDebrief(s) {
     var d = s.debrief;
     if (!d) { document.getElementById('debrief').innerHTML = ''; return; }
-    var h = '<div class="card"><strong>Last night with ' + esc(d.carer) + '</strong>';
+    var h = '<div class="card debrief rise"><strong>Last night with ' + esc(d.carer) + '</strong>';
     if (d.insights.length) h += '<ul>' + d.insights.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>';
     if (d.timeline.length) h += '<p class="from">Timeline</p><ul>' + d.timeline.map(function (e) { return '<li>' + esc(time(e.at)) + ' ' + esc(e.text) + '</li>'; }).join('') + '</ul>';
     if (d.rule_suggestions.length) {
@@ -576,23 +748,28 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     if (!c) return;
     await fetch('/parent/api/shadow', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k: key, topic: c.dataset.shadow, on: c.checked }) });
   });
+  var cardSeen = {};
   function renderQuestions(s) {
     // In busy mode, small questions are grouped under one quiet heading.
     var urgent = s.questions.filter(function (q) { return q.urgency === 'urgent' || !s.busy_until; });
     var waiting = s.busy_until ? s.questions.filter(function (q) { return q.urgency !== 'urgent'; }) : [];
     document.getElementById('questions').innerHTML = urgent.map(questionCard).join('') +
       (waiting.length ? '<p class="from">Waiting until you\\'re free (' + waiting.length + ')</p>' + waiting.map(questionCard).join('') : '');
+    var seen = {};
+    s.questions.forEach(function (q) { seen[q.id] = true; });
+    cardSeen = seen;
     renderSheet(s, urgent);
     function questionCard(q) {
-      return '<div class="card" data-id="' + q.id + '">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') +
+      // Only cards that just arrived rise in; the rest stay still when the list redraws.
+      return '<div class="card' + (cardSeen[q.id] ? '' : ' rise') + '" data-id="' + q.id + '">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') +
         '<p class="asker">' + esc(s.handoff ? s.handoff.carer_name : 'The sitter') + ' asks · ' + esc(time(q.asked_at)) + '</p><p class="q">“' + esc(q.text) + '”</p>' +
         (q.text_english ? '<p class="en">In English: “' + esc(q.text_english) + '”</p>' : '') +
         (q.door_snapshot && !q.shopping_item ? '<img class="doorcam" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' : '') +
         answerButtons(q) +
-        '<textarea placeholder="Or type an answer…" aria-label="Type your own answer"></textarea>' +
+        '<textarea placeholder="Or type an answer…" aria-label="Type your own answer" rows="1"></textarea>' +
         (q.urgency === 'urgent'
           ? '<input type="radio" name="s' + q.id + '" value="tonight" checked hidden><p class="muted">Food, medicine and safety answers apply to tonight only.</p></div>'
-          : '<div class="scope"><label><input type="radio" name="s' + q.id + '" value="tonight" checked> Just tonight</label><label><input type="radio" name="s' + q.id + '" value="always"> Always</label></div>' +
+          : '<div class="scope" role="radiogroup" aria-label="How long this answer counts"><label><input type="radio" name="s' + q.id + '" value="tonight" checked> Just tonight</label><label><input type="radio" name="s' + q.id + '" value="always"> Always</label></div>' +
             '<p class="always-note">Your answer will be saved as a house rule for every future handoff.</p></div>');
     }
   }
@@ -603,7 +780,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     return '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>';
   }
   // ---------- the question sheet: the newest question, one tap to answer ----------
-  var sheetId = null, knownQ = null;
+  var sheetId = null, knownQ = null, sheetHold = false, sheetPeek = false;
   function renderSheet(s, shown) {
     var who = s.handoff ? s.handoff.carer_name : 'The sitter';
     // A toast for questions that arrived while the page is open (not the ones there when it loaded).
@@ -611,28 +788,38 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     s.questions.forEach(function (q) { ids[q.id] = true; });
     if (knownQ) {
       var fresh = shown.filter(function (q) { return !knownQ[q.id]; }).pop();
-      if (fresh) toast(fresh.door_snapshot && !fresh.shopping_item ? 'Someone is at the door. ' + who + ' is asking.' : 'New question from ' + who);
+      if (fresh) toast(fresh.door_snapshot && !fresh.shopping_item ? 'Someone is at the door. ' + who + ' is asking.' : 'New question from ' + who, 'info');
     }
     knownQ = ids;
+    if (sheetHold) return; // the "sent" check is playing; we redraw when it ends
     var q = shown[shown.length - 1];
     if (!q) {
       sheetId = null;
-      sheetEl.classList.remove('open', 'bump');
+      sheetEl.classList.remove('open', 'bump', 'peek');
       dock();
       return;
     }
+    if (sheetId !== q.id) sheetPeek = false;
     var more = s.questions.length - 1;
-    sheetEl.innerHTML = '<div class="qs' + (q.urgency === 'urgent' ? ' urgent-q' : '') + '" data-id="' + q.id + '">' +
-      '<div class="qs-top">' +
-      (q.door_snapshot && !q.shopping_item ? '<img class="qs-thumb" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' : '') +
+    var photo = q.door_snapshot && !q.shopping_item;
+    var html = '<div class="scrim"></div><div class="qs' + (q.urgency === 'urgent' ? ' urgent-q' : '') + '" data-id="' + q.id + '">' +
+      '<button class="grab" data-qpeek="1" aria-label="Show or hide the answer buttons"></button>' +
+      '<div class="qs-top"><span class="qs-ava" aria-hidden="true">' + esc(who.charAt(0).toUpperCase()) + '</span>' +
       '<div class="qs-txt"><p class="asker">' + (q.urgency === 'urgent' ? '<span class="urgent">Urgent</span>' : '') + '<span>' + esc(who) + ' asks · ' + esc(time(q.asked_at)) + '</span></p>' +
       '<p class="q">“' + esc(q.text) + '”</p>' + (q.text_english ? '<p class="en">In English: “' + esc(q.text_english) + '”</p>' : '') + '</div></div>' +
+      '<div class="qs-body">' + (photo ? '<img class="qs-photo" src="' + esc(q.door_snapshot) + '" alt="Doorbell camera photo">' : '') +
       '<input type="radio" name="qs' + q.id + '" value="tonight" checked hidden>' +
       answerButtons(q) +
-      '<button class="qs-more" data-qmore="1">' + (more > 0 ? '+' + more + ' more question' + (more > 1 ? 's' : '') : 'Type an answer or save it as a rule') + '</button></div>';
+      '<button class="qs-more" data-qmore="1">' + (more > 0 ? '+' + more + ' more question' + (more > 1 ? 's' : '') : 'Type an answer or save it as a rule') + '</button></div></div>';
     var wasOpen = sheetEl.classList.contains('open');
-    sheetEl.classList.add('open');
-    if (wasOpen && sheetId !== q.id) {
+    if (written.qsheet !== html) { written.qsheet = html; sheetEl.innerHTML = html; }
+    sheetEl.classList.toggle('peek', sheetPeek);
+    var g = sheetEl.querySelector('.grab');
+    if (g) g.setAttribute('aria-expanded', String(!sheetPeek));
+    if (!wasOpen) {
+      void sheetEl.offsetWidth; // start below the screen, then spring up
+      sheetEl.classList.add('open');
+    } else if (sheetId !== q.id) {
       // A newer question replaced the one showing: nudge it so the change is noticed.
       sheetEl.classList.remove('bump');
       void sheetEl.offsetWidth;
@@ -641,6 +828,14 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     sheetId = q.id;
     dock();
   }
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('button[data-qpeek]')) return;
+    sheetPeek = !sheetPeek;
+    sheetEl.classList.toggle('peek', sheetPeek);
+    var g = sheetEl.querySelector('.grab');
+    if (g) g.setAttribute('aria-expanded', String(!sheetPeek));
+    dock();
+  });
   document.addEventListener('click', function (e) {
     if (!e.target.closest('button[data-qmore]')) return;
     setTab('tonight');
@@ -658,16 +853,30 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     var typed = box ? box.value.trim() : '';
     var picked = card.querySelector('input[type=radio]:checked');
     var scope = picked ? picked.value : 'tonight';
+    var inSheet = card.classList.contains('qs');
     b.disabled = true;
+    var wait = 0;
     try {
       var r = await fetch('/parent/api/answer', { method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ k: key, id: Number(card.dataset.id), answer: typed || b.dataset.a, scope: scope, by: me }) });
-      if (r.ok) toast('Sent to ' + carerName() + ' ✓');
-      else if (r.status === 409) toast('Someone already answered that one.');
+      if (r.ok && inSheet) {
+        // A check draws itself, then the sheet slides away (or on to the next question).
+        sheetHold = true;
+        wait = 1000;
+        card.insertAdjacentHTML('beforeend', '<div class="qs-done" role="status"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30"/><path d="M20 33l8 8 16-17"/></svg>Sent to ' + esc(carerName()) + '</div>');
+      } else if (r.ok) {
+        toast('Sent to ' + carerName() + ' ✓');
+        card.classList.add('leaving');
+        wait = 220;
+      } else if (r.status === 409) toast('Someone already answered that one.', 'info');
       else { toast('Could not send. Try again.', true); b.disabled = false; }
     } catch (err) { b.disabled = false; toast('Offline. Your answer was not sent.', true); }
-    lastQKey = null; // redraw: the question was answered here or already closed elsewhere
-    load();
+    setTimeout(function () {
+      sheetHold = false;
+      written.qsheet = null;
+      lastQKey = null; // redraw: the question was answered here or already closed elsewhere
+      load();
+    }, wait);
   });
   // ---------- Teach the house (House Brain) ----------
   var lastPKey = null;
@@ -751,13 +960,31 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     if (!r.ok) { teachStatus.textContent = out.error || 'Could not read that.'; return; }
     reportImport(out);
   }
-  document.getElementById('file').addEventListener('change', function (e) {
-    var f = e.target.files && e.target.files[0];
-    if (!f) return;
+  function importFile(f) {
     var label = f.type === 'application/pdf' ? 'PDF: ' + f.name : 'Photo of a note';
     sendImport('/parent/api/import/file?k=' + encodeURIComponent(key) + '&by=' + encodeURIComponent(me) + '&label=' + encodeURIComponent(label),
       { method: 'POST', headers: { 'content-type': f.type || 'application/octet-stream' }, body: f });
+  }
+  document.getElementById('file').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    importFile(f);
     e.target.value = '';
+  });
+  // The drop zone also takes a file dragged onto it (on a laptop).
+  var dropZone = document.getElementById('drop');
+  ['dragenter', 'dragover'].forEach(function (t) {
+    dropZone.addEventListener(t, function (e) { e.preventDefault(); dropZone.classList.add('drag'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    dropZone.addEventListener(t, function () { dropZone.classList.remove('drag'); });
+  });
+  dropZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    if (!/^image\\/|^application\\/pdf$/.test(f.type)) { teachStatus.textContent = 'That needs to be a photo or a PDF.'; return; }
+    importFile(f);
   });
   document.getElementById('readText').addEventListener('click', function () {
     var text = document.getElementById('paste').value.trim();
@@ -787,7 +1014,8 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     return reg ? reg.pushManager.getSubscription() : null;
   }
   async function renderNotify(msg) {
-    notifyBox.hidden = false;
+    // Inside the demo's phone frame (an embedded page) notifications don't apply.
+    if (window.top !== window) { notifyBox.hidden = true; return; }
     var h;
     if (!('serviceWorker' in navigator) || !window.isSecureContext) {
       h = '<div><strong>Notifications</strong><p class="muted">Open this page over https to get notifications on this phone.</p></div>';
@@ -800,10 +1028,11 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     } else {
       var sub = await currentSub().catch(function () { return null; });
       h = sub
-        ? '<div><strong>🔔 Notifications on</strong><p class="muted">Questions and emergencies reach this phone even when the page is closed.</p></div><div class="pbtns" style="margin:0"><button data-push="test">Send a test</button><button data-push="off">Turn off</button></div>'
+        ? '<div><strong><span class="on-dot" aria-hidden="true"></span>Notifications on</strong><p class="muted">Questions and emergencies reach this phone even when the page is closed.</p></div><div class="pbtns" style="margin:0"><button data-push="test">Send a test</button><button data-push="off">Turn off</button></div>'
         : '<div><strong>Get notified on this phone</strong><p class="muted">So questions and emergencies reach you even when this page is closed.</p></div><button class="ok" data-push="on">Turn on</button>';
     }
     notifyBox.innerHTML = h + (msg ? '<p class="muted" style="flex-basis:100%">' + esc(msg) + '</p>' : '');
+    notifyBox.hidden = false;
   }
   async function turnOn() {
     var perm = await Notification.requestPermission();
@@ -876,8 +1105,8 @@ export const PARENT_HTML = /* html */ `<!doctype html>
         '<label>Name<input data-f="name" maxlength="40" value="' + esc(m.name) + '"></label>' +
         '<label>' + (m.kind === 'pet' ? 'What kind of pet' : 'Age') + '<input data-f="age" maxlength="20" value="' + esc(m.age || '') + '" placeholder="' + (m.kind === 'pet' ? 'dog' : '5') + '"></label>' +
         (m.kind === 'child' ? '<label class="full">Allergies (leave empty if none)<input data-f="allergies" maxlength="300" value="' + esc(m.allergies || '') + '" placeholder="peanuts and tree nuts"></label>' : '') +
-        '<div class="tools"><span class="grow">' + (m.kind === 'pet' ? '🐾 Pet' : '🧒 Child') + '</span><button data-remove="member" aria-label="Remove ' + esc(m.name || 'this one') + '">Remove</button></div></div>';
-    }).join('') : '<p class="muted">No children or pets yet.</p>';
+        '<div class="tools"><span class="grow"><span class="chip">' + (m.kind === 'pet' ? 'Pet' : 'Child') + '</span></span><button data-remove="member" aria-label="Remove ' + esc(m.name || 'this one') + '">Remove</button></div></div>';
+    }).join('') : '<p class="empty"><span class="fi-ic">' + icon('mood') + '</span>No children or pets yet.</p>';
     var order = 0;
     document.getElementById('fContacts').innerHTML = fam.contacts.length ? fam.contacts.map(function (c, i) {
       var badge = c.doctor ? '<span class="order" title="Doctor">Dr</span>' : '<span class="order">' + (++order) + '</span>';
@@ -885,9 +1114,9 @@ export const PARENT_HTML = /* html */ `<!doctype html>
         '<label>Name<input data-f="name" maxlength="40" value="' + esc(c.name) + '"></label>' +
         '<label>Who they are<input data-f="relation" maxlength="40" value="' + esc(c.relation) + '" placeholder="Mom, Grandpa, Neighbour"></label>' +
         '<label class="full">Phone<input data-f="phone" type="tel" maxlength="25" value="' + esc(c.phone) + '" placeholder="+1 206 555 0142"></label>' +
-        '<div class="tools">' + badge + '<label class="grow"><input type="checkbox" data-f="doctor"' + (c.doctor ? ' checked' : '') + '> Doctor</label>' +
+        '<div class="tools">' + badge + '<label class="grow"><input type="checkbox" role="switch" class="sw" data-f="doctor"' + (c.doctor ? ' checked' : '') + '> Doctor</label>' +
         '<button data-move="-1" aria-label="Move up">↑</button><button data-move="1" aria-label="Move down">↓</button><button data-remove="contact">Remove</button></div></div>';
-    }).join('') : '<p class="muted">No contacts yet. Add at least one person to call.</p>';
+    }).join('') : '<p class="empty"><span class="fi-ic">' + icon('answer') + '</span>No contacts yet. Add at least one person to call.</p>';
   }
   // Reads what's typed into the form back into fam (before adding, moving or saving).
   function collect() {
@@ -975,7 +1204,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   loadFamily();
 
   // ---------- emergency: live view, as it happens at home ----------
-  var lastIncident = null, incReceived = Date.now();
+  var lastIncident = null, incReceived = Date.now(), incShown = false;
   function mmss(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
   function incidentCard(i) {
     if (i.status === 'resolved') {
@@ -983,12 +1212,14 @@ export const PARENT_HTML = /* html */ `<!doctype html>
         '<ul class="inc-log">' + i.updates.slice(-6).map(function (u) { return '<li><span>' + esc(u.time) + '</span>' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul></div>';
     }
     var now = i.steps[i.current];
-    return '<div class="card alert inc"><div class="inc-head"><strong>🚨 Emergency · ' + esc(i.started) + '</strong><span class="elapsed" data-elapsed="' + i.elapsed_seconds + '"></span></div>' +
+    return '<div class="card alert inc"><div class="inc-head"><strong>Emergency · ' + esc(i.started) + '</strong><span class="elapsed" data-elapsed="' + i.elapsed_seconds + '"></span></div>' +
       '<p class="inc-desc">' + esc(i.carer || 'The sitter') + ' said: “' + esc(i.description) + '”</p>' +
+      '<div class="inc-prog" role="progressbar" aria-label="Emergency steps" aria-valuemin="0" aria-valuemax="' + i.total + '" aria-valuenow="' + Math.min(i.current, i.total) + '">' +
+        i.steps.map(function (st) { return '<i class="' + esc(st.state) + '"></i>'; }).join('') + '</div>' +
       (now ? '<div class="inc-now"><small>Step ' + (i.current + 1) + ' of ' + i.total + ' right now</small>' + esc(now.text) + '</div>' : '<div class="inc-now"><small>All steps done</small>Waiting for help to arrive</div>') +
-      i.timers.map(function (t) { return '<div class="inc-timer" data-left="' + t.remaining_seconds + '"><span>⏱ ' + esc(t.label) + '</span><b></b></div>'; }).join('') +
+      i.timers.map(function (t) { return '<div class="inc-timer" data-left="' + t.remaining_seconds + '"><span>' + esc(t.label) + '</span><b></b></div>'; }).join('') +
       '<ol class="inc-steps">' + i.steps.map(function (st) { return '<li class="' + st.state + '">' + esc(st.text) + '</li>'; }).join('') + '</ol>' +
-      (i.on_the_way.length ? '<p class="inc-otw">' + i.on_the_way.map(function (o) { return '🚗 ' + esc(o.name) + ' · home by ' + esc(o.eta); }).join('<br>') + '</p>' : '') +
+      (i.on_the_way.length ? '<p class="inc-otw">' + i.on_the_way.map(function (o) { return esc(o.name) + ' is on the way · home by ' + esc(o.eta); }).join('<br>') + '</p>' : '') +
       '<p class="inc-label" id="otwLabel">I’m on my way · home in</p><div class="otw" role="group" aria-labelledby="otwLabel">' +
         [10, 20, 30].map(function (n) { return '<button data-otw="' + n + '" aria-label="I\\'m on my way, home in ' + n + ' minutes">' + n + '<small>min</small></button>'; }).join('') + '</div>' +
       '<ul class="inc-log">' + i.updates.slice(-4).reverse().map(function (u) { return '<li><span>' + esc(u.time) + '</span>' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul>' +
@@ -1036,7 +1267,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       return '<div class="gn-item"><div class="gn-meta"><span><b>' + esc(m.from_name) + '</b> → ' + esc(m.for_name || 'the kids') + ' · ' + esc(WHEN[m.when_to_play] || '') +
         (m.played_at ? ' · <span class="muted">played ' + esc(time(m.played_at)) + '</span>' : '') + '</span><button data-gnremove="' + m.id + '">Remove</button></div>' +
         (m.caption ? '<p class="muted" style="margin:4px 0 0">“' + esc(m.caption) + '”</p>' : '') + media + '</div>';
-    }).join('');
+    }).join('') || '<p class="empty k-answer"><span class="fi-ic">' + icon('answer') + '</span>No message yet. It takes a minute.</p>';
   }
   function gnErr(t) { document.getElementById('gnErr').textContent = t || ''; }
   function fillFor() {
@@ -1112,12 +1343,14 @@ export const PARENT_HTML = /* html */ `<!doctype html>
 
   // ---------- expected visitors ----------
   var lastVisitors = null;
+  var VI_PERSON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+  var VI_BOX = '<svg viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5Z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/></svg>';
   function renderVisitors(list) {
     document.getElementById('vlist').innerHTML = list.length ? list.map(function (v) {
-      return '<li><span class="vi">' + (v.kind === 'delivery' ? '📦' : '🙋') + '</span><span class="vt"><b>' + esc(v.name) + '</b><small>' +
+      return '<li class="rise"><span class="vi' + (v.kind === 'delivery' ? ' box' : '') + '" aria-hidden="true">' + (v.kind === 'delivery' ? VI_BOX : VI_PERSON) + '</span><span class="vt"><b>' + esc(v.name) + '</b><small>' +
         esc([v.window, v.note].filter(Boolean).join(' · ') || (v.kind === 'delivery' ? 'Delivery' : 'Any time tonight')) + '</small></span>' +
         '<button data-vremove="' + v.id + '" aria-label="Remove ' + esc(v.name) + '">Remove</button></li>';
-    }).join('') : '<li class="muted">Nobody yet. The sitter will be told not to open the door to anyone.</li>';
+    }).join('') : '<li class="empty"><span class="fi-ic">' + icon('door') + '</span>Nobody yet. The sitter won\\'t open the door to anyone.</li>';
   }
   document.addEventListener('click', async function (e) {
     var rm = e.target.closest('button[data-vremove]');
@@ -1142,9 +1375,14 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   });
 
   // ---------- tabs and the live header ----------
+  var TABS = ['tonight', 'house', 'family'];
+  var TITLES = { tonight: 'Tonight', house: 'House', family: 'Family' };
   function setTab(t) {
+    if (TABS.indexOf(t) < 0) t = 'tonight';
     document.body.dataset.tab = t;
     document.querySelectorAll('[data-tabbtn]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tabbtn === t)); });
+    navEl.style.setProperty('--ti', String(TABS.indexOf(t))); // the active pill slides across
+    setText('pageTitle', TITLES[t]);
     try { sessionStorage.setItem('wyo.tab', t); } catch (e) {}
     window.scrollTo(0, 0);
   }
@@ -1153,9 +1391,16 @@ export const PARENT_HTML = /* html */ `<!doctype html>
 
   function renderLive(s, tb) {
     var h = s.home || {};
-    document.getElementById('household').textContent = (s.household && s.household.name) || 'Your home';
+    setText('household', (s.household && s.household.name) || 'Your home');
+    // The live card: who's with the kids (avatar + live dot), then one big line for what's next.
+    var live = document.getElementById('live');
+    live.classList.toggle('on', Boolean(s.handoff));
+    live.classList.toggle('sos', Boolean(s.emergency || (s.incident && s.incident.status !== 'resolved')));
+    var ava = document.getElementById('liveAvatar');
+    ava.classList.toggle('home', !s.handoff);
+    setHtml('liveAvatar', s.handoff ? esc(String(s.handoff.carer_name || '?').charAt(0).toUpperCase()) : '<svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V20h12V9.5"/></svg>');
     var now = '', pills = [], prog = '';
-    var carer = s.handoff ? esc(s.handoff.carer_name) + ' · ' : '';
+    function chip(text, kind) { return '<span class="cd' + (kind ? ' ' + kind : '') + '">' + text + '</span>'; }
     if (s.emergency) {
       now = 'Emergency reported<small>' + esc(time(s.emergency.at)) + ' · see below</small>';
       pills.push('<span class="lp bad">Every contact alerted</span>');
@@ -1164,15 +1409,15 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     } else if (h.night) {
       var kid = ((h.members || []).filter(function (m) { return m.kind === 'child'; })[0] || {}).name;
       now = h.asleep_since
-        ? carer + (kid ? esc(kid) + ' asleep since ' : 'Asleep since ') + esc(h.asleep_since)
-        : carer + 'Past bedtime<small>Nobody has said ' + (kid ? esc(kid) + ' is' : 'they are') + ' asleep yet</small>';
+        ? (kid ? esc(kid) + ' is asleep' : 'All asleep') + chip('since ' + esc(h.asleep_since))
+        : 'Past bedtime<small>Nobody has said ' + (kid ? esc(kid) + ' is' : 'they are') + ' asleep yet</small>';
     } else if (h.next) {
       var m = h.next.minutes_until;
-      now = carer + esc(h.next.title) + (m > 1 ? ' in ' + m + ' min' : m >= -5 ? ' now' : ' · ' + -m + ' min late');
+      now = esc(h.next.title) + (m > 1 ? chip('in ' + m + ' min') : m >= -5 ? chip('now', 'is-now') : chip(-m + ' min late', 'late'));
     } else if ((h.plan || []).length) {
-      now = carer + 'Tonight\\'s plan is done';
+      now = 'Tonight\\'s plan is done' + chip('all set', 'is-now');
     } else {
-      now = esc(s.handoff.carer_name) + ' is looking after things';
+      now = 'All good at home';
     }
     // How far through tonight's plan the evening is: done or late items count as passed.
     var plan = h.plan || [];
