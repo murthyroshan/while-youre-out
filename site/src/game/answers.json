@@ -1,0 +1,83 @@
+{
+  "recorded": "2026-10-19",
+  "answers": {
+    "cookies": {
+      "said": "Maya is allergic to peanuts. Anita said: \"No sweets after 6 pm.\" Unsure? Don't give it. I can ask a parent.",
+      "topic": "Food",
+      "facts": [
+        "Maya is allergic to peanuts. Nothing with peanuts or \"may contain nuts\" on the label. (Anita)",
+        "No sweets after 6 pm. (Anita)",
+        "Dinner is the dal and rice in the fridge. Heat it for 2 minutes. (Anita)"
+      ]
+    },
+    "banana": {
+      "said": "Maya is allergic to peanuts. Anita said: \"If she won't eat dinner, she can have a banana or toast with butter.\" Unsure? Don't give it. I can ask a parent.",
+      "topic": "Food",
+      "facts": [
+        "Maya is allergic to peanuts. Nothing with peanuts or \"may contain nuts\" on the label. (Anita)",
+        "If she won't eat dinner, she can have a banana or toast with butter. (Anita)",
+        "Dinner is the dal and rice in the fridge. Heat it for 2 minutes. (Anita)"
+      ]
+    },
+    "episode": {
+      "said": "The parents haven't said exactly. Closest: Anita said: \"Bath at 7:15, pyjamas, brush teeth, two stories, lights out at 8.\" The parents said yes to this 4 of 5 times on weekends. It's your call, or I can ask.",
+      "topic": "TV",
+      "facts": [
+        "Bath at 7:15, pyjamas, brush teeth, two stories, lights out at 8. (Anita)",
+        "Dinner at 6:30. (Anita)",
+        "If her nap ends after 4 pm, bedtime moves 30 minutes later. (Rahul)"
+      ]
+    },
+    "scary": {
+      "said": "Anita said: \"One hour of TV at most. Gentle cartoons only, nothing scary.\" I can ask them.",
+      "topic": "TV",
+      "facts": [
+        "One hour of TV at most. Gentle cartoons only, nothing scary. (Anita)"
+      ]
+    },
+    "door": {
+      "said": "Don't open the door. Nobody is expected now. Rahul's rule: \"Don't open the door to anyone you don't know.\" I'm sending the doorbell photo to the parents.",
+      "topic": "Front door",
+      "facts": []
+    },
+    "ate": {
+      "said": "Maya is allergic to peanuts. If what she ate might have had any, watch for swelling, hives, vomiting or trouble breathing, and say \"emergency\" if you see one. I can ask Anita now.",
+      "topic": "Food",
+      "facts": [
+        "Maya is allergic to peanuts. Nothing with peanuts or \"may contain nuts\" on the label. (Anita)",
+        "Dinner is the dal and rice in the fridge. Heat it for 2 minutes. (Anita)",
+        "If she won't eat dinner, she can have a banana or toast with butter. (Anita)"
+      ]
+    },
+    "emergency": {
+      "said": "Step 1 of 5: If Maya has trouble breathing, swelling of the lips or tongue, or keeps vomiting after eating: give the EpiPen in the outer thigh right away. Say \"done\" when you have.",
+      "topic": "Emergency",
+      "facts": [
+        "If Maya has trouble breathing, swelling of the lips or tongue, or keeps vomiting after eating: give the EpiPen in the outer thigh right away.",
+        "Call 911. Say \"severe allergic reaction\" and give the address.",
+        "Lay her down flat. If breathing is hard, let her sit up.",
+        "If she is not better after 5 minutes, use the second EpiPen from the same pouch.",
+        "Call Mom, then Dad."
+      ]
+    },
+    "misses": {
+      "said": "Anita left a message for Maya.",
+      "topic": "Goodnight",
+      "facts": []
+    }
+  },
+  "teachback": [
+    {
+      "ask": "What is Maya allergic to?",
+      "answer": "Maya is allergic to peanuts. Nothing with peanuts or \"may contain nuts\" on the label."
+    },
+    {
+      "ask": "Where is the EpiPen kept?",
+      "answer": "Kitchen drawer to the left of the stove, in the red pouch."
+    },
+    {
+      "ask": "Who do you call first if anything comes up?",
+      "answer": "Anita (Mom), +1-206-555-0142"
+    }
+  ]
+}

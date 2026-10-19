@@ -791,6 +791,13 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         const alert = allergyAlert(question, allergens);
         return localized('answer', { ...a, allergy_alert: alert, allergens }, alert);
       }
+      // "She ate a granola bar from her friend's bag": already eaten, and nobody can check what was in
+      // it. Not "don't give it": what to watch for, and a parent asked if they want.
+      const safetyFact = a.facts.find((f) => f.risk === 'safety');
+      if (INGESTED.test(question) && a.category === 'food' && safetyFact && !a.facts.some((f) => f.risk !== 'safety' && sharesWords(f.text, question))) {
+        const watch = `${firstSentence(safetyFact.text)} If what she ate might have had any, watch for swelling, hives, vomiting or trouble breathing, and say "emergency" if you see one. I can ask ${a.facts[0]?.said_by ?? 'a parent'} now.`;
+        return localized('answer', { ...a, watch: true, suggest_ask_parent: true }, watch);
+      }
       const facts = a.facts.map((f) =>
         f.source === 'parent_answer' ? `Earlier ${f.said_by} answered this. ${f.text}` : f.source === 'contacts' ? f.text : `${f.said_by} said: "${f.text}"`,
       );

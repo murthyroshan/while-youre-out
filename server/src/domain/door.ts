@@ -119,7 +119,7 @@ export interface DoorCheck {
 function list(names: string[]) {
   return names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0] ?? '';
 }
-const describe = (v: Visitor) => `${v.name}${v.window ? ` (${v.window})` : ''}${v.note ? `: ${v.note}` : ''}`;
+const describe = (v: Visitor) => `${v.name}${v.window ? ` (${v.window})` : ''}${v.note ? `: ${v.note.replace(/[.!]+$/, '')}` : ''}`;
 
 export function doorCheck(db: DB): DoorCheck {
   const tz = householdTz(db);

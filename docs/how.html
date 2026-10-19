@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>How it works · While You're Out</title>
+    <meta name="description" content="One MCP server, three ways in: an Alexa+ host, today's Alexa, or any MCP host. The parent's phone and the sitter's phone stay in the loop." />
+
+    <script type="module" crossorigin src="/while-youre-out/assets/page-CeYt_f_j.js"></script>
+    <link rel="stylesheet" crossorigin href="/while-youre-out/assets/page-B-RzQevd.css">
+  </head>
+  <body class="page" data-page="how">
+    <a class="skip" href="#main">Skip to the content</a>
+<header class="site-head">
+  <a class="mark" href="/while-youre-out/"><i aria-hidden="true"></i>While You're Out</a>
+  <button class="menu" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+  <nav id="site-nav" aria-label="Site">
+    <a href="/while-youre-out/#evening" data-page="home">The evening</a>
+    <a href="/while-youre-out/safety.html" data-page="safety">Safety</a>
+    <a href="/while-youre-out/how.html" data-page="how">How it works</a>
+    <a href="/while-youre-out/game.html" data-page="game">Play</a>
+    <a href="/while-youre-out/judges.html" data-page="judges">For judges</a>
+    <a class="live" href="/while-youre-out/try.html" data-page="try">Try it</a>
+  </nav>
+  <span class="lightbar" aria-hidden="true"></span>
+</header>
+
+    <main id="main" class="doc">
+      <header class="hero-doc">
+        <div class="hero-copy">
+          <p class="kicker">How it works</p>
+          <h1>One add-on, three ways in.</h1>
+          <p class="lede">While You're Out is an MCP server: the open protocol Alexa+ add-ons are built on. Alexa+ calls its tools and shows its cards on the Echo Show; the parents' and the sitter's phones talk to the same house.</p>
+        </div>
+        <div class="hero-device" data-script="how" aria-hidden="true"></div>
+      </header>
+
+      <section class="sect" style="grid-template-columns: 1fr">
+        <header>
+          <p class="label">THE DRAWING</p>
+          <h2>Who talks to whom</h2>
+          <p><span class="tag real">solid: real</span><span class="tag stand-in">dashed: a stand-in, built against the interface the real one would use</span></p>
+        </header>
+        <svg class="diagram" viewBox="0 0 1040 470" role="img" aria-labelledby="dtitle">
+          <title id="dtitle">Three hosts call the While You're Out MCP server, which talks to the parent's phone, the sitter's phone and simulated stand-ins for Ring, Amazon Pay, a delivery partner, Fire TV and Bee.</title>
+          <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor" /></marker></defs>
+          <!-- hosts -->
+          <rect class="stand" x="20" y="30" width="250" height="96" rx="12" />
+          <text class="t" x="40" y="66">Alexa+ on Echo Show</text>
+          <text class="m" x="40" y="88">PLAYED BY OUR SIMULATOR</text>
+          <text class="m" x="40" y="104">(THE ADD-ON CONSOLE SAYS COMING SOON)</text>
+          <rect class="box" x="20" y="158" width="250" height="96" rx="12" />
+          <text class="t" x="40" y="194">Today's Alexa</text>
+          <text class="m" x="40" y="216">AN ALEXA-HOSTED SKILL, AN MCP HOST,</text>
+          <text class="m" x="40" y="232">TESTED ON AN ECHO SHOW DISPLAY</text>
+          <rect class="box" x="20" y="286" width="250" height="96" rx="12" />
+          <text class="t" x="40" y="322">Any MCP host</text>
+          <text class="m" x="40" y="344">CLAUDE, VS CODE, THE MCP INSPECTOR</text>
+          <text class="m" x="40" y="360">(ONE LINK ON /CONNECT)</text>
+          <!-- server -->
+          <rect class="box live" x="380" y="94" width="300" height="252" rx="16" />
+          <text class="t" x="402" y="132">While You're Out</text>
+          <text class="m" x="402" y="154">MCP SERVER · STREAMABLE HTTP · 2025-11-25</text>
+          <text x="402" y="186">23 tools, each with an output schema</text>
+          <text x="402" y="210">One MCP Apps card, light and dark</text>
+          <text x="402" y="234">Tasks that wait for a parent</text>
+          <text x="402" y="258">Elicitation: a form, a payment link</text>
+          <text x="402" y="282">The safety rules, in code</text>
+          <text x="402" y="306">A house per visitor, OAuth 2.1</text>
+          <text class="m" x="402" y="330">PLUS AN AI SECOND LOOK THAT ONLY ADDS CAUTION</text>
+          <!-- phones -->
+          <rect class="box" x="790" y="40" width="230" height="86" rx="12" />
+          <text class="t" x="808" y="76">Parent's phone</text>
+          <text class="m" x="808" y="98">WEB PUSH · APPROVE · ANSWER</text>
+          <rect class="box" x="790" y="146" width="230" height="86" rx="12" />
+          <text class="t" x="808" y="182">Sitter's phone</text>
+          <text class="m" x="808" y="204">GUEST PASS · WORKS OFFLINE</text>
+          <!-- stand-ins -->
+          <rect class="stand" x="790" y="262" width="230" height="168" rx="12" />
+          <text class="t" x="808" y="296">Stand-ins</text>
+          <text x="808" y="324">Ring doorbell</text>
+          <text x="808" y="346">Amazon Pay</text>
+          <text x="808" y="368">Delivery partner and store</text>
+          <text x="808" y="390">Fire TV, Bee</text>
+          <!-- wires -->
+          <path class="wire dash" d="M270 78 C 330 78, 330 150, 380 160" style="color: var(--ink)" />
+          <path class="wire" d="M270 206 L 380 220" style="color: var(--ink)" />
+          <path class="wire" d="M270 334 C 330 334, 330 290, 380 280" style="color: var(--ink)" />
+          <path class="wire" d="M680 150 C 730 150, 740 84, 790 84" style="color: var(--ink)" />
+          <path class="wire" d="M680 210 L 790 190" style="color: var(--ink)" />
+          <path class="wire dash" d="M680 300 C 730 300, 740 340, 790 340" style="color: var(--ink)" />
+          <text class="m" x="20" y="455">MCP OVER HTTPS, ALL THREE</text>
+        </svg>
+      </section>
+
+      <section class="sect">
+        <header>
+          <p class="label">ALEXA+ ADD-ON FEATURES</p>
+          <h2>What it uses, and why</h2>
+          <p>Each one carries part of the evening; none is there for its own sake.</p>
+        </header>
+        <table class="plain">
+          <thead><tr><th>Feature</th><th>Where it shows up</th></tr></thead>
+          <tbody>
+            <tr><td>MCP Apps card</td><td>Every answer on the Echo Show: the Tonight screen, the emergency guide, the doorbell photo, the goodnight message. One card, sized by the device class, in light and dark.</td></tr>
+            <tr><td>Tasks</td><td>"Ask Mom if she can stay up": the question waits for a person, and the answer arrives when she taps it on her lock screen.</td></tr>
+            <tr><td>Form elicitation</td><td>"We're heading out" with no name: the Echo Show asks who is babysitting, their language and rate.</td></tr>
+            <tr><td>URL elicitation</td><td>"Pay Priya": the payment opens on the parent's own phone, never on the shared screen.</td></tr>
+            <tr><td>Resources and subscriptions</td><td><code>house://tonight</code> updates the screen when the TV limit hits or the porch light goes on.</td></tr>
+            <tr><td>Output schemas, annotations, status text</td><td>Every tool says what it returns, whether it changes anything, and what to show while it works.</td></tr>
+            <tr><td>OAuth 2.1 account linking</td><td>A household links once (PKCE, refresh rotation, protected-resource metadata); the demo needs no sign-in.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="sect">
+        <header>
+          <p class="label">MEASURED</p>
+          <h2>Fast, sturdy, tested</h2>
+          <p>Full MCP round trips over HTTP, the way a host calls it, on a laptop. Amazon's budget is 500 ms per tool call.</p>
+        </header>
+        <div class="stats">
+          <div class="stat"><b>19 ms</b><span>p95 for a tool call, across every tool in 20 scripted evenings</span><small>server/eval/SPEED.md</small></div>
+          <div class="stat"><b>2,000</b><span>calls from 50 sessions at once, with no errors</span><small>239 calls a second</small></div>
+          <div class="stat"><b>0</b><span>server errors from 1,500 malformed and hostile requests</span><small>fuzz: broken JSON, 5 MB strings, __proto__</small></div>
+          <div class="stat"><b>441</b><span>automated tests on every push: the server, the simulator and the Alexa skill</span><small>357 · 76 · 8</small></div>
+        </div>
+      </section>
+
+      <section class="sect">
+        <header>
+          <p class="label">OPEN SOURCE</p>
+          <h2>The simulator is yours too</h2>
+        </header>
+        <div>
+          <p>Alexa+ isn't open to everyone yet, so we built the host: an Echo Show simulator that talks to any MCP add-on the Alexa+ way, with screens for every Echo device, a card audit and a readiness score. It's a project of its own, MIT licensed.</p>
+          <div class="cta-row"><a class="btn primary" href="https://github.com/murthyroshan/alexa-addon-simulator" target="_blank" rel="noreferrer">alexa-addon-simulator</a><a class="btn" href="https://github.com/murthyroshan/while-youre-out" target="_blank" rel="noreferrer">This add-on's code</a></div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-foot">
+  <div class="foot-in">
+    <div>
+      <p class="mark"><i aria-hidden="true"></i>While You're Out</p>
+      <p class="muted">An Alexa+ add-on for whoever looks after your kids and home while you're out. Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track. MIT licensed.</p>
+    </div>
+    <nav aria-label="More">
+      <a href="/while-youre-out/safety.html">Safety</a>
+      <a href="/while-youre-out/how.html">How it works</a>
+      <a href="/while-youre-out/try.html">Try it</a>
+      <a href="/while-youre-out/game.html">Play the evening</a>
+      <a href="/while-youre-out/judges.html">For judges</a>
+      <a href="https://github.com/murthyroshan/while-youre-out" target="_blank" rel="noreferrer">Code on GitHub</a>
+      <a href="https://github.com/murthyroshan/alexa-addon-simulator" target="_blank" rel="noreferrer">The open-source simulator</a>
+    </nav>
+  </div>
+  <p class="fine">The demo family is sample data. The emergency plan shown is written for the demo, not medical advice. Ring, Amazon Pay, the delivery partner, Fire TV and Bee are simulated stand-ins, labelled as such.</p>
+</footer>
+
+  </body>
+</html>

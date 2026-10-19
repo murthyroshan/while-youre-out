@@ -28,7 +28,7 @@
 
 **Emergencies:** 49 of 49 recognised by the add-on's rules with no AI, in English, Hindi and Spanish. False alarms on the 308 other lines: 0.
 
-**Time per line** through the add-on (in-process, so this is the add-on's own work, not the network): median 5.9 ms, p95 37.1 ms, slowest 102.2 ms.
+**Time per line** through the add-on (in-process, so this is the add-on's own work, not the network): median 3.2 ms, p95 7.7 ms, slowest 36.1 ms.
 
 ## Where the add-on failed
 

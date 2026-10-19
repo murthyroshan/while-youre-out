@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>While You're Out · an Alexa+ add-on for whoever looks after your kids</title>
+    <meta name="description" content="The Echo Show in the kitchen becomes the babysitter's guide for the evening, in the parents' own words, while their phones stay in the loop." />
+
+    <script type="module" crossorigin src="/while-youre-out/assets/index-CI9P-6jK.js"></script>
+    <link rel="modulepreload" crossorigin href="/while-youre-out/assets/page-CeYt_f_j.js">
+    <link rel="modulepreload" crossorigin href="/while-youre-out/assets/three-DWOpg4OT.js">
+    <link rel="modulepreload" crossorigin href="/while-youre-out/assets/scene-byuBzLdo.js">
+    <link rel="stylesheet" crossorigin href="/while-youre-out/assets/page-B-RzQevd.css">
+  </head>
+  <body class="home" data-page="home">
+    <a class="skip" href="#main">Skip to the content</a>
+<header class="site-head">
+  <a class="mark" href="/while-youre-out/"><i aria-hidden="true"></i>While You're Out</a>
+  <button class="menu" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+  <nav id="site-nav" aria-label="Site">
+    <a href="/while-youre-out/#evening" data-page="home">The evening</a>
+    <a href="/while-youre-out/safety.html" data-page="safety">Safety</a>
+    <a href="/while-youre-out/how.html" data-page="how">How it works</a>
+    <a href="/while-youre-out/game.html" data-page="game">Play</a>
+    <a href="/while-youre-out/judges.html" data-page="judges">For judges</a>
+    <a class="live" href="/while-youre-out/try.html" data-page="try">Try it</a>
+  </nav>
+  <span class="lightbar" aria-hidden="true"></span>
+</header>
+
+    <canvas id="scene" aria-hidden="true"></canvas>
+    <svg id="plan" aria-hidden="true"></svg>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="clock-chip" aria-hidden="true"><span id="clock">5:36 pm</span></div>
+    <p id="caption" class="caption" aria-live="polite"></p>
+
+    <div id="main"></div>
+    <main id="story">
+      <section class="beat hero" data-beat="0">
+        <p class="kicker">An Alexa+ add-on for Echo Show</p>
+        <h1>Tonight, Priya is looking after Maya.</h1>
+        <p class="lede">The Echo Show in the kitchen becomes her guide for the evening, in the parents' own words. Their phones stay in the loop, and safety is written in code, not left to chance.</p>
+        <div class="cta">
+          <a class="btn primary" href="#evening">Watch the evening</a>
+          <a class="btn" href="/while-youre-out/game.html">Play the evening</a>
+          <a class="btn" href="/while-youre-out/try.html">Try the live demo</a>
+        </div>
+        <p class="moon" id="moon-note"></p>
+      </section>
+
+      <section class="beat" id="evening" data-beat="1">
+        <p class="time">6:00 pm</p>
+        <h2>Mom hands over.</h2>
+        <p>"Priya is babysitting tonight." The Echo Show turns into tonight's screen: what's next, Maya's peanut allergy, who to call. Then it checks Priya knows the three things that matter.</p>
+      </section>
+
+      <section class="beat" data-beat="2">
+        <p class="time">6:40 pm</p>
+        <h2>"Where's the EpiPen?"</h2>
+        <p>Every answer comes in the parents' own words, and food always gets a safety check. This Echo Show is the real thing, running live. Ask it.</p>
+        <div class="ask">
+          <button data-say="Where's the EpiPen?">Where's the EpiPen?</button>
+          <button data-say="Can Maya have the cookies on the counter?">Can she have a cookie?</button>
+          <form id="ask-form"><input placeholder="Ask the kitchen anything…" aria-label="Ask the kitchen" /></form>
+        </div>
+      </section>
+
+      <section class="beat" data-beat="3">
+        <p class="time">8:10 pm</p>
+        <h2>Someone knocks.</h2>
+        <p>Nobody is expected, so: don't open. The doorbell photo goes to Mom's phone, and her answer reaches the kitchen.</p>
+      </section>
+
+      <section class="beat" data-beat="4">
+        <p class="time">8:30 pm</p>
+        <h2>Lights out.</h2>
+        <p>Mom's goodnight message plays for Maya. The house gets ready for bed, room by room, until only the night light is on.</p>
+      </section>
+
+      <section class="beat" data-beat="5">
+        <p class="time">Later</p>
+        <h2>A quiet house.</h2>
+        <p>The parents come home to a summary of the evening, and pay Priya from their phone.</p>
+      </section>
+    </main>
+
+    <section class="after" aria-labelledby="after-title">
+      <div class="doc">
+        <p class="kicker">Beyond the evening</p>
+        <h2 id="after-title">Built to be trusted with someone's child.</h2>
+        <p class="lede">Safety written in code and measured, a guide that keeps going when the internet drops, and the same add-on on today's Alexa. Every number below links to how it was measured.</p>
+        <div class="stats" style="margin-top: 36px">
+          <div class="stat"><b>91%</b><span>of 55 held-out safety traps, on their only untuned run</span><small>the honest number</small></div>
+          <div class="stat"><b>49 / 49</b><span>emergencies recognised with no AI, in three languages</span><small>no false alarms</small></div>
+          <div class="stat"><b>19 ms</b><span>p95 for a tool call, against Amazon's 500 ms budget</span><small>full MCP round trips</small></div>
+          <div class="stat"><b>441</b><span>automated tests on every push</span><small>server · simulator · Alexa skill</small></div>
+        </div>
+        <div class="cards" style="margin-top: 40px">
+          <a class="card" href="/while-youre-out/safety.html"><p class="label">SAFETY</p><h3>What it will never do, and the numbers</h3><span class="go">Read →</span></a>
+          <a class="card" href="/while-youre-out/how.html"><p class="label">HOW IT WORKS</p><h3>One MCP server, three ways in</h3><span class="go">Read →</span></a>
+          <a class="card" href="/while-youre-out/game.html"><p class="label">PLAY</p><h3>You're the sitter tonight. Can you keep Maya safe?</h3><span class="go">Play →</span></a>
+          <a class="card" href="/while-youre-out/try.html"><p class="label">TRY IT</p><h3>A house of your own, in a minute</h3><span class="go">Open →</span></a>
+        </div>
+      </div>
+    </section>
+    <footer class="site-foot">
+  <div class="foot-in">
+    <div>
+      <p class="mark"><i aria-hidden="true"></i>While You're Out</p>
+      <p class="muted">An Alexa+ add-on for whoever looks after your kids and home while you're out. Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track. MIT licensed.</p>
+    </div>
+    <nav aria-label="More">
+      <a href="/while-youre-out/safety.html">Safety</a>
+      <a href="/while-youre-out/how.html">How it works</a>
+      <a href="/while-youre-out/try.html">Try it</a>
+      <a href="/while-youre-out/game.html">Play the evening</a>
+      <a href="/while-youre-out/judges.html">For judges</a>
+      <a href="https://github.com/murthyroshan/while-youre-out" target="_blank" rel="noreferrer">Code on GitHub</a>
+      <a href="https://github.com/murthyroshan/alexa-addon-simulator" target="_blank" rel="noreferrer">The open-source simulator</a>
+    </nav>
+  </div>
+  <p class="fine">The demo family is sample data. The emergency plan shown is written for the demo, not medical advice. Ring, Amazon Pay, the delivery partner, Fire TV and Bee are simulated stand-ins, labelled as such.</p>
+</footer>
+
+  </body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Safety · While You're Out</title>
+    <meta name="description" content="Safety enforced in code, measured on 357 things a sitter might say, and still working when the internet drops." />
+    <!-- include:head -->
+  </head>
+  <body class="page" data-page="safety">
+    <!-- include:header -->
+    <main id="main" class="doc">
+      <header class="hero-doc">
+        <div class="hero-copy">
+          <p class="kicker">Safety</p>
+          <h1>Written in code, not left to a prompt.</h1>
+          <p class="lede">A babysitter will ask about food, medicine and strangers at the door, and some evenings something goes wrong. The rules that decide what While You're Out may say are ordinary code: they give the same answer every time, in a few milliseconds, with no AI and no internet needed.</p>
+        </div>
+        <div class="hero-device" data-script="safety" aria-hidden="true"></div>
+      </header>
+
+      <section class="sect">
+        <header>
+          <p class="label">THE RULES</p>
+          <h2>What it will never do</h2>
+          <p>Each rule is enforced where the answer is made, and a test fails the build if it stops being true.</p>
+        </header>
+        <ol class="rules">
+          <li><b>Never says a food or medicine is safe, and never gives a dose.</b> Food answers lead with the allergy in the parents' words; "No. That can have peanuts in it" comes first when a dish hides them (satay, pad thai, pesto, trail mix).</li>
+          <li><b>Emergencies come before anything else,</b> in English, Hindi and Spanish, inside a question, a log or a request at the door. Each kind gets a fixed script: the parents' own plan for an allergic reaction, "get everyone out" for fire or gas, Poison Control for poisoning.</li>
+          <li><b>Never claims to call for help.</b> "This device can't call 911: use your phone." The address is shown on the screen for the call, never read aloud.</li>
+          <li><b>Never says private details aloud:</b> the alarm code, the spare key, when the parents will be back. Codes a parent sends are never stored.</li>
+          <li><b>"Is it serious?" is never answered.</b> It says what would make it an emergency, and offers to ask a parent.</li>
+          <li><b>A stranger at the door is never called safe.</b> Whether to open is the parents' call, with the doorbell photo on their phone.</li>
+          <li><b>The parents' rule wins.</b> "Nothing scary" outranks how they answered on other evenings. A pet that ate chocolate means a vet, now.</li>
+          <li><b>An AI can only add caution.</b> When the rules find nothing but the words hint at danger, an AI model takes a second look, within two seconds. It can turn "not an emergency" into "emergency", never the other way, and is never asked about what the rules already caught.</li>
+        </ol>
+      </section>
+
+      <section class="sect">
+        <header>
+          <p class="label">MEASURED</p>
+          <h2>357 things a sitter might say</h2>
+          <p>Allergens hidden in dishes, "she already ate it", emergencies in three languages, doses, "the parents said it's fine", the alarm code, a stranger at the door, the dog and the chocolate, and ordinary questions it must still answer. One plain-rules judge reads every reply.</p>
+        </header>
+        <div>
+          <div class="stats">
+            <div class="stat"><b>91%</b><span>on 55 held-out lines, written after the fixes and run once: 50 of 55. The fairest number here.</span><small>eval/REPORT.md</small></div>
+            <div class="stat"><b>49 / 49</b><span>emergencies recognised by the rules alone, with no false alarms on the 308 other lines</span><small>English · Hindi · Spanish</small></div>
+            <div class="stat"><b>270 / 273</b><span>for a chatbot given the same notes and our rules in its prompt. Close; it missed 911 three times.</span><small>Gemini Flash-Lite, temperature 0</small></div>
+            <div class="stat"><b>~3 ms</b><span>per answer through the add-on's own rules (median), with no AI and no internet</span><small>p95 7.7 ms in-process · eval/REPORT.md</small></div>
+          </div>
+          <div class="honest">
+            <p><b>Read it honestly.</b> We wrote the traps and fixed what the first run found, so the add-on's 100% on them says little; that's why the held-out lines are reported on their own, and why an independent set written by a model that never saw ours is next. A well-prompted chatbot gets close on words. What a prompt can't give is the same answer every time, an answer when the model is busy or the connection drops, and actions: the parents alerted, the guide, the timer. Every reply is in <a href="https://github.com/murthyroshan/while-youre-out/blob/main/server/eval/REPORT.md">the report</a> to check.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="sect">
+        <header>
+          <p class="label">WHEN THE INTERNET DROPS</p>
+          <h2>The guide keeps going</h2>
+          <p>Tested by cutting the connection in the middle of an emergency.</p>
+        </header>
+        <div class="cards">
+          <div class="card"><p class="label">THE KITCHEN SCREEN</p><h3>Notices within six seconds</h3><p>The steps stay on the screen, Done moves them on, and the second-EpiPen timer keeps counting. When the connection is back, everything goes to the parents with the times it really happened.</p></div>
+          <div class="card"><p class="label">THE SITTER'S PHONE</p><h3>Opens with no internet at all</h3><p>The page itself and every guide are kept on the phone: the parents' plan, fire, gas, poisoning, choking, a missing child, a break-in. Calls don't need the internet. Deleted when the evening ends.</p></div>
+          <div class="card"><p class="label">BOTH TOGETHER</p><h3>One guide, two screens</h3><p>During an emergency the phone shows the same step as the kitchen, and Done on either moves both. The parents' phones follow live.</p></div>
+        </div>
+      </section>
+
+      <section class="sect">
+        <header>
+          <p class="label">THE CHILDREN'S DETAILS</p>
+          <h2>Kept only with a parent's say-so</h2>
+        </header>
+        <ol class="rules">
+          <li><b>For the adults.</b> Nothing is ever collected from a child. What's kept about a child (a first name, an age, allergies) is entered by a parent or guardian, after they agree; who agreed, and when, is recorded.</li>
+          <li><b>Not forever.</b> Evenings (what was asked, logged and answered, door photos, emergencies, orders) are deleted by themselves after 90 days. "Delete everything" is on the parent's phone.</li>
+          <li><b>Every Alexa+ rule, checked.</b> Amazon's policy, functional and design rules, each with the test that proves it, and the three we only partly meet: <a href="https://github.com/murthyroshan/while-youre-out/blob/main/COMPLIANCE.md">COMPLIANCE.md</a>.</li>
+        </ol>
+      </section>
+
+      <div class="cta-row">
+        <a class="btn primary" href="/while-youre-out/game.html">Play the evening yourself</a>
+        <a class="btn" href="/while-youre-out/how.html">How it works</a>
+      </div>
+    </main>
+    <!-- include:footer -->
+    <script type="module" src="/src/pages/page.ts"></script>
+  </body>
+</html>

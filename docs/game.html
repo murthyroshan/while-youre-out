@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Play the evening · While You're Out</title>
+    <meta name="description" content="You're the babysitter tonight, in a 3D house. Maya is allergic to peanuts. Can you get through the evening, and what would the Echo Show have said?" />
+
+    <script type="module" crossorigin src="/while-youre-out/assets/game-DvgtH9Gd.js"></script>
+    <link rel="modulepreload" crossorigin href="/while-youre-out/assets/page-CeYt_f_j.js">
+    <link rel="modulepreload" crossorigin href="/while-youre-out/assets/three-DWOpg4OT.js">
+    <link rel="modulepreload" crossorigin href="/while-youre-out/assets/scene-byuBzLdo.js">
+    <link rel="stylesheet" crossorigin href="/while-youre-out/assets/page-B-RzQevd.css">
+    <link rel="stylesheet" crossorigin href="/while-youre-out/assets/game-Ds08jZhL.css">
+  </head>
+  <body class="page game intro" data-page="game">
+    <a class="skip" href="#main">Skip to the content</a>
+<header class="site-head">
+  <a class="mark" href="/while-youre-out/"><i aria-hidden="true"></i>While You're Out</a>
+  <button class="menu" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+  <nav id="site-nav" aria-label="Site">
+    <a href="/while-youre-out/#evening" data-page="home">The evening</a>
+    <a href="/while-youre-out/safety.html" data-page="safety">Safety</a>
+    <a href="/while-youre-out/how.html" data-page="how">How it works</a>
+    <a href="/while-youre-out/game.html" data-page="game">Play</a>
+    <a href="/while-youre-out/judges.html" data-page="judges">For judges</a>
+    <a class="live" href="/while-youre-out/try.html" data-page="try">Try it</a>
+  </nav>
+  <span class="lightbar" aria-hidden="true"></span>
+</header>
+
+    <main id="main" class="arena">
+      <canvas id="g-canvas" aria-hidden="true"></canvas>
+      <div class="flash" id="g-flash" aria-hidden="true"></div>
+      <div class="hud" aria-label="How the evening is going">
+        <p class="clock"><span id="g-clock">5:54 pm</span><small>Saturday</small></p>
+        <div class="meter" data-meter="safety"><span>Safety <em>100</em></span><i><b></b></i></div>
+        <div class="meter" data-meter="rules"><span>House rules <em>100</em></span><i><b></b></i></div>
+        <div class="meter" data-meter="mood"><span>Maya <em>70</em></span><i><b></b></i></div>
+        <button class="sound" id="g-sound" type="button" aria-pressed="false">Sound on</button>
+      </div>
+      <section class="panel" id="g-panel" aria-live="polite">
+        <p class="when" id="g-when">A game · about 4 minutes</p>
+        <h1 id="g-title">Tonight, you're the sitter.</h1>
+        <p class="story" id="g-story"></p>
+        <div class="timer" id="g-timer" hidden><b></b><span></span></div>
+        <div class="choices" id="g-choices"></div>
+        <p class="note" id="g-note" hidden></p>
+      </section>
+      <aside class="device" aria-label="The kitchen Echo Show">
+        <div class="bezel" id="g-device"></div>
+        <p class="said" id="g-said" aria-live="polite"></p>
+        <p class="cap">The kitchen Echo Show. Its words are the add-on's own, recorded from it.</p>
+      </aside>
+    </main>
+    <footer class="site-foot">
+  <div class="foot-in">
+    <div>
+      <p class="mark"><i aria-hidden="true"></i>While You're Out</p>
+      <p class="muted">An Alexa+ add-on for whoever looks after your kids and home while you're out. Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track. MIT licensed.</p>
+    </div>
+    <nav aria-label="More">
+      <a href="/while-youre-out/safety.html">Safety</a>
+      <a href="/while-youre-out/how.html">How it works</a>
+      <a href="/while-youre-out/try.html">Try it</a>
+      <a href="/while-youre-out/game.html">Play the evening</a>
+      <a href="/while-youre-out/judges.html">For judges</a>
+      <a href="https://github.com/murthyroshan/while-youre-out" target="_blank" rel="noreferrer">Code on GitHub</a>
+      <a href="https://github.com/murthyroshan/alexa-addon-simulator" target="_blank" rel="noreferrer">The open-source simulator</a>
+    </nav>
+  </div>
+  <p class="fine">The demo family is sample data. The emergency plan shown is written for the demo, not medical advice. Ring, Amazon Pay, the delivery partner, Fire TV and Bee are simulated stand-ins, labelled as such.</p>
+</footer>
+
+  </body>
+</html>

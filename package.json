@@ -4,12 +4,15 @@
   "license": "MIT",
   "workspaces": [
     "server",
-    "simulator"
+    "simulator",
+    "site"
   ],
   "scripts": {
     "dev": "npm run dev -w server",
     "dev:sim": "npm run dev -w simulator",
     "test": "npm test -w server && npm test -w simulator",
-    "typecheck": "npm run typecheck -w server && npm run typecheck -w simulator"
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w simulator",
+    "dev:site": "npm run dev -w site",
+    "build:site": "npm run build -w site"
   }
 }
