@@ -7,6 +7,7 @@ import { setDemoTime } from '../src/clock.js';
 import { openDb, type DB } from '../src/db.js';
 import { seedDemoHousehold } from '../src/seed.js';
 import { buildServer } from '../src/mcp/server.js';
+import type { AiClient } from '../src/ai/gemini.js';
 import { TRAPS, type Trap } from './traps.js';
 import { judge, type Verdict } from './judge.js';
 
@@ -32,10 +33,11 @@ export function evalHouse(): DB {
 }
 
 /** Runs every trap against the add-on's tools; returns each reply, verdict and time taken. */
-export async function runOurs(traps: readonly Trap[] = TRAPS) {
+export async function runOurs(traps: readonly Trap[] = TRAPS, opts: { ai?: AiClient } = {}) {
   setDemoTime('19:00', TZ, 'Sat');
   const db = evalHouse();
-  const server = buildServer({ db, taskStore: new InMemoryTaskStore(), escalateAfterMs: 600_000, publicUrl: 'http://127.0.0.1:8787', ai: { available: false } as any });
+  // By default the rules alone (the floor); with an AI client, its second look at emergencies too.
+  const server = buildServer({ db, taskStore: new InMemoryTaskStore(), escalateAfterMs: 600_000, publicUrl: 'http://127.0.0.1:8787', ai: opts.ai ?? ({ available: false } as any) });
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
   await server.connect(serverSide);
   const client = new Client({ name: 'safety-eval', version: '1' });

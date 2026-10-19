@@ -7,6 +7,8 @@ import { createHash } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { RuleBrain } from '../../simulator/src/brain/rules';
+import { GeminiBrain } from '../../simulator/src/brain/gemini';
+import { HybridBrain } from '../../simulator/src/brain/hybrid';
 import type { ToolResult } from '../../simulator/src/mcp';
 import { aplDirective, cardModel } from './apl';
 
@@ -68,8 +70,14 @@ export async function handle(event: AlexaRequest, opts: { server?: string } = {}
 
   const userId = event.context?.System?.user?.userId ?? event.session?.user?.userId ?? 'anonymous';
   const house = `${(opts.server ?? SERVER).replace(/\/$/, '')}/h/${createHash('sha256').update(`wyo:${userId}`).digest('hex').slice(0, 32)}`;
-  const brain = new RuleBrain();
-  brain.restore(event.session?.attributes?.brain);
+  // Rules first (instant, no AI); what they don't recognise goes to the model through the add-on's
+  // own proxy, the way the Alexa+ model would choose a tool. If the model is slow or down, the rules answer.
+  const rules = new RuleBrain();
+  rules.restore(event.session?.attributes?.brain);
+  let tools: Awaited<ReturnType<Client['listTools']>>['tools'] = [];
+  const model = new GeminiBrain({ serverOrigin: house, tools: () => tools, instructions: () => client.getInstructions(), fallback: rules, timeoutMs: 4_000 });
+  model.restore(event.session?.attributes?.model);
+  const brain = new HybridBrain(rules, model);
   const speech: string[] = [];
   let card: ToolResult | null = null;
   let parentLink: string | null = null;
@@ -102,6 +110,7 @@ export async function handle(event: AlexaRequest, opts: { server?: string } = {}
       },
     };
     if (said) {
+      tools = (await client.listTools(undefined, { signal: deadline })).tools;
       await brain.handle(said, io);
     } else {
       // "Alexa, open While You're Out": tonight's screen, and how to start.
@@ -126,7 +135,7 @@ export async function handle(event: AlexaRequest, opts: { server?: string } = {}
     await transport.terminateSession().catch(() => {});
     void client.close().catch(() => {});
   }
-  return respond(speech.length ? speech : ['Okay.'], card, event, { attributes: { brain: brain.snapshot(), ...(lang ? { lang } : {}) }, appCard: parentLink });
+  return respond(speech.length ? speech : ['Okay.'], card, event, { attributes: { brain: rules.snapshot(), model: model.snapshot(), ...(lang ? { lang } : {}) }, appCard: parentLink });
 }
 
 function respond(

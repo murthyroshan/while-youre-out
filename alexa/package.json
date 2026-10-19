@@ -1,0 +1,9 @@
+{
+  "name": "while-youre-out-alexa-build",
+  "private": true,
+  "description": "Build-time only: what the skill bundle needs on the Node.js version Alexa-hosted skills run.",
+  "license": "MIT",
+  "devDependencies": {
+    "undici": "5.28.4"
+  }
+}

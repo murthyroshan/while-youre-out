@@ -17,9 +17,16 @@ let http: Server;
 let base: string;
 let close: () => void;
 let attributes: Record<string, any> = {};
+/** What the stand-in model answers next, turn by turn. */
+let script: Array<(req: any) => any[]> = [];
 
 before(async () => {
-  const houses = createHouses((url) => createApp({ parentKey: KEY, publicUrl: url, demo: true, escalateAfterMs: 60_000, ai: { available: false } as any }), { publicUrl: 'http://demo.test' });
+  // The model behind the add-on's proxy is a stand-in: unavailable unless a test scripts it.
+  const chat = async (req: any) => {
+    if (!script.length) throw new Error('no model in this test');
+    return { parts: script.shift()!(req), model: 'fake' };
+  };
+  const houses = createHouses((url) => createApp({ parentKey: KEY, publicUrl: url, demo: true, escalateAfterMs: 60_000, ai: { available: false } as any, chat }), { publicUrl: 'http://demo.test' });
   close = houses.close;
   http = houses.app.listen(0, '127.0.0.1');
   await new Promise((r) => http.once('listening', r));
@@ -50,7 +57,7 @@ async function say(words: string, screen = true) {
   return r;
 }
 const speech = (r: any) => String(r.response.outputSpeech.ssml).replace(/^<speak>|<\/speak>$/g, '');
-const card = (r: any) => r.response.directives?.[0]?.datasources?.payload?.card;
+const card = (r: any) => r.response.directives?.[0]?.datasources?.wyo?.card;
 const post = (path: string, body: Record<string, unknown>) =>
   fetch(`${base}${house}${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k: KEY, ...body }) });
 
@@ -155,4 +162,21 @@ test('a Hindi Echo: the sitter is answered in Hindi, and an emergency said in Hi
   const e = await hi('माया साँस नहीं ले पा रही');
   assert.equal(card(e).mood, 'emergency');
   assert.ok(card(e).notes.some((n: any) => /911/.test(n.title)));
+});
+
+test("a sentence the rules don't recognise goes to the model, which picks the tool; what is said is still the add-on's own words", async () => {
+  await handle(envelope({ type: 'LaunchRequest' }), { server: base });
+  let toolsSeen: string[] = [];
+  script = [
+    (req) => ((toolsSeen = req.functions.map((f: any) => f.name)), [{ functionCall: { name: 'where_is', args: { item: 'EpiPen' } } }]),
+    () => [{ text: 'It is in the kitchen drawer.' }],
+  ];
+  const r = await say('मुझे एपिपेन चाहिए, वह कहाँ है?');
+  assert.ok(toolsSeen.includes('where_is') && toolsSeen.includes('ask_house'), "the model chooses among the add-on's tools");
+  assert.match(speech(r), /stove/, "the add-on's own answer, not the model's paraphrase");
+  assert.equal(card(r).title, 'EpiPen');
+  assert.ok(Array.isArray(attributes.model.history), 'the conversation is carried to the next turn');
+  // The model down: the rules answer, and nothing breaks.
+  script = [];
+  assert.match(speech(await say('where is the EpiPen')), /stove/);
 });

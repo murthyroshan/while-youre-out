@@ -185,25 +185,25 @@ export const DOCUMENT = {
   theme: 'dark',
   description: "While You're Out: a card from the add-on",
   mainTemplate: {
-    parameters: ['payload'],
+    // Not "payload": an APL parameter by that name receives every data source at once (a legacy rule).
+    parameters: ['wyo'],
     items: [
       {
         type: 'Container',
         width: '100vw',
         height: '100vh',
-        bind: [{ name: 'c', value: '${payload.card}' }],
         items: [
-          { type: 'Frame', position: 'absolute', width: '100vw', height: '100vh', backgroundColor: '${c.colors.bg}' },
+          { type: 'Frame', position: 'absolute', width: '100vw', height: '100vh', backgroundColor: '${wyo.card.colors.bg}' },
           {
             type: 'ScrollView',
             width: '100vw',
             height: '100vh',
             item: {
               type: 'Container',
-              paddingLeft: '${c.pad}',
-              paddingRight: '${c.pad}',
-              paddingTop: '${c.pad * 0.6}',
-              paddingBottom: '${c.pad}',
+              paddingLeft: '${wyo.card.pad}',
+              paddingRight: '${wyo.card.pad}',
+              paddingTop: '${wyo.card.pad * 0.6}',
+              paddingBottom: '${wyo.card.pad}',
               items: [
                 {
                   type: 'Container',
@@ -211,33 +211,34 @@ export const DOCUMENT = {
                   justifyContent: 'spaceBetween',
                   alignItems: 'center',
                   items: [
-                    { type: 'Text', text: "While You're Out", fontSize: '${c.f.meta}', fontWeight: '700', color: '${c.colors.text2}' },
-                    { type: 'Text', text: '${c.topic}', fontSize: '${c.f.meta}', fontWeight: '700', color: '${c.colors.accent}', maxLines: 1 },
+                    { type: 'Text', text: "While You're Out", fontSize: '${wyo.card.f.meta}', fontWeight: '700', color: '${wyo.card.colors.text2}' },
+                    { type: 'Text', text: '${wyo.card.topic}', fontSize: '${wyo.card.f.meta}', fontWeight: '700', color: '${wyo.card.colors.accent}', maxLines: 1 },
                   ],
                 },
-                { type: 'Text', text: '${c.title}', fontSize: '${c.f.title}', fontWeight: '700', color: '${c.colors.text}', paddingTop: '${c.gap}', lineHeight: 1.15 },
-                { type: 'Text', when: '${c.sub}', text: '${c.sub}', fontSize: '${c.f.body}', color: '${c.colors.text2}', paddingTop: '${c.gap * 0.4}' },
+                { type: 'Text', text: '${wyo.card.title}', fontSize: '${wyo.card.f.title}', fontWeight: '700', color: '${wyo.card.colors.text}', paddingTop: '${wyo.card.gap}', lineHeight: 1.15 },
+                { type: 'Text', when: '${wyo.card.sub}', text: '${wyo.card.sub}', fontSize: '${wyo.card.f.body}', color: '${wyo.card.colors.text2}', paddingTop: '${wyo.card.gap * 0.4}' },
                 {
                   type: 'Container',
-                  data: '${c.notes}',
-                  paddingTop: '${c.gap * 0.5}',
+                  when: '${wyo.card.notes.length > 0}',
+                  data: '${wyo.card.notes}',
+                  paddingTop: '${wyo.card.gap * 0.5}',
                   items: [
                     {
                       type: 'Frame',
-                      backgroundColor: '${c.colors.card}',
-                      borderRadius: '${c.gap * 0.6}',
+                      backgroundColor: '${wyo.card.colors.card}',
+                      borderRadius: '${wyo.card.gap * 0.6}',
                       borderWidth: 2,
                       borderColor: '${data.color}',
-                      paddingTop: '${c.gap * 0.6}',
-                      paddingBottom: '${c.gap * 0.6}',
-                      paddingLeft: '${c.gap}',
-                      paddingRight: '${c.gap}',
-                      spacing: '${c.gap * 0.5}',
+                      paddingTop: '${wyo.card.gap * 0.6}',
+                      paddingBottom: '${wyo.card.gap * 0.6}',
+                      paddingLeft: '${wyo.card.gap}',
+                      paddingRight: '${wyo.card.gap}',
+                      spacing: '${wyo.card.gap * 0.5}',
                       item: {
                         type: 'Container',
                         items: [
-                          { type: 'Text', text: '${data.title}', fontSize: '${c.f.meta}', fontWeight: '700', color: '${data.color}' },
-                          { type: 'Text', when: '${data.text}', text: '${data.text}', fontSize: '${c.f.body}', color: '${c.colors.text}' },
+                          { type: 'Text', text: '${data.title}', fontSize: '${wyo.card.f.meta}', fontWeight: '700', color: '${data.color}' },
+                          { type: 'Text', when: '${data.text}', text: '${data.text}', fontSize: '${wyo.card.f.body}', color: '${wyo.card.colors.text}' },
                         ],
                       },
                     },
@@ -245,28 +246,29 @@ export const DOCUMENT = {
                 },
                 {
                   type: 'Container',
-                  data: '${c.rows}',
-                  paddingTop: '${c.gap * 0.5}',
+                  when: '${wyo.card.rows.length > 0}',
+                  data: '${wyo.card.rows}',
+                  paddingTop: '${wyo.card.gap * 0.5}',
                   items: [
                     {
                       type: 'Container',
                       direction: 'row',
                       alignItems: 'center',
-                      spacing: '${c.gap * 0.3}',
-                      paddingTop: '${c.gap * 0.35}',
-                      paddingBottom: '${c.gap * 0.35}',
+                      spacing: '${wyo.card.gap * 0.3}',
+                      paddingTop: '${wyo.card.gap * 0.35}',
+                      paddingBottom: '${wyo.card.gap * 0.35}',
                       items: [
-                        { type: 'Text', text: '${data.done ? "✓" : "•"}', fontSize: '${c.f.body}', color: '${data.done ? "#4ADE9A" : c.colors.accent}', width: '${c.f.body * 1.4}' },
+                        { type: 'Text', text: '${data.done ? "✓" : "•"}', fontSize: '${wyo.card.f.body}', color: '${data.done ? "#4ADE9A" : wyo.card.colors.accent}', width: '${wyo.card.f.body * 1.4}' },
                         {
                           type: 'Container',
                           grow: 1,
                           shrink: 1,
                           items: [
-                            { type: 'Text', text: '${data.title}', fontSize: '${c.f.body}', fontWeight: '600', color: '${c.colors.text}' },
-                            { type: 'Text', when: '${data.sub}', text: '${data.sub}', fontSize: '${c.f.meta}', color: '${c.colors.text2}' },
+                            { type: 'Text', text: '${data.title}', fontSize: '${wyo.card.f.body}', fontWeight: '600', color: '${wyo.card.colors.text}' },
+                            { type: 'Text', when: '${data.sub}', text: '${data.sub}', fontSize: '${wyo.card.f.meta}', color: '${wyo.card.colors.text2}' },
                           ],
                         },
-                        { type: 'Text', when: '${data.when}', text: '${data.when}', fontSize: '${c.f.meta}', color: '${c.colors.text2}', paddingLeft: '${c.gap * 0.5}' },
+                        { type: 'Text', when: '${data.when}', text: '${data.when}', fontSize: '${wyo.card.f.meta}', color: '${wyo.card.colors.text2}', paddingLeft: '${wyo.card.gap * 0.5}' },
                       ],
                     },
                   ],
@@ -275,30 +277,31 @@ export const DOCUMENT = {
                   type: 'Container',
                   direction: 'row',
                   wrap: 'wrap',
-                  data: '${c.buttons}',
-                  paddingTop: '${c.gap * 0.6}',
+                  when: '${wyo.card.buttons.length > 0}',
+                  data: '${wyo.card.buttons}',
+                  paddingTop: '${wyo.card.gap * 0.6}',
                   items: [
                     {
                       type: 'TouchWrapper',
-                      spacing: '${c.gap * 0.5}',
+                      spacing: '${wyo.card.gap * 0.5}',
                       accessibilityLabel: '${data.label}',
                       onPress: [{ type: 'SendEvent', arguments: ['${data.say}'] }],
                       item: {
                         type: 'Frame',
                         // Alexa's minimum touch target: 48 dp high.
                         minHeight: 64,
-                        backgroundColor: '${c.colors.accent}',
+                        backgroundColor: '${wyo.card.colors.accent}',
                         borderRadius: 32,
-                        paddingLeft: '${c.gap}',
-                        paddingRight: '${c.gap}',
+                        paddingLeft: '${wyo.card.gap}',
+                        paddingRight: '${wyo.card.gap}',
                         paddingTop: 14,
                         paddingBottom: 14,
-                        item: { type: 'Text', text: '${data.label}', fontSize: '${c.f.meta}', fontWeight: '700', color: '${c.colors.bg}' },
+                        item: { type: 'Text', text: '${data.label}', fontSize: '${wyo.card.f.meta}', fontWeight: '700', color: '${wyo.card.colors.bg}' },
                       },
                     },
                   ],
                 },
-                { type: 'Text', when: '${c.footer}', text: '${c.footer}', fontSize: '${c.f.meta * 0.9}', color: '${c.colors.text2}', paddingTop: '${c.gap}' },
+                { type: 'Text', when: '${wyo.card.footer}', text: '${wyo.card.footer}', fontSize: '${wyo.card.f.meta * 0.9}', color: '${wyo.card.colors.text2}', paddingTop: '${wyo.card.gap}' },
               ],
             },
           },
@@ -317,7 +320,7 @@ export function aplDirective(card: CardModel, opts: { pixelWidth?: number; large
     token: 'wyo-card',
     document: DOCUMENT,
     datasources: {
-      payload: {
+      wyo: {
         card: {
           ...card,
           sub: card.sub ?? '',

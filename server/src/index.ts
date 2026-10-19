@@ -25,7 +25,7 @@ import { seedDemoHousehold } from './seed.js';
 import { buildServer } from './mcp/server.js';
 import { PARENT_HTML, SERVICE_WORKER_JS } from './parent/page.js';
 import { createPush, isValidSubscription, type PushSender } from './domain/push.js';
-import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './domain/family.js';
+import { consent, FamilyError, getFamily, pruneOld, recordConsent, resetToDemo, saveFamily, startFresh } from './domain/family.js';
 import { homeScreen } from './domain/home.js';
 import { approvePayment, createPayment, declinePayment, dollars, duration, payableHandoff, type Payment, PaymentError, paymentByToken } from './domain/payments.js';
 import { payPage } from './parent/pay.js';
@@ -640,13 +640,15 @@ export function createApp(opts: AppOptions = {}) {
   // ---------- Family setup ----------
   app.get('/parent/api/family', (req, res) => {
     if (!authorised(req.query.k)) return void res.sendStatus(401);
-    res.json(getFamily(db));
+    res.json({ ...getFamily(db), consent: consent(db) });
   });
   app.post('/parent/api/family', (req, res) => {
     const { k, family, by } = req.body ?? {};
     if (!authorised(k)) return void res.sendStatus(401);
     try {
-      res.json(saveFamily(db, family, parentName(by)));
+      const saved = saveFamily(db, family, parentName(by));
+      recordConsent(db, parentName(by));
+      res.json({ ...saved, consent: consent(db) });
     } catch (e) {
       if (e instanceof FamilyError) return void res.status(400).json({ error: e.message });
       throw e;
@@ -898,6 +900,8 @@ export function createApp(opts: AppOptions = {}) {
 
   const passTimer = setInterval(() => {
     passTick(db);
+    // Once an hour: what's older than the retention period goes.
+    if (new Date().getMinutes() === 0) pruneOld(db);
     const h = activeHandoff(db);
     if (h) houseTick(db, tonightPlan(db, householdTz(db), h).items.filter((i) => i.status === 'due').map((i) => i.key), contacts(db)[0]?.name ?? 'the parents');
   }, 60_000);
@@ -917,6 +921,16 @@ export function createApp(opts: AppOptions = {}) {
   return { app, db, taskStore, parentKey, push, close };
 }
 
+/**
+ * How the public demo makes each visitor's house: in memory, with a parent key of its own, so
+ * knowing one house's parent link never opens another's. The shared house keeps WYO_DB and the
+ * configured key.
+ */
+export const demoHouse =
+  (base: AppOptions = {}) =>
+  (url: string, isShared: boolean) =>
+    createApp({ ...base, publicUrl: url, ...(isShared ? {} : { dbPath: ':memory:', parentKey: randomBytes(18).toString('base64url') }) });
+
 const entry = process.argv[1];
 const isMain = Boolean(entry) && (import.meta.url === pathToFileURL(entry).href || /[\\/]src[\\/]index\.ts$/.test(entry));
 if (isMain) {
@@ -929,11 +943,9 @@ if (isMain) {
   const host = process.env.HOST ?? '127.0.0.1';
   const allowedHosts = process.env.ALLOWED_HOSTS?.split(',').map((h) => h.trim());
   const publicUrl = process.env.WYO_PUBLIC_URL ?? `http://127.0.0.1:${port}`;
-  // Every visitor of the demo gets a house of their own; the shared one keeps WYO_DB if set.
-  const { app, shared } = createHouses(
-    (url, isShared) => createApp({ host, allowedHosts, publicUrl: url, ...(isShared ? {} : { dbPath: ':memory:' }) }),
-    { publicUrl },
-  );
+  // Every visitor of the demo gets a house of their own; the shared one keeps WYO_DB if set. Each
+  // house has its own parent key, so knowing one house's parent link never opens another's.
+  const { app, shared } = createHouses(demoHouse({ host, allowedHosts }), { publicUrl });
   const parentKey = shared.parentKey;
   app.listen(port, host, () => {
     console.log(`While You're Out MCP server: http://${host}:${port}/mcp`);

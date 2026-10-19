@@ -27,8 +27,8 @@ Any Echo device signed in to the same Amazon account can use the skill in develo
 ## Build it yourself
 
 ```sh
-node alexa/build.mjs            # interaction models (5 English locales and Hindi) + lambda/index.js, one file, no dependencies
+npm ci --prefix alexa && node alexa/build.mjs   # interaction models (5 English locales and Hindi) + lambda/index.js, one file, no dependencies
 npx tsx --test alexa/test/*.test.ts   # real Alexa request envelopes through the skill to the add-on
 ```
 
-The skill talks to the hosted demo (`SERVER` in [src/skill.ts](src/skill.ts)). The built file in `lambda/` is checked in, and CI fails if it doesn't match the source.
+The skill talks to the hosted demo (`SERVER` in [src/skill.ts](src/skill.ts)). The built file in `lambda/` is checked in, and CI fails if it doesn't match the source. Alexa-hosted skills run on Node.js 16, which has no built-in `fetch` or web streams, so the build bundles them ([src/polyfill.ts](src/polyfill.ts), with undici 5); run `npm ci --prefix alexa` once before building.

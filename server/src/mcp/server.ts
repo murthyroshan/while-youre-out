@@ -23,6 +23,7 @@ import { applyLogToPlan, inSentence, nextItem, takeDueAnnouncements, tonightPlan
 import { SHOP_ANSWERS, shoppingList, shoppingQuestion, suppliesMentioned } from '../domain/shopping.js';
 import { teachback } from '../domain/teachback.js';
 import { eveningsLabel, largeTextTonight, rememberSitter, sitterProfile } from '../domain/sitters.js';
+import { aiSeesEmergency } from '../domain/safetyNet.js';
 import { busyUntil, shadowSuggestion } from '../domain/shadow.js';
 import { buildDebrief, sinceLastVisit } from '../domain/debrief.js';
 import { englishOf, fixedTranslation, sentences, translateAll, languageCode, LANGUAGES, translateOne } from '../domain/translate.js';
@@ -779,6 +780,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       if (a.emergency) {
         return plain('answer', { ...a }, 'This sounds like an emergency. Call the emergency tool now.');
       }
+      // The rules found nothing, but the words hint at danger: a second look, which can only add caution.
+      if (a.category !== 'safety_info') {
+        const second = await aiSeesEmergency(ai, question, names());
+        if (second) return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true, escalated_by: 'ai', why: second.why }, 'This sounds like an emergency. Call the emergency tool now.');
+      }
       // "She already ate a peanut butter cookie, is she ok?" is an exposure, not a question about food.
       const allergens = INGESTED.test(question) ? allergenMentions(db, question) : [];
       if (allergens.length) {
@@ -897,6 +903,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       if (isEmergency(text, names()) || isEmergency(said, names())) {
         return plain('logged', { event: ev, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
+      const second = await aiSeesEmergency(ai, text, names());
+      if (second) return plain('logged', { event: ev, emergency: true, escalated_by: 'ai', why: second.why }, 'This sounds like an emergency. Call the emergency tool now.');
       const allergens = allergenMentions(db, text);
       if (allergens.length) {
         const alert = allergyAlert(text, allergens);

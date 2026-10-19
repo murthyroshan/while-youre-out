@@ -163,3 +163,26 @@ test('a real phone with the parent page open is counted in its own house only', 
   assert.deepEqual(await presence(A), { phones: 1 }, 'the same phone counts once; malformed ids are ignored');
   assert.deepEqual(await presence(B), { phones: 0 }, 'another house sees no phones');
 });
+
+test('every demo house has a parent key of its own: one house\'s parent link never opens another\'s', async () => {
+  const { demoHouse } = await import('../src/index.js');
+  const houses = createHouses(demoHouse({ ai: { available: false } as any, demo: true }), { publicUrl: 'http://demo.test' });
+  const http = houses.app.listen(0, '127.0.0.1');
+  await new Promise((r) => http.once('listening', r));
+  const base = `http://127.0.0.1:${(http.address() as AddressInfo).port}`;
+  try {
+    const keyOf = async (id: string) => new URL((await (await fetch(`${base}/h/${id}/demo/config`)).json()).parent_url, base).searchParams.get('k')!;
+    const a = 'a'.repeat(32);
+    const b = 'b'.repeat(32);
+    const ka = await keyOf(a);
+    const kb = await keyOf(b);
+    assert.ok(ka.length >= 20 && kb.length >= 20);
+    assert.notEqual(ka, kb);
+    assert.equal((await fetch(`${base}/h/${a}/parent/api/state?k=${ka}`)).status, 200);
+    assert.equal((await fetch(`${base}/h/${b}/parent/api/state?k=${ka}`)).status, 401, "house A's key is refused by house B");
+  } finally {
+    houses.close();
+    http.closeAllConnections();
+    http.close();
+  }
+});

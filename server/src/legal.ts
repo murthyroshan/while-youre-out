@@ -27,6 +27,8 @@ export const PRIVACY = page(
 <li><b>Recordings a parent chooses to make</b> (a goodnight message) and doorbell photos used for a door question.</li>
 <li><b>Phones the parents connect</b> for notifications (a push subscription, not a phone number).</li>
 </ul>
+<h2>About the children</h2>
+<p>The add-on is used by adults. What it keeps about a child is only what a parent or guardian enters, to keep that child safe: a first name, an age if given, and allergies in the parent's own words. Before any of it is kept, the parent or guardian confirms they agree, once; the consent and who gave it are recorded. Nothing is ever collected from a child, by voice or otherwise.</p>
 <h2>What it never does</h2>
 <ul>
 <li>It never stores codes, passwords or where the spare key is: a note containing one is refused.</li>
@@ -37,7 +39,7 @@ export const PRIVACY = page(
 <h2>Who processes it</h2>
 <p>Safety rules (food, medicine, emergencies, secrets) run in our own code, never in an AI. The add-on uses an AI model only to read the parents' free-text notes and to translate for a carer who speaks another language; those requests contain only the text being read or translated. On the public demo, the simulated Alexa (standing in for Alexa+ itself) also uses a model to understand what is said to it.</p>
 <h2>How long it is kept</h2>
-<p>On the public demo, each visitor gets a private sample family held in memory only: it is removed after 3 hours unused and whenever the server restarts, and at most two recordings are kept per demo home. In a real home, "just for tonight" answers end with the evening, and parents can remove a recording, or wipe the whole home and start fresh, from their phone at any time.</p>
+<p>On the public demo, each visitor gets a private sample family held in memory only, with a parent link of its own: it is removed after 3 hours unused and whenever the server restarts, and at most two recordings are kept per demo home. In a real home, evenings (what was asked, logged and answered, door photos, emergencies, orders and payments) are deleted by themselves after 90 days; "just for tonight" answers end with the evening; and parents can remove a recording, or delete everything and start fresh, from their phone at any time. The family's own notes stay until the parents change or delete them.</p>
 <h2>Contact</h2>
 <p>Questions or deletion requests: open an issue at <a href="https://github.com/murthyroshan/while-youre-out">github.com/murthyroshan/while-youre-out</a>.</p>`,
 );

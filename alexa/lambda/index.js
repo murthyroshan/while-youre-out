@@ -35,6 +35,16776 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// alexa/node_modules/undici/lib/core/symbols.js
+var require_symbols = __commonJS({
+  "alexa/node_modules/undici/lib/core/symbols.js"(exports2, module2) {
+    module2.exports = {
+      kClose: /* @__PURE__ */ Symbol("close"),
+      kDestroy: /* @__PURE__ */ Symbol("destroy"),
+      kDispatch: /* @__PURE__ */ Symbol("dispatch"),
+      kUrl: /* @__PURE__ */ Symbol("url"),
+      kWriting: /* @__PURE__ */ Symbol("writing"),
+      kResuming: /* @__PURE__ */ Symbol("resuming"),
+      kQueue: /* @__PURE__ */ Symbol("queue"),
+      kConnect: /* @__PURE__ */ Symbol("connect"),
+      kConnecting: /* @__PURE__ */ Symbol("connecting"),
+      kHeadersList: /* @__PURE__ */ Symbol("headers list"),
+      kKeepAliveDefaultTimeout: /* @__PURE__ */ Symbol("default keep alive timeout"),
+      kKeepAliveMaxTimeout: /* @__PURE__ */ Symbol("max keep alive timeout"),
+      kKeepAliveTimeoutThreshold: /* @__PURE__ */ Symbol("keep alive timeout threshold"),
+      kKeepAliveTimeoutValue: /* @__PURE__ */ Symbol("keep alive timeout"),
+      kKeepAlive: /* @__PURE__ */ Symbol("keep alive"),
+      kHeadersTimeout: /* @__PURE__ */ Symbol("headers timeout"),
+      kBodyTimeout: /* @__PURE__ */ Symbol("body timeout"),
+      kServerName: /* @__PURE__ */ Symbol("server name"),
+      kLocalAddress: /* @__PURE__ */ Symbol("local address"),
+      kHost: /* @__PURE__ */ Symbol("host"),
+      kNoRef: /* @__PURE__ */ Symbol("no ref"),
+      kBodyUsed: /* @__PURE__ */ Symbol("used"),
+      kRunning: /* @__PURE__ */ Symbol("running"),
+      kBlocking: /* @__PURE__ */ Symbol("blocking"),
+      kPending: /* @__PURE__ */ Symbol("pending"),
+      kSize: /* @__PURE__ */ Symbol("size"),
+      kBusy: /* @__PURE__ */ Symbol("busy"),
+      kQueued: /* @__PURE__ */ Symbol("queued"),
+      kFree: /* @__PURE__ */ Symbol("free"),
+      kConnected: /* @__PURE__ */ Symbol("connected"),
+      kClosed: /* @__PURE__ */ Symbol("closed"),
+      kNeedDrain: /* @__PURE__ */ Symbol("need drain"),
+      kReset: /* @__PURE__ */ Symbol("reset"),
+      kDestroyed: /* @__PURE__ */ Symbol.for("nodejs.stream.destroyed"),
+      kMaxHeadersSize: /* @__PURE__ */ Symbol("max headers size"),
+      kRunningIdx: /* @__PURE__ */ Symbol("running index"),
+      kPendingIdx: /* @__PURE__ */ Symbol("pending index"),
+      kError: /* @__PURE__ */ Symbol("error"),
+      kClients: /* @__PURE__ */ Symbol("clients"),
+      kClient: /* @__PURE__ */ Symbol("client"),
+      kParser: /* @__PURE__ */ Symbol("parser"),
+      kOnDestroyed: /* @__PURE__ */ Symbol("destroy callbacks"),
+      kPipelining: /* @__PURE__ */ Symbol("pipelining"),
+      kSocket: /* @__PURE__ */ Symbol("socket"),
+      kHostHeader: /* @__PURE__ */ Symbol("host header"),
+      kConnector: /* @__PURE__ */ Symbol("connector"),
+      kStrictContentLength: /* @__PURE__ */ Symbol("strict content length"),
+      kMaxRedirections: /* @__PURE__ */ Symbol("maxRedirections"),
+      kMaxRequests: /* @__PURE__ */ Symbol("maxRequestsPerClient"),
+      kProxy: /* @__PURE__ */ Symbol("proxy agent options"),
+      kCounter: /* @__PURE__ */ Symbol("socket request counter"),
+      kInterceptors: /* @__PURE__ */ Symbol("dispatch interceptors"),
+      kMaxResponseSize: /* @__PURE__ */ Symbol("max response size"),
+      kHTTP2Session: /* @__PURE__ */ Symbol("http2Session"),
+      kHTTP2SessionState: /* @__PURE__ */ Symbol("http2Session state"),
+      kHTTP2BuildRequest: /* @__PURE__ */ Symbol("http2 build request"),
+      kHTTP1BuildRequest: /* @__PURE__ */ Symbol("http1 build request"),
+      kHTTP2CopyHeaders: /* @__PURE__ */ Symbol("http2 copy headers"),
+      kHTTPConnVersion: /* @__PURE__ */ Symbol("http connection version"),
+      kRetryHandlerDefaultRetry: /* @__PURE__ */ Symbol("retry agent default retry"),
+      kConstruct: /* @__PURE__ */ Symbol("constructable")
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/core/errors.js
+var require_errors = __commonJS({
+  "alexa/node_modules/undici/lib/core/errors.js"(exports2, module2) {
+    "use strict";
+    var UndiciError = class extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "UndiciError";
+        this.code = "UND_ERR";
+      }
+    };
+    var ConnectTimeoutError = class _ConnectTimeoutError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _ConnectTimeoutError);
+        this.name = "ConnectTimeoutError";
+        this.message = message || "Connect Timeout Error";
+        this.code = "UND_ERR_CONNECT_TIMEOUT";
+      }
+    };
+    var HeadersTimeoutError = class _HeadersTimeoutError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _HeadersTimeoutError);
+        this.name = "HeadersTimeoutError";
+        this.message = message || "Headers Timeout Error";
+        this.code = "UND_ERR_HEADERS_TIMEOUT";
+      }
+    };
+    var HeadersOverflowError = class _HeadersOverflowError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _HeadersOverflowError);
+        this.name = "HeadersOverflowError";
+        this.message = message || "Headers Overflow Error";
+        this.code = "UND_ERR_HEADERS_OVERFLOW";
+      }
+    };
+    var BodyTimeoutError = class _BodyTimeoutError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _BodyTimeoutError);
+        this.name = "BodyTimeoutError";
+        this.message = message || "Body Timeout Error";
+        this.code = "UND_ERR_BODY_TIMEOUT";
+      }
+    };
+    var ResponseStatusCodeError = class _ResponseStatusCodeError extends UndiciError {
+      constructor(message, statusCode, headers, body) {
+        super(message);
+        Error.captureStackTrace(this, _ResponseStatusCodeError);
+        this.name = "ResponseStatusCodeError";
+        this.message = message || "Response Status Code Error";
+        this.code = "UND_ERR_RESPONSE_STATUS_CODE";
+        this.body = body;
+        this.status = statusCode;
+        this.statusCode = statusCode;
+        this.headers = headers;
+      }
+    };
+    var InvalidArgumentError = class _InvalidArgumentError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _InvalidArgumentError);
+        this.name = "InvalidArgumentError";
+        this.message = message || "Invalid Argument Error";
+        this.code = "UND_ERR_INVALID_ARG";
+      }
+    };
+    var InvalidReturnValueError = class _InvalidReturnValueError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _InvalidReturnValueError);
+        this.name = "InvalidReturnValueError";
+        this.message = message || "Invalid Return Value Error";
+        this.code = "UND_ERR_INVALID_RETURN_VALUE";
+      }
+    };
+    var RequestAbortedError = class _RequestAbortedError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _RequestAbortedError);
+        this.name = "AbortError";
+        this.message = message || "Request aborted";
+        this.code = "UND_ERR_ABORTED";
+      }
+    };
+    var InformationalError = class _InformationalError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _InformationalError);
+        this.name = "InformationalError";
+        this.message = message || "Request information";
+        this.code = "UND_ERR_INFO";
+      }
+    };
+    var RequestContentLengthMismatchError = class _RequestContentLengthMismatchError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _RequestContentLengthMismatchError);
+        this.name = "RequestContentLengthMismatchError";
+        this.message = message || "Request body length does not match content-length header";
+        this.code = "UND_ERR_REQ_CONTENT_LENGTH_MISMATCH";
+      }
+    };
+    var ResponseContentLengthMismatchError = class _ResponseContentLengthMismatchError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _ResponseContentLengthMismatchError);
+        this.name = "ResponseContentLengthMismatchError";
+        this.message = message || "Response body length does not match content-length header";
+        this.code = "UND_ERR_RES_CONTENT_LENGTH_MISMATCH";
+      }
+    };
+    var ClientDestroyedError = class _ClientDestroyedError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _ClientDestroyedError);
+        this.name = "ClientDestroyedError";
+        this.message = message || "The client is destroyed";
+        this.code = "UND_ERR_DESTROYED";
+      }
+    };
+    var ClientClosedError = class _ClientClosedError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _ClientClosedError);
+        this.name = "ClientClosedError";
+        this.message = message || "The client is closed";
+        this.code = "UND_ERR_CLOSED";
+      }
+    };
+    var SocketError = class _SocketError extends UndiciError {
+      constructor(message, socket) {
+        super(message);
+        Error.captureStackTrace(this, _SocketError);
+        this.name = "SocketError";
+        this.message = message || "Socket error";
+        this.code = "UND_ERR_SOCKET";
+        this.socket = socket;
+      }
+    };
+    var NotSupportedError = class _NotSupportedError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _NotSupportedError);
+        this.name = "NotSupportedError";
+        this.message = message || "Not supported error";
+        this.code = "UND_ERR_NOT_SUPPORTED";
+      }
+    };
+    var BalancedPoolMissingUpstreamError = class extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, NotSupportedError);
+        this.name = "MissingUpstreamError";
+        this.message = message || "No upstream has been added to the BalancedPool";
+        this.code = "UND_ERR_BPL_MISSING_UPSTREAM";
+      }
+    };
+    var HTTPParserError = class _HTTPParserError extends Error {
+      constructor(message, code, data) {
+        super(message);
+        Error.captureStackTrace(this, _HTTPParserError);
+        this.name = "HTTPParserError";
+        this.code = code ? `HPE_${code}` : void 0;
+        this.data = data ? data.toString() : void 0;
+      }
+    };
+    var ResponseExceededMaxSizeError = class _ResponseExceededMaxSizeError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _ResponseExceededMaxSizeError);
+        this.name = "ResponseExceededMaxSizeError";
+        this.message = message || "Response content exceeded max size";
+        this.code = "UND_ERR_RES_EXCEEDED_MAX_SIZE";
+      }
+    };
+    var RequestRetryError = class _RequestRetryError extends UndiciError {
+      constructor(message, code, { headers, data }) {
+        super(message);
+        Error.captureStackTrace(this, _RequestRetryError);
+        this.name = "RequestRetryError";
+        this.message = message || "Request retry error";
+        this.code = "UND_ERR_REQ_RETRY";
+        this.statusCode = code;
+        this.data = data;
+        this.headers = headers;
+      }
+    };
+    module2.exports = {
+      HTTPParserError,
+      UndiciError,
+      HeadersTimeoutError,
+      HeadersOverflowError,
+      BodyTimeoutError,
+      RequestContentLengthMismatchError,
+      ConnectTimeoutError,
+      ResponseStatusCodeError,
+      InvalidArgumentError,
+      InvalidReturnValueError,
+      RequestAbortedError,
+      ClientDestroyedError,
+      ClientClosedError,
+      InformationalError,
+      SocketError,
+      NotSupportedError,
+      ResponseContentLengthMismatchError,
+      BalancedPoolMissingUpstreamError,
+      ResponseExceededMaxSizeError,
+      RequestRetryError
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/core/constants.js
+var require_constants = __commonJS({
+  "alexa/node_modules/undici/lib/core/constants.js"(exports2, module2) {
+    "use strict";
+    var headerNameLowerCasedRecord = {};
+    var wellknownHeaderNames = [
+      "Accept",
+      "Accept-Encoding",
+      "Accept-Language",
+      "Accept-Ranges",
+      "Access-Control-Allow-Credentials",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Expose-Headers",
+      "Access-Control-Max-Age",
+      "Access-Control-Request-Headers",
+      "Access-Control-Request-Method",
+      "Age",
+      "Allow",
+      "Alt-Svc",
+      "Alt-Used",
+      "Authorization",
+      "Cache-Control",
+      "Clear-Site-Data",
+      "Connection",
+      "Content-Disposition",
+      "Content-Encoding",
+      "Content-Language",
+      "Content-Length",
+      "Content-Location",
+      "Content-Range",
+      "Content-Security-Policy",
+      "Content-Security-Policy-Report-Only",
+      "Content-Type",
+      "Cookie",
+      "Cross-Origin-Embedder-Policy",
+      "Cross-Origin-Opener-Policy",
+      "Cross-Origin-Resource-Policy",
+      "Date",
+      "Device-Memory",
+      "Downlink",
+      "ECT",
+      "ETag",
+      "Expect",
+      "Expect-CT",
+      "Expires",
+      "Forwarded",
+      "From",
+      "Host",
+      "If-Match",
+      "If-Modified-Since",
+      "If-None-Match",
+      "If-Range",
+      "If-Unmodified-Since",
+      "Keep-Alive",
+      "Last-Modified",
+      "Link",
+      "Location",
+      "Max-Forwards",
+      "Origin",
+      "Permissions-Policy",
+      "Pragma",
+      "Proxy-Authenticate",
+      "Proxy-Authorization",
+      "RTT",
+      "Range",
+      "Referer",
+      "Referrer-Policy",
+      "Refresh",
+      "Retry-After",
+      "Sec-WebSocket-Accept",
+      "Sec-WebSocket-Extensions",
+      "Sec-WebSocket-Key",
+      "Sec-WebSocket-Protocol",
+      "Sec-WebSocket-Version",
+      "Server",
+      "Server-Timing",
+      "Service-Worker-Allowed",
+      "Service-Worker-Navigation-Preload",
+      "Set-Cookie",
+      "SourceMap",
+      "Strict-Transport-Security",
+      "Supports-Loading-Mode",
+      "TE",
+      "Timing-Allow-Origin",
+      "Trailer",
+      "Transfer-Encoding",
+      "Upgrade",
+      "Upgrade-Insecure-Requests",
+      "User-Agent",
+      "Vary",
+      "Via",
+      "WWW-Authenticate",
+      "X-Content-Type-Options",
+      "X-DNS-Prefetch-Control",
+      "X-Frame-Options",
+      "X-Permitted-Cross-Domain-Policies",
+      "X-Powered-By",
+      "X-Requested-With",
+      "X-XSS-Protection"
+    ];
+    for (let i = 0; i < wellknownHeaderNames.length; ++i) {
+      const key = wellknownHeaderNames[i];
+      const lowerCasedKey = key.toLowerCase();
+      headerNameLowerCasedRecord[key] = headerNameLowerCasedRecord[lowerCasedKey] = lowerCasedKey;
+    }
+    Object.setPrototypeOf(headerNameLowerCasedRecord, null);
+    module2.exports = {
+      wellknownHeaderNames,
+      headerNameLowerCasedRecord
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/core/util.js
+var require_util = __commonJS({
+  "alexa/node_modules/undici/lib/core/util.js"(exports2, module2) {
+    "use strict";
+    var assert2 = require("assert");
+    var { kDestroyed, kBodyUsed } = require_symbols();
+    var { IncomingMessage } = require("http");
+    var stream = require("stream");
+    var net = require("net");
+    var { InvalidArgumentError } = require_errors();
+    var { Blob: Blob2 } = require("buffer");
+    var nodeUtil = require("util");
+    var { stringify } = require("querystring");
+    var { headerNameLowerCasedRecord } = require_constants();
+    var [nodeMajor, nodeMinor] = process.versions.node.split(".").map((v) => Number(v));
+    function nop() {
+    }
+    function isStream(obj) {
+      return obj && typeof obj === "object" && typeof obj.pipe === "function" && typeof obj.on === "function";
+    }
+    function isBlobLike(object3) {
+      return Blob2 && object3 instanceof Blob2 || object3 && typeof object3 === "object" && (typeof object3.stream === "function" || typeof object3.arrayBuffer === "function") && /^(Blob|File)$/.test(object3[Symbol.toStringTag]);
+    }
+    function buildURL(url2, queryParams) {
+      if (url2.includes("?") || url2.includes("#")) {
+        throw new Error('Query params cannot be passed when url already contains "?" or "#".');
+      }
+      const stringified = stringify(queryParams);
+      if (stringified) {
+        url2 += "?" + stringified;
+      }
+      return url2;
+    }
+    function parseURL(url2) {
+      if (typeof url2 === "string") {
+        url2 = new URL(url2);
+        if (!/^https?:/.test(url2.origin || url2.protocol)) {
+          throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
+        }
+        return url2;
+      }
+      if (!url2 || typeof url2 !== "object") {
+        throw new InvalidArgumentError("Invalid URL: The URL argument must be a non-null object.");
+      }
+      if (!/^https?:/.test(url2.origin || url2.protocol)) {
+        throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
+      }
+      if (!(url2 instanceof URL)) {
+        if (url2.port != null && url2.port !== "" && !Number.isFinite(parseInt(url2.port))) {
+          throw new InvalidArgumentError("Invalid URL: port must be a valid integer or a string representation of an integer.");
+        }
+        if (url2.path != null && typeof url2.path !== "string") {
+          throw new InvalidArgumentError("Invalid URL path: the path must be a string or null/undefined.");
+        }
+        if (url2.pathname != null && typeof url2.pathname !== "string") {
+          throw new InvalidArgumentError("Invalid URL pathname: the pathname must be a string or null/undefined.");
+        }
+        if (url2.hostname != null && typeof url2.hostname !== "string") {
+          throw new InvalidArgumentError("Invalid URL hostname: the hostname must be a string or null/undefined.");
+        }
+        if (url2.origin != null && typeof url2.origin !== "string") {
+          throw new InvalidArgumentError("Invalid URL origin: the origin must be a string or null/undefined.");
+        }
+        const port = url2.port != null ? url2.port : url2.protocol === "https:" ? 443 : 80;
+        let origin = url2.origin != null ? url2.origin : `${url2.protocol}//${url2.hostname}:${port}`;
+        let path = url2.path != null ? url2.path : `${url2.pathname || ""}${url2.search || ""}`;
+        if (origin.endsWith("/")) {
+          origin = origin.substring(0, origin.length - 1);
+        }
+        if (path && !path.startsWith("/")) {
+          path = `/${path}`;
+        }
+        url2 = new URL(origin + path);
+      }
+      return url2;
+    }
+    function parseOrigin(url2) {
+      url2 = parseURL(url2);
+      if (url2.pathname !== "/" || url2.search || url2.hash) {
+        throw new InvalidArgumentError("invalid url");
+      }
+      return url2;
+    }
+    function getHostname(host) {
+      if (host[0] === "[") {
+        const idx2 = host.indexOf("]");
+        assert2(idx2 !== -1);
+        return host.substring(1, idx2);
+      }
+      const idx = host.indexOf(":");
+      if (idx === -1) return host;
+      return host.substring(0, idx);
+    }
+    function getServerName(host) {
+      if (!host) {
+        return null;
+      }
+      assert2.strictEqual(typeof host, "string");
+      const servername = getHostname(host);
+      if (net.isIP(servername)) {
+        return "";
+      }
+      return servername;
+    }
+    function deepClone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+    function isAsyncIterable(obj) {
+      return !!(obj != null && typeof obj[Symbol.asyncIterator] === "function");
+    }
+    function isIterable(obj) {
+      return !!(obj != null && (typeof obj[Symbol.iterator] === "function" || typeof obj[Symbol.asyncIterator] === "function"));
+    }
+    function bodyLength(body) {
+      if (body == null) {
+        return 0;
+      } else if (isStream(body)) {
+        const state = body._readableState;
+        return state && state.objectMode === false && state.ended === true && Number.isFinite(state.length) ? state.length : null;
+      } else if (isBlobLike(body)) {
+        return body.size != null ? body.size : null;
+      } else if (isBuffer(body)) {
+        return body.byteLength;
+      }
+      return null;
+    }
+    function isDestroyed(stream2) {
+      return !stream2 || !!(stream2.destroyed || stream2[kDestroyed]);
+    }
+    function isReadableAborted(stream2) {
+      const state = stream2 && stream2._readableState;
+      return isDestroyed(stream2) && state && !state.endEmitted;
+    }
+    function destroy(stream2, err) {
+      if (stream2 == null || !isStream(stream2) || isDestroyed(stream2)) {
+        return;
+      }
+      if (typeof stream2.destroy === "function") {
+        if (Object.getPrototypeOf(stream2).constructor === IncomingMessage) {
+          stream2.socket = null;
+        }
+        stream2.destroy(err);
+      } else if (err) {
+        process.nextTick((stream3, err2) => {
+          stream3.emit("error", err2);
+        }, stream2, err);
+      }
+      if (stream2.destroyed !== true) {
+        stream2[kDestroyed] = true;
+      }
+    }
+    var KEEPALIVE_TIMEOUT_EXPR = /timeout=(\d+)/;
+    function parseKeepAliveTimeout(val) {
+      const m = val.toString().match(KEEPALIVE_TIMEOUT_EXPR);
+      return m ? parseInt(m[1], 10) * 1e3 : null;
+    }
+    function headerNameToString(value) {
+      return headerNameLowerCasedRecord[value] || value.toLowerCase();
+    }
+    function parseHeaders(headers, obj = {}) {
+      if (!Array.isArray(headers)) return headers;
+      for (let i = 0; i < headers.length; i += 2) {
+        const key = headers[i].toString().toLowerCase();
+        let val = obj[key];
+        if (!val) {
+          if (Array.isArray(headers[i + 1])) {
+            obj[key] = headers[i + 1].map((x) => x.toString("utf8"));
+          } else {
+            obj[key] = headers[i + 1].toString("utf8");
+          }
+        } else {
+          if (!Array.isArray(val)) {
+            val = [val];
+            obj[key] = val;
+          }
+          val.push(headers[i + 1].toString("utf8"));
+        }
+      }
+      if ("content-length" in obj && "content-disposition" in obj) {
+        obj["content-disposition"] = Buffer.from(obj["content-disposition"]).toString("latin1");
+      }
+      return obj;
+    }
+    function parseRawHeaders(headers) {
+      const ret = [];
+      let hasContentLength = false;
+      let contentDispositionIdx = -1;
+      for (let n = 0; n < headers.length; n += 2) {
+        const key = headers[n + 0].toString();
+        const val = headers[n + 1].toString("utf8");
+        if (key.length === 14 && (key === "content-length" || key.toLowerCase() === "content-length")) {
+          ret.push(key, val);
+          hasContentLength = true;
+        } else if (key.length === 19 && (key === "content-disposition" || key.toLowerCase() === "content-disposition")) {
+          contentDispositionIdx = ret.push(key, val) - 1;
+        } else {
+          ret.push(key, val);
+        }
+      }
+      if (hasContentLength && contentDispositionIdx !== -1) {
+        ret[contentDispositionIdx] = Buffer.from(ret[contentDispositionIdx]).toString("latin1");
+      }
+      return ret;
+    }
+    function isBuffer(buffer) {
+      return buffer instanceof Uint8Array || Buffer.isBuffer(buffer);
+    }
+    function validateHandler(handler2, method, upgrade) {
+      if (!handler2 || typeof handler2 !== "object") {
+        throw new InvalidArgumentError("handler must be an object");
+      }
+      if (typeof handler2.onConnect !== "function") {
+        throw new InvalidArgumentError("invalid onConnect method");
+      }
+      if (typeof handler2.onError !== "function") {
+        throw new InvalidArgumentError("invalid onError method");
+      }
+      if (typeof handler2.onBodySent !== "function" && handler2.onBodySent !== void 0) {
+        throw new InvalidArgumentError("invalid onBodySent method");
+      }
+      if (upgrade || method === "CONNECT") {
+        if (typeof handler2.onUpgrade !== "function") {
+          throw new InvalidArgumentError("invalid onUpgrade method");
+        }
+      } else {
+        if (typeof handler2.onHeaders !== "function") {
+          throw new InvalidArgumentError("invalid onHeaders method");
+        }
+        if (typeof handler2.onData !== "function") {
+          throw new InvalidArgumentError("invalid onData method");
+        }
+        if (typeof handler2.onComplete !== "function") {
+          throw new InvalidArgumentError("invalid onComplete method");
+        }
+      }
+    }
+    function isDisturbed(body) {
+      return !!(body && (stream.isDisturbed ? stream.isDisturbed(body) || body[kBodyUsed] : body[kBodyUsed] || body.readableDidRead || body._readableState && body._readableState.dataEmitted || isReadableAborted(body)));
+    }
+    function isErrored(body) {
+      return !!(body && (stream.isErrored ? stream.isErrored(body) : /state: 'errored'/.test(
+        nodeUtil.inspect(body)
+      )));
+    }
+    function isReadable(body) {
+      return !!(body && (stream.isReadable ? stream.isReadable(body) : /state: 'readable'/.test(
+        nodeUtil.inspect(body)
+      )));
+    }
+    function getSocketInfo(socket) {
+      return {
+        localAddress: socket.localAddress,
+        localPort: socket.localPort,
+        remoteAddress: socket.remoteAddress,
+        remotePort: socket.remotePort,
+        remoteFamily: socket.remoteFamily,
+        timeout: socket.timeout,
+        bytesWritten: socket.bytesWritten,
+        bytesRead: socket.bytesRead
+      };
+    }
+    async function* convertIterableToBuffer(iterable) {
+      for await (const chunk of iterable) {
+        yield Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      }
+    }
+    var ReadableStream;
+    function ReadableStreamFrom(iterable) {
+      if (!ReadableStream) {
+        ReadableStream = require("stream/web").ReadableStream;
+      }
+      if (ReadableStream.from) {
+        return ReadableStream.from(convertIterableToBuffer(iterable));
+      }
+      let iterator;
+      return new ReadableStream(
+        {
+          async start() {
+            iterator = iterable[Symbol.asyncIterator]();
+          },
+          async pull(controller) {
+            const { done, value } = await iterator.next();
+            if (done) {
+              queueMicrotask(() => {
+                controller.close();
+              });
+            } else {
+              const buf = Buffer.isBuffer(value) ? value : Buffer.from(value);
+              controller.enqueue(new Uint8Array(buf));
+            }
+            return controller.desiredSize > 0;
+          },
+          async cancel(reason) {
+            await iterator.return();
+          }
+        },
+        0
+      );
+    }
+    function isFormDataLike(object3) {
+      return object3 && typeof object3 === "object" && typeof object3.append === "function" && typeof object3.delete === "function" && typeof object3.get === "function" && typeof object3.getAll === "function" && typeof object3.has === "function" && typeof object3.set === "function" && object3[Symbol.toStringTag] === "FormData";
+    }
+    function throwIfAborted(signal) {
+      if (!signal) {
+        return;
+      }
+      if (typeof signal.throwIfAborted === "function") {
+        signal.throwIfAborted();
+      } else {
+        if (signal.aborted) {
+          const err = new Error("The operation was aborted");
+          err.name = "AbortError";
+          throw err;
+        }
+      }
+    }
+    function addAbortListener(signal, listener) {
+      if ("addEventListener" in signal) {
+        signal.addEventListener("abort", listener, { once: true });
+        return () => signal.removeEventListener("abort", listener);
+      }
+      signal.addListener("abort", listener);
+      return () => signal.removeListener("abort", listener);
+    }
+    var hasToWellFormed = !!String.prototype.toWellFormed;
+    function toUSVString(val) {
+      if (hasToWellFormed) {
+        return `${val}`.toWellFormed();
+      } else if (nodeUtil.toUSVString) {
+        return nodeUtil.toUSVString(val);
+      }
+      return `${val}`;
+    }
+    function parseRangeHeader(range) {
+      if (range == null || range === "") return { start: 0, end: null, size: null };
+      const m = range ? range.match(/^bytes (\d+)-(\d+)\/(\d+)?$/) : null;
+      return m ? {
+        start: parseInt(m[1]),
+        end: m[2] ? parseInt(m[2]) : null,
+        size: m[3] ? parseInt(m[3]) : null
+      } : null;
+    }
+    var kEnumerableProperty = /* @__PURE__ */ Object.create(null);
+    kEnumerableProperty.enumerable = true;
+    module2.exports = {
+      kEnumerableProperty,
+      nop,
+      isDisturbed,
+      isErrored,
+      isReadable,
+      toUSVString,
+      isReadableAborted,
+      isBlobLike,
+      parseOrigin,
+      parseURL,
+      getServerName,
+      isStream,
+      isIterable,
+      isAsyncIterable,
+      isDestroyed,
+      headerNameToString,
+      parseRawHeaders,
+      parseHeaders,
+      parseKeepAliveTimeout,
+      destroy,
+      bodyLength,
+      deepClone,
+      ReadableStreamFrom,
+      isBuffer,
+      validateHandler,
+      getSocketInfo,
+      isFormDataLike,
+      buildURL,
+      throwIfAborted,
+      addAbortListener,
+      parseRangeHeader,
+      nodeMajor,
+      nodeMinor,
+      nodeHasAutoSelectFamily: nodeMajor > 18 || nodeMajor === 18 && nodeMinor >= 13,
+      safeHTTPMethods: ["GET", "HEAD", "OPTIONS", "TRACE"]
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/timers.js
+var require_timers = __commonJS({
+  "alexa/node_modules/undici/lib/timers.js"(exports2, module2) {
+    "use strict";
+    var fastNow = Date.now();
+    var fastNowTimeout;
+    var fastTimers = [];
+    function onTimeout() {
+      fastNow = Date.now();
+      let len = fastTimers.length;
+      let idx = 0;
+      while (idx < len) {
+        const timer = fastTimers[idx];
+        if (timer.state === 0) {
+          timer.state = fastNow + timer.delay;
+        } else if (timer.state > 0 && fastNow >= timer.state) {
+          timer.state = -1;
+          timer.callback(timer.opaque);
+        }
+        if (timer.state === -1) {
+          timer.state = -2;
+          if (idx !== len - 1) {
+            fastTimers[idx] = fastTimers.pop();
+          } else {
+            fastTimers.pop();
+          }
+          len -= 1;
+        } else {
+          idx += 1;
+        }
+      }
+      if (fastTimers.length > 0) {
+        refreshTimeout();
+      }
+    }
+    function refreshTimeout() {
+      if (fastNowTimeout && fastNowTimeout.refresh) {
+        fastNowTimeout.refresh();
+      } else {
+        clearTimeout(fastNowTimeout);
+        fastNowTimeout = setTimeout(onTimeout, 1e3);
+        if (fastNowTimeout.unref) {
+          fastNowTimeout.unref();
+        }
+      }
+    }
+    var Timeout = class {
+      constructor(callback, delay, opaque) {
+        this.callback = callback;
+        this.delay = delay;
+        this.opaque = opaque;
+        this.state = -2;
+        this.refresh();
+      }
+      refresh() {
+        if (this.state === -2) {
+          fastTimers.push(this);
+          if (!fastNowTimeout || fastTimers.length === 1) {
+            refreshTimeout();
+          }
+        }
+        this.state = 0;
+      }
+      clear() {
+        this.state = -1;
+      }
+    };
+    module2.exports = {
+      setTimeout(callback, delay, opaque) {
+        return delay < 1e3 ? setTimeout(callback, delay, opaque) : new Timeout(callback, delay, opaque);
+      },
+      clearTimeout(timeout) {
+        if (timeout instanceof Timeout) {
+          timeout.clear();
+        } else {
+          clearTimeout(timeout);
+        }
+      }
+    };
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/deps/streamsearch/sbmh.js
+var require_sbmh = __commonJS({
+  "alexa/node_modules/@fastify/busboy/deps/streamsearch/sbmh.js"(exports2, module2) {
+    "use strict";
+    var EventEmitter = require("node:events").EventEmitter;
+    var inherits = require("node:util").inherits;
+    function SBMH(needle) {
+      if (typeof needle === "string") {
+        needle = Buffer.from(needle);
+      }
+      if (!Buffer.isBuffer(needle)) {
+        throw new TypeError("The needle has to be a String or a Buffer.");
+      }
+      const needleLength = needle.length;
+      if (needleLength === 0) {
+        throw new Error("The needle cannot be an empty String/Buffer.");
+      }
+      if (needleLength > 256) {
+        throw new Error("The needle cannot have a length bigger than 256.");
+      }
+      this.maxMatches = Infinity;
+      this.matches = 0;
+      this._occ = new Array(256).fill(needleLength);
+      this._lookbehind_size = 0;
+      this._needle = needle;
+      this._bufpos = 0;
+      this._lookbehind = Buffer.alloc(needleLength);
+      for (var i = 0; i < needleLength - 1; ++i) {
+        this._occ[needle[i]] = needleLength - 1 - i;
+      }
+    }
+    inherits(SBMH, EventEmitter);
+    SBMH.prototype.reset = function() {
+      this._lookbehind_size = 0;
+      this.matches = 0;
+      this._bufpos = 0;
+    };
+    SBMH.prototype.push = function(chunk, pos) {
+      if (!Buffer.isBuffer(chunk)) {
+        chunk = Buffer.from(chunk, "binary");
+      }
+      const chlen = chunk.length;
+      this._bufpos = pos || 0;
+      let r;
+      while (r !== chlen && this.matches < this.maxMatches) {
+        r = this._sbmh_feed(chunk);
+      }
+      return r;
+    };
+    SBMH.prototype._sbmh_feed = function(data) {
+      const len = data.length;
+      const needle = this._needle;
+      const needleLength = needle.length;
+      const lastNeedleChar = needle[needleLength - 1];
+      let pos = -this._lookbehind_size;
+      let ch;
+      if (pos < 0) {
+        while (pos < 0 && pos <= len - needleLength) {
+          ch = this._sbmh_lookup_char(data, pos + needleLength - 1);
+          if (ch === lastNeedleChar && this._sbmh_memcmp(data, pos, needleLength - 1)) {
+            this._lookbehind_size = 0;
+            ++this.matches;
+            this.emit("info", true);
+            return this._bufpos = pos + needleLength;
+          }
+          pos += this._occ[ch];
+        }
+        if (pos < 0) {
+          while (pos < 0 && !this._sbmh_memcmp(data, pos, len - pos)) {
+            ++pos;
+          }
+        }
+        if (pos >= 0) {
+          this.emit("info", false, this._lookbehind, 0, this._lookbehind_size);
+          this._lookbehind_size = 0;
+        } else {
+          const bytesToCutOff = this._lookbehind_size + pos;
+          if (bytesToCutOff > 0) {
+            this.emit("info", false, this._lookbehind, 0, bytesToCutOff);
+          }
+          this._lookbehind.copy(
+            this._lookbehind,
+            0,
+            bytesToCutOff,
+            this._lookbehind_size - bytesToCutOff
+          );
+          this._lookbehind_size -= bytesToCutOff;
+          data.copy(this._lookbehind, this._lookbehind_size);
+          this._lookbehind_size += len;
+          this._bufpos = len;
+          return len;
+        }
+      }
+      pos += (pos >= 0) * this._bufpos;
+      if (data.indexOf(needle, pos) !== -1) {
+        pos = data.indexOf(needle, pos);
+        ++this.matches;
+        if (pos > 0) {
+          this.emit("info", true, data, this._bufpos, pos);
+        } else {
+          this.emit("info", true);
+        }
+        return this._bufpos = pos + needleLength;
+      } else {
+        pos = len - needleLength;
+      }
+      while (pos < len && (data[pos] !== needle[0] || Buffer.compare(
+        data.subarray(pos, pos + len - pos),
+        needle.subarray(0, len - pos)
+      ) !== 0)) {
+        ++pos;
+      }
+      if (pos < len) {
+        data.copy(this._lookbehind, 0, pos, pos + (len - pos));
+        this._lookbehind_size = len - pos;
+      }
+      if (pos > 0) {
+        this.emit("info", false, data, this._bufpos, pos < len ? pos : len);
+      }
+      this._bufpos = len;
+      return len;
+    };
+    SBMH.prototype._sbmh_lookup_char = function(data, pos) {
+      return pos < 0 ? this._lookbehind[this._lookbehind_size + pos] : data[pos];
+    };
+    SBMH.prototype._sbmh_memcmp = function(data, pos, len) {
+      for (var i = 0; i < len; ++i) {
+        if (this._sbmh_lookup_char(data, pos + i) !== this._needle[i]) {
+          return false;
+        }
+      }
+      return true;
+    };
+    module2.exports = SBMH;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/deps/dicer/lib/PartStream.js
+var require_PartStream = __commonJS({
+  "alexa/node_modules/@fastify/busboy/deps/dicer/lib/PartStream.js"(exports2, module2) {
+    "use strict";
+    var inherits = require("node:util").inherits;
+    var ReadableStream = require("node:stream").Readable;
+    function PartStream(opts) {
+      ReadableStream.call(this, opts);
+    }
+    inherits(PartStream, ReadableStream);
+    PartStream.prototype._read = function(n) {
+    };
+    module2.exports = PartStream;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/utils/getLimit.js
+var require_getLimit = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/utils/getLimit.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function getLimit(limits, name, defaultLimit) {
+      if (!limits || limits[name] === void 0 || limits[name] === null) {
+        return defaultLimit;
+      }
+      if (typeof limits[name] !== "number" || isNaN(limits[name])) {
+        throw new TypeError("Limit " + name + " is not a valid number");
+      }
+      return limits[name];
+    };
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/deps/dicer/lib/HeaderParser.js
+var require_HeaderParser = __commonJS({
+  "alexa/node_modules/@fastify/busboy/deps/dicer/lib/HeaderParser.js"(exports2, module2) {
+    "use strict";
+    var EventEmitter = require("node:events").EventEmitter;
+    var inherits = require("node:util").inherits;
+    var getLimit = require_getLimit();
+    var StreamSearch = require_sbmh();
+    var B_DCRLF = Buffer.from("\r\n\r\n");
+    var RE_CRLF = /\r\n/g;
+    var RE_HDR = /^([^:]+):[ \t]?([\x00-\xFF]+)?$/;
+    function HeaderParser(cfg) {
+      EventEmitter.call(this);
+      cfg = cfg || {};
+      const self = this;
+      this.nread = 0;
+      this.maxed = false;
+      this.npairs = 0;
+      this.maxHeaderPairs = getLimit(cfg, "maxHeaderPairs", 2e3);
+      this.maxHeaderSize = getLimit(cfg, "maxHeaderSize", 80 * 1024);
+      this.buffer = "";
+      this.header = {};
+      this.finished = false;
+      this.ss = new StreamSearch(B_DCRLF);
+      this.ss.on("info", function(isMatch, data, start, end) {
+        if (data && !self.maxed) {
+          if (self.nread + end - start >= self.maxHeaderSize) {
+            end = self.maxHeaderSize - self.nread + start;
+            self.nread = self.maxHeaderSize;
+            self.maxed = true;
+          } else {
+            self.nread += end - start;
+          }
+          self.buffer += data.toString("binary", start, end);
+        }
+        if (isMatch) {
+          self._finish();
+        }
+      });
+    }
+    inherits(HeaderParser, EventEmitter);
+    HeaderParser.prototype.push = function(data) {
+      const r = this.ss.push(data);
+      if (this.finished) {
+        return r;
+      }
+    };
+    HeaderParser.prototype.reset = function() {
+      this.finished = false;
+      this.buffer = "";
+      this.header = {};
+      this.ss.reset();
+    };
+    HeaderParser.prototype._finish = function() {
+      if (this.buffer) {
+        this._parseHeader();
+      }
+      this.ss.matches = this.ss.maxMatches;
+      const header = this.header;
+      this.header = {};
+      this.buffer = "";
+      this.finished = true;
+      this.nread = this.npairs = 0;
+      this.maxed = false;
+      this.emit("header", header);
+    };
+    HeaderParser.prototype._parseHeader = function() {
+      if (this.npairs === this.maxHeaderPairs) {
+        return;
+      }
+      const lines = this.buffer.split(RE_CRLF);
+      const len = lines.length;
+      let m, h;
+      for (var i = 0; i < len; ++i) {
+        if (lines[i].length === 0) {
+          continue;
+        }
+        if (lines[i][0] === "	" || lines[i][0] === " ") {
+          if (h) {
+            this.header[h][this.header[h].length - 1] += lines[i];
+            continue;
+          }
+        }
+        const posColon = lines[i].indexOf(":");
+        if (posColon === -1 || posColon === 0) {
+          return;
+        }
+        m = RE_HDR.exec(lines[i]);
+        h = m[1].toLowerCase();
+        this.header[h] = this.header[h] || [];
+        this.header[h].push(m[2] || "");
+        if (++this.npairs === this.maxHeaderPairs) {
+          break;
+        }
+      }
+    };
+    module2.exports = HeaderParser;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/deps/dicer/lib/Dicer.js
+var require_Dicer = __commonJS({
+  "alexa/node_modules/@fastify/busboy/deps/dicer/lib/Dicer.js"(exports2, module2) {
+    "use strict";
+    var WritableStream = require("node:stream").Writable;
+    var inherits = require("node:util").inherits;
+    var StreamSearch = require_sbmh();
+    var PartStream = require_PartStream();
+    var HeaderParser = require_HeaderParser();
+    var DASH = 45;
+    var B_ONEDASH = Buffer.from("-");
+    var B_CRLF = Buffer.from("\r\n");
+    var EMPTY_FN = function() {
+    };
+    function Dicer(cfg) {
+      if (!(this instanceof Dicer)) {
+        return new Dicer(cfg);
+      }
+      WritableStream.call(this, cfg);
+      if (!cfg || !cfg.headerFirst && typeof cfg.boundary !== "string") {
+        throw new TypeError("Boundary required");
+      }
+      if (typeof cfg.boundary === "string") {
+        this.setBoundary(cfg.boundary);
+      } else {
+        this._bparser = void 0;
+      }
+      this._headerFirst = cfg.headerFirst;
+      this._dashes = 0;
+      this._parts = 0;
+      this._finished = false;
+      this._realFinish = false;
+      this._isPreamble = true;
+      this._justMatched = false;
+      this._firstWrite = true;
+      this._inHeader = true;
+      this._part = void 0;
+      this._cb = void 0;
+      this._ignoreData = false;
+      this._partOpts = { highWaterMark: cfg.partHwm };
+      this._pause = false;
+      const self = this;
+      this._hparser = new HeaderParser(cfg);
+      this._hparser.on("header", function(header) {
+        self._inHeader = false;
+        self._part.emit("header", header);
+      });
+    }
+    inherits(Dicer, WritableStream);
+    Dicer.prototype.emit = function(ev) {
+      if (ev === "finish" && !this._realFinish) {
+        if (!this._finished) {
+          const self = this;
+          process.nextTick(function() {
+            self.emit("error", new Error("Unexpected end of multipart data"));
+            if (self._part && !self._ignoreData) {
+              const type = self._isPreamble ? "Preamble" : "Part";
+              self._part.emit("error", new Error(type + " terminated early due to unexpected end of multipart data"));
+              self._part.push(null);
+              process.nextTick(function() {
+                self._realFinish = true;
+                self.emit("finish");
+                self._realFinish = false;
+              });
+              return;
+            }
+            self._realFinish = true;
+            self.emit("finish");
+            self._realFinish = false;
+          });
+        }
+      } else {
+        WritableStream.prototype.emit.apply(this, arguments);
+      }
+    };
+    Dicer.prototype._write = function(data, encoding, cb) {
+      if (!this._hparser && !this._bparser) {
+        return cb();
+      }
+      if (this._headerFirst && this._isPreamble) {
+        if (!this._part) {
+          this._part = new PartStream(this._partOpts);
+          if (this.listenerCount("preamble") !== 0) {
+            this.emit("preamble", this._part);
+          } else {
+            this._ignore();
+          }
+        }
+        const r = this._hparser.push(data);
+        if (!this._inHeader && r !== void 0 && r < data.length) {
+          data = data.slice(r);
+        } else {
+          return cb();
+        }
+      }
+      if (this._firstWrite) {
+        this._bparser.push(B_CRLF);
+        this._firstWrite = false;
+      }
+      this._bparser.push(data);
+      if (this._pause) {
+        this._cb = cb;
+      } else {
+        cb();
+      }
+    };
+    Dicer.prototype.reset = function() {
+      this._part = void 0;
+      this._bparser = void 0;
+      this._hparser = void 0;
+    };
+    Dicer.prototype.setBoundary = function(boundary) {
+      const self = this;
+      this._bparser = new StreamSearch("\r\n--" + boundary);
+      this._bparser.on("info", function(isMatch, data, start, end) {
+        self._oninfo(isMatch, data, start, end);
+      });
+    };
+    Dicer.prototype._ignore = function() {
+      if (this._part && !this._ignoreData) {
+        this._ignoreData = true;
+        this._part.on("error", EMPTY_FN);
+        this._part.resume();
+      }
+    };
+    Dicer.prototype._oninfo = function(isMatch, data, start, end) {
+      let buf;
+      const self = this;
+      let i = 0;
+      let r;
+      let shouldWriteMore = true;
+      if (!this._part && this._justMatched && data) {
+        while (this._dashes < 2 && start + i < end) {
+          if (data[start + i] === DASH) {
+            ++i;
+            ++this._dashes;
+          } else {
+            if (this._dashes) {
+              buf = B_ONEDASH;
+            }
+            this._dashes = 0;
+            break;
+          }
+        }
+        if (this._dashes === 2) {
+          if (start + i < end && this.listenerCount("trailer") !== 0) {
+            this.emit("trailer", data.slice(start + i, end));
+          }
+          this.reset();
+          this._finished = true;
+          if (self._parts === 0) {
+            self._realFinish = true;
+            self.emit("finish");
+            self._realFinish = false;
+          }
+        }
+        if (this._dashes) {
+          return;
+        }
+      }
+      if (this._justMatched) {
+        this._justMatched = false;
+      }
+      if (!this._part) {
+        this._part = new PartStream(this._partOpts);
+        this._part._read = function(n) {
+          self._unpause();
+        };
+        if (this._isPreamble && this.listenerCount("preamble") !== 0) {
+          this.emit("preamble", this._part);
+        } else if (this._isPreamble !== true && this.listenerCount("part") !== 0) {
+          this.emit("part", this._part);
+        } else {
+          this._ignore();
+        }
+        if (!this._isPreamble) {
+          this._inHeader = true;
+        }
+      }
+      if (data && start < end && !this._ignoreData) {
+        if (this._isPreamble || !this._inHeader) {
+          if (buf) {
+            shouldWriteMore = this._part.push(buf);
+          }
+          shouldWriteMore = this._part.push(data.slice(start, end));
+          if (!shouldWriteMore) {
+            this._pause = true;
+          }
+        } else if (!this._isPreamble && this._inHeader) {
+          if (buf) {
+            this._hparser.push(buf);
+          }
+          r = this._hparser.push(data.slice(start, end));
+          if (!this._inHeader && r !== void 0 && r < end) {
+            this._oninfo(false, data, start + r, end);
+          }
+        }
+      }
+      if (isMatch) {
+        this._hparser.reset();
+        if (this._isPreamble) {
+          this._isPreamble = false;
+        } else {
+          if (start !== end) {
+            ++this._parts;
+            this._part.on("end", function() {
+              if (--self._parts === 0) {
+                if (self._finished) {
+                  self._realFinish = true;
+                  self.emit("finish");
+                  self._realFinish = false;
+                } else {
+                  self._unpause();
+                }
+              }
+            });
+          }
+        }
+        this._part.push(null);
+        this._part = void 0;
+        this._ignoreData = false;
+        this._justMatched = true;
+        this._dashes = 0;
+      }
+    };
+    Dicer.prototype._unpause = function() {
+      if (!this._pause) {
+        return;
+      }
+      this._pause = false;
+      if (this._cb) {
+        const cb = this._cb;
+        this._cb = void 0;
+        cb();
+      }
+    };
+    module2.exports = Dicer;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/utils/decodeText.js
+var require_decodeText = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/utils/decodeText.js"(exports2, module2) {
+    "use strict";
+    var utf8Decoder = new TextDecoder("utf-8");
+    var textDecoders = /* @__PURE__ */ new Map([
+      ["utf-8", utf8Decoder],
+      ["utf8", utf8Decoder]
+    ]);
+    function getDecoder(charset) {
+      let lc;
+      while (true) {
+        switch (charset) {
+          case "utf-8":
+          case "utf8":
+            return decoders.utf8;
+          case "latin1":
+          case "ascii":
+          // TODO: Make these a separate, strict decoder?
+          case "us-ascii":
+          case "iso-8859-1":
+          case "iso8859-1":
+          case "iso88591":
+          case "iso_8859-1":
+          case "windows-1252":
+          case "iso_8859-1:1987":
+          case "cp1252":
+          case "x-cp1252":
+            return decoders.latin1;
+          case "utf16le":
+          case "utf-16le":
+          case "ucs2":
+          case "ucs-2":
+            return decoders.utf16le;
+          case "base64":
+            return decoders.base64;
+          default:
+            if (lc === void 0) {
+              lc = true;
+              charset = charset.toLowerCase();
+              continue;
+            }
+            return decoders.other.bind(charset);
+        }
+      }
+    }
+    var decoders = {
+      utf8: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        return data.utf8Slice(0, data.length);
+      },
+      latin1: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          return data;
+        }
+        return data.latin1Slice(0, data.length);
+      },
+      utf16le: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        return data.ucs2Slice(0, data.length);
+      },
+      base64: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        return data.base64Slice(0, data.length);
+      },
+      other: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        if (textDecoders.has(exports2.toString())) {
+          try {
+            return textDecoders.get(exports2).decode(data);
+          } catch {
+          }
+        }
+        return typeof data === "string" ? data : data.toString();
+      }
+    };
+    function decodeText(text, sourceEncoding, destEncoding) {
+      if (text) {
+        return getDecoder(destEncoding)(text, sourceEncoding);
+      }
+      return text;
+    }
+    module2.exports = decodeText;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/utils/parseParams.js
+var require_parseParams = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/utils/parseParams.js"(exports2, module2) {
+    "use strict";
+    var decodeText = require_decodeText();
+    var RE_ENCODED = /%[a-fA-F0-9][a-fA-F0-9]/g;
+    var EncodedLookup = {
+      "%00": "\0",
+      "%01": "",
+      "%02": "",
+      "%03": "",
+      "%04": "",
+      "%05": "",
+      "%06": "",
+      "%07": "\x07",
+      "%08": "\b",
+      "%09": "	",
+      "%0a": "\n",
+      "%0A": "\n",
+      "%0b": "\v",
+      "%0B": "\v",
+      "%0c": "\f",
+      "%0C": "\f",
+      "%0d": "\r",
+      "%0D": "\r",
+      "%0e": "",
+      "%0E": "",
+      "%0f": "",
+      "%0F": "",
+      "%10": "",
+      "%11": "",
+      "%12": "",
+      "%13": "",
+      "%14": "",
+      "%15": "",
+      "%16": "",
+      "%17": "",
+      "%18": "",
+      "%19": "",
+      "%1a": "",
+      "%1A": "",
+      "%1b": "\x1B",
+      "%1B": "\x1B",
+      "%1c": "",
+      "%1C": "",
+      "%1d": "",
+      "%1D": "",
+      "%1e": "",
+      "%1E": "",
+      "%1f": "",
+      "%1F": "",
+      "%20": " ",
+      "%21": "!",
+      "%22": '"',
+      "%23": "#",
+      "%24": "$",
+      "%25": "%",
+      "%26": "&",
+      "%27": "'",
+      "%28": "(",
+      "%29": ")",
+      "%2a": "*",
+      "%2A": "*",
+      "%2b": "+",
+      "%2B": "+",
+      "%2c": ",",
+      "%2C": ",",
+      "%2d": "-",
+      "%2D": "-",
+      "%2e": ".",
+      "%2E": ".",
+      "%2f": "/",
+      "%2F": "/",
+      "%30": "0",
+      "%31": "1",
+      "%32": "2",
+      "%33": "3",
+      "%34": "4",
+      "%35": "5",
+      "%36": "6",
+      "%37": "7",
+      "%38": "8",
+      "%39": "9",
+      "%3a": ":",
+      "%3A": ":",
+      "%3b": ";",
+      "%3B": ";",
+      "%3c": "<",
+      "%3C": "<",
+      "%3d": "=",
+      "%3D": "=",
+      "%3e": ">",
+      "%3E": ">",
+      "%3f": "?",
+      "%3F": "?",
+      "%40": "@",
+      "%41": "A",
+      "%42": "B",
+      "%43": "C",
+      "%44": "D",
+      "%45": "E",
+      "%46": "F",
+      "%47": "G",
+      "%48": "H",
+      "%49": "I",
+      "%4a": "J",
+      "%4A": "J",
+      "%4b": "K",
+      "%4B": "K",
+      "%4c": "L",
+      "%4C": "L",
+      "%4d": "M",
+      "%4D": "M",
+      "%4e": "N",
+      "%4E": "N",
+      "%4f": "O",
+      "%4F": "O",
+      "%50": "P",
+      "%51": "Q",
+      "%52": "R",
+      "%53": "S",
+      "%54": "T",
+      "%55": "U",
+      "%56": "V",
+      "%57": "W",
+      "%58": "X",
+      "%59": "Y",
+      "%5a": "Z",
+      "%5A": "Z",
+      "%5b": "[",
+      "%5B": "[",
+      "%5c": "\\",
+      "%5C": "\\",
+      "%5d": "]",
+      "%5D": "]",
+      "%5e": "^",
+      "%5E": "^",
+      "%5f": "_",
+      "%5F": "_",
+      "%60": "`",
+      "%61": "a",
+      "%62": "b",
+      "%63": "c",
+      "%64": "d",
+      "%65": "e",
+      "%66": "f",
+      "%67": "g",
+      "%68": "h",
+      "%69": "i",
+      "%6a": "j",
+      "%6A": "j",
+      "%6b": "k",
+      "%6B": "k",
+      "%6c": "l",
+      "%6C": "l",
+      "%6d": "m",
+      "%6D": "m",
+      "%6e": "n",
+      "%6E": "n",
+      "%6f": "o",
+      "%6F": "o",
+      "%70": "p",
+      "%71": "q",
+      "%72": "r",
+      "%73": "s",
+      "%74": "t",
+      "%75": "u",
+      "%76": "v",
+      "%77": "w",
+      "%78": "x",
+      "%79": "y",
+      "%7a": "z",
+      "%7A": "z",
+      "%7b": "{",
+      "%7B": "{",
+      "%7c": "|",
+      "%7C": "|",
+      "%7d": "}",
+      "%7D": "}",
+      "%7e": "~",
+      "%7E": "~",
+      "%7f": "\x7F",
+      "%7F": "\x7F",
+      "%80": "\x80",
+      "%81": "\x81",
+      "%82": "\x82",
+      "%83": "\x83",
+      "%84": "\x84",
+      "%85": "\x85",
+      "%86": "\x86",
+      "%87": "\x87",
+      "%88": "\x88",
+      "%89": "\x89",
+      "%8a": "\x8A",
+      "%8A": "\x8A",
+      "%8b": "\x8B",
+      "%8B": "\x8B",
+      "%8c": "\x8C",
+      "%8C": "\x8C",
+      "%8d": "\x8D",
+      "%8D": "\x8D",
+      "%8e": "\x8E",
+      "%8E": "\x8E",
+      "%8f": "\x8F",
+      "%8F": "\x8F",
+      "%90": "\x90",
+      "%91": "\x91",
+      "%92": "\x92",
+      "%93": "\x93",
+      "%94": "\x94",
+      "%95": "\x95",
+      "%96": "\x96",
+      "%97": "\x97",
+      "%98": "\x98",
+      "%99": "\x99",
+      "%9a": "\x9A",
+      "%9A": "\x9A",
+      "%9b": "\x9B",
+      "%9B": "\x9B",
+      "%9c": "\x9C",
+      "%9C": "\x9C",
+      "%9d": "\x9D",
+      "%9D": "\x9D",
+      "%9e": "\x9E",
+      "%9E": "\x9E",
+      "%9f": "\x9F",
+      "%9F": "\x9F",
+      "%a0": "\xA0",
+      "%A0": "\xA0",
+      "%a1": "\xA1",
+      "%A1": "\xA1",
+      "%a2": "\xA2",
+      "%A2": "\xA2",
+      "%a3": "\xA3",
+      "%A3": "\xA3",
+      "%a4": "\xA4",
+      "%A4": "\xA4",
+      "%a5": "\xA5",
+      "%A5": "\xA5",
+      "%a6": "\xA6",
+      "%A6": "\xA6",
+      "%a7": "\xA7",
+      "%A7": "\xA7",
+      "%a8": "\xA8",
+      "%A8": "\xA8",
+      "%a9": "\xA9",
+      "%A9": "\xA9",
+      "%aa": "\xAA",
+      "%Aa": "\xAA",
+      "%aA": "\xAA",
+      "%AA": "\xAA",
+      "%ab": "\xAB",
+      "%Ab": "\xAB",
+      "%aB": "\xAB",
+      "%AB": "\xAB",
+      "%ac": "\xAC",
+      "%Ac": "\xAC",
+      "%aC": "\xAC",
+      "%AC": "\xAC",
+      "%ad": "\xAD",
+      "%Ad": "\xAD",
+      "%aD": "\xAD",
+      "%AD": "\xAD",
+      "%ae": "\xAE",
+      "%Ae": "\xAE",
+      "%aE": "\xAE",
+      "%AE": "\xAE",
+      "%af": "\xAF",
+      "%Af": "\xAF",
+      "%aF": "\xAF",
+      "%AF": "\xAF",
+      "%b0": "\xB0",
+      "%B0": "\xB0",
+      "%b1": "\xB1",
+      "%B1": "\xB1",
+      "%b2": "\xB2",
+      "%B2": "\xB2",
+      "%b3": "\xB3",
+      "%B3": "\xB3",
+      "%b4": "\xB4",
+      "%B4": "\xB4",
+      "%b5": "\xB5",
+      "%B5": "\xB5",
+      "%b6": "\xB6",
+      "%B6": "\xB6",
+      "%b7": "\xB7",
+      "%B7": "\xB7",
+      "%b8": "\xB8",
+      "%B8": "\xB8",
+      "%b9": "\xB9",
+      "%B9": "\xB9",
+      "%ba": "\xBA",
+      "%Ba": "\xBA",
+      "%bA": "\xBA",
+      "%BA": "\xBA",
+      "%bb": "\xBB",
+      "%Bb": "\xBB",
+      "%bB": "\xBB",
+      "%BB": "\xBB",
+      "%bc": "\xBC",
+      "%Bc": "\xBC",
+      "%bC": "\xBC",
+      "%BC": "\xBC",
+      "%bd": "\xBD",
+      "%Bd": "\xBD",
+      "%bD": "\xBD",
+      "%BD": "\xBD",
+      "%be": "\xBE",
+      "%Be": "\xBE",
+      "%bE": "\xBE",
+      "%BE": "\xBE",
+      "%bf": "\xBF",
+      "%Bf": "\xBF",
+      "%bF": "\xBF",
+      "%BF": "\xBF",
+      "%c0": "\xC0",
+      "%C0": "\xC0",
+      "%c1": "\xC1",
+      "%C1": "\xC1",
+      "%c2": "\xC2",
+      "%C2": "\xC2",
+      "%c3": "\xC3",
+      "%C3": "\xC3",
+      "%c4": "\xC4",
+      "%C4": "\xC4",
+      "%c5": "\xC5",
+      "%C5": "\xC5",
+      "%c6": "\xC6",
+      "%C6": "\xC6",
+      "%c7": "\xC7",
+      "%C7": "\xC7",
+      "%c8": "\xC8",
+      "%C8": "\xC8",
+      "%c9": "\xC9",
+      "%C9": "\xC9",
+      "%ca": "\xCA",
+      "%Ca": "\xCA",
+      "%cA": "\xCA",
+      "%CA": "\xCA",
+      "%cb": "\xCB",
+      "%Cb": "\xCB",
+      "%cB": "\xCB",
+      "%CB": "\xCB",
+      "%cc": "\xCC",
+      "%Cc": "\xCC",
+      "%cC": "\xCC",
+      "%CC": "\xCC",
+      "%cd": "\xCD",
+      "%Cd": "\xCD",
+      "%cD": "\xCD",
+      "%CD": "\xCD",
+      "%ce": "\xCE",
+      "%Ce": "\xCE",
+      "%cE": "\xCE",
+      "%CE": "\xCE",
+      "%cf": "\xCF",
+      "%Cf": "\xCF",
+      "%cF": "\xCF",
+      "%CF": "\xCF",
+      "%d0": "\xD0",
+      "%D0": "\xD0",
+      "%d1": "\xD1",
+      "%D1": "\xD1",
+      "%d2": "\xD2",
+      "%D2": "\xD2",
+      "%d3": "\xD3",
+      "%D3": "\xD3",
+      "%d4": "\xD4",
+      "%D4": "\xD4",
+      "%d5": "\xD5",
+      "%D5": "\xD5",
+      "%d6": "\xD6",
+      "%D6": "\xD6",
+      "%d7": "\xD7",
+      "%D7": "\xD7",
+      "%d8": "\xD8",
+      "%D8": "\xD8",
+      "%d9": "\xD9",
+      "%D9": "\xD9",
+      "%da": "\xDA",
+      "%Da": "\xDA",
+      "%dA": "\xDA",
+      "%DA": "\xDA",
+      "%db": "\xDB",
+      "%Db": "\xDB",
+      "%dB": "\xDB",
+      "%DB": "\xDB",
+      "%dc": "\xDC",
+      "%Dc": "\xDC",
+      "%dC": "\xDC",
+      "%DC": "\xDC",
+      "%dd": "\xDD",
+      "%Dd": "\xDD",
+      "%dD": "\xDD",
+      "%DD": "\xDD",
+      "%de": "\xDE",
+      "%De": "\xDE",
+      "%dE": "\xDE",
+      "%DE": "\xDE",
+      "%df": "\xDF",
+      "%Df": "\xDF",
+      "%dF": "\xDF",
+      "%DF": "\xDF",
+      "%e0": "\xE0",
+      "%E0": "\xE0",
+      "%e1": "\xE1",
+      "%E1": "\xE1",
+      "%e2": "\xE2",
+      "%E2": "\xE2",
+      "%e3": "\xE3",
+      "%E3": "\xE3",
+      "%e4": "\xE4",
+      "%E4": "\xE4",
+      "%e5": "\xE5",
+      "%E5": "\xE5",
+      "%e6": "\xE6",
+      "%E6": "\xE6",
+      "%e7": "\xE7",
+      "%E7": "\xE7",
+      "%e8": "\xE8",
+      "%E8": "\xE8",
+      "%e9": "\xE9",
+      "%E9": "\xE9",
+      "%ea": "\xEA",
+      "%Ea": "\xEA",
+      "%eA": "\xEA",
+      "%EA": "\xEA",
+      "%eb": "\xEB",
+      "%Eb": "\xEB",
+      "%eB": "\xEB",
+      "%EB": "\xEB",
+      "%ec": "\xEC",
+      "%Ec": "\xEC",
+      "%eC": "\xEC",
+      "%EC": "\xEC",
+      "%ed": "\xED",
+      "%Ed": "\xED",
+      "%eD": "\xED",
+      "%ED": "\xED",
+      "%ee": "\xEE",
+      "%Ee": "\xEE",
+      "%eE": "\xEE",
+      "%EE": "\xEE",
+      "%ef": "\xEF",
+      "%Ef": "\xEF",
+      "%eF": "\xEF",
+      "%EF": "\xEF",
+      "%f0": "\xF0",
+      "%F0": "\xF0",
+      "%f1": "\xF1",
+      "%F1": "\xF1",
+      "%f2": "\xF2",
+      "%F2": "\xF2",
+      "%f3": "\xF3",
+      "%F3": "\xF3",
+      "%f4": "\xF4",
+      "%F4": "\xF4",
+      "%f5": "\xF5",
+      "%F5": "\xF5",
+      "%f6": "\xF6",
+      "%F6": "\xF6",
+      "%f7": "\xF7",
+      "%F7": "\xF7",
+      "%f8": "\xF8",
+      "%F8": "\xF8",
+      "%f9": "\xF9",
+      "%F9": "\xF9",
+      "%fa": "\xFA",
+      "%Fa": "\xFA",
+      "%fA": "\xFA",
+      "%FA": "\xFA",
+      "%fb": "\xFB",
+      "%Fb": "\xFB",
+      "%fB": "\xFB",
+      "%FB": "\xFB",
+      "%fc": "\xFC",
+      "%Fc": "\xFC",
+      "%fC": "\xFC",
+      "%FC": "\xFC",
+      "%fd": "\xFD",
+      "%Fd": "\xFD",
+      "%fD": "\xFD",
+      "%FD": "\xFD",
+      "%fe": "\xFE",
+      "%Fe": "\xFE",
+      "%fE": "\xFE",
+      "%FE": "\xFE",
+      "%ff": "\xFF",
+      "%Ff": "\xFF",
+      "%fF": "\xFF",
+      "%FF": "\xFF"
+    };
+    function encodedReplacer(match) {
+      return EncodedLookup[match];
+    }
+    var STATE_KEY = 0;
+    var STATE_VALUE = 1;
+    var STATE_CHARSET = 2;
+    var STATE_LANG = 3;
+    function parseParams(str) {
+      const res = [];
+      let state = STATE_KEY;
+      let charset = "";
+      let inquote = false;
+      let escaping = false;
+      let p = 0;
+      let tmp = "";
+      const len = str.length;
+      for (var i = 0; i < len; ++i) {
+        const char = str[i];
+        if (char === "\\" && inquote) {
+          if (escaping) {
+            escaping = false;
+          } else {
+            escaping = true;
+            continue;
+          }
+        } else if (char === '"') {
+          if (!escaping) {
+            if (inquote) {
+              inquote = false;
+              state = STATE_KEY;
+            } else {
+              inquote = true;
+            }
+            continue;
+          } else {
+            escaping = false;
+          }
+        } else {
+          if (escaping && inquote) {
+            tmp += "\\";
+          }
+          escaping = false;
+          if ((state === STATE_CHARSET || state === STATE_LANG) && char === "'") {
+            if (state === STATE_CHARSET) {
+              state = STATE_LANG;
+              charset = tmp.substring(1);
+            } else {
+              state = STATE_VALUE;
+            }
+            tmp = "";
+            continue;
+          } else if (state === STATE_KEY && (char === "*" || char === "=") && res.length) {
+            state = char === "*" ? STATE_CHARSET : STATE_VALUE;
+            res[p] = [tmp, void 0];
+            tmp = "";
+            continue;
+          } else if (!inquote && char === ";") {
+            state = STATE_KEY;
+            if (charset) {
+              if (tmp.length) {
+                tmp = decodeText(
+                  tmp.replace(RE_ENCODED, encodedReplacer),
+                  "binary",
+                  charset
+                );
+              }
+              charset = "";
+            } else if (tmp.length) {
+              tmp = decodeText(tmp, "binary", "utf8");
+            }
+            if (res[p] === void 0) {
+              res[p] = tmp;
+            } else {
+              res[p][1] = tmp;
+            }
+            tmp = "";
+            ++p;
+            continue;
+          } else if (!inquote && (char === " " || char === "	")) {
+            continue;
+          }
+        }
+        tmp += char;
+      }
+      if (charset && tmp.length) {
+        tmp = decodeText(
+          tmp.replace(RE_ENCODED, encodedReplacer),
+          "binary",
+          charset
+        );
+      } else if (tmp) {
+        tmp = decodeText(tmp, "binary", "utf8");
+      }
+      if (res[p] === void 0) {
+        if (tmp) {
+          res[p] = tmp;
+        }
+      } else {
+        res[p][1] = tmp;
+      }
+      return res;
+    }
+    module2.exports = parseParams;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/utils/basename.js
+var require_basename = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/utils/basename.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function basename(path) {
+      if (typeof path !== "string") {
+        return "";
+      }
+      for (var i = path.length - 1; i >= 0; --i) {
+        switch (path.charCodeAt(i)) {
+          case 47:
+          // '/'
+          case 92:
+            path = path.slice(i + 1);
+            return path === ".." || path === "." ? "" : path;
+        }
+      }
+      return path === ".." || path === "." ? "" : path;
+    };
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/types/multipart.js
+var require_multipart = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/types/multipart.js"(exports2, module2) {
+    "use strict";
+    var { Readable } = require("node:stream");
+    var { inherits } = require("node:util");
+    var Dicer = require_Dicer();
+    var parseParams = require_parseParams();
+    var decodeText = require_decodeText();
+    var basename = require_basename();
+    var getLimit = require_getLimit();
+    var RE_BOUNDARY = /^boundary$/i;
+    var RE_FIELD = /^form-data$/i;
+    var RE_CHARSET = /^charset$/i;
+    var RE_FILENAME = /^filename$/i;
+    var RE_NAME = /^name$/i;
+    Multipart.detect = /^multipart\/form-data/i;
+    function Multipart(boy, cfg) {
+      let i;
+      let len;
+      const self = this;
+      let boundary;
+      const limits = cfg.limits;
+      const isPartAFile = cfg.isPartAFile || ((fieldName, contentType2, fileName) => contentType2 === "application/octet-stream" || fileName !== void 0);
+      const parsedConType = cfg.parsedConType || [];
+      const defCharset = cfg.defCharset || "utf8";
+      const preservePath = cfg.preservePath;
+      const fileOpts = { highWaterMark: cfg.fileHwm };
+      for (i = 0, len = parsedConType.length; i < len; ++i) {
+        if (Array.isArray(parsedConType[i]) && RE_BOUNDARY.test(parsedConType[i][0])) {
+          boundary = parsedConType[i][1];
+          break;
+        }
+      }
+      function checkFinished() {
+        if (nends === 0 && finished && !boy._done) {
+          finished = false;
+          self.end();
+        }
+      }
+      if (typeof boundary !== "string") {
+        throw new Error("Multipart: Boundary not found");
+      }
+      const fieldSizeLimit = getLimit(limits, "fieldSize", 1 * 1024 * 1024);
+      const fileSizeLimit = getLimit(limits, "fileSize", Infinity);
+      const filesLimit = getLimit(limits, "files", Infinity);
+      const fieldsLimit = getLimit(limits, "fields", Infinity);
+      const partsLimit = getLimit(limits, "parts", Infinity);
+      const headerPairsLimit = getLimit(limits, "headerPairs", 2e3);
+      const headerSizeLimit = getLimit(limits, "headerSize", 80 * 1024);
+      let nfiles = 0;
+      let nfields = 0;
+      let nends = 0;
+      let curFile;
+      let curField;
+      let finished = false;
+      this._needDrain = false;
+      this._pause = false;
+      this._cb = void 0;
+      this._nparts = 0;
+      this._boy = boy;
+      const parserCfg = {
+        boundary,
+        maxHeaderPairs: headerPairsLimit,
+        maxHeaderSize: headerSizeLimit,
+        partHwm: fileOpts.highWaterMark,
+        highWaterMark: cfg.highWaterMark
+      };
+      this.parser = new Dicer(parserCfg);
+      this.parser.on("drain", function() {
+        self._needDrain = false;
+        if (self._cb && !self._pause) {
+          const cb = self._cb;
+          self._cb = void 0;
+          cb();
+        }
+      }).on("part", function onPart(part) {
+        if (++self._nparts > partsLimit) {
+          self.parser.removeListener("part", onPart);
+          self.parser.on("part", skipPart);
+          boy.hitPartsLimit = true;
+          boy.emit("partsLimit");
+          return skipPart(part);
+        }
+        if (curField) {
+          const field = curField;
+          field.emit("end");
+          field.removeAllListeners("end");
+        }
+        part.on("header", function(header) {
+          let contype;
+          let fieldname;
+          let parsed;
+          let charset;
+          let encoding;
+          let filename;
+          let nsize = 0;
+          if (header["content-type"]) {
+            parsed = parseParams(header["content-type"][0]);
+            if (parsed[0]) {
+              contype = parsed[0].toLowerCase();
+              for (i = 0, len = parsed.length; i < len; ++i) {
+                if (RE_CHARSET.test(parsed[i][0])) {
+                  charset = parsed[i][1].toLowerCase();
+                  break;
+                }
+              }
+            }
+          }
+          if (contype === void 0) {
+            contype = "text/plain";
+          }
+          if (charset === void 0) {
+            charset = defCharset;
+          }
+          if (header["content-disposition"]) {
+            parsed = parseParams(header["content-disposition"][0]);
+            if (!RE_FIELD.test(parsed[0])) {
+              return skipPart(part);
+            }
+            for (i = 0, len = parsed.length; i < len; ++i) {
+              if (RE_NAME.test(parsed[i][0])) {
+                fieldname = parsed[i][1];
+              } else if (RE_FILENAME.test(parsed[i][0])) {
+                filename = parsed[i][1];
+                if (!preservePath) {
+                  filename = basename(filename);
+                }
+              }
+            }
+          } else {
+            return skipPart(part);
+          }
+          if (header["content-transfer-encoding"]) {
+            encoding = header["content-transfer-encoding"][0].toLowerCase();
+          } else {
+            encoding = "7bit";
+          }
+          let onData, onEnd;
+          if (isPartAFile(fieldname, contype, filename)) {
+            if (nfiles === filesLimit) {
+              if (!boy.hitFilesLimit) {
+                boy.hitFilesLimit = true;
+                boy.emit("filesLimit");
+              }
+              return skipPart(part);
+            }
+            ++nfiles;
+            if (boy.listenerCount("file") === 0) {
+              self.parser._ignore();
+              return;
+            }
+            ++nends;
+            const file = new FileStream(fileOpts);
+            curFile = file;
+            file.on("end", function() {
+              --nends;
+              self._pause = false;
+              checkFinished();
+              if (self._cb && !self._needDrain) {
+                const cb = self._cb;
+                self._cb = void 0;
+                cb();
+              }
+            });
+            file._read = function(n) {
+              if (!self._pause) {
+                return;
+              }
+              self._pause = false;
+              if (self._cb && !self._needDrain) {
+                const cb = self._cb;
+                self._cb = void 0;
+                cb();
+              }
+            };
+            boy.emit("file", fieldname, file, filename, encoding, contype);
+            onData = function(data) {
+              if ((nsize += data.length) > fileSizeLimit) {
+                const extralen = fileSizeLimit - nsize + data.length;
+                if (extralen > 0) {
+                  file.push(data.slice(0, extralen));
+                }
+                file.truncated = true;
+                file.bytesRead = fileSizeLimit;
+                part.removeAllListeners("data");
+                file.emit("limit");
+                return;
+              } else if (!file.push(data)) {
+                self._pause = true;
+              }
+              file.bytesRead = nsize;
+            };
+            onEnd = function() {
+              curFile = void 0;
+              file.push(null);
+            };
+          } else {
+            if (nfields === fieldsLimit) {
+              if (!boy.hitFieldsLimit) {
+                boy.hitFieldsLimit = true;
+                boy.emit("fieldsLimit");
+              }
+              return skipPart(part);
+            }
+            ++nfields;
+            ++nends;
+            let buffer = "";
+            let truncated = false;
+            curField = part;
+            onData = function(data) {
+              if ((nsize += data.length) > fieldSizeLimit) {
+                const extralen = fieldSizeLimit - (nsize - data.length);
+                buffer += data.toString("binary", 0, extralen);
+                truncated = true;
+                part.removeAllListeners("data");
+              } else {
+                buffer += data.toString("binary");
+              }
+            };
+            onEnd = function() {
+              curField = void 0;
+              if (buffer.length) {
+                buffer = decodeText(buffer, "binary", charset);
+              }
+              boy.emit("field", fieldname, buffer, false, truncated, encoding, contype);
+              --nends;
+              checkFinished();
+            };
+          }
+          part._readableState.sync = false;
+          part.on("data", onData);
+          part.on("end", onEnd);
+        }).on("error", function(err) {
+          if (curFile) {
+            curFile.emit("error", err);
+          }
+        });
+      }).on("error", function(err) {
+        boy.emit("error", err);
+      }).on("finish", function() {
+        finished = true;
+        checkFinished();
+      });
+    }
+    Multipart.prototype.write = function(chunk, cb) {
+      const r = this.parser.write(chunk);
+      if (r && !this._pause) {
+        cb();
+      } else {
+        this._needDrain = !r;
+        this._cb = cb;
+      }
+    };
+    Multipart.prototype.end = function() {
+      const self = this;
+      if (self.parser.writable) {
+        self.parser.end();
+      } else if (!self._boy._done) {
+        process.nextTick(function() {
+          self._boy._done = true;
+          self._boy.emit("finish");
+        });
+      }
+    };
+    function skipPart(part) {
+      part.resume();
+    }
+    function FileStream(opts) {
+      Readable.call(this, opts);
+      this.bytesRead = 0;
+      this.truncated = false;
+    }
+    inherits(FileStream, Readable);
+    FileStream.prototype._read = function(n) {
+    };
+    module2.exports = Multipart;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/utils/Decoder.js
+var require_Decoder = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/utils/Decoder.js"(exports2, module2) {
+    "use strict";
+    var RE_PLUS = /\+/g;
+    var HEX = [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ];
+    function Decoder() {
+      this.buffer = void 0;
+    }
+    Decoder.prototype.write = function(str) {
+      str = str.replace(RE_PLUS, " ");
+      let res = "";
+      let i = 0;
+      let p = 0;
+      const len = str.length;
+      for (; i < len; ++i) {
+        if (this.buffer !== void 0) {
+          if (!HEX[str.charCodeAt(i)]) {
+            res += "%" + this.buffer;
+            this.buffer = void 0;
+            --i;
+          } else {
+            this.buffer += str[i];
+            ++p;
+            if (this.buffer.length === 2) {
+              res += String.fromCharCode(parseInt(this.buffer, 16));
+              this.buffer = void 0;
+            }
+          }
+        } else if (str[i] === "%") {
+          if (i > p) {
+            res += str.substring(p, i);
+            p = i;
+          }
+          this.buffer = "";
+          ++p;
+        }
+      }
+      if (p < len && this.buffer === void 0) {
+        res += str.substring(p);
+      }
+      return res;
+    };
+    Decoder.prototype.reset = function() {
+      this.buffer = void 0;
+    };
+    module2.exports = Decoder;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/types/urlencoded.js
+var require_urlencoded = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/types/urlencoded.js"(exports2, module2) {
+    "use strict";
+    var Decoder = require_Decoder();
+    var decodeText = require_decodeText();
+    var getLimit = require_getLimit();
+    var RE_CHARSET = /^charset$/i;
+    UrlEncoded.detect = /^application\/x-www-form-urlencoded/i;
+    function UrlEncoded(boy, cfg) {
+      const limits = cfg.limits;
+      const parsedConType = cfg.parsedConType;
+      this.boy = boy;
+      this.fieldSizeLimit = getLimit(limits, "fieldSize", 1 * 1024 * 1024);
+      this.fieldNameSizeLimit = getLimit(limits, "fieldNameSize", 100);
+      this.fieldsLimit = getLimit(limits, "fields", Infinity);
+      let charset;
+      for (var i = 0, len = parsedConType.length; i < len; ++i) {
+        if (Array.isArray(parsedConType[i]) && RE_CHARSET.test(parsedConType[i][0])) {
+          charset = parsedConType[i][1].toLowerCase();
+          break;
+        }
+      }
+      if (charset === void 0) {
+        charset = cfg.defCharset || "utf8";
+      }
+      this.decoder = new Decoder();
+      this.charset = charset;
+      this._fields = 0;
+      this._state = "key";
+      this._checkingBytes = true;
+      this._bytesKey = 0;
+      this._bytesVal = 0;
+      this._key = "";
+      this._val = "";
+      this._keyTrunc = false;
+      this._valTrunc = false;
+      this._hitLimit = false;
+    }
+    UrlEncoded.prototype.write = function(data, cb) {
+      if (this._fields === this.fieldsLimit) {
+        if (!this.boy.hitFieldsLimit) {
+          this.boy.hitFieldsLimit = true;
+          this.boy.emit("fieldsLimit");
+        }
+        return cb();
+      }
+      let idxeq;
+      let idxamp;
+      let i;
+      let p = 0;
+      const len = data.length;
+      while (p < len) {
+        if (this._state === "key") {
+          idxeq = idxamp = void 0;
+          for (i = p; i < len; ++i) {
+            if (!this._checkingBytes) {
+              ++p;
+            }
+            if (data[i] === 61) {
+              idxeq = i;
+              break;
+            } else if (data[i] === 38) {
+              idxamp = i;
+              break;
+            }
+            if (this._checkingBytes && this._bytesKey === this.fieldNameSizeLimit) {
+              this._hitLimit = true;
+              break;
+            } else if (this._checkingBytes) {
+              ++this._bytesKey;
+            }
+          }
+          if (idxeq !== void 0) {
+            if (idxeq > p) {
+              this._key += this.decoder.write(data.toString("binary", p, idxeq));
+            }
+            this._state = "val";
+            this._hitLimit = false;
+            this._checkingBytes = true;
+            this._val = "";
+            this._bytesVal = 0;
+            this._valTrunc = false;
+            this.decoder.reset();
+            p = idxeq + 1;
+          } else if (idxamp !== void 0) {
+            ++this._fields;
+            let key;
+            const keyTrunc = this._keyTrunc;
+            if (idxamp > p) {
+              key = this._key += this.decoder.write(data.toString("binary", p, idxamp));
+            } else {
+              key = this._key;
+            }
+            this._hitLimit = false;
+            this._checkingBytes = true;
+            this._key = "";
+            this._bytesKey = 0;
+            this._keyTrunc = false;
+            this.decoder.reset();
+            if (key.length) {
+              this.boy.emit(
+                "field",
+                decodeText(key, "binary", this.charset),
+                "",
+                keyTrunc,
+                false
+              );
+            }
+            p = idxamp + 1;
+            if (this._fields === this.fieldsLimit) {
+              return cb();
+            }
+          } else if (this._hitLimit) {
+            if (i > p) {
+              this._key += this.decoder.write(data.toString("binary", p, i));
+            }
+            p = i;
+            if ((this._bytesKey = this._key.length) === this.fieldNameSizeLimit) {
+              this._checkingBytes = false;
+              this._keyTrunc = true;
+            }
+          } else {
+            if (p < len) {
+              this._key += this.decoder.write(data.toString("binary", p));
+            }
+            p = len;
+          }
+        } else {
+          idxamp = void 0;
+          for (i = p; i < len; ++i) {
+            if (!this._checkingBytes) {
+              ++p;
+            }
+            if (data[i] === 38) {
+              idxamp = i;
+              break;
+            }
+            if (this._checkingBytes && this._bytesVal === this.fieldSizeLimit) {
+              this._hitLimit = true;
+              break;
+            } else if (this._checkingBytes) {
+              ++this._bytesVal;
+            }
+          }
+          if (idxamp !== void 0) {
+            ++this._fields;
+            if (idxamp > p) {
+              this._val += this.decoder.write(data.toString("binary", p, idxamp));
+            }
+            this.boy.emit(
+              "field",
+              decodeText(this._key, "binary", this.charset),
+              decodeText(this._val, "binary", this.charset),
+              this._keyTrunc,
+              this._valTrunc
+            );
+            this._state = "key";
+            this._hitLimit = false;
+            this._checkingBytes = true;
+            this._key = "";
+            this._bytesKey = 0;
+            this._keyTrunc = false;
+            this.decoder.reset();
+            p = idxamp + 1;
+            if (this._fields === this.fieldsLimit) {
+              return cb();
+            }
+          } else if (this._hitLimit) {
+            if (i > p) {
+              this._val += this.decoder.write(data.toString("binary", p, i));
+            }
+            p = i;
+            if (this._val === "" && this.fieldSizeLimit === 0 || (this._bytesVal = this._val.length) === this.fieldSizeLimit) {
+              this._checkingBytes = false;
+              this._valTrunc = true;
+            }
+          } else {
+            if (p < len) {
+              this._val += this.decoder.write(data.toString("binary", p));
+            }
+            p = len;
+          }
+        }
+      }
+      cb();
+    };
+    UrlEncoded.prototype.end = function() {
+      if (this.boy._done) {
+        return;
+      }
+      if (this._state === "key" && this._key.length > 0) {
+        this.boy.emit(
+          "field",
+          decodeText(this._key, "binary", this.charset),
+          "",
+          this._keyTrunc,
+          false
+        );
+      } else if (this._state === "val") {
+        this.boy.emit(
+          "field",
+          decodeText(this._key, "binary", this.charset),
+          decodeText(this._val, "binary", this.charset),
+          this._keyTrunc,
+          this._valTrunc
+        );
+      }
+      this.boy._done = true;
+      this.boy.emit("finish");
+    };
+    module2.exports = UrlEncoded;
+  }
+});
+
+// alexa/node_modules/@fastify/busboy/lib/main.js
+var require_main = __commonJS({
+  "alexa/node_modules/@fastify/busboy/lib/main.js"(exports2, module2) {
+    "use strict";
+    var WritableStream = require("node:stream").Writable;
+    var { inherits } = require("node:util");
+    var Dicer = require_Dicer();
+    var MultipartParser = require_multipart();
+    var UrlencodedParser = require_urlencoded();
+    var parseParams = require_parseParams();
+    function Busboy(opts) {
+      if (!(this instanceof Busboy)) {
+        return new Busboy(opts);
+      }
+      if (typeof opts !== "object") {
+        throw new TypeError("Busboy expected an options-Object.");
+      }
+      if (typeof opts.headers !== "object") {
+        throw new TypeError("Busboy expected an options-Object with headers-attribute.");
+      }
+      if (typeof opts.headers["content-type"] !== "string") {
+        throw new TypeError("Missing Content-Type-header.");
+      }
+      const {
+        headers,
+        ...streamOptions
+      } = opts;
+      this.opts = {
+        autoDestroy: false,
+        ...streamOptions
+      };
+      WritableStream.call(this, this.opts);
+      this._done = false;
+      this._parser = this.getParserByHeaders(headers);
+      this._finished = false;
+    }
+    inherits(Busboy, WritableStream);
+    Busboy.prototype.emit = function(ev) {
+      var _a4;
+      if (ev === "finish") {
+        if (!this._done) {
+          (_a4 = this._parser) == null ? void 0 : _a4.end();
+          return;
+        } else if (this._finished) {
+          return;
+        }
+        this._finished = true;
+      }
+      WritableStream.prototype.emit.apply(this, arguments);
+    };
+    Busboy.prototype.getParserByHeaders = function(headers) {
+      const parsed = parseParams(headers["content-type"]);
+      const cfg = {
+        defCharset: this.opts.defCharset,
+        fileHwm: this.opts.fileHwm,
+        headers,
+        highWaterMark: this.opts.highWaterMark,
+        isPartAFile: this.opts.isPartAFile,
+        limits: this.opts.limits,
+        parsedConType: parsed,
+        preservePath: this.opts.preservePath
+      };
+      if (MultipartParser.detect.test(parsed[0])) {
+        return new MultipartParser(this, cfg);
+      }
+      if (UrlencodedParser.detect.test(parsed[0])) {
+        return new UrlencodedParser(this, cfg);
+      }
+      throw new Error("Unsupported Content-Type.");
+    };
+    Busboy.prototype._write = function(chunk, encoding, cb) {
+      this._parser.write(chunk, cb);
+    };
+    module2.exports = Busboy;
+    module2.exports.default = Busboy;
+    module2.exports.Busboy = Busboy;
+    module2.exports.Dicer = Dicer;
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/constants.js
+var require_constants2 = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/constants.js"(exports2, module2) {
+    "use strict";
+    var { MessageChannel, receiveMessageOnPort } = require("worker_threads");
+    var corsSafeListedMethods = ["GET", "HEAD", "POST"];
+    var corsSafeListedMethodsSet = new Set(corsSafeListedMethods);
+    var nullBodyStatus = [101, 204, 205, 304];
+    var redirectStatus = [301, 302, 303, 307, 308];
+    var redirectStatusSet = new Set(redirectStatus);
+    var badPorts = [
+      "1",
+      "7",
+      "9",
+      "11",
+      "13",
+      "15",
+      "17",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "25",
+      "37",
+      "42",
+      "43",
+      "53",
+      "69",
+      "77",
+      "79",
+      "87",
+      "95",
+      "101",
+      "102",
+      "103",
+      "104",
+      "109",
+      "110",
+      "111",
+      "113",
+      "115",
+      "117",
+      "119",
+      "123",
+      "135",
+      "137",
+      "139",
+      "143",
+      "161",
+      "179",
+      "389",
+      "427",
+      "465",
+      "512",
+      "513",
+      "514",
+      "515",
+      "526",
+      "530",
+      "531",
+      "532",
+      "540",
+      "548",
+      "554",
+      "556",
+      "563",
+      "587",
+      "601",
+      "636",
+      "989",
+      "990",
+      "993",
+      "995",
+      "1719",
+      "1720",
+      "1723",
+      "2049",
+      "3659",
+      "4045",
+      "5060",
+      "5061",
+      "6000",
+      "6566",
+      "6665",
+      "6666",
+      "6667",
+      "6668",
+      "6669",
+      "6697",
+      "10080"
+    ];
+    var badPortsSet = new Set(badPorts);
+    var referrerPolicy = [
+      "",
+      "no-referrer",
+      "no-referrer-when-downgrade",
+      "same-origin",
+      "origin",
+      "strict-origin",
+      "origin-when-cross-origin",
+      "strict-origin-when-cross-origin",
+      "unsafe-url"
+    ];
+    var referrerPolicySet = new Set(referrerPolicy);
+    var requestRedirect = ["follow", "manual", "error"];
+    var safeMethods = ["GET", "HEAD", "OPTIONS", "TRACE"];
+    var safeMethodsSet = new Set(safeMethods);
+    var requestMode = ["navigate", "same-origin", "no-cors", "cors"];
+    var requestCredentials = ["omit", "same-origin", "include"];
+    var requestCache = [
+      "default",
+      "no-store",
+      "reload",
+      "no-cache",
+      "force-cache",
+      "only-if-cached"
+    ];
+    var requestBodyHeader = [
+      "content-encoding",
+      "content-language",
+      "content-location",
+      "content-type",
+      // See https://github.com/nodejs/undici/issues/2021
+      // 'Content-Length' is a forbidden header name, which is typically
+      // removed in the Headers implementation. However, undici doesn't
+      // filter out headers, so we add it here.
+      "content-length"
+    ];
+    var requestDuplex = [
+      "half"
+    ];
+    var forbiddenMethods = ["CONNECT", "TRACE", "TRACK"];
+    var forbiddenMethodsSet = new Set(forbiddenMethods);
+    var subresource = [
+      "audio",
+      "audioworklet",
+      "font",
+      "image",
+      "manifest",
+      "paintworklet",
+      "script",
+      "style",
+      "track",
+      "video",
+      "xslt",
+      ""
+    ];
+    var subresourceSet = new Set(subresource);
+    var DOMException2 = globalThis.DOMException ?? (() => {
+      try {
+        atob("~");
+      } catch (err) {
+        return Object.getPrototypeOf(err).constructor;
+      }
+    })();
+    var channel;
+    var structuredClone = globalThis.structuredClone ?? // https://github.com/nodejs/node/blob/b27ae24dcc4251bad726d9d84baf678d1f707fed/lib/internal/structured_clone.js
+    // structuredClone was added in v17.0.0, but fetch supports v16.8
+    function structuredClone2(value, options = void 0) {
+      if (arguments.length === 0) {
+        throw new TypeError("missing argument");
+      }
+      if (!channel) {
+        channel = new MessageChannel();
+      }
+      channel.port1.unref();
+      channel.port2.unref();
+      channel.port1.postMessage(value, options == null ? void 0 : options.transfer);
+      return receiveMessageOnPort(channel.port2).message;
+    };
+    module2.exports = {
+      DOMException: DOMException2,
+      structuredClone,
+      subresource,
+      forbiddenMethods,
+      requestBodyHeader,
+      referrerPolicy,
+      requestRedirect,
+      requestMode,
+      requestCredentials,
+      requestCache,
+      redirectStatus,
+      corsSafeListedMethods,
+      nullBodyStatus,
+      safeMethods,
+      badPorts,
+      requestDuplex,
+      subresourceSet,
+      badPortsSet,
+      redirectStatusSet,
+      corsSafeListedMethodsSet,
+      safeMethodsSet,
+      forbiddenMethodsSet,
+      referrerPolicySet
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/global.js
+var require_global = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/global.js"(exports2, module2) {
+    "use strict";
+    var globalOrigin = /* @__PURE__ */ Symbol.for("undici.globalOrigin.1");
+    function getGlobalOrigin() {
+      return globalThis[globalOrigin];
+    }
+    function setGlobalOrigin(newOrigin) {
+      if (newOrigin === void 0) {
+        Object.defineProperty(globalThis, globalOrigin, {
+          value: void 0,
+          writable: true,
+          enumerable: false,
+          configurable: false
+        });
+        return;
+      }
+      const parsedURL = new URL(newOrigin);
+      if (parsedURL.protocol !== "http:" && parsedURL.protocol !== "https:") {
+        throw new TypeError(`Only http & https urls are allowed, received ${parsedURL.protocol}`);
+      }
+      Object.defineProperty(globalThis, globalOrigin, {
+        value: parsedURL,
+        writable: true,
+        enumerable: false,
+        configurable: false
+      });
+    }
+    module2.exports = {
+      getGlobalOrigin,
+      setGlobalOrigin
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/util.js
+var require_util2 = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/util.js"(exports2, module2) {
+    "use strict";
+    var { redirectStatusSet, referrerPolicySet: referrerPolicyTokens, badPortsSet } = require_constants2();
+    var { getGlobalOrigin } = require_global();
+    var { performance: performance2 } = require("perf_hooks");
+    var { isBlobLike, toUSVString, ReadableStreamFrom } = require_util();
+    var assert2 = require("assert");
+    var { isUint8Array } = require("util/types");
+    var supportedHashes = [];
+    var crypto2;
+    try {
+      crypto2 = require("crypto");
+      const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
+      supportedHashes = crypto2.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
+    } catch {
+    }
+    function responseURL(response) {
+      const urlList = response.urlList;
+      const length = urlList.length;
+      return length === 0 ? null : urlList[length - 1].toString();
+    }
+    function responseLocationURL(response, requestFragment) {
+      if (!redirectStatusSet.has(response.status)) {
+        return null;
+      }
+      let location = response.headersList.get("location");
+      if (location !== null && isValidHeaderValue(location)) {
+        location = new URL(location, responseURL(response));
+      }
+      if (location && !location.hash) {
+        location.hash = requestFragment;
+      }
+      return location;
+    }
+    function requestCurrentURL(request) {
+      return request.urlList[request.urlList.length - 1];
+    }
+    function requestBadPort(request) {
+      const url2 = requestCurrentURL(request);
+      if (urlIsHttpHttpsScheme(url2) && badPortsSet.has(url2.port)) {
+        return "blocked";
+      }
+      return "allowed";
+    }
+    function isErrorLike(object3) {
+      var _a4, _b;
+      return object3 instanceof Error || (((_a4 = object3 == null ? void 0 : object3.constructor) == null ? void 0 : _a4.name) === "Error" || ((_b = object3 == null ? void 0 : object3.constructor) == null ? void 0 : _b.name) === "DOMException");
+    }
+    function isValidReasonPhrase(statusText) {
+      for (let i = 0; i < statusText.length; ++i) {
+        const c = statusText.charCodeAt(i);
+        if (!(c === 9 || // HTAB
+        c >= 32 && c <= 126 || // SP / VCHAR
+        c >= 128 && c <= 255)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    function isTokenCharCode(c) {
+      switch (c) {
+        case 34:
+        case 40:
+        case 41:
+        case 44:
+        case 47:
+        case 58:
+        case 59:
+        case 60:
+        case 61:
+        case 62:
+        case 63:
+        case 64:
+        case 91:
+        case 92:
+        case 93:
+        case 123:
+        case 125:
+          return false;
+        default:
+          return c >= 33 && c <= 126;
+      }
+    }
+    function isValidHTTPToken(characters) {
+      if (characters.length === 0) {
+        return false;
+      }
+      for (let i = 0; i < characters.length; ++i) {
+        if (!isTokenCharCode(characters.charCodeAt(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    function isValidHeaderName(potentialValue) {
+      return isValidHTTPToken(potentialValue);
+    }
+    function isValidHeaderValue(potentialValue) {
+      if (potentialValue.startsWith("	") || potentialValue.startsWith(" ") || potentialValue.endsWith("	") || potentialValue.endsWith(" ")) {
+        return false;
+      }
+      if (potentialValue.includes("\0") || potentialValue.includes("\r") || potentialValue.includes("\n")) {
+        return false;
+      }
+      return true;
+    }
+    function setRequestReferrerPolicyOnRedirect(request, actualResponse) {
+      const { headersList } = actualResponse;
+      const policyHeader = (headersList.get("referrer-policy") ?? "").split(",");
+      let policy = "";
+      if (policyHeader.length > 0) {
+        for (let i = policyHeader.length; i !== 0; i--) {
+          const token = policyHeader[i - 1].trim();
+          if (referrerPolicyTokens.has(token)) {
+            policy = token;
+            break;
+          }
+        }
+      }
+      if (policy !== "") {
+        request.referrerPolicy = policy;
+      }
+    }
+    function crossOriginResourcePolicyCheck() {
+      return "allowed";
+    }
+    function corsCheck() {
+      return "success";
+    }
+    function TAOCheck() {
+      return "success";
+    }
+    function appendFetchMetadata(httpRequest) {
+      let header = null;
+      header = httpRequest.mode;
+      httpRequest.headersList.set("sec-fetch-mode", header);
+    }
+    function appendRequestOriginHeader(request) {
+      let serializedOrigin = request.origin;
+      if (request.responseTainting === "cors" || request.mode === "websocket") {
+        if (serializedOrigin) {
+          request.headersList.append("origin", serializedOrigin);
+        }
+      } else if (request.method !== "GET" && request.method !== "HEAD") {
+        switch (request.referrerPolicy) {
+          case "no-referrer":
+            serializedOrigin = null;
+            break;
+          case "no-referrer-when-downgrade":
+          case "strict-origin":
+          case "strict-origin-when-cross-origin":
+            if (request.origin && urlHasHttpsScheme(request.origin) && !urlHasHttpsScheme(requestCurrentURL(request))) {
+              serializedOrigin = null;
+            }
+            break;
+          case "same-origin":
+            if (!sameOrigin(request, requestCurrentURL(request))) {
+              serializedOrigin = null;
+            }
+            break;
+          default:
+        }
+        if (serializedOrigin) {
+          request.headersList.append("origin", serializedOrigin);
+        }
+      }
+    }
+    function coarsenedSharedCurrentTime(crossOriginIsolatedCapability) {
+      return performance2.now();
+    }
+    function createOpaqueTimingInfo(timingInfo) {
+      return {
+        startTime: timingInfo.startTime ?? 0,
+        redirectStartTime: 0,
+        redirectEndTime: 0,
+        postRedirectStartTime: timingInfo.startTime ?? 0,
+        finalServiceWorkerStartTime: 0,
+        finalNetworkResponseStartTime: 0,
+        finalNetworkRequestStartTime: 0,
+        endTime: 0,
+        encodedBodySize: 0,
+        decodedBodySize: 0,
+        finalConnectionTimingInfo: null
+      };
+    }
+    function makePolicyContainer() {
+      return {
+        referrerPolicy: "strict-origin-when-cross-origin"
+      };
+    }
+    function clonePolicyContainer(policyContainer) {
+      return {
+        referrerPolicy: policyContainer.referrerPolicy
+      };
+    }
+    function determineRequestsReferrer(request) {
+      const policy = request.referrerPolicy;
+      assert2(policy);
+      let referrerSource = null;
+      if (request.referrer === "client") {
+        const globalOrigin = getGlobalOrigin();
+        if (!globalOrigin || globalOrigin.origin === "null") {
+          return "no-referrer";
+        }
+        referrerSource = new URL(globalOrigin);
+      } else if (request.referrer instanceof URL) {
+        referrerSource = request.referrer;
+      }
+      let referrerURL = stripURLForReferrer(referrerSource);
+      const referrerOrigin = stripURLForReferrer(referrerSource, true);
+      if (referrerURL.toString().length > 4096) {
+        referrerURL = referrerOrigin;
+      }
+      const areSameOrigin = sameOrigin(request, referrerURL);
+      const isNonPotentiallyTrustWorthy = isURLPotentiallyTrustworthy(referrerURL) && !isURLPotentiallyTrustworthy(request.url);
+      switch (policy) {
+        case "origin":
+          return referrerOrigin != null ? referrerOrigin : stripURLForReferrer(referrerSource, true);
+        case "unsafe-url":
+          return referrerURL;
+        case "same-origin":
+          return areSameOrigin ? referrerOrigin : "no-referrer";
+        case "origin-when-cross-origin":
+          return areSameOrigin ? referrerURL : referrerOrigin;
+        case "strict-origin-when-cross-origin": {
+          const currentURL = requestCurrentURL(request);
+          if (sameOrigin(referrerURL, currentURL)) {
+            return referrerURL;
+          }
+          if (isURLPotentiallyTrustworthy(referrerURL) && !isURLPotentiallyTrustworthy(currentURL)) {
+            return "no-referrer";
+          }
+          return referrerOrigin;
+        }
+        case "strict-origin":
+        // eslint-disable-line
+        /**
+           * 1. If referrerURL is a potentially trustworthy URL and
+           * request’s current URL is not a potentially trustworthy URL,
+           * then return no referrer.
+           * 2. Return referrerOrigin
+          */
+        case "no-referrer-when-downgrade":
+        // eslint-disable-line
+        /**
+         * 1. If referrerURL is a potentially trustworthy URL and
+         * request’s current URL is not a potentially trustworthy URL,
+         * then return no referrer.
+         * 2. Return referrerOrigin
+        */
+        default:
+          return isNonPotentiallyTrustWorthy ? "no-referrer" : referrerOrigin;
+      }
+    }
+    function stripURLForReferrer(url2, originOnly) {
+      assert2(url2 instanceof URL);
+      if (url2.protocol === "file:" || url2.protocol === "about:" || url2.protocol === "blank:") {
+        return "no-referrer";
+      }
+      url2.username = "";
+      url2.password = "";
+      url2.hash = "";
+      if (originOnly) {
+        url2.pathname = "";
+        url2.search = "";
+      }
+      return url2;
+    }
+    function isURLPotentiallyTrustworthy(url2) {
+      if (!(url2 instanceof URL)) {
+        return false;
+      }
+      if (url2.href === "about:blank" || url2.href === "about:srcdoc") {
+        return true;
+      }
+      if (url2.protocol === "data:") return true;
+      if (url2.protocol === "file:") return true;
+      return isOriginPotentiallyTrustworthy(url2.origin);
+      function isOriginPotentiallyTrustworthy(origin) {
+        if (origin == null || origin === "null") return false;
+        const originAsURL = new URL(origin);
+        if (originAsURL.protocol === "https:" || originAsURL.protocol === "wss:") {
+          return true;
+        }
+        if (/^127(?:\.[0-9]+){0,2}\.[0-9]+$|^\[(?:0*:)*?:?0*1\]$/.test(originAsURL.hostname) || (originAsURL.hostname === "localhost" || originAsURL.hostname.includes("localhost.")) || originAsURL.hostname.endsWith(".localhost")) {
+          return true;
+        }
+        return false;
+      }
+    }
+    function bytesMatch(bytes, metadataList) {
+      if (crypto2 === void 0) {
+        return true;
+      }
+      const parsedMetadata = parseMetadata(metadataList);
+      if (parsedMetadata === "no metadata") {
+        return true;
+      }
+      if (parsedMetadata.length === 0) {
+        return true;
+      }
+      const strongest = getStrongestMetadata(parsedMetadata);
+      const metadata = filterMetadataListByAlgorithm(parsedMetadata, strongest);
+      for (const item of metadata) {
+        const algorithm = item.algo;
+        const expectedValue = item.hash;
+        let actualValue = crypto2.createHash(algorithm).update(bytes).digest("base64");
+        if (actualValue[actualValue.length - 1] === "=") {
+          if (actualValue[actualValue.length - 2] === "=") {
+            actualValue = actualValue.slice(0, -2);
+          } else {
+            actualValue = actualValue.slice(0, -1);
+          }
+        }
+        if (compareBase64Mixed(actualValue, expectedValue)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    var parseHashWithOptions = /(?<algo>sha256|sha384|sha512)-((?<hash>[A-Za-z0-9+/]+|[A-Za-z0-9_-]+)={0,2}(?:\s|$)( +[!-~]*)?)?/i;
+    function parseMetadata(metadata) {
+      const result = [];
+      let empty = true;
+      for (const token of metadata.split(" ")) {
+        empty = false;
+        const parsedToken = parseHashWithOptions.exec(token);
+        if (parsedToken === null || parsedToken.groups === void 0 || parsedToken.groups.algo === void 0) {
+          continue;
+        }
+        const algorithm = parsedToken.groups.algo.toLowerCase();
+        if (supportedHashes.includes(algorithm)) {
+          result.push(parsedToken.groups);
+        }
+      }
+      if (empty === true) {
+        return "no metadata";
+      }
+      return result;
+    }
+    function getStrongestMetadata(metadataList) {
+      let algorithm = metadataList[0].algo;
+      if (algorithm[3] === "5") {
+        return algorithm;
+      }
+      for (let i = 1; i < metadataList.length; ++i) {
+        const metadata = metadataList[i];
+        if (metadata.algo[3] === "5") {
+          algorithm = "sha512";
+          break;
+        } else if (algorithm[3] === "3") {
+          continue;
+        } else if (metadata.algo[3] === "3") {
+          algorithm = "sha384";
+        }
+      }
+      return algorithm;
+    }
+    function filterMetadataListByAlgorithm(metadataList, algorithm) {
+      if (metadataList.length === 1) {
+        return metadataList;
+      }
+      let pos = 0;
+      for (let i = 0; i < metadataList.length; ++i) {
+        if (metadataList[i].algo === algorithm) {
+          metadataList[pos++] = metadataList[i];
+        }
+      }
+      metadataList.length = pos;
+      return metadataList;
+    }
+    function compareBase64Mixed(actualValue, expectedValue) {
+      if (actualValue.length !== expectedValue.length) {
+        return false;
+      }
+      for (let i = 0; i < actualValue.length; ++i) {
+        if (actualValue[i] !== expectedValue[i]) {
+          if (actualValue[i] === "+" && expectedValue[i] === "-" || actualValue[i] === "/" && expectedValue[i] === "_") {
+            continue;
+          }
+          return false;
+        }
+      }
+      return true;
+    }
+    function tryUpgradeRequestToAPotentiallyTrustworthyURL(request) {
+    }
+    function sameOrigin(A, B) {
+      if (A.origin === B.origin && A.origin === "null") {
+        return true;
+      }
+      if (A.protocol === B.protocol && A.hostname === B.hostname && A.port === B.port) {
+        return true;
+      }
+      return false;
+    }
+    function createDeferredPromise() {
+      let res;
+      let rej;
+      const promise = new Promise((resolve, reject) => {
+        res = resolve;
+        rej = reject;
+      });
+      return { promise, resolve: res, reject: rej };
+    }
+    function isAborted(fetchParams) {
+      return fetchParams.controller.state === "aborted";
+    }
+    function isCancelled(fetchParams) {
+      return fetchParams.controller.state === "aborted" || fetchParams.controller.state === "terminated";
+    }
+    var normalizeMethodRecord = {
+      delete: "DELETE",
+      DELETE: "DELETE",
+      get: "GET",
+      GET: "GET",
+      head: "HEAD",
+      HEAD: "HEAD",
+      options: "OPTIONS",
+      OPTIONS: "OPTIONS",
+      post: "POST",
+      POST: "POST",
+      put: "PUT",
+      PUT: "PUT"
+    };
+    Object.setPrototypeOf(normalizeMethodRecord, null);
+    function normalizeMethod(method) {
+      return normalizeMethodRecord[method.toLowerCase()] ?? method;
+    }
+    function serializeJavascriptValueToJSONString(value) {
+      const result = JSON.stringify(value);
+      if (result === void 0) {
+        throw new TypeError("Value is not JSON serializable");
+      }
+      assert2(typeof result === "string");
+      return result;
+    }
+    var esIteratorPrototype = Object.getPrototypeOf(Object.getPrototypeOf([][Symbol.iterator]()));
+    function makeIterator(iterator, name, kind) {
+      const object3 = {
+        index: 0,
+        kind,
+        target: iterator
+      };
+      const i = {
+        next() {
+          if (Object.getPrototypeOf(this) !== i) {
+            throw new TypeError(
+              `'next' called on an object that does not implement interface ${name} Iterator.`
+            );
+          }
+          const { index, kind: kind2, target } = object3;
+          const values = target();
+          const len = values.length;
+          if (index >= len) {
+            return { value: void 0, done: true };
+          }
+          const pair = values[index];
+          object3.index = index + 1;
+          return iteratorResult(pair, kind2);
+        },
+        // The class string of an iterator prototype object for a given interface is the
+        // result of concatenating the identifier of the interface and the string " Iterator".
+        [Symbol.toStringTag]: `${name} Iterator`
+      };
+      Object.setPrototypeOf(i, esIteratorPrototype);
+      return Object.setPrototypeOf({}, i);
+    }
+    function iteratorResult(pair, kind) {
+      let result;
+      switch (kind) {
+        case "key": {
+          result = pair[0];
+          break;
+        }
+        case "value": {
+          result = pair[1];
+          break;
+        }
+        case "key+value": {
+          result = pair;
+          break;
+        }
+      }
+      return { value: result, done: false };
+    }
+    async function fullyReadBody(body, processBody, processBodyError) {
+      const successSteps = processBody;
+      const errorSteps = processBodyError;
+      let reader;
+      try {
+        reader = body.stream.getReader();
+      } catch (e) {
+        errorSteps(e);
+        return;
+      }
+      try {
+        const result = await readAllBytes(reader);
+        successSteps(result);
+      } catch (e) {
+        errorSteps(e);
+      }
+    }
+    var ReadableStream = globalThis.ReadableStream;
+    function isReadableStreamLike(stream) {
+      if (!ReadableStream) {
+        ReadableStream = require("stream/web").ReadableStream;
+      }
+      return stream instanceof ReadableStream || stream[Symbol.toStringTag] === "ReadableStream" && typeof stream.tee === "function";
+    }
+    var MAXIMUM_ARGUMENT_LENGTH = 65535;
+    function isomorphicDecode(input) {
+      if (input.length < MAXIMUM_ARGUMENT_LENGTH) {
+        return String.fromCharCode(...input);
+      }
+      return input.reduce((previous, current) => previous + String.fromCharCode(current), "");
+    }
+    function readableStreamClose(controller) {
+      try {
+        controller.close();
+      } catch (err) {
+        if (!err.message.includes("Controller is already closed")) {
+          throw err;
+        }
+      }
+    }
+    function isomorphicEncode(input) {
+      for (let i = 0; i < input.length; i++) {
+        assert2(input.charCodeAt(i) <= 255);
+      }
+      return input;
+    }
+    async function readAllBytes(reader) {
+      const bytes = [];
+      let byteLength = 0;
+      while (true) {
+        const { done, value: chunk } = await reader.read();
+        if (done) {
+          return Buffer.concat(bytes, byteLength);
+        }
+        if (!isUint8Array(chunk)) {
+          throw new TypeError("Received non-Uint8Array chunk");
+        }
+        bytes.push(chunk);
+        byteLength += chunk.length;
+      }
+    }
+    function urlIsLocal(url2) {
+      assert2("protocol" in url2);
+      const protocol = url2.protocol;
+      return protocol === "about:" || protocol === "blob:" || protocol === "data:";
+    }
+    function urlHasHttpsScheme(url2) {
+      if (typeof url2 === "string") {
+        return url2.startsWith("https:");
+      }
+      return url2.protocol === "https:";
+    }
+    function urlIsHttpHttpsScheme(url2) {
+      assert2("protocol" in url2);
+      const protocol = url2.protocol;
+      return protocol === "http:" || protocol === "https:";
+    }
+    var hasOwn = Object.hasOwn || ((dict, key) => Object.prototype.hasOwnProperty.call(dict, key));
+    module2.exports = {
+      isAborted,
+      isCancelled,
+      createDeferredPromise,
+      ReadableStreamFrom,
+      toUSVString,
+      tryUpgradeRequestToAPotentiallyTrustworthyURL,
+      coarsenedSharedCurrentTime,
+      determineRequestsReferrer,
+      makePolicyContainer,
+      clonePolicyContainer,
+      appendFetchMetadata,
+      appendRequestOriginHeader,
+      TAOCheck,
+      corsCheck,
+      crossOriginResourcePolicyCheck,
+      createOpaqueTimingInfo,
+      setRequestReferrerPolicyOnRedirect,
+      isValidHTTPToken,
+      requestBadPort,
+      requestCurrentURL,
+      responseURL,
+      responseLocationURL,
+      isBlobLike,
+      isURLPotentiallyTrustworthy,
+      isValidReasonPhrase,
+      sameOrigin,
+      normalizeMethod,
+      serializeJavascriptValueToJSONString,
+      makeIterator,
+      isValidHeaderName,
+      isValidHeaderValue,
+      hasOwn,
+      isErrorLike,
+      fullyReadBody,
+      bytesMatch,
+      isReadableStreamLike,
+      readableStreamClose,
+      isomorphicEncode,
+      isomorphicDecode,
+      urlIsLocal,
+      urlHasHttpsScheme,
+      urlIsHttpHttpsScheme,
+      readAllBytes,
+      normalizeMethodRecord,
+      parseMetadata
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/symbols.js
+var require_symbols2 = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/symbols.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      kUrl: /* @__PURE__ */ Symbol("url"),
+      kHeaders: /* @__PURE__ */ Symbol("headers"),
+      kSignal: /* @__PURE__ */ Symbol("signal"),
+      kState: /* @__PURE__ */ Symbol("state"),
+      kGuard: /* @__PURE__ */ Symbol("guard"),
+      kRealm: /* @__PURE__ */ Symbol("realm")
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/webidl.js
+var require_webidl = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/webidl.js"(exports2, module2) {
+    "use strict";
+    var { types } = require("util");
+    var { hasOwn, toUSVString } = require_util2();
+    var webidl = {};
+    webidl.converters = {};
+    webidl.util = {};
+    webidl.errors = {};
+    webidl.errors.exception = function(message) {
+      return new TypeError(`${message.header}: ${message.message}`);
+    };
+    webidl.errors.conversionFailed = function(context) {
+      const plural = context.types.length === 1 ? "" : " one of";
+      const message = `${context.argument} could not be converted to${plural}: ${context.types.join(", ")}.`;
+      return webidl.errors.exception({
+        header: context.prefix,
+        message
+      });
+    };
+    webidl.errors.invalidArgument = function(context) {
+      return webidl.errors.exception({
+        header: context.prefix,
+        message: `"${context.value}" is an invalid ${context.type}.`
+      });
+    };
+    webidl.brandCheck = function(V, I, opts = void 0) {
+      if ((opts == null ? void 0 : opts.strict) !== false && !(V instanceof I)) {
+        throw new TypeError("Illegal invocation");
+      } else {
+        return (V == null ? void 0 : V[Symbol.toStringTag]) === I.prototype[Symbol.toStringTag];
+      }
+    };
+    webidl.argumentLengthCheck = function({ length }, min, ctx) {
+      if (length < min) {
+        throw webidl.errors.exception({
+          message: `${min} argument${min !== 1 ? "s" : ""} required, but${length ? " only" : ""} ${length} found.`,
+          ...ctx
+        });
+      }
+    };
+    webidl.illegalConstructor = function() {
+      throw webidl.errors.exception({
+        header: "TypeError",
+        message: "Illegal constructor"
+      });
+    };
+    webidl.util.Type = function(V) {
+      switch (typeof V) {
+        case "undefined":
+          return "Undefined";
+        case "boolean":
+          return "Boolean";
+        case "string":
+          return "String";
+        case "symbol":
+          return "Symbol";
+        case "number":
+          return "Number";
+        case "bigint":
+          return "BigInt";
+        case "function":
+        case "object": {
+          if (V === null) {
+            return "Null";
+          }
+          return "Object";
+        }
+      }
+    };
+    webidl.util.ConvertToInt = function(V, bitLength, signedness, opts = {}) {
+      let upperBound;
+      let lowerBound;
+      if (bitLength === 64) {
+        upperBound = Math.pow(2, 53) - 1;
+        if (signedness === "unsigned") {
+          lowerBound = 0;
+        } else {
+          lowerBound = Math.pow(-2, 53) + 1;
+        }
+      } else if (signedness === "unsigned") {
+        lowerBound = 0;
+        upperBound = Math.pow(2, bitLength) - 1;
+      } else {
+        lowerBound = Math.pow(-2, bitLength) - 1;
+        upperBound = Math.pow(2, bitLength - 1) - 1;
+      }
+      let x = Number(V);
+      if (x === 0) {
+        x = 0;
+      }
+      if (opts.enforceRange === true) {
+        if (Number.isNaN(x) || x === Number.POSITIVE_INFINITY || x === Number.NEGATIVE_INFINITY) {
+          throw webidl.errors.exception({
+            header: "Integer conversion",
+            message: `Could not convert ${V} to an integer.`
+          });
+        }
+        x = webidl.util.IntegerPart(x);
+        if (x < lowerBound || x > upperBound) {
+          throw webidl.errors.exception({
+            header: "Integer conversion",
+            message: `Value must be between ${lowerBound}-${upperBound}, got ${x}.`
+          });
+        }
+        return x;
+      }
+      if (!Number.isNaN(x) && opts.clamp === true) {
+        x = Math.min(Math.max(x, lowerBound), upperBound);
+        if (Math.floor(x) % 2 === 0) {
+          x = Math.floor(x);
+        } else {
+          x = Math.ceil(x);
+        }
+        return x;
+      }
+      if (Number.isNaN(x) || x === 0 && Object.is(0, x) || x === Number.POSITIVE_INFINITY || x === Number.NEGATIVE_INFINITY) {
+        return 0;
+      }
+      x = webidl.util.IntegerPart(x);
+      x = x % Math.pow(2, bitLength);
+      if (signedness === "signed" && x >= Math.pow(2, bitLength) - 1) {
+        return x - Math.pow(2, bitLength);
+      }
+      return x;
+    };
+    webidl.util.IntegerPart = function(n) {
+      const r = Math.floor(Math.abs(n));
+      if (n < 0) {
+        return -1 * r;
+      }
+      return r;
+    };
+    webidl.sequenceConverter = function(converter) {
+      return (V) => {
+        var _a4;
+        if (webidl.util.Type(V) !== "Object") {
+          throw webidl.errors.exception({
+            header: "Sequence",
+            message: `Value of type ${webidl.util.Type(V)} is not an Object.`
+          });
+        }
+        const method = (_a4 = V == null ? void 0 : V[Symbol.iterator]) == null ? void 0 : _a4.call(V);
+        const seq = [];
+        if (method === void 0 || typeof method.next !== "function") {
+          throw webidl.errors.exception({
+            header: "Sequence",
+            message: "Object is not an iterator."
+          });
+        }
+        while (true) {
+          const { done, value } = method.next();
+          if (done) {
+            break;
+          }
+          seq.push(converter(value));
+        }
+        return seq;
+      };
+    };
+    webidl.recordConverter = function(keyConverter, valueConverter) {
+      return (O) => {
+        if (webidl.util.Type(O) !== "Object") {
+          throw webidl.errors.exception({
+            header: "Record",
+            message: `Value of type ${webidl.util.Type(O)} is not an Object.`
+          });
+        }
+        const result = {};
+        if (!types.isProxy(O)) {
+          const keys2 = Object.keys(O);
+          for (const key of keys2) {
+            const typedKey = keyConverter(key);
+            const typedValue = valueConverter(O[key]);
+            result[typedKey] = typedValue;
+          }
+          return result;
+        }
+        const keys = Reflect.ownKeys(O);
+        for (const key of keys) {
+          const desc = Reflect.getOwnPropertyDescriptor(O, key);
+          if (desc == null ? void 0 : desc.enumerable) {
+            const typedKey = keyConverter(key);
+            const typedValue = valueConverter(O[key]);
+            result[typedKey] = typedValue;
+          }
+        }
+        return result;
+      };
+    };
+    webidl.interfaceConverter = function(i) {
+      return (V, opts = {}) => {
+        if (opts.strict !== false && !(V instanceof i)) {
+          throw webidl.errors.exception({
+            header: i.name,
+            message: `Expected ${V} to be an instance of ${i.name}.`
+          });
+        }
+        return V;
+      };
+    };
+    webidl.dictionaryConverter = function(converters) {
+      return (dictionary) => {
+        const type = webidl.util.Type(dictionary);
+        const dict = {};
+        if (type === "Null" || type === "Undefined") {
+          return dict;
+        } else if (type !== "Object") {
+          throw webidl.errors.exception({
+            header: "Dictionary",
+            message: `Expected ${dictionary} to be one of: Null, Undefined, Object.`
+          });
+        }
+        for (const options of converters) {
+          const { key, defaultValue, required: required2, converter } = options;
+          if (required2 === true) {
+            if (!hasOwn(dictionary, key)) {
+              throw webidl.errors.exception({
+                header: "Dictionary",
+                message: `Missing required key "${key}".`
+              });
+            }
+          }
+          let value = dictionary[key];
+          const hasDefault = hasOwn(options, "defaultValue");
+          if (hasDefault && value !== null) {
+            value = value ?? defaultValue;
+          }
+          if (required2 || hasDefault || value !== void 0) {
+            value = converter(value);
+            if (options.allowedValues && !options.allowedValues.includes(value)) {
+              throw webidl.errors.exception({
+                header: "Dictionary",
+                message: `${value} is not an accepted type. Expected one of ${options.allowedValues.join(", ")}.`
+              });
+            }
+            dict[key] = value;
+          }
+        }
+        return dict;
+      };
+    };
+    webidl.nullableConverter = function(converter) {
+      return (V) => {
+        if (V === null) {
+          return V;
+        }
+        return converter(V);
+      };
+    };
+    webidl.converters.DOMString = function(V, opts = {}) {
+      if (V === null && opts.legacyNullToEmptyString) {
+        return "";
+      }
+      if (typeof V === "symbol") {
+        throw new TypeError("Could not convert argument of type symbol to string.");
+      }
+      return String(V);
+    };
+    webidl.converters.ByteString = function(V) {
+      const x = webidl.converters.DOMString(V);
+      for (let index = 0; index < x.length; index++) {
+        if (x.charCodeAt(index) > 255) {
+          throw new TypeError(
+            `Cannot convert argument to a ByteString because the character at index ${index} has a value of ${x.charCodeAt(index)} which is greater than 255.`
+          );
+        }
+      }
+      return x;
+    };
+    webidl.converters.USVString = toUSVString;
+    webidl.converters.boolean = function(V) {
+      const x = Boolean(V);
+      return x;
+    };
+    webidl.converters.any = function(V) {
+      return V;
+    };
+    webidl.converters["long long"] = function(V) {
+      const x = webidl.util.ConvertToInt(V, 64, "signed");
+      return x;
+    };
+    webidl.converters["unsigned long long"] = function(V) {
+      const x = webidl.util.ConvertToInt(V, 64, "unsigned");
+      return x;
+    };
+    webidl.converters["unsigned long"] = function(V) {
+      const x = webidl.util.ConvertToInt(V, 32, "unsigned");
+      return x;
+    };
+    webidl.converters["unsigned short"] = function(V, opts) {
+      const x = webidl.util.ConvertToInt(V, 16, "unsigned", opts);
+      return x;
+    };
+    webidl.converters.ArrayBuffer = function(V, opts = {}) {
+      if (webidl.util.Type(V) !== "Object" || !types.isAnyArrayBuffer(V)) {
+        throw webidl.errors.conversionFailed({
+          prefix: `${V}`,
+          argument: `${V}`,
+          types: ["ArrayBuffer"]
+        });
+      }
+      if (opts.allowShared === false && types.isSharedArrayBuffer(V)) {
+        throw webidl.errors.exception({
+          header: "ArrayBuffer",
+          message: "SharedArrayBuffer is not allowed."
+        });
+      }
+      return V;
+    };
+    webidl.converters.TypedArray = function(V, T, opts = {}) {
+      if (webidl.util.Type(V) !== "Object" || !types.isTypedArray(V) || V.constructor.name !== T.name) {
+        throw webidl.errors.conversionFailed({
+          prefix: `${T.name}`,
+          argument: `${V}`,
+          types: [T.name]
+        });
+      }
+      if (opts.allowShared === false && types.isSharedArrayBuffer(V.buffer)) {
+        throw webidl.errors.exception({
+          header: "ArrayBuffer",
+          message: "SharedArrayBuffer is not allowed."
+        });
+      }
+      return V;
+    };
+    webidl.converters.DataView = function(V, opts = {}) {
+      if (webidl.util.Type(V) !== "Object" || !types.isDataView(V)) {
+        throw webidl.errors.exception({
+          header: "DataView",
+          message: "Object is not a DataView."
+        });
+      }
+      if (opts.allowShared === false && types.isSharedArrayBuffer(V.buffer)) {
+        throw webidl.errors.exception({
+          header: "ArrayBuffer",
+          message: "SharedArrayBuffer is not allowed."
+        });
+      }
+      return V;
+    };
+    webidl.converters.BufferSource = function(V, opts = {}) {
+      if (types.isAnyArrayBuffer(V)) {
+        return webidl.converters.ArrayBuffer(V, opts);
+      }
+      if (types.isTypedArray(V)) {
+        return webidl.converters.TypedArray(V, V.constructor);
+      }
+      if (types.isDataView(V)) {
+        return webidl.converters.DataView(V, opts);
+      }
+      throw new TypeError(`Could not convert ${V} to a BufferSource.`);
+    };
+    webidl.converters["sequence<ByteString>"] = webidl.sequenceConverter(
+      webidl.converters.ByteString
+    );
+    webidl.converters["sequence<sequence<ByteString>>"] = webidl.sequenceConverter(
+      webidl.converters["sequence<ByteString>"]
+    );
+    webidl.converters["record<ByteString, ByteString>"] = webidl.recordConverter(
+      webidl.converters.ByteString,
+      webidl.converters.ByteString
+    );
+    module2.exports = {
+      webidl
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/dataURL.js
+var require_dataURL = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/dataURL.js"(exports2, module2) {
+    var assert2 = require("assert");
+    var { atob: atob2 } = require("buffer");
+    var { isomorphicDecode } = require_util2();
+    var encoder = new TextEncoder();
+    var HTTP_TOKEN_CODEPOINTS = /^[!#$%&'*+-.^_|~A-Za-z0-9]+$/;
+    var HTTP_WHITESPACE_REGEX = /(\u000A|\u000D|\u0009|\u0020)/;
+    var HTTP_QUOTED_STRING_TOKENS = /[\u0009|\u0020-\u007E|\u0080-\u00FF]/;
+    function dataURLProcessor(dataURL) {
+      assert2(dataURL.protocol === "data:");
+      let input = URLSerializer(dataURL, true);
+      input = input.slice(5);
+      const position = { position: 0 };
+      let mimeType = collectASequenceOfCodePointsFast(
+        ",",
+        input,
+        position
+      );
+      const mimeTypeLength = mimeType.length;
+      mimeType = removeASCIIWhitespace(mimeType, true, true);
+      if (position.position >= input.length) {
+        return "failure";
+      }
+      position.position++;
+      const encodedBody = input.slice(mimeTypeLength + 1);
+      let body = stringPercentDecode(encodedBody);
+      if (/;(\u0020){0,}base64$/i.test(mimeType)) {
+        const stringBody = isomorphicDecode(body);
+        body = forgivingBase64(stringBody);
+        if (body === "failure") {
+          return "failure";
+        }
+        mimeType = mimeType.slice(0, -6);
+        mimeType = mimeType.replace(/(\u0020)+$/, "");
+        mimeType = mimeType.slice(0, -1);
+      }
+      if (mimeType.startsWith(";")) {
+        mimeType = "text/plain" + mimeType;
+      }
+      let mimeTypeRecord = parseMIMEType(mimeType);
+      if (mimeTypeRecord === "failure") {
+        mimeTypeRecord = parseMIMEType("text/plain;charset=US-ASCII");
+      }
+      return { mimeType: mimeTypeRecord, body };
+    }
+    function URLSerializer(url2, excludeFragment = false) {
+      if (!excludeFragment) {
+        return url2.href;
+      }
+      const href = url2.href;
+      const hashLength = url2.hash.length;
+      return hashLength === 0 ? href : href.substring(0, href.length - hashLength);
+    }
+    function collectASequenceOfCodePoints(condition, input, position) {
+      let result = "";
+      while (position.position < input.length && condition(input[position.position])) {
+        result += input[position.position];
+        position.position++;
+      }
+      return result;
+    }
+    function collectASequenceOfCodePointsFast(char, input, position) {
+      const idx = input.indexOf(char, position.position);
+      const start = position.position;
+      if (idx === -1) {
+        position.position = input.length;
+        return input.slice(start);
+      }
+      position.position = idx;
+      return input.slice(start, position.position);
+    }
+    function stringPercentDecode(input) {
+      const bytes = encoder.encode(input);
+      return percentDecode(bytes);
+    }
+    function percentDecode(input) {
+      const output = [];
+      for (let i = 0; i < input.length; i++) {
+        const byte = input[i];
+        if (byte !== 37) {
+          output.push(byte);
+        } else if (byte === 37 && !/^[0-9A-Fa-f]{2}$/i.test(String.fromCharCode(input[i + 1], input[i + 2]))) {
+          output.push(37);
+        } else {
+          const nextTwoBytes = String.fromCharCode(input[i + 1], input[i + 2]);
+          const bytePoint = Number.parseInt(nextTwoBytes, 16);
+          output.push(bytePoint);
+          i += 2;
+        }
+      }
+      return Uint8Array.from(output);
+    }
+    function parseMIMEType(input) {
+      input = removeHTTPWhitespace(input, true, true);
+      const position = { position: 0 };
+      const type = collectASequenceOfCodePointsFast(
+        "/",
+        input,
+        position
+      );
+      if (type.length === 0 || !HTTP_TOKEN_CODEPOINTS.test(type)) {
+        return "failure";
+      }
+      if (position.position > input.length) {
+        return "failure";
+      }
+      position.position++;
+      let subtype = collectASequenceOfCodePointsFast(
+        ";",
+        input,
+        position
+      );
+      subtype = removeHTTPWhitespace(subtype, false, true);
+      if (subtype.length === 0 || !HTTP_TOKEN_CODEPOINTS.test(subtype)) {
+        return "failure";
+      }
+      const typeLowercase = type.toLowerCase();
+      const subtypeLowercase = subtype.toLowerCase();
+      const mimeType = {
+        type: typeLowercase,
+        subtype: subtypeLowercase,
+        /** @type {Map<string, string>} */
+        parameters: /* @__PURE__ */ new Map(),
+        // https://mimesniff.spec.whatwg.org/#mime-type-essence
+        essence: `${typeLowercase}/${subtypeLowercase}`
+      };
+      while (position.position < input.length) {
+        position.position++;
+        collectASequenceOfCodePoints(
+          // https://fetch.spec.whatwg.org/#http-whitespace
+          (char) => HTTP_WHITESPACE_REGEX.test(char),
+          input,
+          position
+        );
+        let parameterName = collectASequenceOfCodePoints(
+          (char) => char !== ";" && char !== "=",
+          input,
+          position
+        );
+        parameterName = parameterName.toLowerCase();
+        if (position.position < input.length) {
+          if (input[position.position] === ";") {
+            continue;
+          }
+          position.position++;
+        }
+        if (position.position > input.length) {
+          break;
+        }
+        let parameterValue = null;
+        if (input[position.position] === '"') {
+          parameterValue = collectAnHTTPQuotedString(input, position, true);
+          collectASequenceOfCodePointsFast(
+            ";",
+            input,
+            position
+          );
+        } else {
+          parameterValue = collectASequenceOfCodePointsFast(
+            ";",
+            input,
+            position
+          );
+          parameterValue = removeHTTPWhitespace(parameterValue, false, true);
+          if (parameterValue.length === 0) {
+            continue;
+          }
+        }
+        if (parameterName.length !== 0 && HTTP_TOKEN_CODEPOINTS.test(parameterName) && (parameterValue.length === 0 || HTTP_QUOTED_STRING_TOKENS.test(parameterValue)) && !mimeType.parameters.has(parameterName)) {
+          mimeType.parameters.set(parameterName, parameterValue);
+        }
+      }
+      return mimeType;
+    }
+    function forgivingBase64(data) {
+      data = data.replace(/[\u0009\u000A\u000C\u000D\u0020]/g, "");
+      if (data.length % 4 === 0) {
+        data = data.replace(/=?=$/, "");
+      }
+      if (data.length % 4 === 1) {
+        return "failure";
+      }
+      if (/[^+/0-9A-Za-z]/.test(data)) {
+        return "failure";
+      }
+      const binary = atob2(data);
+      const bytes = new Uint8Array(binary.length);
+      for (let byte = 0; byte < binary.length; byte++) {
+        bytes[byte] = binary.charCodeAt(byte);
+      }
+      return bytes;
+    }
+    function collectAnHTTPQuotedString(input, position, extractValue) {
+      const positionStart = position.position;
+      let value = "";
+      assert2(input[position.position] === '"');
+      position.position++;
+      while (true) {
+        value += collectASequenceOfCodePoints(
+          (char) => char !== '"' && char !== "\\",
+          input,
+          position
+        );
+        if (position.position >= input.length) {
+          break;
+        }
+        const quoteOrBackslash = input[position.position];
+        position.position++;
+        if (quoteOrBackslash === "\\") {
+          if (position.position >= input.length) {
+            value += "\\";
+            break;
+          }
+          value += input[position.position];
+          position.position++;
+        } else {
+          assert2(quoteOrBackslash === '"');
+          break;
+        }
+      }
+      if (extractValue) {
+        return value;
+      }
+      return input.slice(positionStart, position.position);
+    }
+    function serializeAMimeType(mimeType) {
+      assert2(mimeType !== "failure");
+      const { parameters, essence } = mimeType;
+      let serialization = essence;
+      for (let [name, value] of parameters.entries()) {
+        serialization += ";";
+        serialization += name;
+        serialization += "=";
+        if (!HTTP_TOKEN_CODEPOINTS.test(value)) {
+          value = value.replace(/(\\|")/g, "\\$1");
+          value = '"' + value;
+          value += '"';
+        }
+        serialization += value;
+      }
+      return serialization;
+    }
+    function isHTTPWhiteSpace(char) {
+      return char === "\r" || char === "\n" || char === "	" || char === " ";
+    }
+    function removeHTTPWhitespace(str, leading = true, trailing = true) {
+      let lead = 0;
+      let trail = str.length - 1;
+      if (leading) {
+        for (; lead < str.length && isHTTPWhiteSpace(str[lead]); lead++) ;
+      }
+      if (trailing) {
+        for (; trail > 0 && isHTTPWhiteSpace(str[trail]); trail--) ;
+      }
+      return str.slice(lead, trail + 1);
+    }
+    function isASCIIWhitespace(char) {
+      return char === "\r" || char === "\n" || char === "	" || char === "\f" || char === " ";
+    }
+    function removeASCIIWhitespace(str, leading = true, trailing = true) {
+      let lead = 0;
+      let trail = str.length - 1;
+      if (leading) {
+        for (; lead < str.length && isASCIIWhitespace(str[lead]); lead++) ;
+      }
+      if (trailing) {
+        for (; trail > 0 && isASCIIWhitespace(str[trail]); trail--) ;
+      }
+      return str.slice(lead, trail + 1);
+    }
+    module2.exports = {
+      dataURLProcessor,
+      URLSerializer,
+      collectASequenceOfCodePoints,
+      collectASequenceOfCodePointsFast,
+      stringPercentDecode,
+      parseMIMEType,
+      collectAnHTTPQuotedString,
+      serializeAMimeType
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/file.js
+var require_file = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/file.js"(exports2, module2) {
+    "use strict";
+    var { Blob: Blob2, File: NativeFile } = require("buffer");
+    var { types } = require("util");
+    var { kState } = require_symbols2();
+    var { isBlobLike } = require_util2();
+    var { webidl } = require_webidl();
+    var { parseMIMEType, serializeAMimeType } = require_dataURL();
+    var { kEnumerableProperty } = require_util();
+    var encoder = new TextEncoder();
+    var File2 = class _File extends Blob2 {
+      constructor(fileBits, fileName, options = {}) {
+        webidl.argumentLengthCheck(arguments, 2, { header: "File constructor" });
+        fileBits = webidl.converters["sequence<BlobPart>"](fileBits);
+        fileName = webidl.converters.USVString(fileName);
+        options = webidl.converters.FilePropertyBag(options);
+        const n = fileName;
+        let t = options.type;
+        let d;
+        substep: {
+          if (t) {
+            t = parseMIMEType(t);
+            if (t === "failure") {
+              t = "";
+              break substep;
+            }
+            t = serializeAMimeType(t).toLowerCase();
+          }
+          d = options.lastModified;
+        }
+        super(processBlobParts(fileBits, options), { type: t });
+        this[kState] = {
+          name: n,
+          lastModified: d,
+          type: t
+        };
+      }
+      get name() {
+        webidl.brandCheck(this, _File);
+        return this[kState].name;
+      }
+      get lastModified() {
+        webidl.brandCheck(this, _File);
+        return this[kState].lastModified;
+      }
+      get type() {
+        webidl.brandCheck(this, _File);
+        return this[kState].type;
+      }
+    };
+    var FileLike = class _FileLike {
+      constructor(blobLike, fileName, options = {}) {
+        const n = fileName;
+        const t = options.type;
+        const d = options.lastModified ?? Date.now();
+        this[kState] = {
+          blobLike,
+          name: n,
+          type: t,
+          lastModified: d
+        };
+      }
+      stream(...args) {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].blobLike.stream(...args);
+      }
+      arrayBuffer(...args) {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].blobLike.arrayBuffer(...args);
+      }
+      slice(...args) {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].blobLike.slice(...args);
+      }
+      text(...args) {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].blobLike.text(...args);
+      }
+      get size() {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].blobLike.size;
+      }
+      get type() {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].blobLike.type;
+      }
+      get name() {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].name;
+      }
+      get lastModified() {
+        webidl.brandCheck(this, _FileLike);
+        return this[kState].lastModified;
+      }
+      get [Symbol.toStringTag]() {
+        return "File";
+      }
+    };
+    Object.defineProperties(File2.prototype, {
+      [Symbol.toStringTag]: {
+        value: "File",
+        configurable: true
+      },
+      name: kEnumerableProperty,
+      lastModified: kEnumerableProperty
+    });
+    webidl.converters.Blob = webidl.interfaceConverter(Blob2);
+    webidl.converters.BlobPart = function(V, opts) {
+      if (webidl.util.Type(V) === "Object") {
+        if (isBlobLike(V)) {
+          return webidl.converters.Blob(V, { strict: false });
+        }
+        if (ArrayBuffer.isView(V) || types.isAnyArrayBuffer(V)) {
+          return webidl.converters.BufferSource(V, opts);
+        }
+      }
+      return webidl.converters.USVString(V, opts);
+    };
+    webidl.converters["sequence<BlobPart>"] = webidl.sequenceConverter(
+      webidl.converters.BlobPart
+    );
+    webidl.converters.FilePropertyBag = webidl.dictionaryConverter([
+      {
+        key: "lastModified",
+        converter: webidl.converters["long long"],
+        get defaultValue() {
+          return Date.now();
+        }
+      },
+      {
+        key: "type",
+        converter: webidl.converters.DOMString,
+        defaultValue: ""
+      },
+      {
+        key: "endings",
+        converter: (value) => {
+          value = webidl.converters.DOMString(value);
+          value = value.toLowerCase();
+          if (value !== "native") {
+            value = "transparent";
+          }
+          return value;
+        },
+        defaultValue: "transparent"
+      }
+    ]);
+    function processBlobParts(parts, options) {
+      const bytes = [];
+      for (const element of parts) {
+        if (typeof element === "string") {
+          let s2 = element;
+          if (options.endings === "native") {
+            s2 = convertLineEndingsNative(s2);
+          }
+          bytes.push(encoder.encode(s2));
+        } else if (types.isAnyArrayBuffer(element) || types.isTypedArray(element)) {
+          if (!element.buffer) {
+            bytes.push(new Uint8Array(element));
+          } else {
+            bytes.push(
+              new Uint8Array(element.buffer, element.byteOffset, element.byteLength)
+            );
+          }
+        } else if (isBlobLike(element)) {
+          bytes.push(element);
+        }
+      }
+      return bytes;
+    }
+    function convertLineEndingsNative(s2) {
+      let nativeLineEnding = "\n";
+      if (process.platform === "win32") {
+        nativeLineEnding = "\r\n";
+      }
+      return s2.replace(/\r?\n/g, nativeLineEnding);
+    }
+    function isFileLike(object3) {
+      return NativeFile && object3 instanceof NativeFile || object3 instanceof File2 || object3 && (typeof object3.stream === "function" || typeof object3.arrayBuffer === "function") && object3[Symbol.toStringTag] === "File";
+    }
+    module2.exports = { File: File2, FileLike, isFileLike };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/formdata.js
+var require_formdata = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/formdata.js"(exports2, module2) {
+    "use strict";
+    var { isBlobLike, toUSVString, makeIterator } = require_util2();
+    var { kState } = require_symbols2();
+    var { File: UndiciFile, FileLike, isFileLike } = require_file();
+    var { webidl } = require_webidl();
+    var { Blob: Blob2, File: NativeFile } = require("buffer");
+    var File2 = NativeFile ?? UndiciFile;
+    var FormData2 = class _FormData {
+      constructor(form) {
+        if (form !== void 0) {
+          throw webidl.errors.conversionFailed({
+            prefix: "FormData constructor",
+            argument: "Argument 1",
+            types: ["undefined"]
+          });
+        }
+        this[kState] = [];
+      }
+      append(name, value, filename = void 0) {
+        webidl.brandCheck(this, _FormData);
+        webidl.argumentLengthCheck(arguments, 2, { header: "FormData.append" });
+        if (arguments.length === 3 && !isBlobLike(value)) {
+          throw new TypeError(
+            "Failed to execute 'append' on 'FormData': parameter 2 is not of type 'Blob'"
+          );
+        }
+        name = webidl.converters.USVString(name);
+        value = isBlobLike(value) ? webidl.converters.Blob(value, { strict: false }) : webidl.converters.USVString(value);
+        filename = arguments.length === 3 ? webidl.converters.USVString(filename) : void 0;
+        const entry = makeEntry(name, value, filename);
+        this[kState].push(entry);
+      }
+      delete(name) {
+        webidl.brandCheck(this, _FormData);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FormData.delete" });
+        name = webidl.converters.USVString(name);
+        this[kState] = this[kState].filter((entry) => entry.name !== name);
+      }
+      get(name) {
+        webidl.brandCheck(this, _FormData);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FormData.get" });
+        name = webidl.converters.USVString(name);
+        const idx = this[kState].findIndex((entry) => entry.name === name);
+        if (idx === -1) {
+          return null;
+        }
+        return this[kState][idx].value;
+      }
+      getAll(name) {
+        webidl.brandCheck(this, _FormData);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FormData.getAll" });
+        name = webidl.converters.USVString(name);
+        return this[kState].filter((entry) => entry.name === name).map((entry) => entry.value);
+      }
+      has(name) {
+        webidl.brandCheck(this, _FormData);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FormData.has" });
+        name = webidl.converters.USVString(name);
+        return this[kState].findIndex((entry) => entry.name === name) !== -1;
+      }
+      set(name, value, filename = void 0) {
+        webidl.brandCheck(this, _FormData);
+        webidl.argumentLengthCheck(arguments, 2, { header: "FormData.set" });
+        if (arguments.length === 3 && !isBlobLike(value)) {
+          throw new TypeError(
+            "Failed to execute 'set' on 'FormData': parameter 2 is not of type 'Blob'"
+          );
+        }
+        name = webidl.converters.USVString(name);
+        value = isBlobLike(value) ? webidl.converters.Blob(value, { strict: false }) : webidl.converters.USVString(value);
+        filename = arguments.length === 3 ? toUSVString(filename) : void 0;
+        const entry = makeEntry(name, value, filename);
+        const idx = this[kState].findIndex((entry2) => entry2.name === name);
+        if (idx !== -1) {
+          this[kState] = [
+            ...this[kState].slice(0, idx),
+            entry,
+            ...this[kState].slice(idx + 1).filter((entry2) => entry2.name !== name)
+          ];
+        } else {
+          this[kState].push(entry);
+        }
+      }
+      entries() {
+        webidl.brandCheck(this, _FormData);
+        return makeIterator(
+          () => this[kState].map((pair) => [pair.name, pair.value]),
+          "FormData",
+          "key+value"
+        );
+      }
+      keys() {
+        webidl.brandCheck(this, _FormData);
+        return makeIterator(
+          () => this[kState].map((pair) => [pair.name, pair.value]),
+          "FormData",
+          "key"
+        );
+      }
+      values() {
+        webidl.brandCheck(this, _FormData);
+        return makeIterator(
+          () => this[kState].map((pair) => [pair.name, pair.value]),
+          "FormData",
+          "value"
+        );
+      }
+      /**
+       * @param {(value: string, key: string, self: FormData) => void} callbackFn
+       * @param {unknown} thisArg
+       */
+      forEach(callbackFn, thisArg = globalThis) {
+        webidl.brandCheck(this, _FormData);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FormData.forEach" });
+        if (typeof callbackFn !== "function") {
+          throw new TypeError(
+            "Failed to execute 'forEach' on 'FormData': parameter 1 is not of type 'Function'."
+          );
+        }
+        for (const [key, value] of this) {
+          callbackFn.apply(thisArg, [value, key, this]);
+        }
+      }
+    };
+    FormData2.prototype[Symbol.iterator] = FormData2.prototype.entries;
+    Object.defineProperties(FormData2.prototype, {
+      [Symbol.toStringTag]: {
+        value: "FormData",
+        configurable: true
+      }
+    });
+    function makeEntry(name, value, filename) {
+      name = Buffer.from(name).toString("utf8");
+      if (typeof value === "string") {
+        value = Buffer.from(value).toString("utf8");
+      } else {
+        if (!isFileLike(value)) {
+          value = value instanceof Blob2 ? new File2([value], "blob", { type: value.type }) : new FileLike(value, "blob", { type: value.type });
+        }
+        if (filename !== void 0) {
+          const options = {
+            type: value.type,
+            lastModified: value.lastModified
+          };
+          value = NativeFile && value instanceof NativeFile || value instanceof UndiciFile ? new File2([value], filename, options) : new FileLike(value, filename, options);
+        }
+      }
+      return { name, value };
+    }
+    module2.exports = { FormData: FormData2 };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/body.js
+var require_body = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/body.js"(exports2, module2) {
+    "use strict";
+    var Busboy = require_main();
+    var util = require_util();
+    var {
+      ReadableStreamFrom,
+      isBlobLike,
+      isReadableStreamLike,
+      readableStreamClose,
+      createDeferredPromise,
+      fullyReadBody
+    } = require_util2();
+    var { FormData: FormData2 } = require_formdata();
+    var { kState } = require_symbols2();
+    var { webidl } = require_webidl();
+    var { DOMException: DOMException2, structuredClone } = require_constants2();
+    var { Blob: Blob2, File: NativeFile } = require("buffer");
+    var { kBodyUsed } = require_symbols();
+    var assert2 = require("assert");
+    var { isErrored } = require_util();
+    var { isUint8Array, isArrayBuffer } = require("util/types");
+    var { File: UndiciFile } = require_file();
+    var { parseMIMEType, serializeAMimeType } = require_dataURL();
+    var ReadableStream = globalThis.ReadableStream;
+    var File2 = NativeFile ?? UndiciFile;
+    var textEncoder = new TextEncoder();
+    var textDecoder = new TextDecoder();
+    function extractBody(object3, keepalive = false) {
+      if (!ReadableStream) {
+        ReadableStream = require("stream/web").ReadableStream;
+      }
+      let stream = null;
+      if (object3 instanceof ReadableStream) {
+        stream = object3;
+      } else if (isBlobLike(object3)) {
+        stream = object3.stream();
+      } else {
+        stream = new ReadableStream({
+          async pull(controller) {
+            controller.enqueue(
+              typeof source === "string" ? textEncoder.encode(source) : source
+            );
+            queueMicrotask(() => readableStreamClose(controller));
+          },
+          start() {
+          },
+          type: void 0
+        });
+      }
+      assert2(isReadableStreamLike(stream));
+      let action = null;
+      let source = null;
+      let length = null;
+      let type = null;
+      if (typeof object3 === "string") {
+        source = object3;
+        type = "text/plain;charset=UTF-8";
+      } else if (object3 instanceof URLSearchParams) {
+        source = object3.toString();
+        type = "application/x-www-form-urlencoded;charset=UTF-8";
+      } else if (isArrayBuffer(object3)) {
+        source = new Uint8Array(object3.slice());
+      } else if (ArrayBuffer.isView(object3)) {
+        source = new Uint8Array(object3.buffer.slice(object3.byteOffset, object3.byteOffset + object3.byteLength));
+      } else if (util.isFormDataLike(object3)) {
+        const boundary = `----formdata-undici-0${`${Math.floor(Math.random() * 1e11)}`.padStart(11, "0")}`;
+        const prefix = `--${boundary}\r
+Content-Disposition: form-data`;
+        const escape2 = (str) => str.replace(/\n/g, "%0A").replace(/\r/g, "%0D").replace(/"/g, "%22");
+        const normalizeLinefeeds = (value) => value.replace(/\r?\n|\r/g, "\r\n");
+        const blobParts = [];
+        const rn = new Uint8Array([13, 10]);
+        length = 0;
+        let hasUnknownSizeValue = false;
+        for (const [name, value] of object3) {
+          if (typeof value === "string") {
+            const chunk2 = textEncoder.encode(prefix + `; name="${escape2(normalizeLinefeeds(name))}"\r
+\r
+${normalizeLinefeeds(value)}\r
+`);
+            blobParts.push(chunk2);
+            length += chunk2.byteLength;
+          } else {
+            const chunk2 = textEncoder.encode(`${prefix}; name="${escape2(normalizeLinefeeds(name))}"` + (value.name ? `; filename="${escape2(value.name)}"` : "") + `\r
+Content-Type: ${value.type || "application/octet-stream"}\r
+\r
+`);
+            blobParts.push(chunk2, value, rn);
+            if (typeof value.size === "number") {
+              length += chunk2.byteLength + value.size + rn.byteLength;
+            } else {
+              hasUnknownSizeValue = true;
+            }
+          }
+        }
+        const chunk = textEncoder.encode(`--${boundary}--`);
+        blobParts.push(chunk);
+        length += chunk.byteLength;
+        if (hasUnknownSizeValue) {
+          length = null;
+        }
+        source = object3;
+        action = async function* () {
+          for (const part of blobParts) {
+            if (part.stream) {
+              yield* part.stream();
+            } else {
+              yield part;
+            }
+          }
+        };
+        type = "multipart/form-data; boundary=" + boundary;
+      } else if (isBlobLike(object3)) {
+        source = object3;
+        length = object3.size;
+        if (object3.type) {
+          type = object3.type;
+        }
+      } else if (typeof object3[Symbol.asyncIterator] === "function") {
+        if (keepalive) {
+          throw new TypeError("keepalive");
+        }
+        if (util.isDisturbed(object3) || object3.locked) {
+          throw new TypeError(
+            "Response body object should not be disturbed or locked"
+          );
+        }
+        stream = object3 instanceof ReadableStream ? object3 : ReadableStreamFrom(object3);
+      }
+      if (typeof source === "string" || util.isBuffer(source)) {
+        length = Buffer.byteLength(source);
+      }
+      if (action != null) {
+        let iterator;
+        stream = new ReadableStream({
+          async start() {
+            iterator = action(object3)[Symbol.asyncIterator]();
+          },
+          async pull(controller) {
+            const { value, done } = await iterator.next();
+            if (done) {
+              queueMicrotask(() => {
+                controller.close();
+              });
+            } else {
+              if (!isErrored(stream)) {
+                controller.enqueue(new Uint8Array(value));
+              }
+            }
+            return controller.desiredSize > 0;
+          },
+          async cancel(reason) {
+            await iterator.return();
+          },
+          type: void 0
+        });
+      }
+      const body = { stream, source, length };
+      return [body, type];
+    }
+    function safelyExtractBody(object3, keepalive = false) {
+      if (!ReadableStream) {
+        ReadableStream = require("stream/web").ReadableStream;
+      }
+      if (object3 instanceof ReadableStream) {
+        assert2(!util.isDisturbed(object3), "The body has already been consumed.");
+        assert2(!object3.locked, "The stream is locked.");
+      }
+      return extractBody(object3, keepalive);
+    }
+    function cloneBody(body) {
+      const [out1, out2] = body.stream.tee();
+      const out2Clone = structuredClone(out2, { transfer: [out2] });
+      const [, finalClone] = out2Clone.tee();
+      body.stream = out1;
+      return {
+        stream: finalClone,
+        length: body.length,
+        source: body.source
+      };
+    }
+    async function* consumeBody(body) {
+      if (body) {
+        if (isUint8Array(body)) {
+          yield body;
+        } else {
+          const stream = body.stream;
+          if (util.isDisturbed(stream)) {
+            throw new TypeError("The body has already been consumed.");
+          }
+          if (stream.locked) {
+            throw new TypeError("The stream is locked.");
+          }
+          stream[kBodyUsed] = true;
+          yield* stream;
+        }
+      }
+    }
+    function throwIfAborted(state) {
+      if (state.aborted) {
+        throw new DOMException2("The operation was aborted.", "AbortError");
+      }
+    }
+    function bodyMixinMethods(instance) {
+      const methods = {
+        blob() {
+          return specConsumeBody(this, (bytes) => {
+            let mimeType = bodyMimeType(this);
+            if (mimeType === "failure") {
+              mimeType = "";
+            } else if (mimeType) {
+              mimeType = serializeAMimeType(mimeType);
+            }
+            return new Blob2([bytes], { type: mimeType });
+          }, instance);
+        },
+        arrayBuffer() {
+          return specConsumeBody(this, (bytes) => {
+            return new Uint8Array(bytes).buffer;
+          }, instance);
+        },
+        text() {
+          return specConsumeBody(this, utf8DecodeBytes, instance);
+        },
+        json() {
+          return specConsumeBody(this, parseJSONFromBytes, instance);
+        },
+        async formData() {
+          webidl.brandCheck(this, instance);
+          throwIfAborted(this[kState]);
+          const contentType2 = this.headers.get("Content-Type");
+          if (/multipart\/form-data/.test(contentType2)) {
+            const headers = {};
+            for (const [key, value] of this.headers) headers[key.toLowerCase()] = value;
+            const responseFormData = new FormData2();
+            let busboy;
+            try {
+              busboy = new Busboy({
+                headers,
+                preservePath: true
+              });
+            } catch (err) {
+              throw new DOMException2(`${err}`, "AbortError");
+            }
+            busboy.on("field", (name, value) => {
+              responseFormData.append(name, value);
+            });
+            busboy.on("file", (name, value, filename, encoding, mimeType) => {
+              const chunks = [];
+              if (encoding === "base64" || encoding.toLowerCase() === "base64") {
+                let base64chunk = "";
+                value.on("data", (chunk) => {
+                  base64chunk += chunk.toString().replace(/[\r\n]/gm, "");
+                  const end = base64chunk.length - base64chunk.length % 4;
+                  chunks.push(Buffer.from(base64chunk.slice(0, end), "base64"));
+                  base64chunk = base64chunk.slice(end);
+                });
+                value.on("end", () => {
+                  chunks.push(Buffer.from(base64chunk, "base64"));
+                  responseFormData.append(name, new File2(chunks, filename, { type: mimeType }));
+                });
+              } else {
+                value.on("data", (chunk) => {
+                  chunks.push(chunk);
+                });
+                value.on("end", () => {
+                  responseFormData.append(name, new File2(chunks, filename, { type: mimeType }));
+                });
+              }
+            });
+            const busboyResolve = new Promise((resolve, reject) => {
+              busboy.on("finish", resolve);
+              busboy.on("error", (err) => reject(new TypeError(err)));
+            });
+            if (this.body !== null) for await (const chunk of consumeBody(this[kState].body)) busboy.write(chunk);
+            busboy.end();
+            await busboyResolve;
+            return responseFormData;
+          } else if (/application\/x-www-form-urlencoded/.test(contentType2)) {
+            let entries;
+            try {
+              let text = "";
+              const streamingDecoder = new TextDecoder("utf-8", { ignoreBOM: true });
+              for await (const chunk of consumeBody(this[kState].body)) {
+                if (!isUint8Array(chunk)) {
+                  throw new TypeError("Expected Uint8Array chunk");
+                }
+                text += streamingDecoder.decode(chunk, { stream: true });
+              }
+              text += streamingDecoder.decode();
+              entries = new URLSearchParams(text);
+            } catch (err) {
+              throw Object.assign(new TypeError(), { cause: err });
+            }
+            const formData = new FormData2();
+            for (const [name, value] of entries) {
+              formData.append(name, value);
+            }
+            return formData;
+          } else {
+            await Promise.resolve();
+            throwIfAborted(this[kState]);
+            throw webidl.errors.exception({
+              header: `${instance.name}.formData`,
+              message: "Could not parse content as FormData."
+            });
+          }
+        }
+      };
+      return methods;
+    }
+    function mixinBody(prototype) {
+      Object.assign(prototype.prototype, bodyMixinMethods(prototype));
+    }
+    async function specConsumeBody(object3, convertBytesToJSValue, instance) {
+      webidl.brandCheck(object3, instance);
+      throwIfAborted(object3[kState]);
+      if (bodyUnusable(object3[kState].body)) {
+        throw new TypeError("Body is unusable");
+      }
+      const promise = createDeferredPromise();
+      const errorSteps = (error2) => promise.reject(error2);
+      const successSteps = (data) => {
+        try {
+          promise.resolve(convertBytesToJSValue(data));
+        } catch (e) {
+          errorSteps(e);
+        }
+      };
+      if (object3[kState].body == null) {
+        successSteps(new Uint8Array());
+        return promise.promise;
+      }
+      await fullyReadBody(object3[kState].body, successSteps, errorSteps);
+      return promise.promise;
+    }
+    function bodyUnusable(body) {
+      return body != null && (body.stream.locked || util.isDisturbed(body.stream));
+    }
+    function utf8DecodeBytes(buffer) {
+      if (buffer.length === 0) {
+        return "";
+      }
+      if (buffer[0] === 239 && buffer[1] === 187 && buffer[2] === 191) {
+        buffer = buffer.subarray(3);
+      }
+      const output = textDecoder.decode(buffer);
+      return output;
+    }
+    function parseJSONFromBytes(bytes) {
+      return JSON.parse(utf8DecodeBytes(bytes));
+    }
+    function bodyMimeType(object3) {
+      const { headersList } = object3[kState];
+      const contentType2 = headersList.get("content-type");
+      if (contentType2 === null) {
+        return "failure";
+      }
+      return parseMIMEType(contentType2);
+    }
+    module2.exports = {
+      extractBody,
+      safelyExtractBody,
+      cloneBody,
+      mixinBody
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/core/request.js
+var require_request = __commonJS({
+  "alexa/node_modules/undici/lib/core/request.js"(exports2, module2) {
+    "use strict";
+    var {
+      InvalidArgumentError,
+      NotSupportedError
+    } = require_errors();
+    var assert2 = require("assert");
+    var { kHTTP2BuildRequest, kHTTP2CopyHeaders, kHTTP1BuildRequest } = require_symbols();
+    var util = require_util();
+    var tokenRegExp = /^[\^_`a-zA-Z\-0-9!#$%&'*+.|~]+$/;
+    var headerCharRegex = /[^\t\x20-\x7e\x80-\xff]/;
+    var invalidPathRegex = /[^\u0021-\u00ff]/;
+    var kHandler = /* @__PURE__ */ Symbol("handler");
+    var channels = {};
+    var extractBody;
+    try {
+      const diagnosticsChannel = require("diagnostics_channel");
+      channels.create = diagnosticsChannel.channel("undici:request:create");
+      channels.bodySent = diagnosticsChannel.channel("undici:request:bodySent");
+      channels.headers = diagnosticsChannel.channel("undici:request:headers");
+      channels.trailers = diagnosticsChannel.channel("undici:request:trailers");
+      channels.error = diagnosticsChannel.channel("undici:request:error");
+    } catch {
+      channels.create = { hasSubscribers: false };
+      channels.bodySent = { hasSubscribers: false };
+      channels.headers = { hasSubscribers: false };
+      channels.trailers = { hasSubscribers: false };
+      channels.error = { hasSubscribers: false };
+    }
+    var Request2 = class _Request {
+      constructor(origin, {
+        path,
+        method,
+        body,
+        headers,
+        query,
+        idempotent,
+        blocking,
+        upgrade,
+        headersTimeout,
+        bodyTimeout,
+        reset,
+        throwOnError,
+        expectContinue
+      }, handler2) {
+        if (typeof path !== "string") {
+          throw new InvalidArgumentError("path must be a string");
+        } else if (path[0] !== "/" && !(path.startsWith("http://") || path.startsWith("https://")) && method !== "CONNECT") {
+          throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
+        } else if (invalidPathRegex.exec(path) !== null) {
+          throw new InvalidArgumentError("invalid request path");
+        }
+        if (typeof method !== "string") {
+          throw new InvalidArgumentError("method must be a string");
+        } else if (tokenRegExp.exec(method) === null) {
+          throw new InvalidArgumentError("invalid request method");
+        }
+        if (upgrade && typeof upgrade !== "string") {
+          throw new InvalidArgumentError("upgrade must be a string");
+        }
+        if (headersTimeout != null && (!Number.isFinite(headersTimeout) || headersTimeout < 0)) {
+          throw new InvalidArgumentError("invalid headersTimeout");
+        }
+        if (bodyTimeout != null && (!Number.isFinite(bodyTimeout) || bodyTimeout < 0)) {
+          throw new InvalidArgumentError("invalid bodyTimeout");
+        }
+        if (reset != null && typeof reset !== "boolean") {
+          throw new InvalidArgumentError("invalid reset");
+        }
+        if (expectContinue != null && typeof expectContinue !== "boolean") {
+          throw new InvalidArgumentError("invalid expectContinue");
+        }
+        this.headersTimeout = headersTimeout;
+        this.bodyTimeout = bodyTimeout;
+        this.throwOnError = throwOnError === true;
+        this.method = method;
+        this.abort = null;
+        if (body == null) {
+          this.body = null;
+        } else if (util.isStream(body)) {
+          this.body = body;
+          const rState = this.body._readableState;
+          if (!rState || !rState.autoDestroy) {
+            this.endHandler = function autoDestroy() {
+              util.destroy(this);
+            };
+            this.body.on("end", this.endHandler);
+          }
+          this.errorHandler = (err) => {
+            if (this.abort) {
+              this.abort(err);
+            } else {
+              this.error = err;
+            }
+          };
+          this.body.on("error", this.errorHandler);
+        } else if (util.isBuffer(body)) {
+          this.body = body.byteLength ? body : null;
+        } else if (ArrayBuffer.isView(body)) {
+          this.body = body.buffer.byteLength ? Buffer.from(body.buffer, body.byteOffset, body.byteLength) : null;
+        } else if (body instanceof ArrayBuffer) {
+          this.body = body.byteLength ? Buffer.from(body) : null;
+        } else if (typeof body === "string") {
+          this.body = body.length ? Buffer.from(body) : null;
+        } else if (util.isFormDataLike(body) || util.isIterable(body) || util.isBlobLike(body)) {
+          this.body = body;
+        } else {
+          throw new InvalidArgumentError("body must be a string, a Buffer, a Readable stream, an iterable, or an async iterable");
+        }
+        this.completed = false;
+        this.aborted = false;
+        this.upgrade = upgrade || null;
+        this.path = query ? util.buildURL(path, query) : path;
+        this.origin = origin;
+        this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
+        this.blocking = blocking == null ? false : blocking;
+        this.reset = reset == null ? null : reset;
+        this.host = null;
+        this.contentLength = null;
+        this.contentType = null;
+        this.headers = "";
+        this.expectContinue = expectContinue != null ? expectContinue : false;
+        if (Array.isArray(headers)) {
+          if (headers.length % 2 !== 0) {
+            throw new InvalidArgumentError("headers array must be even");
+          }
+          for (let i = 0; i < headers.length; i += 2) {
+            processHeader(this, headers[i], headers[i + 1]);
+          }
+        } else if (headers && typeof headers === "object") {
+          const keys = Object.keys(headers);
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            processHeader(this, key, headers[key]);
+          }
+        } else if (headers != null) {
+          throw new InvalidArgumentError("headers must be an object or an array");
+        }
+        if (util.isFormDataLike(this.body)) {
+          if (util.nodeMajor < 16 || util.nodeMajor === 16 && util.nodeMinor < 8) {
+            throw new InvalidArgumentError("Form-Data bodies are only supported in node v16.8 and newer.");
+          }
+          if (!extractBody) {
+            extractBody = require_body().extractBody;
+          }
+          const [bodyStream, contentType2] = extractBody(body);
+          if (this.contentType == null) {
+            this.contentType = contentType2;
+            this.headers += `content-type: ${contentType2}\r
+`;
+          }
+          this.body = bodyStream.stream;
+          this.contentLength = bodyStream.length;
+        } else if (util.isBlobLike(body) && this.contentType == null && body.type) {
+          this.contentType = body.type;
+          this.headers += `content-type: ${body.type}\r
+`;
+        }
+        util.validateHandler(handler2, method, upgrade);
+        this.servername = util.getServerName(this.host);
+        this[kHandler] = handler2;
+        if (channels.create.hasSubscribers) {
+          channels.create.publish({ request: this });
+        }
+      }
+      onBodySent(chunk) {
+        if (this[kHandler].onBodySent) {
+          try {
+            return this[kHandler].onBodySent(chunk);
+          } catch (err) {
+            this.abort(err);
+          }
+        }
+      }
+      onRequestSent() {
+        if (channels.bodySent.hasSubscribers) {
+          channels.bodySent.publish({ request: this });
+        }
+        if (this[kHandler].onRequestSent) {
+          try {
+            return this[kHandler].onRequestSent();
+          } catch (err) {
+            this.abort(err);
+          }
+        }
+      }
+      onConnect(abort) {
+        assert2(!this.aborted);
+        assert2(!this.completed);
+        if (this.error) {
+          abort(this.error);
+        } else {
+          this.abort = abort;
+          return this[kHandler].onConnect(abort);
+        }
+      }
+      onHeaders(statusCode, headers, resume, statusText) {
+        assert2(!this.aborted);
+        assert2(!this.completed);
+        if (channels.headers.hasSubscribers) {
+          channels.headers.publish({ request: this, response: { statusCode, headers, statusText } });
+        }
+        try {
+          return this[kHandler].onHeaders(statusCode, headers, resume, statusText);
+        } catch (err) {
+          this.abort(err);
+        }
+      }
+      onData(chunk) {
+        assert2(!this.aborted);
+        assert2(!this.completed);
+        try {
+          return this[kHandler].onData(chunk);
+        } catch (err) {
+          this.abort(err);
+          return false;
+        }
+      }
+      onUpgrade(statusCode, headers, socket) {
+        assert2(!this.aborted);
+        assert2(!this.completed);
+        return this[kHandler].onUpgrade(statusCode, headers, socket);
+      }
+      onComplete(trailers) {
+        this.onFinally();
+        assert2(!this.aborted);
+        this.completed = true;
+        if (channels.trailers.hasSubscribers) {
+          channels.trailers.publish({ request: this, trailers });
+        }
+        try {
+          return this[kHandler].onComplete(trailers);
+        } catch (err) {
+          this.onError(err);
+        }
+      }
+      onError(error2) {
+        this.onFinally();
+        if (channels.error.hasSubscribers) {
+          channels.error.publish({ request: this, error: error2 });
+        }
+        if (this.aborted) {
+          return;
+        }
+        this.aborted = true;
+        return this[kHandler].onError(error2);
+      }
+      onFinally() {
+        if (this.errorHandler) {
+          this.body.off("error", this.errorHandler);
+          this.errorHandler = null;
+        }
+        if (this.endHandler) {
+          this.body.off("end", this.endHandler);
+          this.endHandler = null;
+        }
+      }
+      // TODO: adjust to support H2
+      addHeader(key, value) {
+        processHeader(this, key, value);
+        return this;
+      }
+      static [kHTTP1BuildRequest](origin, opts, handler2) {
+        return new _Request(origin, opts, handler2);
+      }
+      static [kHTTP2BuildRequest](origin, opts, handler2) {
+        const headers = opts.headers;
+        opts = { ...opts, headers: null };
+        const request = new _Request(origin, opts, handler2);
+        request.headers = {};
+        if (Array.isArray(headers)) {
+          if (headers.length % 2 !== 0) {
+            throw new InvalidArgumentError("headers array must be even");
+          }
+          for (let i = 0; i < headers.length; i += 2) {
+            processHeader(request, headers[i], headers[i + 1], true);
+          }
+        } else if (headers && typeof headers === "object") {
+          const keys = Object.keys(headers);
+          for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            processHeader(request, key, headers[key], true);
+          }
+        } else if (headers != null) {
+          throw new InvalidArgumentError("headers must be an object or an array");
+        }
+        return request;
+      }
+      static [kHTTP2CopyHeaders](raw) {
+        const rawHeaders = raw.split("\r\n");
+        const headers = {};
+        for (const header of rawHeaders) {
+          const [key, value] = header.split(": ");
+          if (value == null || value.length === 0) continue;
+          if (headers[key]) headers[key] += `,${value}`;
+          else headers[key] = value;
+        }
+        return headers;
+      }
+    };
+    function processHeaderValue(key, val, skipAppend) {
+      if (val && typeof val === "object") {
+        throw new InvalidArgumentError(`invalid ${key} header`);
+      }
+      val = val != null ? `${val}` : "";
+      if (headerCharRegex.exec(val) !== null) {
+        throw new InvalidArgumentError(`invalid ${key} header`);
+      }
+      return skipAppend ? val : `${key}: ${val}\r
+`;
+    }
+    function processHeader(request, key, val, skipAppend = false) {
+      if (val && (typeof val === "object" && !Array.isArray(val))) {
+        throw new InvalidArgumentError(`invalid ${key} header`);
+      } else if (val === void 0) {
+        return;
+      }
+      if (request.host === null && key.length === 4 && key.toLowerCase() === "host") {
+        if (headerCharRegex.exec(val) !== null) {
+          throw new InvalidArgumentError(`invalid ${key} header`);
+        }
+        request.host = val;
+      } else if (request.contentLength === null && key.length === 14 && key.toLowerCase() === "content-length") {
+        request.contentLength = parseInt(val, 10);
+        if (!Number.isFinite(request.contentLength)) {
+          throw new InvalidArgumentError("invalid content-length header");
+        }
+      } else if (request.contentType === null && key.length === 12 && key.toLowerCase() === "content-type") {
+        request.contentType = val;
+        if (skipAppend) request.headers[key] = processHeaderValue(key, val, skipAppend);
+        else request.headers += processHeaderValue(key, val);
+      } else if (key.length === 17 && key.toLowerCase() === "transfer-encoding") {
+        throw new InvalidArgumentError("invalid transfer-encoding header");
+      } else if (key.length === 10 && key.toLowerCase() === "connection") {
+        const value = typeof val === "string" ? val.toLowerCase() : null;
+        if (value !== "close" && value !== "keep-alive") {
+          throw new InvalidArgumentError("invalid connection header");
+        } else if (value === "close") {
+          request.reset = true;
+        }
+      } else if (key.length === 10 && key.toLowerCase() === "keep-alive") {
+        throw new InvalidArgumentError("invalid keep-alive header");
+      } else if (key.length === 7 && key.toLowerCase() === "upgrade") {
+        throw new InvalidArgumentError("invalid upgrade header");
+      } else if (key.length === 6 && key.toLowerCase() === "expect") {
+        throw new NotSupportedError("expect header not supported");
+      } else if (tokenRegExp.exec(key) === null) {
+        throw new InvalidArgumentError("invalid header key");
+      } else {
+        if (Array.isArray(val)) {
+          for (let i = 0; i < val.length; i++) {
+            if (skipAppend) {
+              if (request.headers[key]) request.headers[key] += `,${processHeaderValue(key, val[i], skipAppend)}`;
+              else request.headers[key] = processHeaderValue(key, val[i], skipAppend);
+            } else {
+              request.headers += processHeaderValue(key, val[i]);
+            }
+          }
+        } else {
+          if (skipAppend) request.headers[key] = processHeaderValue(key, val, skipAppend);
+          else request.headers += processHeaderValue(key, val);
+        }
+      }
+    }
+    module2.exports = Request2;
+  }
+});
+
+// alexa/node_modules/undici/lib/dispatcher.js
+var require_dispatcher = __commonJS({
+  "alexa/node_modules/undici/lib/dispatcher.js"(exports2, module2) {
+    "use strict";
+    var EventEmitter = require("events");
+    var Dispatcher = class extends EventEmitter {
+      dispatch() {
+        throw new Error("not implemented");
+      }
+      close() {
+        throw new Error("not implemented");
+      }
+      destroy() {
+        throw new Error("not implemented");
+      }
+    };
+    module2.exports = Dispatcher;
+  }
+});
+
+// alexa/node_modules/undici/lib/dispatcher-base.js
+var require_dispatcher_base = __commonJS({
+  "alexa/node_modules/undici/lib/dispatcher-base.js"(exports2, module2) {
+    "use strict";
+    var Dispatcher = require_dispatcher();
+    var {
+      ClientDestroyedError,
+      ClientClosedError,
+      InvalidArgumentError
+    } = require_errors();
+    var { kDestroy, kClose, kDispatch, kInterceptors } = require_symbols();
+    var kDestroyed = /* @__PURE__ */ Symbol("destroyed");
+    var kClosed = /* @__PURE__ */ Symbol("closed");
+    var kOnDestroyed = /* @__PURE__ */ Symbol("onDestroyed");
+    var kOnClosed = /* @__PURE__ */ Symbol("onClosed");
+    var kInterceptedDispatch = /* @__PURE__ */ Symbol("Intercepted Dispatch");
+    var DispatcherBase = class extends Dispatcher {
+      constructor() {
+        super();
+        this[kDestroyed] = false;
+        this[kOnDestroyed] = null;
+        this[kClosed] = false;
+        this[kOnClosed] = [];
+      }
+      get destroyed() {
+        return this[kDestroyed];
+      }
+      get closed() {
+        return this[kClosed];
+      }
+      get interceptors() {
+        return this[kInterceptors];
+      }
+      set interceptors(newInterceptors) {
+        if (newInterceptors) {
+          for (let i = newInterceptors.length - 1; i >= 0; i--) {
+            const interceptor = this[kInterceptors][i];
+            if (typeof interceptor !== "function") {
+              throw new InvalidArgumentError("interceptor must be an function");
+            }
+          }
+        }
+        this[kInterceptors] = newInterceptors;
+      }
+      close(callback) {
+        if (callback === void 0) {
+          return new Promise((resolve, reject) => {
+            this.close((err, data) => {
+              return err ? reject(err) : resolve(data);
+            });
+          });
+        }
+        if (typeof callback !== "function") {
+          throw new InvalidArgumentError("invalid callback");
+        }
+        if (this[kDestroyed]) {
+          queueMicrotask(() => callback(new ClientDestroyedError(), null));
+          return;
+        }
+        if (this[kClosed]) {
+          if (this[kOnClosed]) {
+            this[kOnClosed].push(callback);
+          } else {
+            queueMicrotask(() => callback(null, null));
+          }
+          return;
+        }
+        this[kClosed] = true;
+        this[kOnClosed].push(callback);
+        const onClosed = () => {
+          const callbacks = this[kOnClosed];
+          this[kOnClosed] = null;
+          for (let i = 0; i < callbacks.length; i++) {
+            callbacks[i](null, null);
+          }
+        };
+        this[kClose]().then(() => this.destroy()).then(() => {
+          queueMicrotask(onClosed);
+        });
+      }
+      destroy(err, callback) {
+        if (typeof err === "function") {
+          callback = err;
+          err = null;
+        }
+        if (callback === void 0) {
+          return new Promise((resolve, reject) => {
+            this.destroy(err, (err2, data) => {
+              return err2 ? (
+                /* istanbul ignore next: should never error */
+                reject(err2)
+              ) : resolve(data);
+            });
+          });
+        }
+        if (typeof callback !== "function") {
+          throw new InvalidArgumentError("invalid callback");
+        }
+        if (this[kDestroyed]) {
+          if (this[kOnDestroyed]) {
+            this[kOnDestroyed].push(callback);
+          } else {
+            queueMicrotask(() => callback(null, null));
+          }
+          return;
+        }
+        if (!err) {
+          err = new ClientDestroyedError();
+        }
+        this[kDestroyed] = true;
+        this[kOnDestroyed] = this[kOnDestroyed] || [];
+        this[kOnDestroyed].push(callback);
+        const onDestroyed = () => {
+          const callbacks = this[kOnDestroyed];
+          this[kOnDestroyed] = null;
+          for (let i = 0; i < callbacks.length; i++) {
+            callbacks[i](null, null);
+          }
+        };
+        this[kDestroy](err).then(() => {
+          queueMicrotask(onDestroyed);
+        });
+      }
+      [kInterceptedDispatch](opts, handler2) {
+        if (!this[kInterceptors] || this[kInterceptors].length === 0) {
+          this[kInterceptedDispatch] = this[kDispatch];
+          return this[kDispatch](opts, handler2);
+        }
+        let dispatch = this[kDispatch].bind(this);
+        for (let i = this[kInterceptors].length - 1; i >= 0; i--) {
+          dispatch = this[kInterceptors][i](dispatch);
+        }
+        this[kInterceptedDispatch] = dispatch;
+        return dispatch(opts, handler2);
+      }
+      dispatch(opts, handler2) {
+        if (!handler2 || typeof handler2 !== "object") {
+          throw new InvalidArgumentError("handler must be an object");
+        }
+        try {
+          if (!opts || typeof opts !== "object") {
+            throw new InvalidArgumentError("opts must be an object.");
+          }
+          if (this[kDestroyed] || this[kOnDestroyed]) {
+            throw new ClientDestroyedError();
+          }
+          if (this[kClosed]) {
+            throw new ClientClosedError();
+          }
+          return this[kInterceptedDispatch](opts, handler2);
+        } catch (err) {
+          if (typeof handler2.onError !== "function") {
+            throw new InvalidArgumentError("invalid onError method");
+          }
+          handler2.onError(err);
+          return false;
+        }
+      }
+    };
+    module2.exports = DispatcherBase;
+  }
+});
+
+// alexa/node_modules/undici/lib/core/connect.js
+var require_connect = __commonJS({
+  "alexa/node_modules/undici/lib/core/connect.js"(exports2, module2) {
+    "use strict";
+    var net = require("net");
+    var assert2 = require("assert");
+    var util = require_util();
+    var { InvalidArgumentError, ConnectTimeoutError } = require_errors();
+    var tls;
+    var SessionCache;
+    if (global.FinalizationRegistry && !process.env.NODE_V8_COVERAGE) {
+      SessionCache = class WeakSessionCache {
+        constructor(maxCachedSessions) {
+          this._maxCachedSessions = maxCachedSessions;
+          this._sessionCache = /* @__PURE__ */ new Map();
+          this._sessionRegistry = new global.FinalizationRegistry((key) => {
+            if (this._sessionCache.size < this._maxCachedSessions) {
+              return;
+            }
+            const ref = this._sessionCache.get(key);
+            if (ref !== void 0 && ref.deref() === void 0) {
+              this._sessionCache.delete(key);
+            }
+          });
+        }
+        get(sessionKey) {
+          const ref = this._sessionCache.get(sessionKey);
+          return ref ? ref.deref() : null;
+        }
+        set(sessionKey, session) {
+          if (this._maxCachedSessions === 0) {
+            return;
+          }
+          this._sessionCache.set(sessionKey, new WeakRef(session));
+          this._sessionRegistry.register(session, sessionKey);
+        }
+      };
+    } else {
+      SessionCache = class SimpleSessionCache {
+        constructor(maxCachedSessions) {
+          this._maxCachedSessions = maxCachedSessions;
+          this._sessionCache = /* @__PURE__ */ new Map();
+        }
+        get(sessionKey) {
+          return this._sessionCache.get(sessionKey);
+        }
+        set(sessionKey, session) {
+          if (this._maxCachedSessions === 0) {
+            return;
+          }
+          if (this._sessionCache.size >= this._maxCachedSessions) {
+            const { value: oldestKey } = this._sessionCache.keys().next();
+            this._sessionCache.delete(oldestKey);
+          }
+          this._sessionCache.set(sessionKey, session);
+        }
+      };
+    }
+    function buildConnector({ allowH2, maxCachedSessions, socketPath, timeout, ...opts }) {
+      if (maxCachedSessions != null && (!Number.isInteger(maxCachedSessions) || maxCachedSessions < 0)) {
+        throw new InvalidArgumentError("maxCachedSessions must be a positive integer or zero");
+      }
+      const options = { path: socketPath, ...opts };
+      const sessionCache = new SessionCache(maxCachedSessions == null ? 100 : maxCachedSessions);
+      timeout = timeout == null ? 1e4 : timeout;
+      allowH2 = allowH2 != null ? allowH2 : false;
+      return function connect({ hostname, host, protocol, port, servername, localAddress, httpSocket }, callback) {
+        let socket;
+        if (protocol === "https:") {
+          if (!tls) {
+            tls = require("tls");
+          }
+          servername = servername || options.servername || util.getServerName(host) || null;
+          const sessionKey = servername || hostname;
+          const session = sessionCache.get(sessionKey) || null;
+          assert2(sessionKey);
+          socket = tls.connect({
+            highWaterMark: 16384,
+            // TLS in node can't have bigger HWM anyway...
+            ...options,
+            servername,
+            session,
+            localAddress,
+            // TODO(HTTP/2): Add support for h2c
+            ALPNProtocols: allowH2 ? ["http/1.1", "h2"] : ["http/1.1"],
+            socket: httpSocket,
+            // upgrade socket connection
+            port: port || 443,
+            host: hostname
+          });
+          socket.on("session", function(session2) {
+            sessionCache.set(sessionKey, session2);
+          });
+        } else {
+          assert2(!httpSocket, "httpSocket can only be sent on TLS update");
+          socket = net.connect({
+            highWaterMark: 64 * 1024,
+            // Same as nodejs fs streams.
+            ...options,
+            localAddress,
+            port: port || 80,
+            host: hostname
+          });
+        }
+        if (options.keepAlive == null || options.keepAlive) {
+          const keepAliveInitialDelay = options.keepAliveInitialDelay === void 0 ? 6e4 : options.keepAliveInitialDelay;
+          socket.setKeepAlive(true, keepAliveInitialDelay);
+        }
+        const cancelTimeout = setupTimeout(() => onConnectTimeout(socket), timeout);
+        socket.setNoDelay(true).once(protocol === "https:" ? "secureConnect" : "connect", function() {
+          cancelTimeout();
+          if (callback) {
+            const cb = callback;
+            callback = null;
+            cb(null, this);
+          }
+        }).on("error", function(err) {
+          cancelTimeout();
+          if (callback) {
+            const cb = callback;
+            callback = null;
+            cb(err);
+          }
+        });
+        return socket;
+      };
+    }
+    function setupTimeout(onConnectTimeout2, timeout) {
+      if (!timeout) {
+        return () => {
+        };
+      }
+      let s1 = null;
+      let s2 = null;
+      const timeoutId = setTimeout(() => {
+        s1 = setImmediate(() => {
+          if (process.platform === "win32") {
+            s2 = setImmediate(() => onConnectTimeout2());
+          } else {
+            onConnectTimeout2();
+          }
+        });
+      }, timeout);
+      return () => {
+        clearTimeout(timeoutId);
+        clearImmediate(s1);
+        clearImmediate(s2);
+      };
+    }
+    function onConnectTimeout(socket) {
+      util.destroy(socket, new ConnectTimeoutError());
+    }
+    module2.exports = buildConnector;
+  }
+});
+
+// alexa/node_modules/undici/lib/llhttp/utils.js
+var require_utils = __commonJS({
+  "alexa/node_modules/undici/lib/llhttp/utils.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.enumToMap = void 0;
+    function enumToMap(obj) {
+      const res = {};
+      Object.keys(obj).forEach((key) => {
+        const value = obj[key];
+        if (typeof value === "number") {
+          res[key] = value;
+        }
+      });
+      return res;
+    }
+    exports2.enumToMap = enumToMap;
+  }
+});
+
+// alexa/node_modules/undici/lib/llhttp/constants.js
+var require_constants3 = __commonJS({
+  "alexa/node_modules/undici/lib/llhttp/constants.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.SPECIAL_HEADERS = exports2.HEADER_STATE = exports2.MINOR = exports2.MAJOR = exports2.CONNECTION_TOKEN_CHARS = exports2.HEADER_CHARS = exports2.TOKEN = exports2.STRICT_TOKEN = exports2.HEX = exports2.URL_CHAR = exports2.STRICT_URL_CHAR = exports2.USERINFO_CHARS = exports2.MARK = exports2.ALPHANUM = exports2.NUM = exports2.HEX_MAP = exports2.NUM_MAP = exports2.ALPHA = exports2.FINISH = exports2.H_METHOD_MAP = exports2.METHOD_MAP = exports2.METHODS_RTSP = exports2.METHODS_ICE = exports2.METHODS_HTTP = exports2.METHODS = exports2.LENIENT_FLAGS = exports2.FLAGS = exports2.TYPE = exports2.ERROR = void 0;
+    var utils_1 = require_utils();
+    var ERROR;
+    (function(ERROR2) {
+      ERROR2[ERROR2["OK"] = 0] = "OK";
+      ERROR2[ERROR2["INTERNAL"] = 1] = "INTERNAL";
+      ERROR2[ERROR2["STRICT"] = 2] = "STRICT";
+      ERROR2[ERROR2["LF_EXPECTED"] = 3] = "LF_EXPECTED";
+      ERROR2[ERROR2["UNEXPECTED_CONTENT_LENGTH"] = 4] = "UNEXPECTED_CONTENT_LENGTH";
+      ERROR2[ERROR2["CLOSED_CONNECTION"] = 5] = "CLOSED_CONNECTION";
+      ERROR2[ERROR2["INVALID_METHOD"] = 6] = "INVALID_METHOD";
+      ERROR2[ERROR2["INVALID_URL"] = 7] = "INVALID_URL";
+      ERROR2[ERROR2["INVALID_CONSTANT"] = 8] = "INVALID_CONSTANT";
+      ERROR2[ERROR2["INVALID_VERSION"] = 9] = "INVALID_VERSION";
+      ERROR2[ERROR2["INVALID_HEADER_TOKEN"] = 10] = "INVALID_HEADER_TOKEN";
+      ERROR2[ERROR2["INVALID_CONTENT_LENGTH"] = 11] = "INVALID_CONTENT_LENGTH";
+      ERROR2[ERROR2["INVALID_CHUNK_SIZE"] = 12] = "INVALID_CHUNK_SIZE";
+      ERROR2[ERROR2["INVALID_STATUS"] = 13] = "INVALID_STATUS";
+      ERROR2[ERROR2["INVALID_EOF_STATE"] = 14] = "INVALID_EOF_STATE";
+      ERROR2[ERROR2["INVALID_TRANSFER_ENCODING"] = 15] = "INVALID_TRANSFER_ENCODING";
+      ERROR2[ERROR2["CB_MESSAGE_BEGIN"] = 16] = "CB_MESSAGE_BEGIN";
+      ERROR2[ERROR2["CB_HEADERS_COMPLETE"] = 17] = "CB_HEADERS_COMPLETE";
+      ERROR2[ERROR2["CB_MESSAGE_COMPLETE"] = 18] = "CB_MESSAGE_COMPLETE";
+      ERROR2[ERROR2["CB_CHUNK_HEADER"] = 19] = "CB_CHUNK_HEADER";
+      ERROR2[ERROR2["CB_CHUNK_COMPLETE"] = 20] = "CB_CHUNK_COMPLETE";
+      ERROR2[ERROR2["PAUSED"] = 21] = "PAUSED";
+      ERROR2[ERROR2["PAUSED_UPGRADE"] = 22] = "PAUSED_UPGRADE";
+      ERROR2[ERROR2["PAUSED_H2_UPGRADE"] = 23] = "PAUSED_H2_UPGRADE";
+      ERROR2[ERROR2["USER"] = 24] = "USER";
+    })(ERROR = exports2.ERROR || (exports2.ERROR = {}));
+    var TYPE;
+    (function(TYPE2) {
+      TYPE2[TYPE2["BOTH"] = 0] = "BOTH";
+      TYPE2[TYPE2["REQUEST"] = 1] = "REQUEST";
+      TYPE2[TYPE2["RESPONSE"] = 2] = "RESPONSE";
+    })(TYPE = exports2.TYPE || (exports2.TYPE = {}));
+    var FLAGS;
+    (function(FLAGS2) {
+      FLAGS2[FLAGS2["CONNECTION_KEEP_ALIVE"] = 1] = "CONNECTION_KEEP_ALIVE";
+      FLAGS2[FLAGS2["CONNECTION_CLOSE"] = 2] = "CONNECTION_CLOSE";
+      FLAGS2[FLAGS2["CONNECTION_UPGRADE"] = 4] = "CONNECTION_UPGRADE";
+      FLAGS2[FLAGS2["CHUNKED"] = 8] = "CHUNKED";
+      FLAGS2[FLAGS2["UPGRADE"] = 16] = "UPGRADE";
+      FLAGS2[FLAGS2["CONTENT_LENGTH"] = 32] = "CONTENT_LENGTH";
+      FLAGS2[FLAGS2["SKIPBODY"] = 64] = "SKIPBODY";
+      FLAGS2[FLAGS2["TRAILING"] = 128] = "TRAILING";
+      FLAGS2[FLAGS2["TRANSFER_ENCODING"] = 512] = "TRANSFER_ENCODING";
+    })(FLAGS = exports2.FLAGS || (exports2.FLAGS = {}));
+    var LENIENT_FLAGS;
+    (function(LENIENT_FLAGS2) {
+      LENIENT_FLAGS2[LENIENT_FLAGS2["HEADERS"] = 1] = "HEADERS";
+      LENIENT_FLAGS2[LENIENT_FLAGS2["CHUNKED_LENGTH"] = 2] = "CHUNKED_LENGTH";
+      LENIENT_FLAGS2[LENIENT_FLAGS2["KEEP_ALIVE"] = 4] = "KEEP_ALIVE";
+    })(LENIENT_FLAGS = exports2.LENIENT_FLAGS || (exports2.LENIENT_FLAGS = {}));
+    var METHODS;
+    (function(METHODS2) {
+      METHODS2[METHODS2["DELETE"] = 0] = "DELETE";
+      METHODS2[METHODS2["GET"] = 1] = "GET";
+      METHODS2[METHODS2["HEAD"] = 2] = "HEAD";
+      METHODS2[METHODS2["POST"] = 3] = "POST";
+      METHODS2[METHODS2["PUT"] = 4] = "PUT";
+      METHODS2[METHODS2["CONNECT"] = 5] = "CONNECT";
+      METHODS2[METHODS2["OPTIONS"] = 6] = "OPTIONS";
+      METHODS2[METHODS2["TRACE"] = 7] = "TRACE";
+      METHODS2[METHODS2["COPY"] = 8] = "COPY";
+      METHODS2[METHODS2["LOCK"] = 9] = "LOCK";
+      METHODS2[METHODS2["MKCOL"] = 10] = "MKCOL";
+      METHODS2[METHODS2["MOVE"] = 11] = "MOVE";
+      METHODS2[METHODS2["PROPFIND"] = 12] = "PROPFIND";
+      METHODS2[METHODS2["PROPPATCH"] = 13] = "PROPPATCH";
+      METHODS2[METHODS2["SEARCH"] = 14] = "SEARCH";
+      METHODS2[METHODS2["UNLOCK"] = 15] = "UNLOCK";
+      METHODS2[METHODS2["BIND"] = 16] = "BIND";
+      METHODS2[METHODS2["REBIND"] = 17] = "REBIND";
+      METHODS2[METHODS2["UNBIND"] = 18] = "UNBIND";
+      METHODS2[METHODS2["ACL"] = 19] = "ACL";
+      METHODS2[METHODS2["REPORT"] = 20] = "REPORT";
+      METHODS2[METHODS2["MKACTIVITY"] = 21] = "MKACTIVITY";
+      METHODS2[METHODS2["CHECKOUT"] = 22] = "CHECKOUT";
+      METHODS2[METHODS2["MERGE"] = 23] = "MERGE";
+      METHODS2[METHODS2["M-SEARCH"] = 24] = "M-SEARCH";
+      METHODS2[METHODS2["NOTIFY"] = 25] = "NOTIFY";
+      METHODS2[METHODS2["SUBSCRIBE"] = 26] = "SUBSCRIBE";
+      METHODS2[METHODS2["UNSUBSCRIBE"] = 27] = "UNSUBSCRIBE";
+      METHODS2[METHODS2["PATCH"] = 28] = "PATCH";
+      METHODS2[METHODS2["PURGE"] = 29] = "PURGE";
+      METHODS2[METHODS2["MKCALENDAR"] = 30] = "MKCALENDAR";
+      METHODS2[METHODS2["LINK"] = 31] = "LINK";
+      METHODS2[METHODS2["UNLINK"] = 32] = "UNLINK";
+      METHODS2[METHODS2["SOURCE"] = 33] = "SOURCE";
+      METHODS2[METHODS2["PRI"] = 34] = "PRI";
+      METHODS2[METHODS2["DESCRIBE"] = 35] = "DESCRIBE";
+      METHODS2[METHODS2["ANNOUNCE"] = 36] = "ANNOUNCE";
+      METHODS2[METHODS2["SETUP"] = 37] = "SETUP";
+      METHODS2[METHODS2["PLAY"] = 38] = "PLAY";
+      METHODS2[METHODS2["PAUSE"] = 39] = "PAUSE";
+      METHODS2[METHODS2["TEARDOWN"] = 40] = "TEARDOWN";
+      METHODS2[METHODS2["GET_PARAMETER"] = 41] = "GET_PARAMETER";
+      METHODS2[METHODS2["SET_PARAMETER"] = 42] = "SET_PARAMETER";
+      METHODS2[METHODS2["REDIRECT"] = 43] = "REDIRECT";
+      METHODS2[METHODS2["RECORD"] = 44] = "RECORD";
+      METHODS2[METHODS2["FLUSH"] = 45] = "FLUSH";
+    })(METHODS = exports2.METHODS || (exports2.METHODS = {}));
+    exports2.METHODS_HTTP = [
+      METHODS.DELETE,
+      METHODS.GET,
+      METHODS.HEAD,
+      METHODS.POST,
+      METHODS.PUT,
+      METHODS.CONNECT,
+      METHODS.OPTIONS,
+      METHODS.TRACE,
+      METHODS.COPY,
+      METHODS.LOCK,
+      METHODS.MKCOL,
+      METHODS.MOVE,
+      METHODS.PROPFIND,
+      METHODS.PROPPATCH,
+      METHODS.SEARCH,
+      METHODS.UNLOCK,
+      METHODS.BIND,
+      METHODS.REBIND,
+      METHODS.UNBIND,
+      METHODS.ACL,
+      METHODS.REPORT,
+      METHODS.MKACTIVITY,
+      METHODS.CHECKOUT,
+      METHODS.MERGE,
+      METHODS["M-SEARCH"],
+      METHODS.NOTIFY,
+      METHODS.SUBSCRIBE,
+      METHODS.UNSUBSCRIBE,
+      METHODS.PATCH,
+      METHODS.PURGE,
+      METHODS.MKCALENDAR,
+      METHODS.LINK,
+      METHODS.UNLINK,
+      METHODS.PRI,
+      // TODO(indutny): should we allow it with HTTP?
+      METHODS.SOURCE
+    ];
+    exports2.METHODS_ICE = [
+      METHODS.SOURCE
+    ];
+    exports2.METHODS_RTSP = [
+      METHODS.OPTIONS,
+      METHODS.DESCRIBE,
+      METHODS.ANNOUNCE,
+      METHODS.SETUP,
+      METHODS.PLAY,
+      METHODS.PAUSE,
+      METHODS.TEARDOWN,
+      METHODS.GET_PARAMETER,
+      METHODS.SET_PARAMETER,
+      METHODS.REDIRECT,
+      METHODS.RECORD,
+      METHODS.FLUSH,
+      // For AirPlay
+      METHODS.GET,
+      METHODS.POST
+    ];
+    exports2.METHOD_MAP = utils_1.enumToMap(METHODS);
+    exports2.H_METHOD_MAP = {};
+    Object.keys(exports2.METHOD_MAP).forEach((key) => {
+      if (/^H/.test(key)) {
+        exports2.H_METHOD_MAP[key] = exports2.METHOD_MAP[key];
+      }
+    });
+    var FINISH;
+    (function(FINISH2) {
+      FINISH2[FINISH2["SAFE"] = 0] = "SAFE";
+      FINISH2[FINISH2["SAFE_WITH_CB"] = 1] = "SAFE_WITH_CB";
+      FINISH2[FINISH2["UNSAFE"] = 2] = "UNSAFE";
+    })(FINISH = exports2.FINISH || (exports2.FINISH = {}));
+    exports2.ALPHA = [];
+    for (let i = "A".charCodeAt(0); i <= "Z".charCodeAt(0); i++) {
+      exports2.ALPHA.push(String.fromCharCode(i));
+      exports2.ALPHA.push(String.fromCharCode(i + 32));
+    }
+    exports2.NUM_MAP = {
+      0: 0,
+      1: 1,
+      2: 2,
+      3: 3,
+      4: 4,
+      5: 5,
+      6: 6,
+      7: 7,
+      8: 8,
+      9: 9
+    };
+    exports2.HEX_MAP = {
+      0: 0,
+      1: 1,
+      2: 2,
+      3: 3,
+      4: 4,
+      5: 5,
+      6: 6,
+      7: 7,
+      8: 8,
+      9: 9,
+      A: 10,
+      B: 11,
+      C: 12,
+      D: 13,
+      E: 14,
+      F: 15,
+      a: 10,
+      b: 11,
+      c: 12,
+      d: 13,
+      e: 14,
+      f: 15
+    };
+    exports2.NUM = [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ];
+    exports2.ALPHANUM = exports2.ALPHA.concat(exports2.NUM);
+    exports2.MARK = ["-", "_", ".", "!", "~", "*", "'", "(", ")"];
+    exports2.USERINFO_CHARS = exports2.ALPHANUM.concat(exports2.MARK).concat(["%", ";", ":", "&", "=", "+", "$", ","]);
+    exports2.STRICT_URL_CHAR = [
+      "!",
+      '"',
+      "$",
+      "%",
+      "&",
+      "'",
+      "(",
+      ")",
+      "*",
+      "+",
+      ",",
+      "-",
+      ".",
+      "/",
+      ":",
+      ";",
+      "<",
+      "=",
+      ">",
+      "@",
+      "[",
+      "\\",
+      "]",
+      "^",
+      "_",
+      "`",
+      "{",
+      "|",
+      "}",
+      "~"
+    ].concat(exports2.ALPHANUM);
+    exports2.URL_CHAR = exports2.STRICT_URL_CHAR.concat(["	", "\f"]);
+    for (let i = 128; i <= 255; i++) {
+      exports2.URL_CHAR.push(i);
+    }
+    exports2.HEX = exports2.NUM.concat(["a", "b", "c", "d", "e", "f", "A", "B", "C", "D", "E", "F"]);
+    exports2.STRICT_TOKEN = [
+      "!",
+      "#",
+      "$",
+      "%",
+      "&",
+      "'",
+      "*",
+      "+",
+      "-",
+      ".",
+      "^",
+      "_",
+      "`",
+      "|",
+      "~"
+    ].concat(exports2.ALPHANUM);
+    exports2.TOKEN = exports2.STRICT_TOKEN.concat([" "]);
+    exports2.HEADER_CHARS = ["	"];
+    for (let i = 32; i <= 255; i++) {
+      if (i !== 127) {
+        exports2.HEADER_CHARS.push(i);
+      }
+    }
+    exports2.CONNECTION_TOKEN_CHARS = exports2.HEADER_CHARS.filter((c) => c !== 44);
+    exports2.MAJOR = exports2.NUM_MAP;
+    exports2.MINOR = exports2.MAJOR;
+    var HEADER_STATE;
+    (function(HEADER_STATE2) {
+      HEADER_STATE2[HEADER_STATE2["GENERAL"] = 0] = "GENERAL";
+      HEADER_STATE2[HEADER_STATE2["CONNECTION"] = 1] = "CONNECTION";
+      HEADER_STATE2[HEADER_STATE2["CONTENT_LENGTH"] = 2] = "CONTENT_LENGTH";
+      HEADER_STATE2[HEADER_STATE2["TRANSFER_ENCODING"] = 3] = "TRANSFER_ENCODING";
+      HEADER_STATE2[HEADER_STATE2["UPGRADE"] = 4] = "UPGRADE";
+      HEADER_STATE2[HEADER_STATE2["CONNECTION_KEEP_ALIVE"] = 5] = "CONNECTION_KEEP_ALIVE";
+      HEADER_STATE2[HEADER_STATE2["CONNECTION_CLOSE"] = 6] = "CONNECTION_CLOSE";
+      HEADER_STATE2[HEADER_STATE2["CONNECTION_UPGRADE"] = 7] = "CONNECTION_UPGRADE";
+      HEADER_STATE2[HEADER_STATE2["TRANSFER_ENCODING_CHUNKED"] = 8] = "TRANSFER_ENCODING_CHUNKED";
+    })(HEADER_STATE = exports2.HEADER_STATE || (exports2.HEADER_STATE = {}));
+    exports2.SPECIAL_HEADERS = {
+      "connection": HEADER_STATE.CONNECTION,
+      "content-length": HEADER_STATE.CONTENT_LENGTH,
+      "proxy-connection": HEADER_STATE.CONNECTION,
+      "transfer-encoding": HEADER_STATE.TRANSFER_ENCODING,
+      "upgrade": HEADER_STATE.UPGRADE
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/handler/RedirectHandler.js
+var require_RedirectHandler = __commonJS({
+  "alexa/node_modules/undici/lib/handler/RedirectHandler.js"(exports2, module2) {
+    "use strict";
+    var util = require_util();
+    var { kBodyUsed } = require_symbols();
+    var assert2 = require("assert");
+    var { InvalidArgumentError } = require_errors();
+    var EE = require("events");
+    var redirectableStatusCodes = [300, 301, 302, 303, 307, 308];
+    var kBody = /* @__PURE__ */ Symbol("body");
+    var BodyAsyncIterable = class {
+      constructor(body) {
+        this[kBody] = body;
+        this[kBodyUsed] = false;
+      }
+      async *[Symbol.asyncIterator]() {
+        assert2(!this[kBodyUsed], "disturbed");
+        this[kBodyUsed] = true;
+        yield* this[kBody];
+      }
+    };
+    var RedirectHandler = class {
+      constructor(dispatch, maxRedirections, opts, handler2) {
+        if (maxRedirections != null && (!Number.isInteger(maxRedirections) || maxRedirections < 0)) {
+          throw new InvalidArgumentError("maxRedirections must be a positive number");
+        }
+        util.validateHandler(handler2, opts.method, opts.upgrade);
+        this.dispatch = dispatch;
+        this.location = null;
+        this.abort = null;
+        this.opts = { ...opts, maxRedirections: 0 };
+        this.maxRedirections = maxRedirections;
+        this.handler = handler2;
+        this.history = [];
+        if (util.isStream(this.opts.body)) {
+          if (util.bodyLength(this.opts.body) === 0) {
+            this.opts.body.on("data", function() {
+              assert2(false);
+            });
+          }
+          if (typeof this.opts.body.readableDidRead !== "boolean") {
+            this.opts.body[kBodyUsed] = false;
+            EE.prototype.on.call(this.opts.body, "data", function() {
+              this[kBodyUsed] = true;
+            });
+          }
+        } else if (this.opts.body && typeof this.opts.body.pipeTo === "function") {
+          this.opts.body = new BodyAsyncIterable(this.opts.body);
+        } else if (this.opts.body && typeof this.opts.body !== "string" && !ArrayBuffer.isView(this.opts.body) && util.isIterable(this.opts.body)) {
+          this.opts.body = new BodyAsyncIterable(this.opts.body);
+        }
+      }
+      onConnect(abort) {
+        this.abort = abort;
+        this.handler.onConnect(abort, { history: this.history });
+      }
+      onUpgrade(statusCode, headers, socket) {
+        this.handler.onUpgrade(statusCode, headers, socket);
+      }
+      onError(error2) {
+        this.handler.onError(error2);
+      }
+      onHeaders(statusCode, headers, resume, statusText) {
+        this.location = this.history.length >= this.maxRedirections || util.isDisturbed(this.opts.body) ? null : parseLocation(statusCode, headers);
+        if (this.opts.origin) {
+          this.history.push(new URL(this.opts.path, this.opts.origin));
+        }
+        if (!this.location) {
+          return this.handler.onHeaders(statusCode, headers, resume, statusText);
+        }
+        const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
+        const path = search ? `${pathname}${search}` : pathname;
+        this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
+        this.opts.path = path;
+        this.opts.origin = origin;
+        this.opts.maxRedirections = 0;
+        this.opts.query = null;
+        if (statusCode === 303 && this.opts.method !== "HEAD") {
+          this.opts.method = "GET";
+          this.opts.body = null;
+        }
+      }
+      onData(chunk) {
+        if (this.location) {
+        } else {
+          return this.handler.onData(chunk);
+        }
+      }
+      onComplete(trailers) {
+        if (this.location) {
+          this.location = null;
+          this.abort = null;
+          this.dispatch(this.opts, this);
+        } else {
+          this.handler.onComplete(trailers);
+        }
+      }
+      onBodySent(chunk) {
+        if (this.handler.onBodySent) {
+          this.handler.onBodySent(chunk);
+        }
+      }
+    };
+    function parseLocation(statusCode, headers) {
+      if (redirectableStatusCodes.indexOf(statusCode) === -1) {
+        return null;
+      }
+      for (let i = 0; i < headers.length; i += 2) {
+        if (headers[i].toString().toLowerCase() === "location") {
+          return headers[i + 1];
+        }
+      }
+    }
+    function shouldRemoveHeader(header, removeContent, unknownOrigin) {
+      if (header.length === 4) {
+        return util.headerNameToString(header) === "host";
+      }
+      if (removeContent && util.headerNameToString(header).startsWith("content-")) {
+        return true;
+      }
+      if (unknownOrigin && (header.length === 13 || header.length === 6 || header.length === 19)) {
+        const name = util.headerNameToString(header);
+        return name === "authorization" || name === "cookie" || name === "proxy-authorization";
+      }
+      return false;
+    }
+    function cleanRequestHeaders(headers, removeContent, unknownOrigin) {
+      const ret = [];
+      if (Array.isArray(headers)) {
+        for (let i = 0; i < headers.length; i += 2) {
+          if (!shouldRemoveHeader(headers[i], removeContent, unknownOrigin)) {
+            ret.push(headers[i], headers[i + 1]);
+          }
+        }
+      } else if (headers && typeof headers === "object") {
+        for (const key of Object.keys(headers)) {
+          if (!shouldRemoveHeader(key, removeContent, unknownOrigin)) {
+            ret.push(key, headers[key]);
+          }
+        }
+      } else {
+        assert2(headers == null, "headers must be an object or an array");
+      }
+      return ret;
+    }
+    module2.exports = RedirectHandler;
+  }
+});
+
+// alexa/node_modules/undici/lib/interceptor/redirectInterceptor.js
+var require_redirectInterceptor = __commonJS({
+  "alexa/node_modules/undici/lib/interceptor/redirectInterceptor.js"(exports2, module2) {
+    "use strict";
+    var RedirectHandler = require_RedirectHandler();
+    function createRedirectInterceptor({ maxRedirections: defaultMaxRedirections }) {
+      return (dispatch) => {
+        return function Intercept(opts, handler2) {
+          const { maxRedirections = defaultMaxRedirections } = opts;
+          if (!maxRedirections) {
+            return dispatch(opts, handler2);
+          }
+          const redirectHandler = new RedirectHandler(dispatch, maxRedirections, opts, handler2);
+          opts = { ...opts, maxRedirections: 0 };
+          return dispatch(opts, redirectHandler);
+        };
+      };
+    }
+    module2.exports = createRedirectInterceptor;
+  }
+});
+
+// alexa/node_modules/undici/lib/llhttp/llhttp-wasm.js
+var require_llhttp_wasm = __commonJS({
+  "alexa/node_modules/undici/lib/llhttp/llhttp-wasm.js"(exports2, module2) {
+    module2.exports = "AGFzbQEAAAABMAhgAX8Bf2ADf39/AX9gBH9/f38Bf2AAAGADf39/AGABfwBgAn9/AGAGf39/f39/AALLAQgDZW52GHdhc21fb25faGVhZGVyc19jb21wbGV0ZQACA2VudhV3YXNtX29uX21lc3NhZ2VfYmVnaW4AAANlbnYLd2FzbV9vbl91cmwAAQNlbnYOd2FzbV9vbl9zdGF0dXMAAQNlbnYUd2FzbV9vbl9oZWFkZXJfZmllbGQAAQNlbnYUd2FzbV9vbl9oZWFkZXJfdmFsdWUAAQNlbnYMd2FzbV9vbl9ib2R5AAEDZW52GHdhc21fb25fbWVzc2FnZV9jb21wbGV0ZQAAA0ZFAwMEAAAFAAAAAAAABQEFAAUFBQAABgAAAAAGBgYGAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAAABAQcAAAUFAwABBAUBcAESEgUDAQACBggBfwFBgNQECwfRBSIGbWVtb3J5AgALX2luaXRpYWxpemUACRlfX2luZGlyZWN0X2Z1bmN0aW9uX3RhYmxlAQALbGxodHRwX2luaXQAChhsbGh0dHBfc2hvdWxkX2tlZXBfYWxpdmUAQQxsbGh0dHBfYWxsb2MADAZtYWxsb2MARgtsbGh0dHBfZnJlZQANBGZyZWUASA9sbGh0dHBfZ2V0X3R5cGUADhVsbGh0dHBfZ2V0X2h0dHBfbWFqb3IADxVsbGh0dHBfZ2V0X2h0dHBfbWlub3IAEBFsbGh0dHBfZ2V0X21ldGhvZAARFmxsaHR0cF9nZXRfc3RhdHVzX2NvZGUAEhJsbGh0dHBfZ2V0X3VwZ3JhZGUAEwxsbGh0dHBfcmVzZXQAFA5sbGh0dHBfZXhlY3V0ZQAVFGxsaHR0cF9zZXR0aW5nc19pbml0ABYNbGxodHRwX2ZpbmlzaAAXDGxsaHR0cF9wYXVzZQAYDWxsaHR0cF9yZXN1bWUAGRtsbGh0dHBfcmVzdW1lX2FmdGVyX3VwZ3JhZGUAGhBsbGh0dHBfZ2V0X2Vycm5vABsXbGxodHRwX2dldF9lcnJvcl9yZWFzb24AHBdsbGh0dHBfc2V0X2Vycm9yX3JlYXNvbgAdFGxsaHR0cF9nZXRfZXJyb3JfcG9zAB4RbGxodHRwX2Vycm5vX25hbWUAHxJsbGh0dHBfbWV0aG9kX25hbWUAIBJs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ADcDACAAQShqQgA3AwAgAEEgakIANwMAIABBEGpCADcDACAAQQhqQgA3AwAgAEHdATYCHEEAC3sBAX8CQCAAKAIMIgMNAAJAIAAoAgRFDQAgACABNgIECwJAIAAgASACEMSAgIAAIgMNACAAKAIMDwsgACADNgIcQQAhAyAAKAIEIgFFDQAgACABIAIgACgCCBGBgICAAAAiAUUNACAAIAI2AhQgACABNgIMIAEhAwsgAwvk8wEDDn8DfgR/I4CAgIAAQRBrIgMkgICAgAAgASEEIAEhBSABIQYgASEHIAEhCCABIQkgASEKIAEhCyABIQwgASENIAEhDiABIQ8CQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkAgACgCHCIQQX9qDt0B2gEB2QECAwQFBgcICQoLDA0O2AEPENcBERLWARMUFRYXGBkaG+AB3wEcHR7VAR8gISIjJCXUASYnKCkqKyzTAdIBLS7RAdABLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVG2wFHSElKzwHOAUvNAUzMAU1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4ABgQGCAYMBhAGFAYYBhwGIAYkB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QAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkAC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FCAAIBA2AgxBACEQDLIBCyAAKAIEIRAgAEEANgIEAkAgACAQIAEQp4CAgAAiEA0AIAEhAQxNCyAAQdMANgIcIAAgATYCFCAAIBA2AgxBACEQDLEBCyAAKAIEIRAgAEEANgIEAkAgACAQIAEQp4CAgAAiEA0AIAEhAQxRCyAAQeUANgIcIAAgATYCFCAAIBA2AgxBACEQDLABCyAAQQA2AhwgACABNgIUIABBxoqAgAA2AhAgAEEHNgIMQQAhEAyvAQsgACgCBCEQIABBADYCBAJAIAAgECABEKeAgIAAIhANACABIQEMSQsgAEHSADYCHCAAIAE2AhQgACAQNgIMQQAhEAyuAQsgACgCBCEQIABBADYCBAJAIAAgECABEKeAgIAAIhANACABIQEMSQsgAEHTADYCHCAAIAE2AhQgACAQNgIMQQAhEAytAQsgACgCBCEQIABBADYCBAJAIAAgECABEKeAgIAAIhANACABIQEMTQsgAEHlADYCHCAAIAE2AhQgACAQNgIMQQAhEAysAQsgAEEANgIcIAAgATYCFCAAQdyIgIAANgIQIABBBzYCDEEAIRAMqwELIBBBP0cNASABQQFqIQELQQUhEAyQAQtBACEQIABBADYCHCAAIAE2AhQgAEH9koCAADYCECAAQQc2AgwMqAELIAAoAgQhECAAQQA2AgQCQCAAIBAgARCngICAACIQDQAgASEBDEILIABB0gA2AhwgACABNgIUIAAgEDYCDEEAIRAMpwELIAAoAgQhECAAQQA2AgQCQCAAIBAgARCngICAACIQDQAgASEBDEILIABB0wA2AhwgACABNgIUIAAgEDYCDEEAIRAMpgELIAAoAgQhECAAQQA2AgQCQCAAIBAgARCngICAACIQDQAgASEBDEYLIABB5QA2AhwgACABNgIUIAAgEDYCDEEAIRAMpQELIAAoAgQhASAAQQA2AgQCQCAAIAEgFBCngICAACIBDQAgFCEBDD8LIABB0gA2AhwgACAUNgIUIAAgATYCDEEAIRAMpAELIAAoAgQhASAAQQA2AgQCQCAAIAEgFBCngICAACIBDQAgFCEBDD8LIABB0wA2AhwgACAUNgIUIAAgATYCDEEAIRAMowELIAAoAgQhASAAQQA2AgQCQCAAIAEgFBCngICAACIBDQAgFCEBDEMLIABB5QA2AhwgACAUNgIUIAAgATYCDEEAIRAMogELIABBADYCHCAAIBQ2AhQgAEHDj4CAADYCECAAQQc2AgxBACEQDKEBCyAAQQA2AhwgACABNgIUIABBw4+AgAA2AhAgAEEHNgIMQQAhEAygAQtBACEQIABBADYCHCAAIBQ2AhQgAEGMnICAADYCECAAQQc2AgwMnwELIABBADYCHCAAIBQ2AhQgAEGMnICAADYCECAAQQc2AgxBACEQDJ4BCyAAQQA2AhwgACAUNgIUIABB/pGAgAA2AhAgAEEHNgIMQQAhEAydAQsgAEEANgIcIAAgATYCFCAAQY6bgIAANgIQIABBBjYCDEEAIRAMnAELIBBBFUYNVyAAQQA2AhwgACABNgIUIABBzI6AgAA2AhAgAEEgNgIMQQAhEAybAQsgAEEANgIAIBBBAWohAUEkIRALIAAgEDoAKSAAKAIEIRAgAEEANgIEIAAgECABEKuAgIAAIhANVCABIQEMPgsgAEEANgIAC0EAIRAgAEEANgIcIAAgBDYCFCAAQfGbgIAANgIQIABBBjYCDAyXAQsgAUEVRg1QIABBADYCHCAAIAU2AhQgAEHwjICAADYCECAAQRs2AgxBACEQDJYBCyAAKAIEIQUgAEEANgIEIAAgBSAQEKmAgIAAIgUNASAQQQFqIQULQa0BIRAMewsgAEHBATYCHCAAIAU2AgwgACAQQQFqNgIUQQAhEAyTAQsgACgCBCEGIABBADYCBCAAIAYgEBCpgICAACIGDQEgEEEBaiEGC0GuASEQDHgLIABBwgE2AhwgACAGNgIMIAAgEEEBajYCFEEAIRAMkAELIABBADYCHCAAIAc2AhQgAEGXi4CAADYCECAAQQ02AgxBACEQDI8BCyAAQQA2AhwgACAINgIUIABB45CAgAA2AhAgAEEJNgIMQQAhEAyOAQsgAEEANgIcIAAgCDYCFCAAQZSNgIAANgIQIABBITYCDEEAIRAMjQELQQEhFkEAIRdBACEUQQEhEAsgACAQOgArIAlBAWohCAJAAkAgAC0ALUEQcQ0AAkACQAJAIAAtACoOAwEAAgQLIBZFDQMMAgsgFA0BDAILIBdFDQELIAAoAgQhECAAQQA2AgQgACAQIAgQrYCAgAAiEEUNPSAAQckBNgIcIAAgCDYCFCAAIBA2AgxBACEQDIwBCyAAKAIEIQQgAEEANgIEIAAgBCAIEK2AgIAAIgRFDXYgAEHKATYCHCAAIAg2AhQgACAENgIMQQAhEAyLAQsgACgCBCEEIABBADYCBCAAIAQgCRCtgICAACIERQ10IABBywE2AhwgACAJNgIUIAAgBDYCDEEAIRAMigELIAAoAgQhBCAAQQA2AgQgACAEIAoQrYCAgAAiBEUNciAAQc0BNgIcIAAgCjYCFCAAIAQ2AgxBACEQDIkBCwJAIAstAABBUGoiEEH/AXFBCk8NACAAIBA6ACogC0EBaiEKQbYBIRAMcAsgACgCBCEEIABBADYCBCAAIAQgCxCtgICAACIERQ1wIABBzwE2AhwgACALNgIUIAAgBDYCDEEAIRAMiAELIABBADYCHCAAIAQ2AhQgAEGQs4CAADYCECAAQQg2AgwgAEEANgIAQQAhEAyHAQsgAUEVRg0/IABBADYCHCAAIAw2AhQgAEHMjoCAADYCECAAQSA2AgxBACEQDIYBCyAAQYEEOwEoIAAoAgQhECAAQgA3AwAgACAQIAxBAWoiDBCrgICAACIQRQ04IABB0wE2AhwgACAMNgIUIAAgEDYCDEEAIRAMhQELIABBADYCAAtBACEQIABBADYCHCAAIAQ2AhQgAEHYm4CAADYCECAAQQg2AgwMgwELIAAoAgQhECAAQgA3AwAgACAQIAtBAWoiCxCrgICAACIQDQFBxgEhEAxpCyAAQQI6ACgMVQsgAEHVATYCHCAAIAs2AhQgACAQNgIMQQAhEAyAAQsgEEEVRg03IABBADYCHCAAIAQ2AhQgAEGkjICAADYCECAAQRA2AgxBACEQDH8LIAAtADRBAUcNNCAAIAQgAhC8gICAACIQRQ00IBBBFUcNNSAAQdwBNgIcIAAgBDYCFCAAQdWWgIAANgIQIABBFTYCDEEAIRAMfgtBACEQIABBADYCHCAAQa+LgIAANgIQIABBAjYCDCAAIBRBAWo2AhQMfQtBACEQDGMLQQIhEAxiC0ENIRAMYQtBDyEQDGALQSUhEAxfC0ETIRAMXgtBFSEQDF0LQRYhEAxcC0EXIRAMWwtBGCEQDFoLQRkhEAxZC0EaIRAMWAtBGyEQDFcLQRwhEAxWC0EdIRAMVQtBHyEQDFQLQSEhEAxTC0EjIRAMUgtBxgAhEAxRC0EuIRAMUAtBLyEQDE8LQTshEAxOC0E9IRAMTQtByAAhEAxMC0HJACEQDEsLQcsAIRAMSgtBzAAhEAxJC0HOACEQDEgLQdEAIRAMRwtB1QAhEAxGC0HYACEQDEULQdkAIRAMRAtB2wAhEAxDC0HkACEQDEILQeUAIRAMQQtB8QAhEAxAC0H0ACEQDD8LQY0BIRAMPgtBlwEhEAw9C0GpASEQDDwLQawBIRAMOwtBwAEhEAw6C0G5ASEQDDkLQa8BIRAMOAtBsQEhEAw3C0GyASEQDDYLQbQBIRAMNQtBtQEhEAw0C0G6ASEQDDMLQb0BIRAMMgtBvwEhEAwxC0HBASEQDDALIABBADYCHCAAIAQ2AhQgAEHpi4CAADYCECAAQR82AgxBACEQDEgLIABB2wE2AhwgACAENgIUIABB+paAgAA2AhAgAEEVNgIMQQAhEAxHCyAAQfgANgIcIAAgDDYCFCAAQcqYgIAANgIQIABBFTYCDEEAIRAMRgsgAEHRADYCHCAAIAU2AhQgAEGwl4CAADYCECAAQRU2AgxBACEQDEULIABB+QA2AhwgACABNgIUIAAgEDYCDEEAIRAMRAsgAEH4ADYCHCAAIAE2AhQgAEHKmICAADYCECAAQRU2AgxBACEQDEMLIABB5AA2AhwgACABNgIUIABB45eAgAA2AhAgAEEVNgIMQQAhEAxCCyAAQdcANgIcIAAgATYCFCAAQcmXgIAANgIQIABBFTYCDEEAIRAMQQsgAEEANgIcIAAgATYCFCAAQbmNgIAANgIQIABBGjYCDEEAIRAMQAsgAEHCADYCHCAAIAE2AhQgAEHjmICAADYCECAAQRU2AgxBACEQDD8LIABBADYCBCAAIA8gDxCxgICAACIERQ0BIABBOjYCHCAAIAQ2AgwgACAPQQFqNgIUQQAhEAw+CyAAKAIEIQQgAEEANgIEAkAgACAEIAEQsYCAgAAiBEUNACAAQTs2AhwgACAENgIMIAAgAUEBajYCFEEAIRAMPgsgAUEBaiEBDC0LIA9BAWohAQwtCyAAQQA2AhwgACAPNgIUIABB5JKAgAA2AhAgAEEENgIMQQAhEAw7CyAAQTY2AhwgACAENgIUIAAgAjYCDEEAIRAMOgsgAEEuNgIcIAAgDjYCFCAAIAQ2AgxBACEQDDkLIABB0AA2AhwgACABNgIUIABBkZiAgAA2AhAgAEEVNgIMQQAhEAw4CyANQQFqIQEMLAsgAEEVNgIcIAAgATYCFCAAQYKZgIAANgIQIABBFTYCDEEAIRAMNgsgAEEbNgIcIAAgATYCFCAAQZGXgIAANgIQIABBFTYCDEEAIRAMNQsgAEEPNgIcIAAgATYCFCAAQZGXgIAANgIQIABBFTYCDEEAIRAMNAsgAEELNgIcIAAgATYCFCAAQZGXgIAANgIQIABBFTYCDEEAIRAMMwsgAEEaNgIcIAAgATYCFCAAQYKZgIAANgIQIABBFTYCDEEAIRAMMgsgAEELNgIcIAAgATYCFCAAQYKZgIAANgIQIABBFTYCDEEAIRAMMQsgAEEKNgIcIAAgATYCFCAAQeSWgIAANgIQIABBFTYCDEEAIRAMMAsgAEEeNgIcIAAgATYCFCAAQfmXgIAANgIQIABBFTYCDEEAIRAMLwsgAEEANgIcIAAgEDYCFCAAQdqNgIAANgIQIABBFDYCDEEAIRAMLgsgAEEENgIcIAAgATYCFCAAQbCYgIAANgIQIABBFTYCDEEAIRAMLQsgAEEANgIAIAtBAWohCwtBuAEhEAwSCyAAQQA2AgAgEEEBaiEBQfUAIRAMEQsgASEBAkAgAC0AKUEFRw0AQeMAIRAMEQtB4gAhEAwQC0EAIRAgAEEANgIcIABB5JGAgAA2AhAgAEEHNgIMIAAgFEEBajYCFAwoCyAAQQA2AgAgF0EBaiEBQcAAIRAMDgtBASEBCyAAIAE6ACwgAEEANgIAIBdBAWohAQtBKCEQDAsLIAEhAQtBOCEQDAkLAkAgASIPIAJGDQADQAJAIA8tAABBgL6AgABqLQAAIgFBAUYNACABQQJHDQMgD0EBaiEBDAQLIA9BAWoiDyACRw0AC0E+IRAMIgtBPiEQDCELIABBADoALCAPIQEMAQtBCyEQDAYLQTohEAwFCyABQQFqIQFBLSEQDAQLIAAgAToALCAAQQA2AgAgFkEBaiEBQQwhEAwDCyAAQQA2AgAgF0EBaiEBQQohEAwCCyAAQQA2AgALIABBADoALCANIQFBCSEQDAALC0EAIRAgAEEANgIcIAAgCzYCFCAAQc2QgIAANgIQIABBCTYCDAwXC0EAIRAgAEEANgIcIAAgCjYCFCAAQemKgIAANgIQIABBCTYCDAwWC0EAIRAgAEEANgIcIAAgCTYCFCAAQbeQgIAANgIQIABBCTYCDAwVC0EAIRAgAEEANgIcIAAgCDYCFCAAQZyRgIAANgIQIABBCTYCDAwUC0EAIRAgAEEANgIcIAAgATYCFCAAQc2QgIAANgIQIABBCTYCDAwTC0EAIRAgAEEANgIcIAAgATYCFCAAQemKgIAANgIQIABBCTYCDAwSC0EAIRAgAEEANgIcIAAgATYCFCAAQbeQgIAANgIQIABBCTYCDAwRC0EAIRAgAEEANgIcIAAgATYCFCAAQZyRgIAANgIQIABBCTYCDAwQC0EAIRAgAEEANgIcIAAgATYCFCAAQZeVgIAANgIQIABBDzYCDAwPC0EAIRAgAEEANgIcIAAgATYCFCAAQZeVgIAANgIQIABBDzYCDAwOC0EAIRAgAEEANgIcIAAgATYCFCAAQcCSgIAANgIQIABBCzYCDAwNC0EAIRAgAEEANgIcIAAgATYCFCAAQZWJgIAANgIQIABBCzYCDAwMC0EAIRAgAEEANgIcIAAgATYCFCAAQeGPgIAANgIQIABBCjYCDAwLC0EAIRAgAEEANgIcIAAgATYCFCAAQfuPgIAANgIQIABBCjYCDAwKC0EAIRAgAEEANgIcIAAgATYCFCAAQfGZgIAANgIQIABBAjYCDAwJC0EAIRAgAEEANgIcIAAgATYCFCAAQcSUgIAANgIQIABBAjYCDAwIC0EAIRAgAEEANgIcIAAgATYCFCAAQfKVgIAANgIQIABBAjYCDAwHCyAAQQI2AhwgACABNgIUIABBnJqAgAA2AhAgAEEWNgIMQQAhEAwGC0EBIRAMBQtB1AAhECABIgQgAkYNBCADQQhqIAAgBCACQdjCgIAAQQoQxYCAgAAgAygCDCEEIAMoAggOAwEEAgALEMqAgIAAAAsgAEEANgIcIABBtZqAgAA2AhAgAEEXNgIMIAAgBEEBajYCFEEAIRAMAgsgAEEANgIcIAAgBDYCFCAAQcqagIAANgIQIABBCTYCDEEAIRAMAQsCQCABIgQgAkcNAEEiIRAMAQsgAEGJgICAADYCCCAAIAQ2AgRBISEQCyADQRBqJICAgIAAIBALrwEBAn8gASgCACEGAkACQCACIANGDQAgBCAGaiEEIAYgA2ogAmshByACIAZBf3MgBWoiBmohBQNAAkAgAi0AACAELQAARg0AQQIhBAwDCwJAIAYNAEEAIQQgBSECDAMLIAZBf2ohBiAEQQFqIQQgAkEBaiICIANHDQALIAchBiADIQILIABBATYCACABIAY2AgAgACACNgIEDwsgAUEANgIAIAAgBDYCACAAIAI2AgQLCgAgABDHgICAAAvyNgELfyOAgICAAEEQayIBJICAgIAAAkBBACgCoNCAgAANAEEAEMuAgIAAQYDUhIAAayICQdkASQ0AQQAhAwJAQQAoAuDTgIAAIgQNAEEAQn83AuzTgIAAQQBCgICEgICAwAA3AuTTgIAAQQAgAUEIakFwcUHYqtWqBXMiBDYC4NOAgABBAEEANgL004CAAEEAQQA2AsTTgIAAC0EAIAI2AszTgIAAQQBBgNSEgAA2AsjTgIAAQQBBgNSEgAA2ApjQgIAAQQAgBDYCrNCAgABBAEF/NgKo0ICAAANAIANBxNCAgABqIANBuNCAgABqIgQ2AgAgBCADQbDQgIAAaiIFNgIAIANBvNCAgABqIAU2AgAgA0HM0ICAAGogA0HA0ICAAGoiBTYCACAFIAQ2AgAgA0HU0ICAAGogA0HI0ICAAGoiBDYCACAEIAU2AgAgA0HQ0ICAAGogBDYCACADQSBqIgNBgAJHDQALQYDUhIAAQXhBgNSEgABrQQ9xQQBBgNSEgABBCGpBD3EbIgNqIgRBBGogAkFIaiIFIANrIgNBAXI2AgBBAEEAKALw04CAADYCpNCAgABBACADNgKU0ICAAEEAIAQ2AqDQgIAAQYDUhIAAIAVqQTg2AgQLAkACQAJAAkACQAJAAkACQAJAAkACQAJAIABB7AFLDQACQEEAKAKI0ICAACIGQRAgAEETakFwcSAAQQtJGyICQQN2IgR2IgNBA3FFDQACQAJAIANBAXEgBHJBAXMiBUEDdCIEQbDQgIAAaiIDIARBuNCAgABqKAIAIgQoAggiAkcNAEEAIAZBfiAFd3E2AojQgIAADAELIAMgAjYCCCACIAM2AgwLIARBCGohAyAEIAVBA3QiBUEDcjYCBCAEIAVqIgQgBCgCBEEBcjYCBAwMCyACQQAoApDQgIAAIgdNDQECQCADRQ0AAkACQCADIAR0QQIgBHQiA0EAIANrcnEiA0EAIANrcUF/aiIDIANBDHZBEHEiA3YiBEEFdkEIcSIFIANyIAQgBXYiA0ECdkEEcSIEciADIAR2IgNBAXZBAnEiBHIgAyAEdiIDQQF2QQFxIgRyIAMgBHZqIgRBA3QiA0Gw0ICAAGoiBSADQbjQgIAAaigCACIDKAIIIgBHDQBBACAGQX4gBHdxIgY2AojQgIAADAELIAUgADYCCCAAIAU2AgwLIAMgAkEDcjYCBCADIARBA3QiBGogBCACayIFNgIAIAMgAmoiACAFQQFyNgIEAkAgB0UNACAHQXhxQbDQgIAAaiECQQAoApzQgIAAIQQCQAJAIAZBASAHQQN2dCIIcQ0AQQAgBiAIcjYCiNCAgAAgAiEIDAELIAIoAgghCAsgCCAENgIMIAIgBDYCCCAEIAI2AgwgBCAINgIICyADQQhqIQNBACAANgKc0ICAAEEAIAU2ApDQgIAADAwLQQAoAozQgIAAIglFDQEgCUEAIAlrcUF/aiIDIANBDHZBEHEiA3YiBEEFdkEIcSIFIANyIAQgBXYiA0ECdkEEcSIEciADIAR2IgNBAXZBAnEiBHIgAyAEdiIDQQF2QQFxIgRyIAMgBHZqQQJ0QbjSgIAAaigCACIAKAIEQXhxIAJrIQQgACEFAkADQAJAIAUoAhAiAw0AIAVBFGooAgAiA0UNAgsgAygCBEF4cSACayIFIAQgBSAESSIFGyEEIAMgACAFGyEAIAMhBQwACwsgACgCGCEKAkAgACgCDCIIIABGDQAgACgCCCIDQQAoApjQgIAASRogCCADNgIIIAMgCDYCDAwLCwJAIABBFGoiBSgCACIDDQAgACgCECIDRQ0DIABBEGohBQsDQCAFIQsgAyIIQRRqIgUoAgAiAw0AIAhBEGohBSAIKAIQIgMNAAsgC0EANgIADAoLQX8hAiAAQb9/Sw0AIABBE2oiA0FwcSECQQAoAozQgIAAIgdFDQBBACELAkAgAkGAAkkNAEEfIQsgAkH///8HSw0AIANBCHYiAyADQYD+P2pBEHZBCHEiA3QiBCAEQYDgH2pBEHZBBHEiBHQiBSAFQYCAD2pBEHZBAnEiBXRBD3YgAyAEciAFcmsiA0EBdCACIANBFWp2QQFxckEcaiELC0EAIAJrIQQCQAJAAkACQCALQQJ0QbjSgIAAaigCACIFDQBBACEDQQAhCAwBC0EAIQMgAkEAQRkgC0EBdmsgC0EfRht0IQBBACEIA0ACQCAFKAIEQXhxIAJrIgYgBE8NACAGIQQgBSEIIAYNAEEAIQQgBSEIIAUhAwwDCyADIAVBFGooAgAiBiAGIAUgAEEddkEEcWpBEGooAgAiBUYbIAMgBhshAyAAQQF0IQAgBQ0ACwsCQCADIAhyDQBBACEIQQIgC3QiA0EAIANrciAHcSIDRQ0DIANBACADa3FBf2oiAyADQQx2QRBxIgN2IgVBBXZBCHEiACADciAFIAB2IgNBAnZBBHEiBXIgAyAFdiIDQQF2QQJxIgVyIAMgBXYiA0EBdkEBcSIFciADIAV2akECdEG40oCAAGooAgAhAwsgA0UNAQsDQCADKAIEQXhxIAJrIgYgBEkhAAJAIAMoAhAiBQ0AIANBFGooAgAhBQsgBiAEIAAbIQQgAyAIIAAbIQggBSEDIAUNAAsLIAhFDQAgBEEAKAKQ0ICAACACa08NACAIKAIYIQsCQCAIKAIMIgAgCEYNACAIKAIIIgNBACgCmNCAgABJGiAAIAM2AgggAyAANgIMDAkLAkAgCEEUaiIFKAIAIgMNACAIKAIQIgNFDQMgCEEQaiEFCwNAIAUhBiADIgBBFGoiBSgCACIDDQAgAEEQaiEFIAAoAhAiAw0ACyAGQQA2AgAMCAsCQEEAKAKQ0ICAACIDIAJJDQBBACgCnNCAgAAhBAJAAkAgAyACayIFQRBJDQAgBCACaiIAIAVBAXI2AgRBACAFNgKQ0ICAAEEAIAA2ApzQgIAAIAQgA2ogBTYCACAEIAJBA3I2AgQMAQsgBCADQQNyNgIEIAQgA2oiAyADKAIEQQFyNgIEQQBBADYCnNCAgABBAEEANgKQ0ICAAAsgBEEIaiEDDAoLAkBBACgClNCAgAAiACACTQ0AQQAoAqDQgIAAIgMgAmoiBCAAIAJrIgVBAXI2AgRBACAFNgKU0ICAAEEAIAQ2AqDQgIAAIAMgAkEDcjYCBCADQQhqIQMMCgsCQAJAQQAoAuDTgIAARQ0AQQAoAujTgIAAIQQMAQtBAEJ/NwLs04CAAEEAQoCAhICAgMAANwLk04CAAEEAIAFBDGpBcHFB2KrVqgVzNgLg04CAAEEAQQA2AvTTgIAAQQBBADYCxNOAgABBgIAEIQQLQQAhAwJAIAQgAkHHAGoiB2oiBkEAIARrIgtxIgggAksNAEEAQTA2AvjTgIAADAoLAkBBACgCwNOAgAAiA0UNAAJAQQAoArjTgIAAIgQgCGoiBSAETQ0AIAUgA00NAQtBACEDQQBBMDYC+NOAgAAMCgtBAC0AxNOAgABBBHENBAJAAkACQEEAKAKg0ICAACIERQ0AQcjTgIAAIQMDQAJAIAMoAgAiBSAESw0AIAUgAygCBGogBEsNAwsgAygCCCIDDQALC0EAEMuAgIAAIgBBf0YNBSAIIQYCQEEAKALk04CAACIDQX9qIgQgAHFFDQAgCCAAayAEIABqQQAgA2txaiEGCyAGIAJNDQUgBkH+////B0sNBQJAQQAoAsDTgIAAIgNFDQBBACgCuNOAgAAiBCAGaiIFIARNDQYgBSADSw0GCyAGEMuAgIAAIgMgAEcNAQwHCyAGIABrIAtxIgZB/v///wdLDQQgBhDLgICAACIAIAMoAgAgAygCBGpGDQMgACEDCwJAIANBf0YNACACQcgAaiAGTQ0AAkAgByAGa0EAKALo04CAACIEakEAIARrcSIEQf7///8HTQ0AIAMhAAwHCwJAIAQQy4CAgABBf0YNACAEIAZqIQYgAyEADAcLQQAgBmsQy4CAgAAaDAQLIAMhACADQX9HDQUMAwtBACEIDAcLQQAhAAwFCyAAQX9HDQILQQBBACgCxNOAgABBBHI2AsTTgIAACyAIQf7///8HSw0BIAgQy4CAgAAhAEEAEMuAgIAAIQMgAEF/Rg0BIANBf0YNASAAIANPDQEgAyAAayIGIAJBOGpNDQELQQBBACgCuNOAgAAgBmoiAzYCuNOAgAACQCADQQAoArzTgIAATQ0AQQAgAzYCvNOAgAALAkACQAJAAkBBACgCoNCAgAAiBEUNAEHI04CAACEDA0AgACADKAIAIgUgAygCBCIIakYNAiADKAIIIgMNAAwDCwsCQAJAQQAoApjQgIAAIgNFDQAgACADTw0BC0EAIAA2ApjQgIAAC0EAIQNBACAGNgLM04CAAEEAIAA2AsjTgIAAQQBBfzYCqNCAgABBAEEAKALg04CAADYCrNCAgABBAEEANgLU04CAAANAIANBxNCAgABqIANBuNCAgABqIgQ2AgAgBCADQbDQgIAAaiIFNgIAIANBvNCAgABqIAU2AgAgA0HM0ICAAGogA0HA0ICAAGoiBTYCACAFIAQ2AgAgA0HU0ICAAGogA0HI0ICAAGoiBDYCACAEIAU2AgAgA0HQ0ICAAGogBDYCACADQSBqIgNBgAJHDQALIABBeCAAa0EPcUEAIABBCGpBD3EbIgNqIgQgBkFIaiIFIANrIgNBAXI2AgRBAEEAKALw04CAADYCpNCAgABBACADNgKU0ICAAEEAIAQ2AqDQgIAAIAAgBWpBODYCBAwCCyADLQAMQQhxDQAgBCAFSQ0AIAQgAE8NACAEQXggBGtBD3FBACAEQQhqQQ9xGyIFaiIAQQAoApTQgIAAIAZqIgsgBWsiBUEBcjYCBCADIAggBmo2AgRBAEEAKALw04CAADYCpNCAgABBACAFNgKU0ICAAEEAIAA2AqDQgIAAIAQgC2pBODYCBAwBCwJAIABBACgCmNCAgAAiCE8NAEEAIAA2ApjQgIAAIAAhCAsgACAGaiEFQcjTgIAAIQMCQAJAAkACQAJAAkACQANAIAMoAgAgBUYNASADKAIIIgMNAAwCCwsgAy0ADEEIcUUNAQtByNOAgAAhAwNAAkAgAygCACIFIARLDQAgBSADKAIEaiIFIARLDQMLIAMoAgghAwwACwsgAyAANgIAIAMgAygCBCAGajYCBCAAQXggAGtBD3FBACAAQQhqQQ9xG2oiCyACQQNyNgIEIAVBeCAFa0EPcUEAIAVBCGpBD3EbaiIGIAsgAmoiAmshAwJAIAYgBEcNAEEAIAI2AqDQgIAAQQBBACgClNCAgAAgA2oiAzYClNCAgAAgAiADQQFyNgIEDAMLAkAgBkEAKAKc0ICAAEcNAEEAIAI2ApzQgIAAQQBBACgCkNCAgAAgA2oiAzYCkNCAgAAgAiADQQFyNgIEIAIgA2ogAzYCAAwDCwJAIAYoAgQiBEEDcUEBRw0AIARBeHEhBwJAAkAgBEH/AUsNACAGKAIIIgUgBEEDdiIIQQN0QbDQgIAAaiIARhoCQCAGKAIMIgQgBUcNAEEAQQAoAojQgIAAQX4gCHdxNgKI0ICAAAwCCyAEIABGGiAEIAU2AgggBSAENgIMDAELIAYoAhghCQJAAkAgBigCDCIAIAZGDQAgBigCCCIEIAhJGiAAIAQ2AgggBCAANgIMDAELAkAgBkEUaiIEKAIAIgUNACAGQRBqIgQoAgAiBQ0AQQAhAAwBCwNAIAQhCCAFIgBBFGoiBCgCACIFDQAgAEEQaiEEIAAoAhAiBQ0ACyAIQQA2AgALIAlFDQACQAJAIAYgBigCHCIFQQJ0QbjSgIAAaiIEKAIARw0AIAQgADYCACAADQFBAEEAKAKM0ICAAEF+IAV3cTYCjNCAgAAMAgsgCUEQQRQgCSgCECAGRhtqIAA2AgAgAEUNAQsgACAJNgIYAkAgBigCECIERQ0AIAAgBDYCECAEIAA2AhgLIAYoAhQiBEUNACAAQRRqIAQ2AgAgBCAANgIYCyAHIANqIQMgBiAHaiIGKAIEIQQLIAYgBEF+cTYCBCACIANqIAM2AgAgAiADQQFyNgIEAkAgA0H/AUsNACADQXhxQbDQgIAAaiEEAkACQEEAKAKI0ICAACIFQQEgA0EDdnQiA3ENAEEAIAUgA3I2AojQgIAAIAQhAwwBCyAEKAIIIQMLIAMgAjYCDCAEIAI2AgggAiAENgIMIAIgAzYCCAwDC0EfIQQCQCADQf///wdLDQAgA0EIdiIEIARBgP4/akEQdkEIcSIEdCIFIAVBgOAfakEQdkEEcSIFdCIAIABBgIAPakEQdkECcSIAdEEPdiAEIAVyIAByayIEQQF0IAMgBEEVanZBAXFyQRxqIQQLIAIgBDYCHCACQgA3AhAgBEECdEG40oCAAGohBQJAQQAoAozQgIAAIgBBASAEdCIIcQ0AIAUgAjYCAEEAIAAgCHI2AozQgIAAIAIgBTYCGCACIAI2AgggAiACNgIMDAMLIANBAEEZIARBAXZrIARBH0YbdCEEIAUoAgAhAANAIAAiBSgCBEF4cSADRg0CIARBHXYhACAEQQF0IQQgBSAAQQRxakEQaiIIKAIAIgANAAsgCCACNgIAIAIgBTYCGCACIAI2AgwgAiACNgIIDAILIABBeCAAa0EPcUEAIABBCGpBD3EbIgNqIgsgBkFIaiIIIANrIgNBAXI2AgQgACAIakE4NgIEIAQgBUE3IAVrQQ9xQQAgBUFJakEPcRtqQUFqIgggCCAEQRBqSRsiCEEjNgIEQQBBACgC8NOAgAA2AqTQgIAAQQAgAzYClNCAgABBACALNgKg0ICAACAIQRBqQQApAtDTgIAANwIAIAhBACkCyNOAgAA3AghBACAIQQhqNgLQ04CAAEEAIAY2AszTgIAAQQAgADYCyNOAgABBAEEANgLU04CAACAIQSRqIQMDQCADQQc2AgAgA0EEaiIDIAVJDQALIAggBEYNAyAIIAgoAgRBfnE2AgQgCCAIIARrIgA2AgAgBCAAQQFyNgIEAkAgAEH/AUsNACAAQXhxQbDQgIAAaiEDAkACQEEAKAKI0ICAACIFQQEgAEEDdnQiAHENAEEAIAUgAHI2AojQgIAAIAMhBQwBCyADKAIIIQULIAUgBDYCDCADIAQ2AgggBCADNgIMIAQgBTYCCAwEC0EfIQMCQCAAQf///wdLDQAgAEEIdiIDIANBgP4/akEQdkEIcSIDdCIFIAVBgOAfakEQdkEEcSIFdCIIIAhBgIAPakEQdkECcSIIdEEPdiADIAVyIAhyayIDQQF0IAAgA0EVanZBAXFyQRxqIQMLIAQgAzYCHCAEQgA3AhAgA0ECdEG40oCAAGohBQJAQQAoAozQgIAAIghBASADdCIGcQ0AIAUgBDYCAEEAIAggBnI2AozQgIAAIAQgBTYCGCAEIAQ2AgggBCAENgIMDAQLIABBAEEZIANBAXZrIANBH0YbdCEDIAUoAgAhCANAIAgiBSgCBEF4cSAARg0DIANBHXYhCCADQQF0IQMgBSAIQQRxakEQaiIGKAIAIggNAAsgBiAENgIAIAQgBTYCGCAEIAQ2AgwgBCAENgIIDAMLIAUoAggiAyACNgIMIAUgAjYCCCACQQA2AhggAiAFNgIMIAIgAzYCCAsgC0EIaiEDDAULIAUoAggiAyAENgIMIAUgBDYCCCAEQQA2AhggBCAFNgIMIAQgAzYCCAtBACgClNCAgAAiAyACTQ0AQQAoAqDQgIAAIgQgAmoiBSADIAJrIgNBAXI2AgRBACADNgKU0ICAAEEAIAU2AqDQgIAAIAQgAkEDcjYCBCAEQQhqIQMMAwtBACEDQQBBMDYC+NOAgAAMAgsCQCALRQ0AAkACQCAIIAgoAhwiBUECdEG40oCAAGoiAygCAEcNACADIAA2AgAgAA0BQQAgB0F+IAV3cSIHNgKM0ICAAAwCCyALQRBBFCALKAIQIAhGG2ogADYCACAARQ0BCyAAIAs2AhgCQCAIKAIQIgNFDQAgACADNgIQIAMgADYCGAsgCEEUaigCACIDRQ0AIABBFGogAzYCACADIAA2AhgLAkACQCAEQQ9LDQAgCCAEIAJqIgNBA3I2AgQgCCADaiIDIAMoAgRBAXI2AgQMAQsgCCACaiIAIARBAXI2AgQgCCACQQNyNgIEIAAgBGogBDYCAAJAIARB/wFLDQAgBEF4cUGw0ICAAGohAwJAAkBBACgCiNCAgAAiBUEBIARBA3Z0IgRxDQBBACAFIARyNgKI0ICAACADIQQMAQsgAygCCCEECyAEIAA2AgwgAyAANgIIIAAgAzYCDCAAIAQ2AggMAQtBHyEDAkAgBEH///8HSw0AIARBCHYiAyADQYD+P2pBEHZBCHEiA3QiBSAFQYDgH2pBEHZBBHEiBXQiAiACQYCAD2pBEHZBAnEiAnRBD3YgAyAFciACcmsiA0EBdCAEIANBFWp2QQFxckEcaiEDCyAAIAM2AhwgAEIANwIQIANBAnRBuNKAgABqIQUCQCAHQQEgA3QiAnENACAFIAA2AgBBACAHIAJyNgKM0ICAACAAIAU2AhggACAANgIIIAAgADYCDAwBCyAEQQBBGSADQQF2ayADQR9GG3QhAyAFKAIAIQICQANAIAIiBSgCBEF4cSAERg0BIANBHXYhAiADQQF0IQMgBSACQQRxakEQaiIGKAIAIgINAAsgBiAANgIAIAAgBTYCGCAAIAA2AgwgACAANgIIDAELIAUoAggiAyAANgIMIAUgADYCCCAAQQA2AhggACAFNgIMIAAgAzYCCAsgCEEIaiEDDAELAkAgCkUNAAJAAkAgACAAKAIcIgVBAnRBuNKAgABqIgMoAgBHDQAgAyAINgIAIAgNAUEAIAlBfiAFd3E2AozQgIAADAILIApBEEEUIAooAhAgAEYbaiAINgIAIAhFDQELIAggCjYCGAJAIAAoAhAiA0UNACAIIAM2AhAgAyAINgIYCyAAQRRqKAIAIgNFDQAgCEEUaiADNgIAIAMgCDYCGAsCQAJAIARBD0sNACAAIAQgAmoiA0EDcjYCBCAAIANqIgMgAygCBEEBcjYCBAwBCyAAIAJqIgUgBEEBcjYCBCAAIAJBA3I2AgQgBSAEaiAENgIAAkAgB0UNACAHQXhxQbDQgIAAaiECQQAoApzQgIAAIQMCQAJAQQEgB0EDdnQiCCAGcQ0AQQAgCCAGcjYCiNCAgAAgAiEIDAELIAIoAgghCAsgCCADNgIMIAIgAzYCCCADIAI2AgwgAyAINgIIC0EAIAU2ApzQgIAAQQAgBDYCkNCAgAALIABBCGohAwsgAUEQaiSAgICAACADCwoAIAAQyYCAgAAL4g0BB38CQCAARQ0AIABBeGoiASAAQXxqKAIAIgJBeHEiAGohAwJAIAJBAXENACACQQNxRQ0BIAEgASgCACICayIBQQAoApjQgIAAIgRJDQEgAiAAaiEAAkAgAUEAKAKc0ICAAEYNAAJAIAJB/wFLDQAgASgCCCIEIAJBA3YiBUEDdEGw0ICAAGoiBkYaAkAgASgCDCICIARHDQBBAEEAKAKI0ICAAEF+IAV3cTYCiNCAgAAMAwsgAiAGRhogAiAENgIIIAQgAjYCDAwCCyABKAIYIQcCQAJAIAEoAgwiBiABRg0AIAEoAggiAiAESRogBiACNgIIIAIgBjYCDAwBCwJAIAFBFGoiAigCACIEDQAgAUEQaiICKAIAIgQNAEEAIQYMAQsDQCACIQUgBCIGQRRqIgIoAgAiBA0AIAZBEGohAiAGKAIQIgQNAAsgBUEANgIACyAHRQ0BAkACQCABIAEoAhwiBEECdEG40oCAAGoiAigCAEcNACACIAY2AgAgBg0BQQBBACgCjNCAgABBfiAEd3E2AozQgIAADAMLIAdBEEEUIAcoAhAgAUYbaiAGNgIAIAZFDQILIAYgBzYCGAJAIAEoAhAiAkUNACAGIAI2AhAgAiAGNgIYCyABKAIUIgJFDQEgBkEUaiACNgIAIAIgBjYCGAwBCyADKAIEIgJBA3FBA0cNACADIAJBfnE2AgRBACAANgKQ0ICAACABIABqIAA2AgAgASAAQQFyNgIEDwsgASADTw0AIAMoAgQiAkEBcUUNAAJAAkAgAkECcQ0AAkAgA0EAKAKg0ICAAEcNAEEAIAE2AqDQgIAAQQBBACgClNCAgAAgAGoiADYClNCAgAAgASAAQQFyNgIEIAFBACgCnNCAgABHDQNBAEEANgKQ0ICAAEEAQQA2ApzQgIAADwsCQCADQQAoApzQgIAARw0AQQAgATYCnNCAgABBAEEAKAKQ0ICAACAAaiIANgKQ0ICAACABIABBAXI2AgQgASAAaiAANgIADwsgAkF4cSAAaiEAAkACQCACQf8BSw0AIAMoAggiBCACQQN2IgVBA3RBsNCAgABqIgZGGgJAIAMoAgwiAiAERw0AQQBBACgCiNCAgABBfiAFd3E2AojQgIAADAILIAIgBkYaIAIgBDYCCCAEIAI2AgwMAQsgAygCGCEHAkACQCADKAIMIgYgA0YNACADKAIIIgJBACgCmNCAgABJGiAGIAI2AgggAiAGNgIMDAELAkAgA0EUaiICKAIAIgQNACADQRBqIgIoAgAiBA0AQQAhBgwBCwNAIAIhBSAEIgZBFGoiAigCACIEDQAgBkEQaiECIAYoAhAiBA0ACyAFQQA2AgALIAdFDQACQAJAIAMgAygCHCIEQQJ0QbjSgIAAaiICKAIARw0AIAIgBjYCACAGDQFBAEEAKAKM0ICAAEF+IAR3cTYCjNCAgAAMAgsgB0EQQRQgBygCECADRhtqIAY2AgAgBkUNAQsgBiAHNgIYAkAgAygCECICRQ0AIAYgAjYCECACIAY2AhgLIAMoAhQiAkUNACAGQRRqIAI2AgAgAiAGNgIYCyABIABqIAA2AgAgASAAQQFyNgIEIAFBACgCnNCAgABHDQFBACAANgKQ0ICAAA8LIAMgAkF+cTYCBCABIABqIAA2AgAgASAAQQFyNgIECwJAIABB/wFLDQAgAEF4cUGw0ICAAGohAgJAAkBBACgCiNCAgAAiBEEBIABBA3Z0IgBxDQBBACAEIAByNgKI0ICAACACIQAMAQsgAigCCCEACyAAIAE2AgwgAiABNgIIIAEgAjYCDCABIAA2AggPC0EfIQICQCAAQf///wdLDQAgAEEIdiICIAJBgP4/akEQdkEIcSICdCIEIARBgOAfakEQdkEEcSIEdCIGIAZBgIAPakEQdkECcSIGdEEPdiACIARyIAZyayICQQF0IAAgAkEVanZBAXFyQRxqIQILIAEgAjYCHCABQgA3AhAgAkECdEG40oCAAGohBAJAAkBBACgCjNCAgAAiBkEBIAJ0IgNxDQAgBCABNgIAQQAgBiADcjYCjNCAgAAgASAENgIYIAEgATYCCCABIAE2AgwMAQsgAEEAQRkgAkEBdmsgAkEfRht0IQIgBCgCACEGAkADQCAGIgQoAgRBeHEgAEYNASACQR12IQYgAkEBdCECIAQgBkEEcWpBEGoiAygCACIGDQALIAMgATYCACABIAQ2AhggASABNgIMIAEgATYCCAwBCyAEKAIIIgAgATYCDCAEIAE2AgggAUEANgIYIAEgBDYCDCABIAA2AggLQQBBACgCqNCAgABBf2oiAUF/IAEbNgKo0ICAAAsLBAAAAAtOAAJAIAANAD8AQRB0DwsCQCAAQf//A3ENACAAQX9MDQACQCAAQRB2QAAiAEF/Rw0AQQBBMDYC+NOAgABBfw8LIABBEHQPCxDKgICAAAAL8gICA38BfgJAIAJFDQAgACABOgAAIAIgAGoiA0F/aiABOgAAIAJBA0kNACAAIAE6AAIgACABOgABIANBfWogAToAACADQX5qIAE6AAAgAkEHSQ0AIAAgAToAAyADQXxqIAE6AAAgAkEJSQ0AIABBACAAa0EDcSIEaiIDIAFB/wFxQYGChAhsIgE2AgAgAyACIARrQXxxIgRqIgJBfGogATYCACAEQQlJDQAgAyABNgIIIAMgATYCBCACQXhqIAE2AgAgAkF0aiABNgIAIARBGUkNACADIAE2AhggAyABNgIUIAMgATYCECADIAE2AgwgAkFwaiABNgIAIAJBbGogATYCACACQWhqIAE2AgAgAkFkaiABNgIAIAQgA0EEcUEYciIFayICQSBJDQAgAa1CgYCAgBB+IQYgAyAFaiEBA0AgASAGNwMYIAEgBjcDECABIAY3AwggASAGNwMAIAFBIGohASACQWBqIgJBH0sNAAsLIAALC45IAQBBgAgLhkgBAAAAAgAAAAMAAAAAAAAAAAAAAAQAAAAFAAAAAAAAAAAAAAAGAAAABwAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEludmFsaWQgY2hhciBpbiB1cmwgcXVlcnkAU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl9ib2R5AENvbnRlbnQtTGVuZ3RoIG92ZXJmbG93AENodW5rIHNpemUgb3ZlcmZsb3cAUmVzcG9uc2Ugb3ZlcmZsb3cASW52YWxpZCBtZXRob2QgZm9yIEhUVFAveC54IHJlcXVlc3QASW52YWxpZCBtZXRob2QgZm9yIFJUU1AveC54IHJlcXVlc3QARXhwZWN0ZWQgU09VUkNFIG1ldGhvZCBmb3IgSUNFL3gueCByZXF1ZXN0AEludmFsaWQgY2hhciBpbiB1cmwgZnJhZ21lbnQgc3RhcnQARXhwZWN0ZWQgZG90AFNwYW4gY2FsbGJhY2sgZXJyb3IgaW4gb25fc3RhdHVzAEludmFsaWQgcmVzcG9uc2Ugc3RhdHVzAEludmFsaWQgY2hhcmFjdGVyIGluIGNodW5rIGV4dGVuc2lvbnMAVXNlciBjYWxsYmFjayBlcnJvcgBgb25fcmVzZXRgIGNhbGxiYWNrIGVycm9yAGBvbl9jaHVua19oZWFkZXJgIGNhbGxiYWNrIGVycm9yAGBvbl9tZXNzYWdlX2JlZ2luYCBjYWxsYmFjayBlcnJvcgBgb25fY2h1bmtfZXh0ZW5zaW9uX3ZhbHVlYCBjYWxsYmFjayBlcnJvcgBgb25fc3RhdHVzX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25fdmVyc2lvbl9jb21wbGV0ZWAgY2FsbGJhY2sgZXJyb3IAYG9uX3VybF9jb21wbGV0ZWAgY2FsbGJhY2sgZXJyb3IAYG9uX2NodW5rX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25faGVhZGVyX3ZhbHVlX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25fbWVzc2FnZV9jb21wbGV0ZWAgY2FsbGJhY2sgZXJyb3IAYG9uX21ldGhvZF9jb21wbGV0ZWAgY2FsbGJhY2sgZXJyb3IAYG9uX2hlYWRlcl9maWVsZF9jb21wbGV0ZWAgY2FsbGJhY2sgZXJyb3IAYG9uX2NodW5rX2V4dGVuc2lvbl9uYW1lYCBjYWxsYmFjayBlcnJvcgBVbmV4cGVjdGVkIGNoYXIgaW4gdXJsIHNlcnZlcgBJbnZhbGlkIGhlYWRlciB2YWx1ZSBjaGFyAEludmFsaWQgaGVhZGVyIGZpZWxkIGNoYXIAU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl92ZXJzaW9uAEludmFsaWQgbWlub3IgdmVyc2lvbgBJbnZhbGlkIG1ham9yIHZlcnNpb24ARXhwZWN0ZWQgc3BhY2UgYWZ0ZXIgdmVyc2lvbgBFeHBlY3RlZCBDUkxGIGFmdGVyIHZlcnNpb24ASW52YWxpZCBIVFRQIHZlcnNpb24ASW52YWxpZCBoZWFkZXIgdG9rZW4AU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl91cmwASW52YWxpZCBjaGFyYWN0ZXJzIGluIHVybABVbmV4cGVjdGVkIHN0YXJ0IGNoYXIgaW4gdXJsAERvdWJsZSBAIGluIHVybABFbXB0eSBDb250ZW50LUxlbmd0aABJbnZhbGlkIGNoYXJhY3RlciBpbiBDb250ZW50LUxlbmd0aABEdXBsaWNhdGUgQ29udGVudC1MZW5ndGgASW52YWxpZCBjaGFyIGluIHVybCBwYXRoAENvbnRlbnQtTGVuZ3RoIGNhbid0IGJlIHByZXNlbnQgd2l0aCBUcmFuc2Zlci1FbmNvZGluZwBJbnZhbGlkIGNoYXJhY3RlciBpbiBjaHVuayBzaXplAFNwYW4gY2FsbGJhY2sgZXJyb3IgaW4gb25faGVhZGVyX3ZhbHVlAFNwYW4gY2FsbGJhY2sgZXJyb3IgaW4gb25fY2h1bmtfZXh0ZW5zaW9uX3ZhbHVlAEludmFsaWQgY2hhcmFjdGVyIGluIGNodW5rIGV4dGVuc2lvbnMgdmFsdWUATWlzc2luZyBleHBlY3RlZCBMRiBhZnRlciBoZWFkZXIgdmFsdWUASW52YWxpZCBgVHJhbnNmZXItRW5jb2RpbmdgIGhlYWRlciB2YWx1ZQBJbnZhbGlkIGNoYXJhY3RlciBpbiBjaHVuayBleHRlbnNpb25zIHF1b3RlIHZhbHVlAEludmFsaWQgY2hhcmFjdGVyIGluIGNodW5rIGV4dGVuc2lvbnMgcXVvdGVkIHZhbHVlAFBhdXNlZCBieSBvbl9oZWFkZXJzX2NvbXBsZXRlAEludmFsaWQgRU9GIHN0YXRlAG9uX3Jlc2V0IHBhdXNlAG9uX2NodW5rX2hlYWRlciBwYXVzZQBvbl9tZXNzYWdlX2JlZ2luIHBhdXNlAG9uX2NodW5rX2V4dGVuc2lvbl92YWx1ZSBwYXVzZQBvbl9zdGF0dXNfY29tcGxldGUgcGF1c2UAb25fdmVyc2lvbl9jb21wbGV0ZSBwYXVzZQBvbl91cmxfY29tcGxldGUgcGF1c2UAb25fY2h1bmtfY29tcGxldGUgcGF1c2UAb25faGVhZGVyX3ZhbHVlX2NvbXBsZXRlIHBhdXNlAG9uX21lc3NhZ2VfY29tcGxldGUgcGF1c2UAb25fbWV0aG9kX2NvbXBsZXRlIHBhdXNlAG9uX2hlYWRlcl9maWVsZF9jb21wbGV0ZSBwYXVzZQBvbl9jaHVua19leHRlbnNpb25fbmFtZSBwYXVzZQBVbmV4cGVjdGVkIHNwYWNlIGFmdGVyIHN0YXJ0IGxpbmUAU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl9jaHVua19leHRlbnNpb25fbmFtZQBJbnZhbGlkIGNoYXJhY3RlciBpbiBjaHVuayBleHRlbnNpb25zIG5hbWUAUGF1c2Ugb24gQ09OTkVDVC9VcGdyYWRlAFBhdXNlIG9uIFBSSS9VcGdyYWRlAEV4cGVjdGVkIEhUVFAvMiBDb25uZWN0aW9uIFByZWZhY2UAU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl9tZXRob2QARXhwZWN0ZWQgc3BhY2UgYWZ0ZXIgbWV0aG9kAFNwYW4gY2FsbGJhY2sgZXJyb3IgaW4gb25faGVhZGVyX2ZpZWxkAFBhdXNlZABJbnZhbGlkIHdvcmQgZW5jb3VudGVyZWQASW52YWxpZCBtZXRob2QgZW5jb3VudGVyZWQAVW5leHBlY3RlZCBjaGFyIGluIHVybCBzY2hlbWEAUmVxdWVzdCBoYXMgaW52YWxpZCBgVHJhbnNmZXItRW5jb2RpbmdgAFNXSVRDSF9QUk9YWQBVU0VfUFJPWFkATUtBQ1RJVklUWQBVTlBST0NFU1NBQkxFX0VOVElUWQBDT1BZAE1PVkVEX1BFUk1BTkVOVExZAFRPT19FQVJMWQBOT1RJRlkARkFJTEVEX0RFUEVOREVOQ1kAQkFEX0dBVEVXQVkAUExBWQBQVVQAQ0hFQ0tPVVQAR0FURVdBWV9USU1FT1VUAFJFUVVFU1RfVElNRU9VVABORVRXT1JLX0NPTk5FQ1RfVElNRU9VVABDT05ORUNUSU9OX1RJTUVPVVQATE9HSU5fVElNRU9VVABORVRXT1JLX1JFQURfVElNRU9VVABQT1NUAE1JU0RJUkVDVEVEX1JFUVVFU1QAQ0xJRU5UX0NMT1NFRF9SRVFVRVNUAENMSUVOVF9DTE9TRURfTE9BRF9CQUxBTkNFRF9SRVFVRVNUAEJBRF9SRVFVRVNUAEhUVFBfUkVRVUVTVF9TRU5UX1RPX0hUVFBTX1BPUlQAUkVQT1JUAElNX0FfVEVBUE9UAFJFU0VUX0NPTlRFTlQATk9fQ09OVEVOVABQQVJUSUFMX0NPTlRFTlQASFBFX0lOVkFMSURfQ09OU1RBTlQASFBFX0NCX1JFU0VUAEdFVABIUEVfU1RSSUNUAENPTkZMSUNUAFRFTVBPUkFSWV9SRURJUkVDVABQRVJNQU5FTlRfUkVESVJFQ1QAQ09OTkVDVABNVUxUSV9TVEFUVVMASFBFX0lOVkFMSURfU1RBVFVTAFRPT19NQU5ZX1JFUVVFU1RTAEVBUkxZX0hJTlRTAFVOQVZBSUxBQkxFX0ZPUl9MRUdBTF9SRUFTT05TAE9QVElPTlMAU1dJVENISU5HX1BST1RPQ09MUwBWQVJJQU5UX0FMU09fTkVHT1RJQVRFUwBNVUxUSVBMRV9DSE9JQ0VTAElOVEVSTkFMX1NFUlZFUl9FUlJPUgBXRUJfU0VSVkVSX1VOS05PV05fRVJST1IAUkFJTEdVTl9FUlJPUgBJREVOVElUWV9QUk9WSURFUl9BVVRIRU5USUNBVElPTl9FUlJPUgBTU0xfQ0VSVElGSUNBVEVfRVJST1IASU5WQUxJRF9YX0ZPUldBUkRFRF9GT1IAU0VUX1BBUkFNRVRFUgBHRVRfUEFSQU1FVEVSAEhQRV9VU0VSAFNFRV9PVEhFUgBIUEVfQ0JfQ0hVTktfSEVBREVSAE1LQ0FMRU5EQVIAU0VUVVAAV0VCX1NFUlZFUl9JU19ET1dOAFRFQVJET1dOAEhQRV9DTE9TRURfQ09OTkVDVElPTgBIRVVSSVNUSUNfRVhQSVJBVElPTgBESVNDT05ORUNURURfT1BFUkFUSU9OAE5PTl9BVVRIT1JJVEFUSVZFX0lORk9STUFUSU9OAEhQRV9JTlZBTElEX1ZFUlNJT04ASFBFX0NCX01FU1NBR0VfQkVHSU4AU0lURV9JU19GUk9aRU4ASFBFX0lOVkFMSURfSEVBREVSX1RPS0VOAElOVkFMSURfVE9LRU4ARk9SQklEREVOAEVOSEFOQ0VfWU9VUl9DQUxNAEhQRV9JTlZBTElEX1VSTABCTE9DS0VEX0JZX1BBUkVOVEFMX0NPTlRST0wATUtDT0wAQUNMAEhQRV9JTlRFUk5BTABSRVFVRVNUX0hFQURFUl9GSUVMRFNfVE9PX0xBUkdFX1VOT0ZGSUNJQUwASFBFX09LAFVOTElOSwBVTkxPQ0sAUFJJAFJFVFJZX1dJVEgASFBFX0lOVkFMSURfQ09OVEVOVF9MRU5HVEgASFBFX1VORVhQRUNURURfQ09OVEVOVF9MRU5HVEgARkxVU0gAUFJPUFBBVENIAE0tU0VBUkNIAFVSSV9UT09fTE9ORwBQUk9DRVNTSU5HAE1JU0NFTExBTkVPVVNfUEVSU0lTVEVOVF9XQVJOSU5HAE1JU0NFTExBTkVPVVNfV0FSTklORwBIUEVfSU5WQUxJRF9UUkFOU0ZFUl9FTkNPRElORwBFeHBlY3RlZCBDUkxGAEhQRV9JTlZBTElEX0NIVU5LX1NJWkUATU9WRQBDT05USU5VRQBIUEVfQ0JfU1RBVFVTX0NPTVBMRVRFAEhQRV9DQl9IRUFERVJTX0NPTVBMRVRFAEhQRV9DQl9WRVJTSU9OX0NPTVBMRVRFAEhQRV9DQl9VUkxfQ09NUExFVEUASFBFX0NCX0NIVU5LX0NPTVBMRVRFAEhQRV9DQl9IRUFERVJfVkFMVUVfQ09NUExFVEUASFBFX0NCX0NIVU5LX0VYVEVOU0lPTl9WQUxVRV9DT01QTEVURQBIUEVfQ0JfQ0hVTktfRVhURU5TSU9OX05BTUVfQ09NUExFVEUASFBFX0NCX01FU1NBR0VfQ09NUExFVEUASFBFX0NCX01FVEhPRF9DT01QTEVURQBIUEVfQ0JfSEVBREVSX0ZJRUxEX0NPTVBMRVRFAERFTEVURQBIUEVfSU5WQUxJRF9FT0ZfU1RBVEUASU5WQUxJRF9TU0xfQ0VSVElGSUNBVEUAUEFVU0UATk9fUkVTUE9OU0UAVU5TVVBQT1JURURfTUVESUFfVFlQRQBHT05FAE5PVF9BQ0NFUFRBQkxFAFNFUlZJQ0VfVU5BVkFJTEFCTEUAUkFOR0VfTk9UX1NBVElTRklBQkxFAE9SSUdJTl9JU19VTlJFQUNIQUJMRQBSRVNQT05TRV9JU19TVEFMRQBQVVJHRQBNRVJHRQBSRVFVRVNUX0hFQURFUl9GSUVMRFNfVE9PX0xBUkdFAFJFUVVFU1RfSEVBREVSX1RPT19MQVJHRQBQQVlMT0FEX1RPT19MQVJHRQBJTlNVRkZJQ0lFTlRfU1RPUkFHRQBIUEVfUEFVU0VEX1VQR1JBREUASFBFX1BBVVNFRF9IMl9VUEdSQURFAFNPVVJDRQBBTk5PVU5DRQBUUkFDRQBIUEVfVU5FWFBFQ1RFRF9TUEFDRQBERVNDUklCRQBVTlNVQlNDUklCRQBSRUNPUkQASFBFX0lOVkFMSURfTUVUSE9EAE5PVF9GT1VORABQUk9QRklORABVTkJJTkQAUkVCSU5EAFVOQVVUSE9SSVpFRABNRVRIT0RfTk9UX0FMTE9XRUQASFRUUF9WRVJTSU9OX05PVF9TVVBQT1JURUQAQUxSRUFEWV9SRVBPUlRFRABBQ0NFUFRFRABOT1RfSU1QTEVNRU5URUQATE9PUF9ERVRFQ1RFRABIUEVfQ1JfRVhQRUNURUQASFBFX0xGX0VYUEVDVEVEAENSRUFURUQASU1fVVNFRABIUEVfUEFVU0VEAFRJTUVPVVRfT0NDVVJFRABQQVlNRU5UX1JFUVVJUkVEAFBSRUNPTkRJVElPTl9SRVFVSVJFRABQUk9YWV9BVVRIRU5USUNBVElPTl9SRVFVSVJFRABORVRXT1JLX0FVVEhFTlRJQ0FUSU9OX1JFUVVJUkVEAExFTkdUSF9SRVFVSVJFRABTU0xfQ0VSVElGSUNBVEVfUkVRVUlSRUQAVVBHUkFERV9SRVFVSVJFRABQQUdFX0VYUElSRUQAUFJFQ09ORElUSU9OX0ZBSUxFRABFWFBFQ1RBVElPTl9GQUlMRUQAUkVWQUxJREFUSU9OX0ZBSUxFRABTU0xfSEFORFNIQUtFX0ZBSUxFRABMT0NLRUQAVFJBTlNGT1JNQVRJT05fQVBQTElFRABOT1RfTU9ESUZJRUQATk9UX0VYVEVOREVEAEJBTkRXSURUSF9MSU1JVF9FWENFRURFRABTSVRFX0lTX09WRVJMT0FERUQASEVBRABFeHBlY3RlZCBIVFRQLwAAXhMAACYTAAAwEAAA8BcAAJ0TAAAVEgAAORcAAPASAAAKEAAAdRIAAK0SAACCEwAATxQAAH8QAACgFQAAIxQAAIkSAACLFAAATRUAANQRAADPFAAAEBgAAMkWAADcFgAAwREAAOAXAAC7FAAAdBQAAHwVAADlFAAACBcAAB8QAABlFQAAoxQAACgVAAACFQAAmRUAACwQAACLGQAATw8AANQOAABqEAAAzhAAAAIXAACJDgAAbhMAABwTAABmFAAAVhcAAMETAADNEwAAbBMAAGgXAABmFwAAXxcAACITAADODwAAaQ4AANgOAABjFgAAyxMAAKoOAAAoFwAAJhcAAMUTAABdFgAA6BEAAGcTAABlEwAA8hYAAHMTAAAdFwAA+RYAAPMRAADPDgAAzhUAAAwSAACzEQAApREAAGEQAAAyFwAAuxMAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQIBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIDAgICAgIAAAICAAICAAICAgICAgICAgIABAAAAAAAAgICAgICAgICAgICAgICAgICAgICAgICAgIAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgACAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACAAICAgICAAACAgACAgACAgICAgICAgICAAMABAAAAAICAgICAgICAgICAgICAgICAgICAgICAgICAAAAAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAAgACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbG9zZWVlcC1hbGl2ZQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAQEBAQEBAQIBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBY2h1bmtlZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEAAQEBAQEAAAEBAAEBAAEBAQEBAQEBAQEAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABlY3Rpb25lbnQtbGVuZ3Rob25yb3h5LWNvbm5lY3Rpb24AAAAAAAAAAAAAAAAAAAByYW5zZmVyLWVuY29kaW5ncGdyYWRlDQoNCg0KU00NCg0KVFRQL0NFL1RTUC8AAAAAAAAAAAAAAAABAgABAwAAAAAAAAAAAAAAAAAAAAAAAAQBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAQIAAQMAAAAAAAAAAAAAAAAAAAAAAAAEAQEFAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAEAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAQAAAgAAAAAAAAAAAAAAAAAAAAAAAAMEAAAEBAQEBAQEBAQEBAUEBAQEBAQEBAQEBAQABAAGBwQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEAAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAEAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwAAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAABAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAIAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMAAAAAAAADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABOT1VOQ0VFQ0tPVVRORUNURVRFQ1JJQkVMVVNIRVRFQURTRUFSQ0hSR0VDVElWSVRZTEVOREFSVkVPVElGWVBUSU9OU0NIU0VBWVNUQVRDSEdFT1JESVJFQ1RPUlRSQ0hQQVJBTUVURVJVUkNFQlNDUklCRUFSRE9XTkFDRUlORE5LQ0tVQlNDUklCRUhUVFAvQURUUC8=";
+  }
+});
+
+// alexa/node_modules/undici/lib/llhttp/llhttp_simd-wasm.js
+var require_llhttp_simd_wasm = __commonJS({
+  "alexa/node_modules/undici/lib/llhttp/llhttp_simd-wasm.js"(exports2, module2) {
+    module2.exports = "AGFzbQEAAAABMAhgAX8Bf2ADf39/AX9gBH9/f38Bf2AAAGADf39/AGABfwBgAn9/AGAGf39/f39/AALLAQgDZW52GHdhc21fb25faGVhZGVyc19jb21wbGV0ZQACA2VudhV3YXNtX29uX21lc3NhZ2VfYmVnaW4AAANlbnYLd2FzbV9vbl91cmwAAQNlbnYOd2FzbV9vbl9zdGF0dXMAAQNlbnYUd2FzbV9vbl9oZWFkZXJfZmllbGQAAQNlbnYUd2FzbV9vbl9oZWFkZXJfdmFsdWUAAQNlbnYMd2FzbV9vbl9ib2R5AAEDZW52GHdhc21fb25fbWVzc2FnZV9jb21wbGV0ZQAAA0ZFAwMEAAAFAAAAAAAABQEFAAUFBQAABgAAAAAGBgYGAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAAABAQcAAAUFAwABBAUBcAESEgUDAQACBggBfwFBgNQECwfRBSIGbWVtb3J5AgALX2luaXRpYWxpemUACRlfX2luZGlyZWN0X2Z1bmN0aW9uX3RhYmxlAQALbGxodHRwX2luaXQAChhsbGh0dHBfc2hvdWxkX2tlZXBfYWxpdmUAQQxsbGh0dHBfYWxsb2MADAZtYWxsb2MARgtsbGh0dHBfZnJlZQANBGZyZWUASA9sbGh0dHBfZ2V0X3R5cGUADhVsbGh0dHBfZ2V0X2h0dHBfbWFqb3IADxVsbGh0dHBfZ2V0X2h0dHBfbWlub3IAEBFsbGh0dHBfZ2V0X21ldGhvZAARFmxsaHR0cF9nZXRfc3RhdHVzX2NvZGUAEhJsbGh0dHBfZ2V0X3VwZ3JhZGUAEwxsbGh0dHBfcmVzZXQAFA5sbGh0dHBfZXhlY3V0ZQAVFGxsaHR0cF9zZXR0aW5nc19pbml0ABYNbGxodHRwX2ZpbmlzaAAXDGxsaHR0cF9wYXVzZQAYDWxsaHR0cF9yZXN1bWUAGRtsbGh0dHBfcmVzdW1lX2FmdGVyX3VwZ3JhZGUAGhBsbGh0dHBfZ2V0X2Vycm5vABsXbGxodHRwX2dldF9lcnJvcl9yZWFzb24AHBdsbGh0dHBfc2V0X2Vycm9yX3JlYXNvbgAdFGxsaHR0cF9nZXRfZXJyb3JfcG9zAB4RbGxodHRwX2Vycm5vX25hbWUAHxJsbGh0dHBfbWV0aG9kX25hbWUAIBJs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IAH9CwMAIABBMGogAf0LAwAgAEEgaiAB/QsDACAAQd0BNgIcQQALewEBfwJAIAAoAgwiAw0AAkAgACgCBEUNACAAIAE2AgQLAkAgACABIAIQxICAgAAiAw0AIAAoAgwPCyAAIAM2AhxBACEDIAAoAgQiAUUNACAAIAEgAiAAKAIIEYGAgIAAACIBRQ0AIAAgAjYCFCAAIAE2AgwgASEDCyADC+TzAQMOfwN+BH8jgICAgABBEGsiAySAgICAACABIQQgASEFIAEhBiABIQcgASEIIAEhCSABIQogASELIAEhDCABIQ0gASEOIAEhDwJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQCAAKAIcIhBBf2oO3QHaAQHZAQIDBAUGBwgJCgsMDQ7YAQ8Q1wEREtYBExQVFhcYGRob4AHfARwdHtUBHyAhIiMkJdQBJicoKSorLNMB0gEtLtEB0AEvMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUbbAUdISUrPAc4BS80BTMwBTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gAGBAYIBgwGEAYUBhgGHAYgBiQGKAYsBjAGNAY4BjwGQAZEB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QAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAAkACQAJAIBAOxwEAAQID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YWNrIGVycm9yAGBvbl9jaHVua19leHRlbnNpb25fdmFsdWVgIGNhbGxiYWNrIGVycm9yAGBvbl9zdGF0dXNfY29tcGxldGVgIGNhbGxiYWNrIGVycm9yAGBvbl92ZXJzaW9uX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25fdXJsX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25fY2h1bmtfY29tcGxldGVgIGNhbGxiYWNrIGVycm9yAGBvbl9oZWFkZXJfdmFsdWVfY29tcGxldGVgIGNhbGxiYWNrIGVycm9yAGBvbl9tZXNzYWdlX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25fbWV0aG9kX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25faGVhZGVyX2ZpZWxkX2NvbXBsZXRlYCBjYWxsYmFjayBlcnJvcgBgb25fY2h1bmtfZXh0ZW5zaW9uX25hbWVgIGNhbGxiYWNrIGVycm9yAFVuZXhwZWN0ZWQgY2hhciBpbiB1cmwgc2VydmVyAEludmFsaWQgaGVhZGVyIHZhbHVlIGNoYXIASW52YWxpZCBoZWFkZXIgZmllbGQgY2hhcgBTcGFuIGNhbGxiYWNrIGVycm9yIGluIG9uX3ZlcnNpb24ASW52YWxpZCBtaW5vciB2ZXJzaW9uAEludmFsaWQgbWFqb3IgdmVyc2lvbgBFeHBlY3RlZCBzcGFjZSBhZnRlciB2ZXJzaW9uAEV4cGVjdGVkIENSTEYgYWZ0ZXIgdmVyc2lvbgBJbnZhbGlkIEhUVFAgdmVyc2lvbgBJbnZhbGlkIGhlYWRlciB0b2tlbgBTcGFuIGNhbGxiYWNrIGVycm9yIGluIG9uX3VybABJbnZhbGlkIGNoYXJhY3RlcnMgaW4gdXJsAFVuZXhwZWN0ZWQgc3RhcnQgY2hhciBpbiB1cmwARG91YmxlIEAgaW4gdXJsAEVtcHR5IENvbnRlbnQtTGVuZ3RoAEludmFsaWQgY2hhcmFjdGVyIGluIENvbnRlbnQtTGVuZ3RoAER1cGxpY2F0ZSBDb250ZW50LUxlbmd0aABJbnZhbGlkIGNoYXIgaW4gdXJsIHBhdGgAQ29udGVudC1MZW5ndGggY2FuJ3QgYmUgcHJlc2VudCB3aXRoIFRyYW5zZmVyLUVuY29kaW5nAEludmFsaWQgY2hhcmFjdGVyIGluIGNodW5rIHNpemUAU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl9oZWFkZXJfdmFsdWUAU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl9jaHVua19leHRlbnNpb25fdmFsdWUASW52YWxpZCBjaGFyYWN0ZXIgaW4gY2h1bmsgZXh0ZW5zaW9ucyB2YWx1ZQBNaXNzaW5nIGV4cGVjdGVkIExGIGFmdGVyIGhlYWRlciB2YWx1ZQBJbnZhbGlkIGBUcmFuc2Zlci1FbmNvZGluZ2AgaGVhZGVyIHZhbHVlAEludmFsaWQgY2hhcmFjdGVyIGluIGNodW5rIGV4dGVuc2lvbnMgcXVvdGUgdmFsdWUASW52YWxpZCBjaGFyYWN0ZXIgaW4gY2h1bmsgZXh0ZW5zaW9ucyBxdW90ZWQgdmFsdWUAUGF1c2VkIGJ5IG9uX2hlYWRlcnNfY29tcGxldGUASW52YWxpZCBFT0Ygc3RhdGUAb25fcmVzZXQgcGF1c2UAb25fY2h1bmtfaGVhZGVyIHBhdXNlAG9uX21lc3NhZ2VfYmVnaW4gcGF1c2UAb25fY2h1bmtfZXh0ZW5zaW9uX3ZhbHVlIHBhdXNlAG9uX3N0YXR1c19jb21wbGV0ZSBwYXVzZQBvbl92ZXJzaW9uX2NvbXBsZXRlIHBhdXNlAG9uX3VybF9jb21wbGV0ZSBwYXVzZQBvbl9jaHVua19jb21wbGV0ZSBwYXVzZQBvbl9oZWFkZXJfdmFsdWVfY29tcGxldGUgcGF1c2UAb25fbWVzc2FnZV9jb21wbGV0ZSBwYXVzZQBvbl9tZXRob2RfY29tcGxldGUgcGF1c2UAb25faGVhZGVyX2ZpZWxkX2NvbXBsZXRlIHBhdXNlAG9uX2NodW5rX2V4dGVuc2lvbl9uYW1lIHBhdXNlAFVuZXhwZWN0ZWQgc3BhY2UgYWZ0ZXIgc3RhcnQgbGluZQBTcGFuIGNhbGxiYWNrIGVycm9yIGluIG9uX2NodW5rX2V4dGVuc2lvbl9uYW1lAEludmFsaWQgY2hhcmFjdGVyIGluIGNodW5rIGV4dGVuc2lvbnMgbmFtZQBQYXVzZSBvbiBDT05ORUNUL1VwZ3JhZGUAUGF1c2Ugb24gUFJJL1VwZ3JhZGUARXhwZWN0ZWQgSFRUUC8yIENvbm5lY3Rpb24gUHJlZmFjZQBTcGFuIGNhbGxiYWNrIGVycm9yIGluIG9uX21ldGhvZABFeHBlY3RlZCBzcGFjZSBhZnRlciBtZXRob2QAU3BhbiBjYWxsYmFjayBlcnJvciBpbiBvbl9oZWFkZXJfZmllbGQAUGF1c2VkAEludmFsaWQgd29yZCBlbmNvdW50ZXJlZABJbnZhbGlkIG1ldGhvZCBlbmNvdW50ZXJlZABVbmV4cGVjdGVkIGNoYXIgaW4gdXJsIHNjaGVtYQBSZXF1ZXN0IGhhcyBpbnZhbGlkIGBUcmFuc2Zlci1FbmNvZGluZ2AAU1dJVENIX1BST1hZAFVTRV9QUk9YWQBNS0FDVElWSVRZAFVOUFJPQ0VTU0FCTEVfRU5USVRZAENPUFkATU9WRURfUEVSTUFORU5UTFkAVE9PX0VBUkxZAE5PVElGWQBGQUlMRURfREVQRU5ERU5DWQBCQURfR0FURVdBWQBQTEFZAFBVVABDSEVDS09VVABHQVRFV0FZX1RJTUVPVVQAUkVRVUVTVF9USU1FT1VUAE5FVFdPUktfQ09OTkVDVF9USU1FT1VUAENPTk5FQ1RJT05fVElNRU9VVABMT0dJTl9USU1FT1VUAE5FVFdPUktfUkVBRF9USU1FT1VUAFBPU1QATUlTRElSRUNURURfUkVRVUVTVABDTElFTlRfQ0xPU0VEX1JFUVVFU1QAQ0xJRU5UX0NMT1NFRF9MT0FEX0JBTEFOQ0VEX1JFUVVFU1QAQkFEX1JFUVVFU1QASFRUUF9SRVFVRVNUX1NFTlRfVE9fSFRUUFNfUE9SVABSRVBPUlQASU1fQV9URUFQT1QAUkVTRVRfQ09OVEVOVABOT19DT05URU5UAFBBUlRJQUxfQ09OVEVOVABIUEVfSU5WQUxJRF9DT05TVEFOVABIUEVfQ0JfUkVTRVQAR0VUAEhQRV9TVFJJQ1QAQ09ORkxJQ1QAVEVNUE9SQVJZX1JFRElSRUNUAFBFUk1BTkVOVF9SRURJUkVDVABDT05ORUNUAE1VTFRJX1NUQVRVUwBIUEVfSU5WQUxJRF9TVEFUVVMAVE9PX01BTllfUkVRVUVTVFMARUFSTFlfSElOVFMAVU5BVkFJTEFCTEVfRk9SX0xFR0FMX1JFQVNPTlMAT1BUSU9OUwBTV0lUQ0hJTkdfUFJPVE9DT0xTAFZBUklBTlRfQUxTT19ORUdPVElBVEVTAE1VTFRJUExFX0NIT0lDRVMASU5URVJOQUxfU0VSVkVSX0VSUk9SAFdFQl9TRVJWRVJfVU5LTk9XTl9FUlJPUgBSQUlMR1VOX0VSUk9SAElERU5USVRZX1BST1ZJREVSX0FVVEhFTlRJQ0FUSU9OX0VSUk9SAFNTTF9DRVJUSUZJQ0FURV9FUlJPUgBJTlZBTElEX1hfRk9SV0FSREVEX0ZPUgBTRVRfUEFSQU1FVEVSAEdFVF9QQVJBTUVURVIASFBFX1VTRVIAU0VFX09USEVSAEhQRV9DQl9DSFVOS19IRUFERVIATUtDQUxFTkRBUgBTRVRVUABXRUJfU0VSVkVSX0lTX0RPV04AVEVBUkRPV04ASFBFX0NMT1NFRF9DT05ORUNUSU9OAEhFVVJJU1RJQ19FWFBJUkFUSU9OAERJU0NPTk5FQ1RFRF9PUEVSQVRJT04ATk9OX0FVVEhPUklUQVRJVkVfSU5GT1JNQVRJT04ASFBFX0lOVkFMSURfVkVSU0lPTgBIUEVfQ0JfTUVTU0FHRV9CRUdJTgBTSVRFX0lTX0ZST1pFTgBIUEVfSU5WQUxJRF9IRUFERVJfVE9LRU4ASU5WQUxJRF9UT0tFTgBGT1JCSURERU4ARU5IQU5DRV9ZT1VSX0NBTE0ASFBFX0lOVkFMSURfVVJMAEJMT0NLRURfQllfUEFSRU5UQUxfQ09OVFJPTABNS0NPTABBQ0wASFBFX0lOVEVSTkFMAFJFUVVFU1RfSEVBREVSX0ZJRUxEU19UT09fTEFSR0VfVU5PRkZJQ0lBTABIUEVfT0sAVU5MSU5LAFVOTE9DSwBQUkkAUkVUUllfV0lUSABIUEVfSU5WQUxJRF9DT05URU5UX0xFTkdUSABIUEVfVU5FWFBFQ1RFRF9DT05URU5UX0xFTkdUSABGTFVTSABQUk9QUEFUQ0gATS1TRUFSQ0gAVVJJX1RPT19MT05HAFBST0NFU1NJTkcATUlTQ0VMTEFORU9VU19QRVJTSVNURU5UX1dBUk5JTkcATUlTQ0VMTEFORU9VU19XQVJOSU5HAEhQRV9JTlZBTElEX1RSQU5TRkVSX0VOQ09ESU5HAEV4cGVjdGVkIENSTEYASFBFX0lOVkFMSURfQ0hVTktfU0laRQBNT1ZFAENPTlRJTlVFAEhQRV9DQl9TVEFUVVNfQ09NUExFVEUASFBFX0NCX0hFQURFUlNfQ09NUExFVEUASFBFX0NCX1ZFUlNJT05fQ09NUExFVEUASFBFX0NCX1VSTF9DT01QTEVURQBIUEVfQ0JfQ0hVTktfQ09NUExFVEUASFBFX0NCX0hFQURFUl9WQUxVRV9DT01QTEVURQBIUEVfQ0JfQ0hVTktfRVhURU5TSU9OX1ZBTFVFX0NPTVBMRVRFAEhQRV9DQl9DSFVOS19FWFRFTlNJT05fTkFNRV9DT01QTEVURQBIUEVfQ0JfTUVTU0FHRV9DT01QTEVURQBIUEVfQ0JfTUVUSE9EX0NPTVBMRVRFAEhQRV9DQl9IRUFERVJfRklFTERfQ09NUExFVEUAREVMRVRFAEhQRV9JTlZBTElEX0VPRl9TVEFURQBJTlZBTElEX1NTTF9DRVJUSUZJQ0FURQBQQVVTRQBOT19SRVNQT05TRQBVTlNVUFBPUlRFRF9NRURJQV9UWVBFAEdPTkUATk9UX0FDQ0VQVEFCTEUAU0VSVklDRV9VTkFWQUlMQUJMRQBSQU5HRV9OT1RfU0FUSVNGSUFCTEUAT1JJR0lOX0lTX1VOUkVBQ0hBQkxFAFJFU1BPTlNFX0lTX1NUQUxFAFBVUkdFAE1FUkdFAFJFUVVFU1RfSEVBREVSX0ZJRUxEU19UT09fTEFSR0UAUkVRVUVTVF9IRUFERVJfVE9PX0xBUkdFAFBBWUxPQURfVE9PX0xBUkdFAElOU1VGRklDSUVOVF9TVE9SQUdFAEhQRV9QQVVTRURfVVBHUkFERQBIUEVfUEFVU0VEX0gyX1VQR1JBREUAU09VUkNFAEFOTk9VTkNFAFRSQUNFAEhQRV9VTkVYUEVDVEVEX1NQQUNFAERFU0NSSUJFAFVOU1VCU0NSSUJFAFJFQ09SRABIUEVfSU5WQUxJRF9NRVRIT0QATk9UX0ZPVU5EAFBST1BGSU5EAFVOQklORABSRUJJTkQAVU5BVVRIT1JJWkVEAE1FVEhPRF9OT1RfQUxMT1dFRABIVFRQX1ZFUlNJT05fTk9UX1NVUFBPUlRFRABBTFJFQURZX1JFUE9SVEVEAEFDQ0VQVEVEAE5PVF9JTVBMRU1FTlRFRABMT09QX0RFVEVDVEVEAEhQRV9DUl9FWFBFQ1RFRABIUEVfTEZfRVhQRUNURUQAQ1JFQVRFRABJTV9VU0VEAEhQRV9QQVVTRUQAVElNRU9VVF9PQ0NVUkVEAFBBWU1FTlRfUkVRVUlSRUQAUFJFQ09ORElUSU9OX1JFUVVJUkVEAFBST1hZX0FVVEhFTlRJQ0FUSU9OX1JFUVVJUkVEAE5FVFdPUktfQVVUSEVOVElDQVRJT05fUkVRVUlSRUQATEVOR1RIX1JFUVVJUkVEAFNTTF9DRVJUSUZJQ0FURV9SRVFVSVJFRABVUEdSQURFX1JFUVVJUkVEAFBBR0VfRVhQSVJFRABQUkVDT05ESVRJT05fRkFJTEVEAEVYUEVDVEFUSU9OX0ZBSUxFRABSRVZBTElEQVRJT05fRkFJTEVEAFNTTF9IQU5EU0hBS0VfRkFJTEVEAExPQ0tFRABUUkFOU0ZPUk1BVElPTl9BUFBMSUVEAE5PVF9NT0RJRklFRABOT1RfRVhURU5ERUQAQkFORFdJRFRIX0xJTUlUX0VYQ0VFREVEAFNJVEVfSVNfT1ZFUkxPQURFRABIRUFEAEV4cGVjdGVkIEhUVFAvAABeEwAAJhMAADAQAADwFwAAnRMAABUSAAA5FwAA8BIAAAoQAAB1EgAArRIAAIITAABPFAAAfxAAAKAVAAAjFAAAiRIAAIsUAABNFQAA1BEAAM8UAAAQGAAAyRYAANwWAADBEQAA4BcAALsUAAB0FAAAfBUAAOUUAAAIFwAAHxAAAGUVAACjFAAAKBUAAAIVAACZFQAALBAAAIsZAABPDwAA1A4AAGoQAADOEAAAAhcAAIkOAABuEwAAHBMAAGYUAABWFwAAwRMAAM0TAABsEwAAaBcAAGYXAABfFwAAIhMAAM4PAABpDgAA2A4AAGMWAADLEwAAqg4AACgXAAAmFwAAxRMAAF0WAADoEQAAZxMAAGUTAADyFgAAcxMAAB0XAAD5FgAA8xEAAM8OAADOFQAADBIAALMRAAClEQAAYRAAADIXAAC7EwAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAgEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAgMCAgICAgAAAgIAAgIAAgICAgICAgICAgAEAAAAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgAAAAICAgICAgICAgICAgICAgICAgICAgICAgICAgICAAIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAgICAgIAAAICAAICAAICAgICAgICAgIAAwAEAAAAAgICAgICAgICAgICAgICAgICAgICAgICAgIAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgACAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABsb3NlZWVwLWFsaXZlAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAgEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQFjaHVua2VkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQABAQEBAQAAAQEAAQEAAQEBAQEBAQEBAQAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGVjdGlvbmVudC1sZW5ndGhvbnJveHktY29ubmVjdGlvbgAAAAAAAAAAAAAAAAAAAHJhbnNmZXItZW5jb2RpbmdwZ3JhZGUNCg0KDQpTTQ0KDQpUVFAvQ0UvVFNQLwAAAAAAAAAAAAAAAAECAAEDAAAAAAAAAAAAAAAAAAAAAAAABAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAABAgABAwAAAAAAAAAAAAAAAAAAAAAAAAQBAQUBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAQAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAQEAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAABAAACAAAAAAAAAAAAAAAAAAAAAAAAAwQAAAQEBAQEBAQEBAQEBQQEBAQEBAQEBAQEBAAEAAYHBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAQABAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAQAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAEAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAgAAAAACAAAAAAAAAAAAAAAAAAAAAAADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwAAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE5PVU5DRUVDS09VVE5FQ1RFVEVDUklCRUxVU0hFVEVBRFNFQVJDSFJHRUNUSVZJVFlMRU5EQVJWRU9USUZZUFRJT05TQ0hTRUFZU1RBVENIR0VPUkRJUkVDVE9SVFJDSFBBUkFNRVRFUlVSQ0VCU0NSSUJFQVJET1dOQUNFSU5ETktDS1VCU0NSSUJFSFRUUC9BRFRQLw==";
+  }
+});
+
+// alexa/node_modules/undici/lib/client.js
+var require_client = __commonJS({
+  "alexa/node_modules/undici/lib/client.js"(exports2, module2) {
+    "use strict";
+    var assert2 = require("assert");
+    var net = require("net");
+    var http = require("http");
+    var { pipeline } = require("stream");
+    var util = require_util();
+    var timers = require_timers();
+    var Request2 = require_request();
+    var DispatcherBase = require_dispatcher_base();
+    var {
+      RequestContentLengthMismatchError,
+      ResponseContentLengthMismatchError,
+      InvalidArgumentError,
+      RequestAbortedError,
+      HeadersTimeoutError,
+      HeadersOverflowError,
+      SocketError,
+      InformationalError,
+      BodyTimeoutError,
+      HTTPParserError,
+      ResponseExceededMaxSizeError,
+      ClientDestroyedError
+    } = require_errors();
+    var buildConnector = require_connect();
+    var {
+      kUrl,
+      kReset,
+      kServerName,
+      kClient,
+      kBusy,
+      kParser,
+      kConnect,
+      kBlocking,
+      kResuming,
+      kRunning,
+      kPending,
+      kSize,
+      kWriting,
+      kQueue,
+      kConnected,
+      kConnecting,
+      kNeedDrain,
+      kNoRef,
+      kKeepAliveDefaultTimeout,
+      kHostHeader,
+      kPendingIdx,
+      kRunningIdx,
+      kError,
+      kPipelining,
+      kSocket,
+      kKeepAliveTimeoutValue,
+      kMaxHeadersSize,
+      kKeepAliveMaxTimeout,
+      kKeepAliveTimeoutThreshold,
+      kHeadersTimeout,
+      kBodyTimeout,
+      kStrictContentLength,
+      kConnector,
+      kMaxRedirections,
+      kMaxRequests,
+      kCounter,
+      kClose,
+      kDestroy,
+      kDispatch,
+      kInterceptors,
+      kLocalAddress,
+      kMaxResponseSize,
+      kHTTPConnVersion,
+      // HTTP2
+      kHost,
+      kHTTP2Session,
+      kHTTP2SessionState,
+      kHTTP2BuildRequest,
+      kHTTP2CopyHeaders,
+      kHTTP1BuildRequest
+    } = require_symbols();
+    var http2;
+    try {
+      http2 = require("http2");
+    } catch {
+      http2 = { constants: {} };
+    }
+    var {
+      constants: {
+        HTTP2_HEADER_AUTHORITY,
+        HTTP2_HEADER_METHOD,
+        HTTP2_HEADER_PATH,
+        HTTP2_HEADER_SCHEME,
+        HTTP2_HEADER_CONTENT_LENGTH,
+        HTTP2_HEADER_EXPECT,
+        HTTP2_HEADER_STATUS
+      }
+    } = http2;
+    var h2ExperimentalWarned = false;
+    var FastBuffer = Buffer[Symbol.species];
+    var kClosedResolve = /* @__PURE__ */ Symbol("kClosedResolve");
+    var channels = {};
+    try {
+      const diagnosticsChannel = require("diagnostics_channel");
+      channels.sendHeaders = diagnosticsChannel.channel("undici:client:sendHeaders");
+      channels.beforeConnect = diagnosticsChannel.channel("undici:client:beforeConnect");
+      channels.connectError = diagnosticsChannel.channel("undici:client:connectError");
+      channels.connected = diagnosticsChannel.channel("undici:client:connected");
+    } catch {
+      channels.sendHeaders = { hasSubscribers: false };
+      channels.beforeConnect = { hasSubscribers: false };
+      channels.connectError = { hasSubscribers: false };
+      channels.connected = { hasSubscribers: false };
+    }
+    var Client2 = class extends DispatcherBase {
+      /**
+       *
+       * @param {string|URL} url
+       * @param {import('../types/client').Client.Options} options
+       */
+      constructor(url2, {
+        interceptors,
+        maxHeaderSize,
+        headersTimeout,
+        socketTimeout,
+        requestTimeout,
+        connectTimeout,
+        bodyTimeout,
+        idleTimeout,
+        keepAlive,
+        keepAliveTimeout,
+        maxKeepAliveTimeout,
+        keepAliveMaxTimeout,
+        keepAliveTimeoutThreshold,
+        socketPath,
+        pipelining,
+        tls,
+        strictContentLength,
+        maxCachedSessions,
+        maxRedirections,
+        connect: connect2,
+        maxRequestsPerClient,
+        localAddress,
+        maxResponseSize,
+        autoSelectFamily,
+        autoSelectFamilyAttemptTimeout,
+        // h2
+        allowH2,
+        maxConcurrentStreams
+      } = {}) {
+        super();
+        if (keepAlive !== void 0) {
+          throw new InvalidArgumentError("unsupported keepAlive, use pipelining=0 instead");
+        }
+        if (socketTimeout !== void 0) {
+          throw new InvalidArgumentError("unsupported socketTimeout, use headersTimeout & bodyTimeout instead");
+        }
+        if (requestTimeout !== void 0) {
+          throw new InvalidArgumentError("unsupported requestTimeout, use headersTimeout & bodyTimeout instead");
+        }
+        if (idleTimeout !== void 0) {
+          throw new InvalidArgumentError("unsupported idleTimeout, use keepAliveTimeout instead");
+        }
+        if (maxKeepAliveTimeout !== void 0) {
+          throw new InvalidArgumentError("unsupported maxKeepAliveTimeout, use keepAliveMaxTimeout instead");
+        }
+        if (maxHeaderSize != null && !Number.isFinite(maxHeaderSize)) {
+          throw new InvalidArgumentError("invalid maxHeaderSize");
+        }
+        if (socketPath != null && typeof socketPath !== "string") {
+          throw new InvalidArgumentError("invalid socketPath");
+        }
+        if (connectTimeout != null && (!Number.isFinite(connectTimeout) || connectTimeout < 0)) {
+          throw new InvalidArgumentError("invalid connectTimeout");
+        }
+        if (keepAliveTimeout != null && (!Number.isFinite(keepAliveTimeout) || keepAliveTimeout <= 0)) {
+          throw new InvalidArgumentError("invalid keepAliveTimeout");
+        }
+        if (keepAliveMaxTimeout != null && (!Number.isFinite(keepAliveMaxTimeout) || keepAliveMaxTimeout <= 0)) {
+          throw new InvalidArgumentError("invalid keepAliveMaxTimeout");
+        }
+        if (keepAliveTimeoutThreshold != null && !Number.isFinite(keepAliveTimeoutThreshold)) {
+          throw new InvalidArgumentError("invalid keepAliveTimeoutThreshold");
+        }
+        if (headersTimeout != null && (!Number.isInteger(headersTimeout) || headersTimeout < 0)) {
+          throw new InvalidArgumentError("headersTimeout must be a positive integer or zero");
+        }
+        if (bodyTimeout != null && (!Number.isInteger(bodyTimeout) || bodyTimeout < 0)) {
+          throw new InvalidArgumentError("bodyTimeout must be a positive integer or zero");
+        }
+        if (connect2 != null && typeof connect2 !== "function" && typeof connect2 !== "object") {
+          throw new InvalidArgumentError("connect must be a function or an object");
+        }
+        if (maxRedirections != null && (!Number.isInteger(maxRedirections) || maxRedirections < 0)) {
+          throw new InvalidArgumentError("maxRedirections must be a positive number");
+        }
+        if (maxRequestsPerClient != null && (!Number.isInteger(maxRequestsPerClient) || maxRequestsPerClient < 0)) {
+          throw new InvalidArgumentError("maxRequestsPerClient must be a positive number");
+        }
+        if (localAddress != null && (typeof localAddress !== "string" || net.isIP(localAddress) === 0)) {
+          throw new InvalidArgumentError("localAddress must be valid string IP address");
+        }
+        if (maxResponseSize != null && (!Number.isInteger(maxResponseSize) || maxResponseSize < -1)) {
+          throw new InvalidArgumentError("maxResponseSize must be a positive number");
+        }
+        if (autoSelectFamilyAttemptTimeout != null && (!Number.isInteger(autoSelectFamilyAttemptTimeout) || autoSelectFamilyAttemptTimeout < -1)) {
+          throw new InvalidArgumentError("autoSelectFamilyAttemptTimeout must be a positive number");
+        }
+        if (allowH2 != null && typeof allowH2 !== "boolean") {
+          throw new InvalidArgumentError("allowH2 must be a valid boolean value");
+        }
+        if (maxConcurrentStreams != null && (typeof maxConcurrentStreams !== "number" || maxConcurrentStreams < 1)) {
+          throw new InvalidArgumentError("maxConcurrentStreams must be a possitive integer, greater than 0");
+        }
+        if (typeof connect2 !== "function") {
+          connect2 = buildConnector({
+            ...tls,
+            maxCachedSessions,
+            allowH2,
+            socketPath,
+            timeout: connectTimeout,
+            ...util.nodeHasAutoSelectFamily && autoSelectFamily ? { autoSelectFamily, autoSelectFamilyAttemptTimeout } : void 0,
+            ...connect2
+          });
+        }
+        this[kInterceptors] = interceptors && interceptors.Client && Array.isArray(interceptors.Client) ? interceptors.Client : [createRedirectInterceptor({ maxRedirections })];
+        this[kUrl] = util.parseOrigin(url2);
+        this[kConnector] = connect2;
+        this[kSocket] = null;
+        this[kPipelining] = pipelining != null ? pipelining : 1;
+        this[kMaxHeadersSize] = maxHeaderSize || http.maxHeaderSize;
+        this[kKeepAliveDefaultTimeout] = keepAliveTimeout == null ? 4e3 : keepAliveTimeout;
+        this[kKeepAliveMaxTimeout] = keepAliveMaxTimeout == null ? 6e5 : keepAliveMaxTimeout;
+        this[kKeepAliveTimeoutThreshold] = keepAliveTimeoutThreshold == null ? 1e3 : keepAliveTimeoutThreshold;
+        this[kKeepAliveTimeoutValue] = this[kKeepAliveDefaultTimeout];
+        this[kServerName] = null;
+        this[kLocalAddress] = localAddress != null ? localAddress : null;
+        this[kResuming] = 0;
+        this[kNeedDrain] = 0;
+        this[kHostHeader] = `host: ${this[kUrl].hostname}${this[kUrl].port ? `:${this[kUrl].port}` : ""}\r
+`;
+        this[kBodyTimeout] = bodyTimeout != null ? bodyTimeout : 3e5;
+        this[kHeadersTimeout] = headersTimeout != null ? headersTimeout : 3e5;
+        this[kStrictContentLength] = strictContentLength == null ? true : strictContentLength;
+        this[kMaxRedirections] = maxRedirections;
+        this[kMaxRequests] = maxRequestsPerClient;
+        this[kClosedResolve] = null;
+        this[kMaxResponseSize] = maxResponseSize > -1 ? maxResponseSize : -1;
+        this[kHTTPConnVersion] = "h1";
+        this[kHTTP2Session] = null;
+        this[kHTTP2SessionState] = !allowH2 ? null : {
+          // streams: null, // Fixed queue of streams - For future support of `push`
+          openStreams: 0,
+          // Keep track of them to decide wether or not unref the session
+          maxConcurrentStreams: maxConcurrentStreams != null ? maxConcurrentStreams : 100
+          // Max peerConcurrentStreams for a Node h2 server
+        };
+        this[kHost] = `${this[kUrl].hostname}${this[kUrl].port ? `:${this[kUrl].port}` : ""}`;
+        this[kQueue] = [];
+        this[kRunningIdx] = 0;
+        this[kPendingIdx] = 0;
+      }
+      get pipelining() {
+        return this[kPipelining];
+      }
+      set pipelining(value) {
+        this[kPipelining] = value;
+        resume(this, true);
+      }
+      get [kPending]() {
+        return this[kQueue].length - this[kPendingIdx];
+      }
+      get [kRunning]() {
+        return this[kPendingIdx] - this[kRunningIdx];
+      }
+      get [kSize]() {
+        return this[kQueue].length - this[kRunningIdx];
+      }
+      get [kConnected]() {
+        return !!this[kSocket] && !this[kConnecting] && !this[kSocket].destroyed;
+      }
+      get [kBusy]() {
+        const socket = this[kSocket];
+        return socket && (socket[kReset] || socket[kWriting] || socket[kBlocking]) || this[kSize] >= (this[kPipelining] || 1) || this[kPending] > 0;
+      }
+      /* istanbul ignore: only used for test */
+      [kConnect](cb) {
+        connect(this);
+        this.once("connect", cb);
+      }
+      [kDispatch](opts, handler2) {
+        const origin = opts.origin || this[kUrl].origin;
+        const request = this[kHTTPConnVersion] === "h2" ? Request2[kHTTP2BuildRequest](origin, opts, handler2) : Request2[kHTTP1BuildRequest](origin, opts, handler2);
+        this[kQueue].push(request);
+        if (this[kResuming]) {
+        } else if (util.bodyLength(request.body) == null && util.isIterable(request.body)) {
+          this[kResuming] = 1;
+          process.nextTick(resume, this);
+        } else {
+          resume(this, true);
+        }
+        if (this[kResuming] && this[kNeedDrain] !== 2 && this[kBusy]) {
+          this[kNeedDrain] = 2;
+        }
+        return this[kNeedDrain] < 2;
+      }
+      async [kClose]() {
+        return new Promise((resolve) => {
+          if (!this[kSize]) {
+            resolve(null);
+          } else {
+            this[kClosedResolve] = resolve;
+          }
+        });
+      }
+      async [kDestroy](err) {
+        return new Promise((resolve) => {
+          const requests = this[kQueue].splice(this[kPendingIdx]);
+          for (let i = 0; i < requests.length; i++) {
+            const request = requests[i];
+            errorRequest(this, request, err);
+          }
+          const callback = () => {
+            if (this[kClosedResolve]) {
+              this[kClosedResolve]();
+              this[kClosedResolve] = null;
+            }
+            resolve();
+          };
+          if (this[kHTTP2Session] != null) {
+            util.destroy(this[kHTTP2Session], err);
+            this[kHTTP2Session] = null;
+            this[kHTTP2SessionState] = null;
+          }
+          if (!this[kSocket]) {
+            queueMicrotask(callback);
+          } else {
+            util.destroy(this[kSocket].on("close", callback), err);
+          }
+          resume(this);
+        });
+      }
+    };
+    function onHttp2SessionError(err) {
+      assert2(err.code !== "ERR_TLS_CERT_ALTNAME_INVALID");
+      this[kSocket][kError] = err;
+      onError(this[kClient], err);
+    }
+    function onHttp2FrameError(type, code, id) {
+      const err = new InformationalError(`HTTP/2: "frameError" received - type ${type}, code ${code}`);
+      if (id === 0) {
+        this[kSocket][kError] = err;
+        onError(this[kClient], err);
+      }
+    }
+    function onHttp2SessionEnd() {
+      util.destroy(this, new SocketError("other side closed"));
+      util.destroy(this[kSocket], new SocketError("other side closed"));
+    }
+    function onHTTP2GoAway(code) {
+      const client = this[kClient];
+      const err = new InformationalError(`HTTP/2: "GOAWAY" frame received with code ${code}`);
+      client[kSocket] = null;
+      client[kHTTP2Session] = null;
+      if (client.destroyed) {
+        assert2(this[kPending] === 0);
+        const requests = client[kQueue].splice(client[kRunningIdx]);
+        for (let i = 0; i < requests.length; i++) {
+          const request = requests[i];
+          errorRequest(this, request, err);
+        }
+      } else if (client[kRunning] > 0) {
+        const request = client[kQueue][client[kRunningIdx]];
+        client[kQueue][client[kRunningIdx]++] = null;
+        errorRequest(client, request, err);
+      }
+      client[kPendingIdx] = client[kRunningIdx];
+      assert2(client[kRunning] === 0);
+      client.emit(
+        "disconnect",
+        client[kUrl],
+        [client],
+        err
+      );
+      resume(client);
+    }
+    var constants = require_constants3();
+    var createRedirectInterceptor = require_redirectInterceptor();
+    var EMPTY_BUF = Buffer.alloc(0);
+    async function lazyllhttp() {
+      const llhttpWasmData = process.env.JEST_WORKER_ID ? require_llhttp_wasm() : void 0;
+      let mod;
+      try {
+        mod = await WebAssembly.compile(Buffer.from(require_llhttp_simd_wasm(), "base64"));
+      } catch (e) {
+        mod = await WebAssembly.compile(Buffer.from(llhttpWasmData || require_llhttp_wasm(), "base64"));
+      }
+      return await WebAssembly.instantiate(mod, {
+        env: {
+          /* eslint-disable camelcase */
+          wasm_on_url: (p, at, len) => {
+            return 0;
+          },
+          wasm_on_status: (p, at, len) => {
+            assert2.strictEqual(currentParser.ptr, p);
+            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+            return currentParser.onStatus(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
+          },
+          wasm_on_message_begin: (p) => {
+            assert2.strictEqual(currentParser.ptr, p);
+            return currentParser.onMessageBegin() || 0;
+          },
+          wasm_on_header_field: (p, at, len) => {
+            assert2.strictEqual(currentParser.ptr, p);
+            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+            return currentParser.onHeaderField(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
+          },
+          wasm_on_header_value: (p, at, len) => {
+            assert2.strictEqual(currentParser.ptr, p);
+            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+            return currentParser.onHeaderValue(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
+          },
+          wasm_on_headers_complete: (p, statusCode, upgrade, shouldKeepAlive) => {
+            assert2.strictEqual(currentParser.ptr, p);
+            return currentParser.onHeadersComplete(statusCode, Boolean(upgrade), Boolean(shouldKeepAlive)) || 0;
+          },
+          wasm_on_body: (p, at, len) => {
+            assert2.strictEqual(currentParser.ptr, p);
+            const start = at - currentBufferPtr + currentBufferRef.byteOffset;
+            return currentParser.onBody(new FastBuffer(currentBufferRef.buffer, start, len)) || 0;
+          },
+          wasm_on_message_complete: (p) => {
+            assert2.strictEqual(currentParser.ptr, p);
+            return currentParser.onMessageComplete() || 0;
+          }
+          /* eslint-enable camelcase */
+        }
+      });
+    }
+    var llhttpInstance = null;
+    var llhttpPromise = lazyllhttp();
+    llhttpPromise.catch();
+    var currentParser = null;
+    var currentBufferRef = null;
+    var currentBufferSize = 0;
+    var currentBufferPtr = null;
+    var TIMEOUT_HEADERS = 1;
+    var TIMEOUT_BODY = 2;
+    var TIMEOUT_IDLE = 3;
+    var Parser = class {
+      constructor(client, socket, { exports: exports3 }) {
+        assert2(Number.isFinite(client[kMaxHeadersSize]) && client[kMaxHeadersSize] > 0);
+        this.llhttp = exports3;
+        this.ptr = this.llhttp.llhttp_alloc(constants.TYPE.RESPONSE);
+        this.client = client;
+        this.socket = socket;
+        this.timeout = null;
+        this.timeoutValue = null;
+        this.timeoutType = null;
+        this.statusCode = null;
+        this.statusText = "";
+        this.upgrade = false;
+        this.headers = [];
+        this.headersSize = 0;
+        this.headersMaxSize = client[kMaxHeadersSize];
+        this.shouldKeepAlive = false;
+        this.paused = false;
+        this.resume = this.resume.bind(this);
+        this.bytesRead = 0;
+        this.keepAlive = "";
+        this.contentLength = "";
+        this.connection = "";
+        this.maxResponseSize = client[kMaxResponseSize];
+      }
+      setTimeout(value, type) {
+        this.timeoutType = type;
+        if (value !== this.timeoutValue) {
+          timers.clearTimeout(this.timeout);
+          if (value) {
+            this.timeout = timers.setTimeout(onParserTimeout, value, this);
+            if (this.timeout.unref) {
+              this.timeout.unref();
+            }
+          } else {
+            this.timeout = null;
+          }
+          this.timeoutValue = value;
+        } else if (this.timeout) {
+          if (this.timeout.refresh) {
+            this.timeout.refresh();
+          }
+        }
+      }
+      resume() {
+        if (this.socket.destroyed || !this.paused) {
+          return;
+        }
+        assert2(this.ptr != null);
+        assert2(currentParser == null);
+        this.llhttp.llhttp_resume(this.ptr);
+        assert2(this.timeoutType === TIMEOUT_BODY);
+        if (this.timeout) {
+          if (this.timeout.refresh) {
+            this.timeout.refresh();
+          }
+        }
+        this.paused = false;
+        this.execute(this.socket.read() || EMPTY_BUF);
+        this.readMore();
+      }
+      readMore() {
+        while (!this.paused && this.ptr) {
+          const chunk = this.socket.read();
+          if (chunk === null) {
+            break;
+          }
+          this.execute(chunk);
+        }
+      }
+      execute(data) {
+        assert2(this.ptr != null);
+        assert2(currentParser == null);
+        assert2(!this.paused);
+        const { socket, llhttp } = this;
+        if (data.length > currentBufferSize) {
+          if (currentBufferPtr) {
+            llhttp.free(currentBufferPtr);
+          }
+          currentBufferSize = Math.ceil(data.length / 4096) * 4096;
+          currentBufferPtr = llhttp.malloc(currentBufferSize);
+        }
+        new Uint8Array(llhttp.memory.buffer, currentBufferPtr, currentBufferSize).set(data);
+        try {
+          let ret;
+          try {
+            currentBufferRef = data;
+            currentParser = this;
+            ret = llhttp.llhttp_execute(this.ptr, currentBufferPtr, data.length);
+          } catch (err) {
+            throw err;
+          } finally {
+            currentParser = null;
+            currentBufferRef = null;
+          }
+          const offset = llhttp.llhttp_get_error_pos(this.ptr) - currentBufferPtr;
+          if (ret === constants.ERROR.PAUSED_UPGRADE) {
+            this.onUpgrade(data.slice(offset));
+          } else if (ret === constants.ERROR.PAUSED) {
+            this.paused = true;
+            socket.unshift(data.slice(offset));
+          } else if (ret !== constants.ERROR.OK) {
+            const ptr = llhttp.llhttp_get_error_reason(this.ptr);
+            let message = "";
+            if (ptr) {
+              const len = new Uint8Array(llhttp.memory.buffer, ptr).indexOf(0);
+              message = "Response does not match the HTTP/1.1 protocol (" + Buffer.from(llhttp.memory.buffer, ptr, len).toString() + ")";
+            }
+            throw new HTTPParserError(message, constants.ERROR[ret], data.slice(offset));
+          }
+        } catch (err) {
+          util.destroy(socket, err);
+        }
+      }
+      destroy() {
+        assert2(this.ptr != null);
+        assert2(currentParser == null);
+        this.llhttp.llhttp_free(this.ptr);
+        this.ptr = null;
+        timers.clearTimeout(this.timeout);
+        this.timeout = null;
+        this.timeoutValue = null;
+        this.timeoutType = null;
+        this.paused = false;
+      }
+      onStatus(buf) {
+        this.statusText = buf.toString();
+      }
+      onMessageBegin() {
+        const { socket, client } = this;
+        if (socket.destroyed) {
+          return -1;
+        }
+        const request = client[kQueue][client[kRunningIdx]];
+        if (!request) {
+          return -1;
+        }
+      }
+      onHeaderField(buf) {
+        const len = this.headers.length;
+        if ((len & 1) === 0) {
+          this.headers.push(buf);
+        } else {
+          this.headers[len - 1] = Buffer.concat([this.headers[len - 1], buf]);
+        }
+        this.trackHeader(buf.length);
+      }
+      onHeaderValue(buf) {
+        let len = this.headers.length;
+        if ((len & 1) === 1) {
+          this.headers.push(buf);
+          len += 1;
+        } else {
+          this.headers[len - 1] = Buffer.concat([this.headers[len - 1], buf]);
+        }
+        const key = this.headers[len - 2];
+        if (key.length === 10 && key.toString().toLowerCase() === "keep-alive") {
+          this.keepAlive += buf.toString();
+        } else if (key.length === 10 && key.toString().toLowerCase() === "connection") {
+          this.connection += buf.toString();
+        } else if (key.length === 14 && key.toString().toLowerCase() === "content-length") {
+          this.contentLength += buf.toString();
+        }
+        this.trackHeader(buf.length);
+      }
+      trackHeader(len) {
+        this.headersSize += len;
+        if (this.headersSize >= this.headersMaxSize) {
+          util.destroy(this.socket, new HeadersOverflowError());
+        }
+      }
+      onUpgrade(head) {
+        const { upgrade, client, socket, headers, statusCode } = this;
+        assert2(upgrade);
+        const request = client[kQueue][client[kRunningIdx]];
+        assert2(request);
+        assert2(!socket.destroyed);
+        assert2(socket === client[kSocket]);
+        assert2(!this.paused);
+        assert2(request.upgrade || request.method === "CONNECT");
+        this.statusCode = null;
+        this.statusText = "";
+        this.shouldKeepAlive = null;
+        assert2(this.headers.length % 2 === 0);
+        this.headers = [];
+        this.headersSize = 0;
+        socket.unshift(head);
+        socket[kParser].destroy();
+        socket[kParser] = null;
+        socket[kClient] = null;
+        socket[kError] = null;
+        socket.removeListener("error", onSocketError).removeListener("readable", onSocketReadable).removeListener("end", onSocketEnd).removeListener("close", onSocketClose);
+        client[kSocket] = null;
+        client[kQueue][client[kRunningIdx]++] = null;
+        client.emit("disconnect", client[kUrl], [client], new InformationalError("upgrade"));
+        try {
+          request.onUpgrade(statusCode, headers, socket);
+        } catch (err) {
+          util.destroy(socket, err);
+        }
+        resume(client);
+      }
+      onHeadersComplete(statusCode, upgrade, shouldKeepAlive) {
+        const { client, socket, headers, statusText } = this;
+        if (socket.destroyed) {
+          return -1;
+        }
+        const request = client[kQueue][client[kRunningIdx]];
+        if (!request) {
+          return -1;
+        }
+        assert2(!this.upgrade);
+        assert2(this.statusCode < 200);
+        if (statusCode === 100) {
+          util.destroy(socket, new SocketError("bad response", util.getSocketInfo(socket)));
+          return -1;
+        }
+        if (upgrade && !request.upgrade) {
+          util.destroy(socket, new SocketError("bad upgrade", util.getSocketInfo(socket)));
+          return -1;
+        }
+        assert2.strictEqual(this.timeoutType, TIMEOUT_HEADERS);
+        this.statusCode = statusCode;
+        this.shouldKeepAlive = shouldKeepAlive || // Override llhttp value which does not allow keepAlive for HEAD.
+        request.method === "HEAD" && !socket[kReset] && this.connection.toLowerCase() === "keep-alive";
+        if (this.statusCode >= 200) {
+          const bodyTimeout = request.bodyTimeout != null ? request.bodyTimeout : client[kBodyTimeout];
+          this.setTimeout(bodyTimeout, TIMEOUT_BODY);
+        } else if (this.timeout) {
+          if (this.timeout.refresh) {
+            this.timeout.refresh();
+          }
+        }
+        if (request.method === "CONNECT") {
+          assert2(client[kRunning] === 1);
+          this.upgrade = true;
+          return 2;
+        }
+        if (upgrade) {
+          assert2(client[kRunning] === 1);
+          this.upgrade = true;
+          return 2;
+        }
+        assert2(this.headers.length % 2 === 0);
+        this.headers = [];
+        this.headersSize = 0;
+        if (this.shouldKeepAlive && client[kPipelining]) {
+          const keepAliveTimeout = this.keepAlive ? util.parseKeepAliveTimeout(this.keepAlive) : null;
+          if (keepAliveTimeout != null) {
+            const timeout = Math.min(
+              keepAliveTimeout - client[kKeepAliveTimeoutThreshold],
+              client[kKeepAliveMaxTimeout]
+            );
+            if (timeout <= 0) {
+              socket[kReset] = true;
+            } else {
+              client[kKeepAliveTimeoutValue] = timeout;
+            }
+          } else {
+            client[kKeepAliveTimeoutValue] = client[kKeepAliveDefaultTimeout];
+          }
+        } else {
+          socket[kReset] = true;
+        }
+        const pause = request.onHeaders(statusCode, headers, this.resume, statusText) === false;
+        if (request.aborted) {
+          return -1;
+        }
+        if (request.method === "HEAD") {
+          return 1;
+        }
+        if (statusCode < 200) {
+          return 1;
+        }
+        if (socket[kBlocking]) {
+          socket[kBlocking] = false;
+          resume(client);
+        }
+        return pause ? constants.ERROR.PAUSED : 0;
+      }
+      onBody(buf) {
+        const { client, socket, statusCode, maxResponseSize } = this;
+        if (socket.destroyed) {
+          return -1;
+        }
+        const request = client[kQueue][client[kRunningIdx]];
+        assert2(request);
+        assert2.strictEqual(this.timeoutType, TIMEOUT_BODY);
+        if (this.timeout) {
+          if (this.timeout.refresh) {
+            this.timeout.refresh();
+          }
+        }
+        assert2(statusCode >= 200);
+        if (maxResponseSize > -1 && this.bytesRead + buf.length > maxResponseSize) {
+          util.destroy(socket, new ResponseExceededMaxSizeError());
+          return -1;
+        }
+        this.bytesRead += buf.length;
+        if (request.onData(buf) === false) {
+          return constants.ERROR.PAUSED;
+        }
+      }
+      onMessageComplete() {
+        const { client, socket, statusCode, upgrade, headers, contentLength, bytesRead, shouldKeepAlive } = this;
+        if (socket.destroyed && (!statusCode || shouldKeepAlive)) {
+          return -1;
+        }
+        if (upgrade) {
+          return;
+        }
+        const request = client[kQueue][client[kRunningIdx]];
+        assert2(request);
+        assert2(statusCode >= 100);
+        this.statusCode = null;
+        this.statusText = "";
+        this.bytesRead = 0;
+        this.contentLength = "";
+        this.keepAlive = "";
+        this.connection = "";
+        assert2(this.headers.length % 2 === 0);
+        this.headers = [];
+        this.headersSize = 0;
+        if (statusCode < 200) {
+          return;
+        }
+        if (request.method !== "HEAD" && contentLength && bytesRead !== parseInt(contentLength, 10)) {
+          util.destroy(socket, new ResponseContentLengthMismatchError());
+          return -1;
+        }
+        request.onComplete(headers);
+        client[kQueue][client[kRunningIdx]++] = null;
+        if (socket[kWriting]) {
+          assert2.strictEqual(client[kRunning], 0);
+          util.destroy(socket, new InformationalError("reset"));
+          return constants.ERROR.PAUSED;
+        } else if (!shouldKeepAlive) {
+          util.destroy(socket, new InformationalError("reset"));
+          return constants.ERROR.PAUSED;
+        } else if (socket[kReset] && client[kRunning] === 0) {
+          util.destroy(socket, new InformationalError("reset"));
+          return constants.ERROR.PAUSED;
+        } else if (client[kPipelining] === 1) {
+          setImmediate(resume, client);
+        } else {
+          resume(client);
+        }
+      }
+    };
+    function onParserTimeout(parser) {
+      const { socket, timeoutType, client } = parser;
+      if (timeoutType === TIMEOUT_HEADERS) {
+        if (!socket[kWriting] || socket.writableNeedDrain || client[kRunning] > 1) {
+          assert2(!parser.paused, "cannot be paused while waiting for headers");
+          util.destroy(socket, new HeadersTimeoutError());
+        }
+      } else if (timeoutType === TIMEOUT_BODY) {
+        if (!parser.paused) {
+          util.destroy(socket, new BodyTimeoutError());
+        }
+      } else if (timeoutType === TIMEOUT_IDLE) {
+        assert2(client[kRunning] === 0 && client[kKeepAliveTimeoutValue]);
+        util.destroy(socket, new InformationalError("socket idle timeout"));
+      }
+    }
+    function onSocketReadable() {
+      const { [kParser]: parser } = this;
+      if (parser) {
+        parser.readMore();
+      }
+    }
+    function onSocketError(err) {
+      const { [kClient]: client, [kParser]: parser } = this;
+      assert2(err.code !== "ERR_TLS_CERT_ALTNAME_INVALID");
+      if (client[kHTTPConnVersion] !== "h2") {
+        if (err.code === "ECONNRESET" && parser.statusCode && !parser.shouldKeepAlive) {
+          parser.onMessageComplete();
+          return;
+        }
+      }
+      this[kError] = err;
+      onError(this[kClient], err);
+    }
+    function onError(client, err) {
+      if (client[kRunning] === 0 && err.code !== "UND_ERR_INFO" && err.code !== "UND_ERR_SOCKET") {
+        assert2(client[kPendingIdx] === client[kRunningIdx]);
+        const requests = client[kQueue].splice(client[kRunningIdx]);
+        for (let i = 0; i < requests.length; i++) {
+          const request = requests[i];
+          errorRequest(client, request, err);
+        }
+        assert2(client[kSize] === 0);
+      }
+    }
+    function onSocketEnd() {
+      const { [kParser]: parser, [kClient]: client } = this;
+      if (client[kHTTPConnVersion] !== "h2") {
+        if (parser.statusCode && !parser.shouldKeepAlive) {
+          parser.onMessageComplete();
+          return;
+        }
+      }
+      util.destroy(this, new SocketError("other side closed", util.getSocketInfo(this)));
+    }
+    function onSocketClose() {
+      const { [kClient]: client, [kParser]: parser } = this;
+      if (client[kHTTPConnVersion] === "h1" && parser) {
+        if (!this[kError] && parser.statusCode && !parser.shouldKeepAlive) {
+          parser.onMessageComplete();
+        }
+        this[kParser].destroy();
+        this[kParser] = null;
+      }
+      const err = this[kError] || new SocketError("closed", util.getSocketInfo(this));
+      client[kSocket] = null;
+      if (client.destroyed) {
+        assert2(client[kPending] === 0);
+        const requests = client[kQueue].splice(client[kRunningIdx]);
+        for (let i = 0; i < requests.length; i++) {
+          const request = requests[i];
+          errorRequest(client, request, err);
+        }
+      } else if (client[kRunning] > 0 && err.code !== "UND_ERR_INFO") {
+        const request = client[kQueue][client[kRunningIdx]];
+        client[kQueue][client[kRunningIdx]++] = null;
+        errorRequest(client, request, err);
+      }
+      client[kPendingIdx] = client[kRunningIdx];
+      assert2(client[kRunning] === 0);
+      client.emit("disconnect", client[kUrl], [client], err);
+      resume(client);
+    }
+    async function connect(client) {
+      assert2(!client[kConnecting]);
+      assert2(!client[kSocket]);
+      let { host, hostname, protocol, port } = client[kUrl];
+      if (hostname[0] === "[") {
+        const idx = hostname.indexOf("]");
+        assert2(idx !== -1);
+        const ip = hostname.substring(1, idx);
+        assert2(net.isIP(ip));
+        hostname = ip;
+      }
+      client[kConnecting] = true;
+      if (channels.beforeConnect.hasSubscribers) {
+        channels.beforeConnect.publish({
+          connectParams: {
+            host,
+            hostname,
+            protocol,
+            port,
+            servername: client[kServerName],
+            localAddress: client[kLocalAddress]
+          },
+          connector: client[kConnector]
+        });
+      }
+      try {
+        const socket = await new Promise((resolve, reject) => {
+          client[kConnector]({
+            host,
+            hostname,
+            protocol,
+            port,
+            servername: client[kServerName],
+            localAddress: client[kLocalAddress]
+          }, (err, socket2) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(socket2);
+            }
+          });
+        });
+        if (client.destroyed) {
+          util.destroy(socket.on("error", () => {
+          }), new ClientDestroyedError());
+          return;
+        }
+        client[kConnecting] = false;
+        assert2(socket);
+        const isH2 = socket.alpnProtocol === "h2";
+        if (isH2) {
+          if (!h2ExperimentalWarned) {
+            h2ExperimentalWarned = true;
+            process.emitWarning("H2 support is experimental, expect them to change at any time.", {
+              code: "UNDICI-H2"
+            });
+          }
+          const session = http2.connect(client[kUrl], {
+            createConnection: () => socket,
+            peerMaxConcurrentStreams: client[kHTTP2SessionState].maxConcurrentStreams
+          });
+          client[kHTTPConnVersion] = "h2";
+          session[kClient] = client;
+          session[kSocket] = socket;
+          session.on("error", onHttp2SessionError);
+          session.on("frameError", onHttp2FrameError);
+          session.on("end", onHttp2SessionEnd);
+          session.on("goaway", onHTTP2GoAway);
+          session.on("close", onSocketClose);
+          session.unref();
+          client[kHTTP2Session] = session;
+          socket[kHTTP2Session] = session;
+        } else {
+          if (!llhttpInstance) {
+            llhttpInstance = await llhttpPromise;
+            llhttpPromise = null;
+          }
+          socket[kNoRef] = false;
+          socket[kWriting] = false;
+          socket[kReset] = false;
+          socket[kBlocking] = false;
+          socket[kParser] = new Parser(client, socket, llhttpInstance);
+        }
+        socket[kCounter] = 0;
+        socket[kMaxRequests] = client[kMaxRequests];
+        socket[kClient] = client;
+        socket[kError] = null;
+        socket.on("error", onSocketError).on("readable", onSocketReadable).on("end", onSocketEnd).on("close", onSocketClose);
+        client[kSocket] = socket;
+        if (channels.connected.hasSubscribers) {
+          channels.connected.publish({
+            connectParams: {
+              host,
+              hostname,
+              protocol,
+              port,
+              servername: client[kServerName],
+              localAddress: client[kLocalAddress]
+            },
+            connector: client[kConnector],
+            socket
+          });
+        }
+        client.emit("connect", client[kUrl], [client]);
+      } catch (err) {
+        if (client.destroyed) {
+          return;
+        }
+        client[kConnecting] = false;
+        if (channels.connectError.hasSubscribers) {
+          channels.connectError.publish({
+            connectParams: {
+              host,
+              hostname,
+              protocol,
+              port,
+              servername: client[kServerName],
+              localAddress: client[kLocalAddress]
+            },
+            connector: client[kConnector],
+            error: err
+          });
+        }
+        if (err.code === "ERR_TLS_CERT_ALTNAME_INVALID") {
+          assert2(client[kRunning] === 0);
+          while (client[kPending] > 0 && client[kQueue][client[kPendingIdx]].servername === client[kServerName]) {
+            const request = client[kQueue][client[kPendingIdx]++];
+            errorRequest(client, request, err);
+          }
+        } else {
+          onError(client, err);
+        }
+        client.emit("connectionError", client[kUrl], [client], err);
+      }
+      resume(client);
+    }
+    function emitDrain(client) {
+      client[kNeedDrain] = 0;
+      client.emit("drain", client[kUrl], [client]);
+    }
+    function resume(client, sync) {
+      if (client[kResuming] === 2) {
+        return;
+      }
+      client[kResuming] = 2;
+      _resume(client, sync);
+      client[kResuming] = 0;
+      if (client[kRunningIdx] > 256) {
+        client[kQueue].splice(0, client[kRunningIdx]);
+        client[kPendingIdx] -= client[kRunningIdx];
+        client[kRunningIdx] = 0;
+      }
+    }
+    function _resume(client, sync) {
+      while (true) {
+        if (client.destroyed) {
+          assert2(client[kPending] === 0);
+          return;
+        }
+        if (client[kClosedResolve] && !client[kSize]) {
+          client[kClosedResolve]();
+          client[kClosedResolve] = null;
+          return;
+        }
+        const socket = client[kSocket];
+        if (socket && !socket.destroyed && socket.alpnProtocol !== "h2") {
+          if (client[kSize] === 0) {
+            if (!socket[kNoRef] && socket.unref) {
+              socket.unref();
+              socket[kNoRef] = true;
+            }
+          } else if (socket[kNoRef] && socket.ref) {
+            socket.ref();
+            socket[kNoRef] = false;
+          }
+          if (client[kSize] === 0) {
+            if (socket[kParser].timeoutType !== TIMEOUT_IDLE) {
+              socket[kParser].setTimeout(client[kKeepAliveTimeoutValue], TIMEOUT_IDLE);
+            }
+          } else if (client[kRunning] > 0 && socket[kParser].statusCode < 200) {
+            if (socket[kParser].timeoutType !== TIMEOUT_HEADERS) {
+              const request2 = client[kQueue][client[kRunningIdx]];
+              const headersTimeout = request2.headersTimeout != null ? request2.headersTimeout : client[kHeadersTimeout];
+              socket[kParser].setTimeout(headersTimeout, TIMEOUT_HEADERS);
+            }
+          }
+        }
+        if (client[kBusy]) {
+          client[kNeedDrain] = 2;
+        } else if (client[kNeedDrain] === 2) {
+          if (sync) {
+            client[kNeedDrain] = 1;
+            process.nextTick(emitDrain, client);
+          } else {
+            emitDrain(client);
+          }
+          continue;
+        }
+        if (client[kPending] === 0) {
+          return;
+        }
+        if (client[kRunning] >= (client[kPipelining] || 1)) {
+          return;
+        }
+        const request = client[kQueue][client[kPendingIdx]];
+        if (client[kUrl].protocol === "https:" && client[kServerName] !== request.servername) {
+          if (client[kRunning] > 0) {
+            return;
+          }
+          client[kServerName] = request.servername;
+          if (socket && socket.servername !== request.servername) {
+            util.destroy(socket, new InformationalError("servername changed"));
+            return;
+          }
+        }
+        if (client[kConnecting]) {
+          return;
+        }
+        if (!socket && !client[kHTTP2Session]) {
+          connect(client);
+          return;
+        }
+        if (socket.destroyed || socket[kWriting] || socket[kReset] || socket[kBlocking]) {
+          return;
+        }
+        if (client[kRunning] > 0 && !request.idempotent) {
+          return;
+        }
+        if (client[kRunning] > 0 && (request.upgrade || request.method === "CONNECT")) {
+          return;
+        }
+        if (client[kRunning] > 0 && util.bodyLength(request.body) !== 0 && (util.isStream(request.body) || util.isAsyncIterable(request.body))) {
+          return;
+        }
+        if (!request.aborted && write(client, request)) {
+          client[kPendingIdx]++;
+        } else {
+          client[kQueue].splice(client[kPendingIdx], 1);
+        }
+      }
+    }
+    function shouldSendContentLength(method) {
+      return method !== "GET" && method !== "HEAD" && method !== "OPTIONS" && method !== "TRACE" && method !== "CONNECT";
+    }
+    function write(client, request) {
+      if (client[kHTTPConnVersion] === "h2") {
+        writeH2(client, client[kHTTP2Session], request);
+        return;
+      }
+      const { body, method, path, host, upgrade, headers, blocking, reset } = request;
+      const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
+      if (body && typeof body.read === "function") {
+        body.read(0);
+      }
+      const bodyLength = util.bodyLength(body);
+      let contentLength = bodyLength;
+      if (contentLength === null) {
+        contentLength = request.contentLength;
+      }
+      if (contentLength === 0 && !expectsPayload) {
+        contentLength = null;
+      }
+      if (shouldSendContentLength(method) && contentLength > 0 && request.contentLength !== null && request.contentLength !== contentLength) {
+        if (client[kStrictContentLength]) {
+          errorRequest(client, request, new RequestContentLengthMismatchError());
+          return false;
+        }
+        process.emitWarning(new RequestContentLengthMismatchError());
+      }
+      const socket = client[kSocket];
+      try {
+        request.onConnect((err) => {
+          if (request.aborted || request.completed) {
+            return;
+          }
+          errorRequest(client, request, err || new RequestAbortedError());
+          util.destroy(socket, new InformationalError("aborted"));
+        });
+      } catch (err) {
+        errorRequest(client, request, err);
+      }
+      if (request.aborted) {
+        return false;
+      }
+      if (method === "HEAD") {
+        socket[kReset] = true;
+      }
+      if (upgrade || method === "CONNECT") {
+        socket[kReset] = true;
+      }
+      if (reset != null) {
+        socket[kReset] = reset;
+      }
+      if (client[kMaxRequests] && socket[kCounter]++ >= client[kMaxRequests]) {
+        socket[kReset] = true;
+      }
+      if (blocking) {
+        socket[kBlocking] = true;
+      }
+      let header = `${method} ${path} HTTP/1.1\r
+`;
+      if (typeof host === "string") {
+        header += `host: ${host}\r
+`;
+      } else {
+        header += client[kHostHeader];
+      }
+      if (upgrade) {
+        header += `connection: upgrade\r
+upgrade: ${upgrade}\r
+`;
+      } else if (client[kPipelining] && !socket[kReset]) {
+        header += "connection: keep-alive\r\n";
+      } else {
+        header += "connection: close\r\n";
+      }
+      if (headers) {
+        header += headers;
+      }
+      if (channels.sendHeaders.hasSubscribers) {
+        channels.sendHeaders.publish({ request, headers: header, socket });
+      }
+      if (!body || bodyLength === 0) {
+        if (contentLength === 0) {
+          socket.write(`${header}content-length: 0\r
+\r
+`, "latin1");
+        } else {
+          assert2(contentLength === null, "no body must not have content length");
+          socket.write(`${header}\r
+`, "latin1");
+        }
+        request.onRequestSent();
+      } else if (util.isBuffer(body)) {
+        assert2(contentLength === body.byteLength, "buffer body must have content length");
+        socket.cork();
+        socket.write(`${header}content-length: ${contentLength}\r
+\r
+`, "latin1");
+        socket.write(body);
+        socket.uncork();
+        request.onBodySent(body);
+        request.onRequestSent();
+        if (!expectsPayload) {
+          socket[kReset] = true;
+        }
+      } else if (util.isBlobLike(body)) {
+        if (typeof body.stream === "function") {
+          writeIterable({ body: body.stream(), client, request, socket, contentLength, header, expectsPayload });
+        } else {
+          writeBlob({ body, client, request, socket, contentLength, header, expectsPayload });
+        }
+      } else if (util.isStream(body)) {
+        writeStream({ body, client, request, socket, contentLength, header, expectsPayload });
+      } else if (util.isIterable(body)) {
+        writeIterable({ body, client, request, socket, contentLength, header, expectsPayload });
+      } else {
+        assert2(false);
+      }
+      return true;
+    }
+    function writeH2(client, session, request) {
+      const { body, method, path, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
+      let headers;
+      if (typeof reqHeaders === "string") headers = Request2[kHTTP2CopyHeaders](reqHeaders.trim());
+      else headers = reqHeaders;
+      if (upgrade) {
+        errorRequest(client, request, new Error("Upgrade not supported for H2"));
+        return false;
+      }
+      try {
+        request.onConnect((err) => {
+          if (request.aborted || request.completed) {
+            return;
+          }
+          errorRequest(client, request, err || new RequestAbortedError());
+        });
+      } catch (err) {
+        errorRequest(client, request, err);
+      }
+      if (request.aborted) {
+        return false;
+      }
+      let stream;
+      const h2State = client[kHTTP2SessionState];
+      headers[HTTP2_HEADER_AUTHORITY] = host || client[kHost];
+      headers[HTTP2_HEADER_METHOD] = method;
+      if (method === "CONNECT") {
+        session.ref();
+        stream = session.request(headers, { endStream: false, signal });
+        if (stream.id && !stream.pending) {
+          request.onUpgrade(null, null, stream);
+          ++h2State.openStreams;
+        } else {
+          stream.once("ready", () => {
+            request.onUpgrade(null, null, stream);
+            ++h2State.openStreams;
+          });
+        }
+        stream.once("close", () => {
+          h2State.openStreams -= 1;
+          if (h2State.openStreams === 0) session.unref();
+        });
+        return true;
+      }
+      headers[HTTP2_HEADER_PATH] = path;
+      headers[HTTP2_HEADER_SCHEME] = "https";
+      const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
+      if (body && typeof body.read === "function") {
+        body.read(0);
+      }
+      let contentLength = util.bodyLength(body);
+      if (contentLength == null) {
+        contentLength = request.contentLength;
+      }
+      if (contentLength === 0 || !expectsPayload) {
+        contentLength = null;
+      }
+      if (shouldSendContentLength(method) && contentLength > 0 && request.contentLength != null && request.contentLength !== contentLength) {
+        if (client[kStrictContentLength]) {
+          errorRequest(client, request, new RequestContentLengthMismatchError());
+          return false;
+        }
+        process.emitWarning(new RequestContentLengthMismatchError());
+      }
+      if (contentLength != null) {
+        assert2(body, "no body must not have content length");
+        headers[HTTP2_HEADER_CONTENT_LENGTH] = `${contentLength}`;
+      }
+      session.ref();
+      const shouldEndStream = method === "GET" || method === "HEAD";
+      if (expectContinue) {
+        headers[HTTP2_HEADER_EXPECT] = "100-continue";
+        stream = session.request(headers, { endStream: shouldEndStream, signal });
+        stream.once("continue", writeBodyH2);
+      } else {
+        stream = session.request(headers, {
+          endStream: shouldEndStream,
+          signal
+        });
+        writeBodyH2();
+      }
+      ++h2State.openStreams;
+      stream.once("response", (headers2) => {
+        const { [HTTP2_HEADER_STATUS]: statusCode, ...realHeaders } = headers2;
+        if (request.onHeaders(Number(statusCode), realHeaders, stream.resume.bind(stream), "") === false) {
+          stream.pause();
+        }
+      });
+      stream.once("end", () => {
+        request.onComplete([]);
+      });
+      stream.on("data", (chunk) => {
+        if (request.onData(chunk) === false) {
+          stream.pause();
+        }
+      });
+      stream.once("close", () => {
+        h2State.openStreams -= 1;
+        if (h2State.openStreams === 0) {
+          session.unref();
+        }
+      });
+      stream.once("error", function(err) {
+        if (client[kHTTP2Session] && !client[kHTTP2Session].destroyed && !this.closed && !this.destroyed) {
+          h2State.streams -= 1;
+          util.destroy(stream, err);
+        }
+      });
+      stream.once("frameError", (type, code) => {
+        const err = new InformationalError(`HTTP/2: "frameError" received - type ${type}, code ${code}`);
+        errorRequest(client, request, err);
+        if (client[kHTTP2Session] && !client[kHTTP2Session].destroyed && !this.closed && !this.destroyed) {
+          h2State.streams -= 1;
+          util.destroy(stream, err);
+        }
+      });
+      return true;
+      function writeBodyH2() {
+        if (!body) {
+          request.onRequestSent();
+        } else if (util.isBuffer(body)) {
+          assert2(contentLength === body.byteLength, "buffer body must have content length");
+          stream.cork();
+          stream.write(body);
+          stream.uncork();
+          stream.end();
+          request.onBodySent(body);
+          request.onRequestSent();
+        } else if (util.isBlobLike(body)) {
+          if (typeof body.stream === "function") {
+            writeIterable({
+              client,
+              request,
+              contentLength,
+              h2stream: stream,
+              expectsPayload,
+              body: body.stream(),
+              socket: client[kSocket],
+              header: ""
+            });
+          } else {
+            writeBlob({
+              body,
+              client,
+              request,
+              contentLength,
+              expectsPayload,
+              h2stream: stream,
+              header: "",
+              socket: client[kSocket]
+            });
+          }
+        } else if (util.isStream(body)) {
+          writeStream({
+            body,
+            client,
+            request,
+            contentLength,
+            expectsPayload,
+            socket: client[kSocket],
+            h2stream: stream,
+            header: ""
+          });
+        } else if (util.isIterable(body)) {
+          writeIterable({
+            body,
+            client,
+            request,
+            contentLength,
+            expectsPayload,
+            header: "",
+            h2stream: stream,
+            socket: client[kSocket]
+          });
+        } else {
+          assert2(false);
+        }
+      }
+    }
+    function writeStream({ h2stream, body, client, request, socket, contentLength, header, expectsPayload }) {
+      assert2(contentLength !== 0 || client[kRunning] === 0, "stream body cannot be pipelined");
+      if (client[kHTTPConnVersion] === "h2") {
+        let onPipeData = function(chunk) {
+          request.onBodySent(chunk);
+        };
+        const pipe2 = pipeline(
+          body,
+          h2stream,
+          (err) => {
+            if (err) {
+              util.destroy(body, err);
+              util.destroy(h2stream, err);
+            } else {
+              request.onRequestSent();
+            }
+          }
+        );
+        pipe2.on("data", onPipeData);
+        pipe2.once("end", () => {
+          pipe2.removeListener("data", onPipeData);
+          util.destroy(pipe2);
+        });
+        return;
+      }
+      let finished = false;
+      const writer = new AsyncWriter({ socket, request, contentLength, client, expectsPayload, header });
+      const onData = function(chunk) {
+        if (finished) {
+          return;
+        }
+        try {
+          if (!writer.write(chunk) && this.pause) {
+            this.pause();
+          }
+        } catch (err) {
+          util.destroy(this, err);
+        }
+      };
+      const onDrain = function() {
+        if (finished) {
+          return;
+        }
+        if (body.resume) {
+          body.resume();
+        }
+      };
+      const onAbort = function() {
+        if (finished) {
+          return;
+        }
+        const err = new RequestAbortedError();
+        queueMicrotask(() => onFinished(err));
+      };
+      const onFinished = function(err) {
+        if (finished) {
+          return;
+        }
+        finished = true;
+        assert2(socket.destroyed || socket[kWriting] && client[kRunning] <= 1);
+        socket.off("drain", onDrain).off("error", onFinished);
+        body.removeListener("data", onData).removeListener("end", onFinished).removeListener("error", onFinished).removeListener("close", onAbort);
+        if (!err) {
+          try {
+            writer.end();
+          } catch (er) {
+            err = er;
+          }
+        }
+        writer.destroy(err);
+        if (err && (err.code !== "UND_ERR_INFO" || err.message !== "reset")) {
+          util.destroy(body, err);
+        } else {
+          util.destroy(body);
+        }
+      };
+      body.on("data", onData).on("end", onFinished).on("error", onFinished).on("close", onAbort);
+      if (body.resume) {
+        body.resume();
+      }
+      socket.on("drain", onDrain).on("error", onFinished);
+    }
+    async function writeBlob({ h2stream, body, client, request, socket, contentLength, header, expectsPayload }) {
+      assert2(contentLength === body.size, "blob body must have content length");
+      const isH2 = client[kHTTPConnVersion] === "h2";
+      try {
+        if (contentLength != null && contentLength !== body.size) {
+          throw new RequestContentLengthMismatchError();
+        }
+        const buffer = Buffer.from(await body.arrayBuffer());
+        if (isH2) {
+          h2stream.cork();
+          h2stream.write(buffer);
+          h2stream.uncork();
+        } else {
+          socket.cork();
+          socket.write(`${header}content-length: ${contentLength}\r
+\r
+`, "latin1");
+          socket.write(buffer);
+          socket.uncork();
+        }
+        request.onBodySent(buffer);
+        request.onRequestSent();
+        if (!expectsPayload) {
+          socket[kReset] = true;
+        }
+        resume(client);
+      } catch (err) {
+        util.destroy(isH2 ? h2stream : socket, err);
+      }
+    }
+    async function writeIterable({ h2stream, body, client, request, socket, contentLength, header, expectsPayload }) {
+      assert2(contentLength !== 0 || client[kRunning] === 0, "iterator body cannot be pipelined");
+      let callback = null;
+      function onDrain() {
+        if (callback) {
+          const cb = callback;
+          callback = null;
+          cb();
+        }
+      }
+      const waitForDrain = () => new Promise((resolve, reject) => {
+        assert2(callback === null);
+        if (socket[kError]) {
+          reject(socket[kError]);
+        } else {
+          callback = resolve;
+        }
+      });
+      if (client[kHTTPConnVersion] === "h2") {
+        h2stream.on("close", onDrain).on("drain", onDrain);
+        try {
+          for await (const chunk of body) {
+            if (socket[kError]) {
+              throw socket[kError];
+            }
+            const res = h2stream.write(chunk);
+            request.onBodySent(chunk);
+            if (!res) {
+              await waitForDrain();
+            }
+          }
+        } catch (err) {
+          h2stream.destroy(err);
+        } finally {
+          request.onRequestSent();
+          h2stream.end();
+          h2stream.off("close", onDrain).off("drain", onDrain);
+        }
+        return;
+      }
+      socket.on("close", onDrain).on("drain", onDrain);
+      const writer = new AsyncWriter({ socket, request, contentLength, client, expectsPayload, header });
+      try {
+        for await (const chunk of body) {
+          if (socket[kError]) {
+            throw socket[kError];
+          }
+          if (!writer.write(chunk)) {
+            await waitForDrain();
+          }
+        }
+        writer.end();
+      } catch (err) {
+        writer.destroy(err);
+      } finally {
+        socket.off("close", onDrain).off("drain", onDrain);
+      }
+    }
+    var AsyncWriter = class {
+      constructor({ socket, request, contentLength, client, expectsPayload, header }) {
+        this.socket = socket;
+        this.request = request;
+        this.contentLength = contentLength;
+        this.client = client;
+        this.bytesWritten = 0;
+        this.expectsPayload = expectsPayload;
+        this.header = header;
+        socket[kWriting] = true;
+      }
+      write(chunk) {
+        const { socket, request, contentLength, client, bytesWritten, expectsPayload, header } = this;
+        if (socket[kError]) {
+          throw socket[kError];
+        }
+        if (socket.destroyed) {
+          return false;
+        }
+        const len = Buffer.byteLength(chunk);
+        if (!len) {
+          return true;
+        }
+        if (contentLength !== null && bytesWritten + len > contentLength) {
+          if (client[kStrictContentLength]) {
+            throw new RequestContentLengthMismatchError();
+          }
+          process.emitWarning(new RequestContentLengthMismatchError());
+        }
+        socket.cork();
+        if (bytesWritten === 0) {
+          if (!expectsPayload) {
+            socket[kReset] = true;
+          }
+          if (contentLength === null) {
+            socket.write(`${header}transfer-encoding: chunked\r
+`, "latin1");
+          } else {
+            socket.write(`${header}content-length: ${contentLength}\r
+\r
+`, "latin1");
+          }
+        }
+        if (contentLength === null) {
+          socket.write(`\r
+${len.toString(16)}\r
+`, "latin1");
+        }
+        this.bytesWritten += len;
+        const ret = socket.write(chunk);
+        socket.uncork();
+        request.onBodySent(chunk);
+        if (!ret) {
+          if (socket[kParser].timeout && socket[kParser].timeoutType === TIMEOUT_HEADERS) {
+            if (socket[kParser].timeout.refresh) {
+              socket[kParser].timeout.refresh();
+            }
+          }
+        }
+        return ret;
+      }
+      end() {
+        const { socket, contentLength, client, bytesWritten, expectsPayload, header, request } = this;
+        request.onRequestSent();
+        socket[kWriting] = false;
+        if (socket[kError]) {
+          throw socket[kError];
+        }
+        if (socket.destroyed) {
+          return;
+        }
+        if (bytesWritten === 0) {
+          if (expectsPayload) {
+            socket.write(`${header}content-length: 0\r
+\r
+`, "latin1");
+          } else {
+            socket.write(`${header}\r
+`, "latin1");
+          }
+        } else if (contentLength === null) {
+          socket.write("\r\n0\r\n\r\n", "latin1");
+        }
+        if (contentLength !== null && bytesWritten !== contentLength) {
+          if (client[kStrictContentLength]) {
+            throw new RequestContentLengthMismatchError();
+          } else {
+            process.emitWarning(new RequestContentLengthMismatchError());
+          }
+        }
+        if (socket[kParser].timeout && socket[kParser].timeoutType === TIMEOUT_HEADERS) {
+          if (socket[kParser].timeout.refresh) {
+            socket[kParser].timeout.refresh();
+          }
+        }
+        resume(client);
+      }
+      destroy(err) {
+        const { socket, client } = this;
+        socket[kWriting] = false;
+        if (err) {
+          assert2(client[kRunning] <= 1, "pipeline should only contain this request");
+          util.destroy(socket, err);
+        }
+      }
+    };
+    function errorRequest(client, request, err) {
+      try {
+        request.onError(err);
+        assert2(request.aborted);
+      } catch (err2) {
+        client.emit("error", err2);
+      }
+    }
+    module2.exports = Client2;
+  }
+});
+
+// alexa/node_modules/undici/lib/node/fixed-queue.js
+var require_fixed_queue = __commonJS({
+  "alexa/node_modules/undici/lib/node/fixed-queue.js"(exports2, module2) {
+    "use strict";
+    var kSize = 2048;
+    var kMask = kSize - 1;
+    var FixedCircularBuffer = class {
+      constructor() {
+        this.bottom = 0;
+        this.top = 0;
+        this.list = new Array(kSize);
+        this.next = null;
+      }
+      isEmpty() {
+        return this.top === this.bottom;
+      }
+      isFull() {
+        return (this.top + 1 & kMask) === this.bottom;
+      }
+      push(data) {
+        this.list[this.top] = data;
+        this.top = this.top + 1 & kMask;
+      }
+      shift() {
+        const nextItem = this.list[this.bottom];
+        if (nextItem === void 0)
+          return null;
+        this.list[this.bottom] = void 0;
+        this.bottom = this.bottom + 1 & kMask;
+        return nextItem;
+      }
+    };
+    module2.exports = class FixedQueue {
+      constructor() {
+        this.head = this.tail = new FixedCircularBuffer();
+      }
+      isEmpty() {
+        return this.head.isEmpty();
+      }
+      push(data) {
+        if (this.head.isFull()) {
+          this.head = this.head.next = new FixedCircularBuffer();
+        }
+        this.head.push(data);
+      }
+      shift() {
+        const tail = this.tail;
+        const next = tail.shift();
+        if (tail.isEmpty() && tail.next !== null) {
+          this.tail = tail.next;
+        }
+        return next;
+      }
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/pool-stats.js
+var require_pool_stats = __commonJS({
+  "alexa/node_modules/undici/lib/pool-stats.js"(exports2, module2) {
+    var { kFree, kConnected, kPending, kQueued, kRunning, kSize } = require_symbols();
+    var kPool = /* @__PURE__ */ Symbol("pool");
+    var PoolStats = class {
+      constructor(pool) {
+        this[kPool] = pool;
+      }
+      get connected() {
+        return this[kPool][kConnected];
+      }
+      get free() {
+        return this[kPool][kFree];
+      }
+      get pending() {
+        return this[kPool][kPending];
+      }
+      get queued() {
+        return this[kPool][kQueued];
+      }
+      get running() {
+        return this[kPool][kRunning];
+      }
+      get size() {
+        return this[kPool][kSize];
+      }
+    };
+    module2.exports = PoolStats;
+  }
+});
+
+// alexa/node_modules/undici/lib/pool-base.js
+var require_pool_base = __commonJS({
+  "alexa/node_modules/undici/lib/pool-base.js"(exports2, module2) {
+    "use strict";
+    var DispatcherBase = require_dispatcher_base();
+    var FixedQueue = require_fixed_queue();
+    var { kConnected, kSize, kRunning, kPending, kQueued, kBusy, kFree, kUrl, kClose, kDestroy, kDispatch } = require_symbols();
+    var PoolStats = require_pool_stats();
+    var kClients = /* @__PURE__ */ Symbol("clients");
+    var kNeedDrain = /* @__PURE__ */ Symbol("needDrain");
+    var kQueue = /* @__PURE__ */ Symbol("queue");
+    var kClosedResolve = /* @__PURE__ */ Symbol("closed resolve");
+    var kOnDrain = /* @__PURE__ */ Symbol("onDrain");
+    var kOnConnect = /* @__PURE__ */ Symbol("onConnect");
+    var kOnDisconnect = /* @__PURE__ */ Symbol("onDisconnect");
+    var kOnConnectionError = /* @__PURE__ */ Symbol("onConnectionError");
+    var kGetDispatcher = /* @__PURE__ */ Symbol("get dispatcher");
+    var kAddClient = /* @__PURE__ */ Symbol("add client");
+    var kRemoveClient = /* @__PURE__ */ Symbol("remove client");
+    var kStats = /* @__PURE__ */ Symbol("stats");
+    var PoolBase = class extends DispatcherBase {
+      constructor() {
+        super();
+        this[kQueue] = new FixedQueue();
+        this[kClients] = [];
+        this[kQueued] = 0;
+        const pool = this;
+        this[kOnDrain] = function onDrain(origin, targets) {
+          const queue = pool[kQueue];
+          let needDrain = false;
+          while (!needDrain) {
+            const item = queue.shift();
+            if (!item) {
+              break;
+            }
+            pool[kQueued]--;
+            needDrain = !this.dispatch(item.opts, item.handler);
+          }
+          this[kNeedDrain] = needDrain;
+          if (!this[kNeedDrain] && pool[kNeedDrain]) {
+            pool[kNeedDrain] = false;
+            pool.emit("drain", origin, [pool, ...targets]);
+          }
+          if (pool[kClosedResolve] && queue.isEmpty()) {
+            Promise.all(pool[kClients].map((c) => c.close())).then(pool[kClosedResolve]);
+          }
+        };
+        this[kOnConnect] = (origin, targets) => {
+          pool.emit("connect", origin, [pool, ...targets]);
+        };
+        this[kOnDisconnect] = (origin, targets, err) => {
+          pool.emit("disconnect", origin, [pool, ...targets], err);
+        };
+        this[kOnConnectionError] = (origin, targets, err) => {
+          pool.emit("connectionError", origin, [pool, ...targets], err);
+        };
+        this[kStats] = new PoolStats(this);
+      }
+      get [kBusy]() {
+        return this[kNeedDrain];
+      }
+      get [kConnected]() {
+        return this[kClients].filter((client) => client[kConnected]).length;
+      }
+      get [kFree]() {
+        return this[kClients].filter((client) => client[kConnected] && !client[kNeedDrain]).length;
+      }
+      get [kPending]() {
+        let ret = this[kQueued];
+        for (const { [kPending]: pending } of this[kClients]) {
+          ret += pending;
+        }
+        return ret;
+      }
+      get [kRunning]() {
+        let ret = 0;
+        for (const { [kRunning]: running } of this[kClients]) {
+          ret += running;
+        }
+        return ret;
+      }
+      get [kSize]() {
+        let ret = this[kQueued];
+        for (const { [kSize]: size } of this[kClients]) {
+          ret += size;
+        }
+        return ret;
+      }
+      get stats() {
+        return this[kStats];
+      }
+      async [kClose]() {
+        if (this[kQueue].isEmpty()) {
+          return Promise.all(this[kClients].map((c) => c.close()));
+        } else {
+          return new Promise((resolve) => {
+            this[kClosedResolve] = resolve;
+          });
+        }
+      }
+      async [kDestroy](err) {
+        while (true) {
+          const item = this[kQueue].shift();
+          if (!item) {
+            break;
+          }
+          item.handler.onError(err);
+        }
+        return Promise.all(this[kClients].map((c) => c.destroy(err)));
+      }
+      [kDispatch](opts, handler2) {
+        const dispatcher = this[kGetDispatcher]();
+        if (!dispatcher) {
+          this[kNeedDrain] = true;
+          this[kQueue].push({ opts, handler: handler2 });
+          this[kQueued]++;
+        } else if (!dispatcher.dispatch(opts, handler2)) {
+          dispatcher[kNeedDrain] = true;
+          this[kNeedDrain] = !this[kGetDispatcher]();
+        }
+        return !this[kNeedDrain];
+      }
+      [kAddClient](client) {
+        client.on("drain", this[kOnDrain]).on("connect", this[kOnConnect]).on("disconnect", this[kOnDisconnect]).on("connectionError", this[kOnConnectionError]);
+        this[kClients].push(client);
+        if (this[kNeedDrain]) {
+          process.nextTick(() => {
+            if (this[kNeedDrain]) {
+              this[kOnDrain](client[kUrl], [this, client]);
+            }
+          });
+        }
+        return this;
+      }
+      [kRemoveClient](client) {
+        client.close(() => {
+          const idx = this[kClients].indexOf(client);
+          if (idx !== -1) {
+            this[kClients].splice(idx, 1);
+          }
+        });
+        this[kNeedDrain] = this[kClients].some((dispatcher) => !dispatcher[kNeedDrain] && dispatcher.closed !== true && dispatcher.destroyed !== true);
+      }
+    };
+    module2.exports = {
+      PoolBase,
+      kClients,
+      kNeedDrain,
+      kAddClient,
+      kRemoveClient,
+      kGetDispatcher
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/pool.js
+var require_pool = __commonJS({
+  "alexa/node_modules/undici/lib/pool.js"(exports2, module2) {
+    "use strict";
+    var {
+      PoolBase,
+      kClients,
+      kNeedDrain,
+      kAddClient,
+      kGetDispatcher
+    } = require_pool_base();
+    var Client2 = require_client();
+    var {
+      InvalidArgumentError
+    } = require_errors();
+    var util = require_util();
+    var { kUrl, kInterceptors } = require_symbols();
+    var buildConnector = require_connect();
+    var kOptions = /* @__PURE__ */ Symbol("options");
+    var kConnections = /* @__PURE__ */ Symbol("connections");
+    var kFactory = /* @__PURE__ */ Symbol("factory");
+    function defaultFactory(origin, opts) {
+      return new Client2(origin, opts);
+    }
+    var Pool = class extends PoolBase {
+      constructor(origin, {
+        connections,
+        factory = defaultFactory,
+        connect,
+        connectTimeout,
+        tls,
+        maxCachedSessions,
+        socketPath,
+        autoSelectFamily,
+        autoSelectFamilyAttemptTimeout,
+        allowH2,
+        ...options
+      } = {}) {
+        super();
+        if (connections != null && (!Number.isFinite(connections) || connections < 0)) {
+          throw new InvalidArgumentError("invalid connections");
+        }
+        if (typeof factory !== "function") {
+          throw new InvalidArgumentError("factory must be a function.");
+        }
+        if (connect != null && typeof connect !== "function" && typeof connect !== "object") {
+          throw new InvalidArgumentError("connect must be a function or an object");
+        }
+        if (typeof connect !== "function") {
+          connect = buildConnector({
+            ...tls,
+            maxCachedSessions,
+            allowH2,
+            socketPath,
+            timeout: connectTimeout,
+            ...util.nodeHasAutoSelectFamily && autoSelectFamily ? { autoSelectFamily, autoSelectFamilyAttemptTimeout } : void 0,
+            ...connect
+          });
+        }
+        this[kInterceptors] = options.interceptors && options.interceptors.Pool && Array.isArray(options.interceptors.Pool) ? options.interceptors.Pool : [];
+        this[kConnections] = connections || null;
+        this[kUrl] = util.parseOrigin(origin);
+        this[kOptions] = { ...util.deepClone(options), connect, allowH2 };
+        this[kOptions].interceptors = options.interceptors ? { ...options.interceptors } : void 0;
+        this[kFactory] = factory;
+      }
+      [kGetDispatcher]() {
+        let dispatcher = this[kClients].find((dispatcher2) => !dispatcher2[kNeedDrain]);
+        if (dispatcher) {
+          return dispatcher;
+        }
+        if (!this[kConnections] || this[kClients].length < this[kConnections]) {
+          dispatcher = this[kFactory](this[kUrl], this[kOptions]);
+          this[kAddClient](dispatcher);
+        }
+        return dispatcher;
+      }
+    };
+    module2.exports = Pool;
+  }
+});
+
+// alexa/node_modules/undici/lib/balanced-pool.js
+var require_balanced_pool = __commonJS({
+  "alexa/node_modules/undici/lib/balanced-pool.js"(exports2, module2) {
+    "use strict";
+    var {
+      BalancedPoolMissingUpstreamError,
+      InvalidArgumentError
+    } = require_errors();
+    var {
+      PoolBase,
+      kClients,
+      kNeedDrain,
+      kAddClient,
+      kRemoveClient,
+      kGetDispatcher
+    } = require_pool_base();
+    var Pool = require_pool();
+    var { kUrl, kInterceptors } = require_symbols();
+    var { parseOrigin } = require_util();
+    var kFactory = /* @__PURE__ */ Symbol("factory");
+    var kOptions = /* @__PURE__ */ Symbol("options");
+    var kGreatestCommonDivisor = /* @__PURE__ */ Symbol("kGreatestCommonDivisor");
+    var kCurrentWeight = /* @__PURE__ */ Symbol("kCurrentWeight");
+    var kIndex = /* @__PURE__ */ Symbol("kIndex");
+    var kWeight = /* @__PURE__ */ Symbol("kWeight");
+    var kMaxWeightPerServer = /* @__PURE__ */ Symbol("kMaxWeightPerServer");
+    var kErrorPenalty = /* @__PURE__ */ Symbol("kErrorPenalty");
+    function getGreatestCommonDivisor(a, b) {
+      if (b === 0) return a;
+      return getGreatestCommonDivisor(b, a % b);
+    }
+    function defaultFactory(origin, opts) {
+      return new Pool(origin, opts);
+    }
+    var BalancedPool = class extends PoolBase {
+      constructor(upstreams = [], { factory = defaultFactory, ...opts } = {}) {
+        super();
+        this[kOptions] = opts;
+        this[kIndex] = -1;
+        this[kCurrentWeight] = 0;
+        this[kMaxWeightPerServer] = this[kOptions].maxWeightPerServer || 100;
+        this[kErrorPenalty] = this[kOptions].errorPenalty || 15;
+        if (!Array.isArray(upstreams)) {
+          upstreams = [upstreams];
+        }
+        if (typeof factory !== "function") {
+          throw new InvalidArgumentError("factory must be a function.");
+        }
+        this[kInterceptors] = opts.interceptors && opts.interceptors.BalancedPool && Array.isArray(opts.interceptors.BalancedPool) ? opts.interceptors.BalancedPool : [];
+        this[kFactory] = factory;
+        for (const upstream of upstreams) {
+          this.addUpstream(upstream);
+        }
+        this._updateBalancedPoolStats();
+      }
+      addUpstream(upstream) {
+        const upstreamOrigin = parseOrigin(upstream).origin;
+        if (this[kClients].find((pool2) => pool2[kUrl].origin === upstreamOrigin && pool2.closed !== true && pool2.destroyed !== true)) {
+          return this;
+        }
+        const pool = this[kFactory](upstreamOrigin, Object.assign({}, this[kOptions]));
+        this[kAddClient](pool);
+        pool.on("connect", () => {
+          pool[kWeight] = Math.min(this[kMaxWeightPerServer], pool[kWeight] + this[kErrorPenalty]);
+        });
+        pool.on("connectionError", () => {
+          pool[kWeight] = Math.max(1, pool[kWeight] - this[kErrorPenalty]);
+          this._updateBalancedPoolStats();
+        });
+        pool.on("disconnect", (...args) => {
+          const err = args[2];
+          if (err && err.code === "UND_ERR_SOCKET") {
+            pool[kWeight] = Math.max(1, pool[kWeight] - this[kErrorPenalty]);
+            this._updateBalancedPoolStats();
+          }
+        });
+        for (const client of this[kClients]) {
+          client[kWeight] = this[kMaxWeightPerServer];
+        }
+        this._updateBalancedPoolStats();
+        return this;
+      }
+      _updateBalancedPoolStats() {
+        this[kGreatestCommonDivisor] = this[kClients].map((p) => p[kWeight]).reduce(getGreatestCommonDivisor, 0);
+      }
+      removeUpstream(upstream) {
+        const upstreamOrigin = parseOrigin(upstream).origin;
+        const pool = this[kClients].find((pool2) => pool2[kUrl].origin === upstreamOrigin && pool2.closed !== true && pool2.destroyed !== true);
+        if (pool) {
+          this[kRemoveClient](pool);
+        }
+        return this;
+      }
+      get upstreams() {
+        return this[kClients].filter((dispatcher) => dispatcher.closed !== true && dispatcher.destroyed !== true).map((p) => p[kUrl].origin);
+      }
+      [kGetDispatcher]() {
+        if (this[kClients].length === 0) {
+          throw new BalancedPoolMissingUpstreamError();
+        }
+        const dispatcher = this[kClients].find((dispatcher2) => !dispatcher2[kNeedDrain] && dispatcher2.closed !== true && dispatcher2.destroyed !== true);
+        if (!dispatcher) {
+          return;
+        }
+        const allClientsBusy = this[kClients].map((pool) => pool[kNeedDrain]).reduce((a, b) => a && b, true);
+        if (allClientsBusy) {
+          return;
+        }
+        let counter = 0;
+        let maxWeightIndex = this[kClients].findIndex((pool) => !pool[kNeedDrain]);
+        while (counter++ < this[kClients].length) {
+          this[kIndex] = (this[kIndex] + 1) % this[kClients].length;
+          const pool = this[kClients][this[kIndex]];
+          if (pool[kWeight] > this[kClients][maxWeightIndex][kWeight] && !pool[kNeedDrain]) {
+            maxWeightIndex = this[kIndex];
+          }
+          if (this[kIndex] === 0) {
+            this[kCurrentWeight] = this[kCurrentWeight] - this[kGreatestCommonDivisor];
+            if (this[kCurrentWeight] <= 0) {
+              this[kCurrentWeight] = this[kMaxWeightPerServer];
+            }
+          }
+          if (pool[kWeight] >= this[kCurrentWeight] && !pool[kNeedDrain]) {
+            return pool;
+          }
+        }
+        this[kCurrentWeight] = this[kClients][maxWeightIndex][kWeight];
+        this[kIndex] = maxWeightIndex;
+        return this[kClients][maxWeightIndex];
+      }
+    };
+    module2.exports = BalancedPool;
+  }
+});
+
+// alexa/node_modules/undici/lib/compat/dispatcher-weakref.js
+var require_dispatcher_weakref = __commonJS({
+  "alexa/node_modules/undici/lib/compat/dispatcher-weakref.js"(exports2, module2) {
+    "use strict";
+    var { kConnected, kSize } = require_symbols();
+    var CompatWeakRef = class {
+      constructor(value) {
+        this.value = value;
+      }
+      deref() {
+        return this.value[kConnected] === 0 && this.value[kSize] === 0 ? void 0 : this.value;
+      }
+    };
+    var CompatFinalizer = class {
+      constructor(finalizer) {
+        this.finalizer = finalizer;
+      }
+      register(dispatcher, key) {
+        if (dispatcher.on) {
+          dispatcher.on("disconnect", () => {
+            if (dispatcher[kConnected] === 0 && dispatcher[kSize] === 0) {
+              this.finalizer(key);
+            }
+          });
+        }
+      }
+    };
+    module2.exports = function() {
+      if (process.env.NODE_V8_COVERAGE) {
+        return {
+          WeakRef: CompatWeakRef,
+          FinalizationRegistry: CompatFinalizer
+        };
+      }
+      return {
+        WeakRef: global.WeakRef || CompatWeakRef,
+        FinalizationRegistry: global.FinalizationRegistry || CompatFinalizer
+      };
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/agent.js
+var require_agent = __commonJS({
+  "alexa/node_modules/undici/lib/agent.js"(exports2, module2) {
+    "use strict";
+    var { InvalidArgumentError } = require_errors();
+    var { kClients, kRunning, kClose, kDestroy, kDispatch, kInterceptors } = require_symbols();
+    var DispatcherBase = require_dispatcher_base();
+    var Pool = require_pool();
+    var Client2 = require_client();
+    var util = require_util();
+    var createRedirectInterceptor = require_redirectInterceptor();
+    var { WeakRef: WeakRef2, FinalizationRegistry } = require_dispatcher_weakref()();
+    var kOnConnect = /* @__PURE__ */ Symbol("onConnect");
+    var kOnDisconnect = /* @__PURE__ */ Symbol("onDisconnect");
+    var kOnConnectionError = /* @__PURE__ */ Symbol("onConnectionError");
+    var kMaxRedirections = /* @__PURE__ */ Symbol("maxRedirections");
+    var kOnDrain = /* @__PURE__ */ Symbol("onDrain");
+    var kFactory = /* @__PURE__ */ Symbol("factory");
+    var kFinalizer = /* @__PURE__ */ Symbol("finalizer");
+    var kOptions = /* @__PURE__ */ Symbol("options");
+    function defaultFactory(origin, opts) {
+      return opts && opts.connections === 1 ? new Client2(origin, opts) : new Pool(origin, opts);
+    }
+    var Agent = class extends DispatcherBase {
+      constructor({ factory = defaultFactory, maxRedirections = 0, connect, ...options } = {}) {
+        super();
+        if (typeof factory !== "function") {
+          throw new InvalidArgumentError("factory must be a function.");
+        }
+        if (connect != null && typeof connect !== "function" && typeof connect !== "object") {
+          throw new InvalidArgumentError("connect must be a function or an object");
+        }
+        if (!Number.isInteger(maxRedirections) || maxRedirections < 0) {
+          throw new InvalidArgumentError("maxRedirections must be a positive number");
+        }
+        if (connect && typeof connect !== "function") {
+          connect = { ...connect };
+        }
+        this[kInterceptors] = options.interceptors && options.interceptors.Agent && Array.isArray(options.interceptors.Agent) ? options.interceptors.Agent : [createRedirectInterceptor({ maxRedirections })];
+        this[kOptions] = { ...util.deepClone(options), connect };
+        this[kOptions].interceptors = options.interceptors ? { ...options.interceptors } : void 0;
+        this[kMaxRedirections] = maxRedirections;
+        this[kFactory] = factory;
+        this[kClients] = /* @__PURE__ */ new Map();
+        this[kFinalizer] = new FinalizationRegistry(
+          /* istanbul ignore next: gc is undeterministic */
+          (key) => {
+            const ref = this[kClients].get(key);
+            if (ref !== void 0 && ref.deref() === void 0) {
+              this[kClients].delete(key);
+            }
+          }
+        );
+        const agent = this;
+        this[kOnDrain] = (origin, targets) => {
+          agent.emit("drain", origin, [agent, ...targets]);
+        };
+        this[kOnConnect] = (origin, targets) => {
+          agent.emit("connect", origin, [agent, ...targets]);
+        };
+        this[kOnDisconnect] = (origin, targets, err) => {
+          agent.emit("disconnect", origin, [agent, ...targets], err);
+        };
+        this[kOnConnectionError] = (origin, targets, err) => {
+          agent.emit("connectionError", origin, [agent, ...targets], err);
+        };
+      }
+      get [kRunning]() {
+        let ret = 0;
+        for (const ref of this[kClients].values()) {
+          const client = ref.deref();
+          if (client) {
+            ret += client[kRunning];
+          }
+        }
+        return ret;
+      }
+      [kDispatch](opts, handler2) {
+        let key;
+        if (opts.origin && (typeof opts.origin === "string" || opts.origin instanceof URL)) {
+          key = String(opts.origin);
+        } else {
+          throw new InvalidArgumentError("opts.origin must be a non-empty string or URL.");
+        }
+        const ref = this[kClients].get(key);
+        let dispatcher = ref ? ref.deref() : null;
+        if (!dispatcher) {
+          dispatcher = this[kFactory](opts.origin, this[kOptions]).on("drain", this[kOnDrain]).on("connect", this[kOnConnect]).on("disconnect", this[kOnDisconnect]).on("connectionError", this[kOnConnectionError]);
+          this[kClients].set(key, new WeakRef2(dispatcher));
+          this[kFinalizer].register(dispatcher, key);
+        }
+        return dispatcher.dispatch(opts, handler2);
+      }
+      async [kClose]() {
+        const closePromises = [];
+        for (const ref of this[kClients].values()) {
+          const client = ref.deref();
+          if (client) {
+            closePromises.push(client.close());
+          }
+        }
+        await Promise.all(closePromises);
+      }
+      async [kDestroy](err) {
+        const destroyPromises = [];
+        for (const ref of this[kClients].values()) {
+          const client = ref.deref();
+          if (client) {
+            destroyPromises.push(client.destroy(err));
+          }
+        }
+        await Promise.all(destroyPromises);
+      }
+    };
+    module2.exports = Agent;
+  }
+});
+
+// alexa/node_modules/undici/lib/api/readable.js
+var require_readable = __commonJS({
+  "alexa/node_modules/undici/lib/api/readable.js"(exports2, module2) {
+    "use strict";
+    var assert2 = require("assert");
+    var { Readable } = require("stream");
+    var { RequestAbortedError, NotSupportedError, InvalidArgumentError } = require_errors();
+    var util = require_util();
+    var { ReadableStreamFrom, toUSVString } = require_util();
+    var Blob2;
+    var kConsume = /* @__PURE__ */ Symbol("kConsume");
+    var kReading = /* @__PURE__ */ Symbol("kReading");
+    var kBody = /* @__PURE__ */ Symbol("kBody");
+    var kAbort = /* @__PURE__ */ Symbol("abort");
+    var kContentType = /* @__PURE__ */ Symbol("kContentType");
+    var noop2 = () => {
+    };
+    module2.exports = class BodyReadable extends Readable {
+      constructor({
+        resume,
+        abort,
+        contentType: contentType2 = "",
+        highWaterMark = 64 * 1024
+        // Same as nodejs fs streams.
+      }) {
+        super({
+          autoDestroy: true,
+          read: resume,
+          highWaterMark
+        });
+        this._readableState.dataEmitted = false;
+        this[kAbort] = abort;
+        this[kConsume] = null;
+        this[kBody] = null;
+        this[kContentType] = contentType2;
+        this[kReading] = false;
+      }
+      destroy(err) {
+        if (this.destroyed) {
+          return this;
+        }
+        if (!err && !this._readableState.endEmitted) {
+          err = new RequestAbortedError();
+        }
+        if (err) {
+          this[kAbort]();
+        }
+        return super.destroy(err);
+      }
+      emit(ev, ...args) {
+        if (ev === "data") {
+          this._readableState.dataEmitted = true;
+        } else if (ev === "error") {
+          this._readableState.errorEmitted = true;
+        }
+        return super.emit(ev, ...args);
+      }
+      on(ev, ...args) {
+        if (ev === "data" || ev === "readable") {
+          this[kReading] = true;
+        }
+        return super.on(ev, ...args);
+      }
+      addListener(ev, ...args) {
+        return this.on(ev, ...args);
+      }
+      off(ev, ...args) {
+        const ret = super.off(ev, ...args);
+        if (ev === "data" || ev === "readable") {
+          this[kReading] = this.listenerCount("data") > 0 || this.listenerCount("readable") > 0;
+        }
+        return ret;
+      }
+      removeListener(ev, ...args) {
+        return this.off(ev, ...args);
+      }
+      push(chunk) {
+        if (this[kConsume] && chunk !== null && this.readableLength === 0) {
+          consumePush(this[kConsume], chunk);
+          return this[kReading] ? super.push(chunk) : true;
+        }
+        return super.push(chunk);
+      }
+      // https://fetch.spec.whatwg.org/#dom-body-text
+      async text() {
+        return consume(this, "text");
+      }
+      // https://fetch.spec.whatwg.org/#dom-body-json
+      async json() {
+        return consume(this, "json");
+      }
+      // https://fetch.spec.whatwg.org/#dom-body-blob
+      async blob() {
+        return consume(this, "blob");
+      }
+      // https://fetch.spec.whatwg.org/#dom-body-arraybuffer
+      async arrayBuffer() {
+        return consume(this, "arrayBuffer");
+      }
+      // https://fetch.spec.whatwg.org/#dom-body-formdata
+      async formData() {
+        throw new NotSupportedError();
+      }
+      // https://fetch.spec.whatwg.org/#dom-body-bodyused
+      get bodyUsed() {
+        return util.isDisturbed(this);
+      }
+      // https://fetch.spec.whatwg.org/#dom-body-body
+      get body() {
+        if (!this[kBody]) {
+          this[kBody] = ReadableStreamFrom(this);
+          if (this[kConsume]) {
+            this[kBody].getReader();
+            assert2(this[kBody].locked);
+          }
+        }
+        return this[kBody];
+      }
+      dump(opts) {
+        let limit = opts && Number.isFinite(opts.limit) ? opts.limit : 262144;
+        const signal = opts && opts.signal;
+        if (signal) {
+          try {
+            if (typeof signal !== "object" || !("aborted" in signal)) {
+              throw new InvalidArgumentError("signal must be an AbortSignal");
+            }
+            util.throwIfAborted(signal);
+          } catch (err) {
+            return Promise.reject(err);
+          }
+        }
+        if (this.closed) {
+          return Promise.resolve(null);
+        }
+        return new Promise((resolve, reject) => {
+          const signalListenerCleanup = signal ? util.addAbortListener(signal, () => {
+            this.destroy();
+          }) : noop2;
+          this.on("close", function() {
+            signalListenerCleanup();
+            if (signal && signal.aborted) {
+              reject(signal.reason || Object.assign(new Error("The operation was aborted"), { name: "AbortError" }));
+            } else {
+              resolve(null);
+            }
+          }).on("error", noop2).on("data", function(chunk) {
+            limit -= chunk.length;
+            if (limit <= 0) {
+              this.destroy();
+            }
+          }).resume();
+        });
+      }
+    };
+    function isLocked(self) {
+      return self[kBody] && self[kBody].locked === true || self[kConsume];
+    }
+    function isUnusable(self) {
+      return util.isDisturbed(self) || isLocked(self);
+    }
+    async function consume(stream, type) {
+      if (isUnusable(stream)) {
+        throw new TypeError("unusable");
+      }
+      assert2(!stream[kConsume]);
+      return new Promise((resolve, reject) => {
+        stream[kConsume] = {
+          type,
+          stream,
+          resolve,
+          reject,
+          length: 0,
+          body: []
+        };
+        stream.on("error", function(err) {
+          consumeFinish(this[kConsume], err);
+        }).on("close", function() {
+          if (this[kConsume].body !== null) {
+            consumeFinish(this[kConsume], new RequestAbortedError());
+          }
+        });
+        process.nextTick(consumeStart, stream[kConsume]);
+      });
+    }
+    function consumeStart(consume2) {
+      if (consume2.body === null) {
+        return;
+      }
+      const { _readableState: state } = consume2.stream;
+      for (const chunk of state.buffer) {
+        consumePush(consume2, chunk);
+      }
+      if (state.endEmitted) {
+        consumeEnd(this[kConsume]);
+      } else {
+        consume2.stream.on("end", function() {
+          consumeEnd(this[kConsume]);
+        });
+      }
+      consume2.stream.resume();
+      while (consume2.stream.read() != null) {
+      }
+    }
+    function consumeEnd(consume2) {
+      const { type, body, resolve, stream, length } = consume2;
+      try {
+        if (type === "text") {
+          resolve(toUSVString(Buffer.concat(body)));
+        } else if (type === "json") {
+          resolve(JSON.parse(Buffer.concat(body)));
+        } else if (type === "arrayBuffer") {
+          const dst = new Uint8Array(length);
+          let pos = 0;
+          for (const buf of body) {
+            dst.set(buf, pos);
+            pos += buf.byteLength;
+          }
+          resolve(dst.buffer);
+        } else if (type === "blob") {
+          if (!Blob2) {
+            Blob2 = require("buffer").Blob;
+          }
+          resolve(new Blob2(body, { type: stream[kContentType] }));
+        }
+        consumeFinish(consume2);
+      } catch (err) {
+        stream.destroy(err);
+      }
+    }
+    function consumePush(consume2, chunk) {
+      consume2.length += chunk.length;
+      consume2.body.push(chunk);
+    }
+    function consumeFinish(consume2, err) {
+      if (consume2.body === null) {
+        return;
+      }
+      if (err) {
+        consume2.reject(err);
+      } else {
+        consume2.resolve();
+      }
+      consume2.type = null;
+      consume2.stream = null;
+      consume2.resolve = null;
+      consume2.reject = null;
+      consume2.length = 0;
+      consume2.body = null;
+    }
+  }
+});
+
+// alexa/node_modules/undici/lib/api/util.js
+var require_util3 = __commonJS({
+  "alexa/node_modules/undici/lib/api/util.js"(exports2, module2) {
+    var assert2 = require("assert");
+    var {
+      ResponseStatusCodeError
+    } = require_errors();
+    var { toUSVString } = require_util();
+    async function getResolveErrorBodyCallback({ callback, body, contentType: contentType2, statusCode, statusMessage, headers }) {
+      assert2(body);
+      let chunks = [];
+      let limit = 0;
+      for await (const chunk of body) {
+        chunks.push(chunk);
+        limit += chunk.length;
+        if (limit > 128 * 1024) {
+          chunks = null;
+          break;
+        }
+      }
+      if (statusCode === 204 || !contentType2 || !chunks) {
+        process.nextTick(callback, new ResponseStatusCodeError(`Response status code ${statusCode}${statusMessage ? `: ${statusMessage}` : ""}`, statusCode, headers));
+        return;
+      }
+      try {
+        if (contentType2.startsWith("application/json")) {
+          const payload = JSON.parse(toUSVString(Buffer.concat(chunks)));
+          process.nextTick(callback, new ResponseStatusCodeError(`Response status code ${statusCode}${statusMessage ? `: ${statusMessage}` : ""}`, statusCode, headers, payload));
+          return;
+        }
+        if (contentType2.startsWith("text/")) {
+          const payload = toUSVString(Buffer.concat(chunks));
+          process.nextTick(callback, new ResponseStatusCodeError(`Response status code ${statusCode}${statusMessage ? `: ${statusMessage}` : ""}`, statusCode, headers, payload));
+          return;
+        }
+      } catch (err) {
+      }
+      process.nextTick(callback, new ResponseStatusCodeError(`Response status code ${statusCode}${statusMessage ? `: ${statusMessage}` : ""}`, statusCode, headers));
+    }
+    module2.exports = { getResolveErrorBodyCallback };
+  }
+});
+
+// alexa/node_modules/undici/lib/api/abort-signal.js
+var require_abort_signal = __commonJS({
+  "alexa/node_modules/undici/lib/api/abort-signal.js"(exports2, module2) {
+    var { addAbortListener } = require_util();
+    var { RequestAbortedError } = require_errors();
+    var kListener = /* @__PURE__ */ Symbol("kListener");
+    var kSignal = /* @__PURE__ */ Symbol("kSignal");
+    function abort(self) {
+      if (self.abort) {
+        self.abort();
+      } else {
+        self.onError(new RequestAbortedError());
+      }
+    }
+    function addSignal(self, signal) {
+      self[kSignal] = null;
+      self[kListener] = null;
+      if (!signal) {
+        return;
+      }
+      if (signal.aborted) {
+        abort(self);
+        return;
+      }
+      self[kSignal] = signal;
+      self[kListener] = () => {
+        abort(self);
+      };
+      addAbortListener(self[kSignal], self[kListener]);
+    }
+    function removeSignal(self) {
+      if (!self[kSignal]) {
+        return;
+      }
+      if ("removeEventListener" in self[kSignal]) {
+        self[kSignal].removeEventListener("abort", self[kListener]);
+      } else {
+        self[kSignal].removeListener("abort", self[kListener]);
+      }
+      self[kSignal] = null;
+      self[kListener] = null;
+    }
+    module2.exports = {
+      addSignal,
+      removeSignal
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/api/api-request.js
+var require_api_request = __commonJS({
+  "alexa/node_modules/undici/lib/api/api-request.js"(exports2, module2) {
+    "use strict";
+    var Readable = require_readable();
+    var {
+      InvalidArgumentError,
+      RequestAbortedError
+    } = require_errors();
+    var util = require_util();
+    var { getResolveErrorBodyCallback } = require_util3();
+    var { AsyncResource } = require("async_hooks");
+    var { addSignal, removeSignal } = require_abort_signal();
+    var RequestHandler = class extends AsyncResource {
+      constructor(opts, callback) {
+        if (!opts || typeof opts !== "object") {
+          throw new InvalidArgumentError("invalid opts");
+        }
+        const { signal, method, opaque, body, onInfo, responseHeaders, throwOnError, highWaterMark } = opts;
+        try {
+          if (typeof callback !== "function") {
+            throw new InvalidArgumentError("invalid callback");
+          }
+          if (highWaterMark && (typeof highWaterMark !== "number" || highWaterMark < 0)) {
+            throw new InvalidArgumentError("invalid highWaterMark");
+          }
+          if (signal && typeof signal.on !== "function" && typeof signal.addEventListener !== "function") {
+            throw new InvalidArgumentError("signal must be an EventEmitter or EventTarget");
+          }
+          if (method === "CONNECT") {
+            throw new InvalidArgumentError("invalid method");
+          }
+          if (onInfo && typeof onInfo !== "function") {
+            throw new InvalidArgumentError("invalid onInfo callback");
+          }
+          super("UNDICI_REQUEST");
+        } catch (err) {
+          if (util.isStream(body)) {
+            util.destroy(body.on("error", util.nop), err);
+          }
+          throw err;
+        }
+        this.responseHeaders = responseHeaders || null;
+        this.opaque = opaque || null;
+        this.callback = callback;
+        this.res = null;
+        this.abort = null;
+        this.body = body;
+        this.trailers = {};
+        this.context = null;
+        this.onInfo = onInfo || null;
+        this.throwOnError = throwOnError;
+        this.highWaterMark = highWaterMark;
+        if (util.isStream(body)) {
+          body.on("error", (err) => {
+            this.onError(err);
+          });
+        }
+        addSignal(this, signal);
+      }
+      onConnect(abort, context) {
+        if (!this.callback) {
+          throw new RequestAbortedError();
+        }
+        this.abort = abort;
+        this.context = context;
+      }
+      onHeaders(statusCode, rawHeaders, resume, statusMessage) {
+        const { callback, opaque, abort, context, responseHeaders, highWaterMark } = this;
+        const headers = responseHeaders === "raw" ? util.parseRawHeaders(rawHeaders) : util.parseHeaders(rawHeaders);
+        if (statusCode < 200) {
+          if (this.onInfo) {
+            this.onInfo({ statusCode, headers });
+          }
+          return;
+        }
+        const parsedHeaders = responseHeaders === "raw" ? util.parseHeaders(rawHeaders) : headers;
+        const contentType2 = parsedHeaders["content-type"];
+        const body = new Readable({ resume, abort, contentType: contentType2, highWaterMark });
+        this.callback = null;
+        this.res = body;
+        if (callback !== null) {
+          if (this.throwOnError && statusCode >= 400) {
+            this.runInAsyncScope(
+              getResolveErrorBodyCallback,
+              null,
+              { callback, body, contentType: contentType2, statusCode, statusMessage, headers }
+            );
+          } else {
+            this.runInAsyncScope(callback, null, null, {
+              statusCode,
+              headers,
+              trailers: this.trailers,
+              opaque,
+              body,
+              context
+            });
+          }
+        }
+      }
+      onData(chunk) {
+        const { res } = this;
+        return res.push(chunk);
+      }
+      onComplete(trailers) {
+        const { res } = this;
+        removeSignal(this);
+        util.parseHeaders(trailers, this.trailers);
+        res.push(null);
+      }
+      onError(err) {
+        const { res, callback, body, opaque } = this;
+        removeSignal(this);
+        if (callback) {
+          this.callback = null;
+          queueMicrotask(() => {
+            this.runInAsyncScope(callback, null, err, { opaque });
+          });
+        }
+        if (res) {
+          this.res = null;
+          queueMicrotask(() => {
+            util.destroy(res, err);
+          });
+        }
+        if (body) {
+          this.body = null;
+          util.destroy(body, err);
+        }
+      }
+    };
+    function request(opts, callback) {
+      if (callback === void 0) {
+        return new Promise((resolve, reject) => {
+          request.call(this, opts, (err, data) => {
+            return err ? reject(err) : resolve(data);
+          });
+        });
+      }
+      try {
+        this.dispatch(opts, new RequestHandler(opts, callback));
+      } catch (err) {
+        if (typeof callback !== "function") {
+          throw err;
+        }
+        const opaque = opts && opts.opaque;
+        queueMicrotask(() => callback(err, { opaque }));
+      }
+    }
+    module2.exports = request;
+    module2.exports.RequestHandler = RequestHandler;
+  }
+});
+
+// alexa/node_modules/undici/lib/api/api-stream.js
+var require_api_stream = __commonJS({
+  "alexa/node_modules/undici/lib/api/api-stream.js"(exports2, module2) {
+    "use strict";
+    var { finished, PassThrough } = require("stream");
+    var {
+      InvalidArgumentError,
+      InvalidReturnValueError,
+      RequestAbortedError
+    } = require_errors();
+    var util = require_util();
+    var { getResolveErrorBodyCallback } = require_util3();
+    var { AsyncResource } = require("async_hooks");
+    var { addSignal, removeSignal } = require_abort_signal();
+    var StreamHandler = class extends AsyncResource {
+      constructor(opts, factory, callback) {
+        if (!opts || typeof opts !== "object") {
+          throw new InvalidArgumentError("invalid opts");
+        }
+        const { signal, method, opaque, body, onInfo, responseHeaders, throwOnError } = opts;
+        try {
+          if (typeof callback !== "function") {
+            throw new InvalidArgumentError("invalid callback");
+          }
+          if (typeof factory !== "function") {
+            throw new InvalidArgumentError("invalid factory");
+          }
+          if (signal && typeof signal.on !== "function" && typeof signal.addEventListener !== "function") {
+            throw new InvalidArgumentError("signal must be an EventEmitter or EventTarget");
+          }
+          if (method === "CONNECT") {
+            throw new InvalidArgumentError("invalid method");
+          }
+          if (onInfo && typeof onInfo !== "function") {
+            throw new InvalidArgumentError("invalid onInfo callback");
+          }
+          super("UNDICI_STREAM");
+        } catch (err) {
+          if (util.isStream(body)) {
+            util.destroy(body.on("error", util.nop), err);
+          }
+          throw err;
+        }
+        this.responseHeaders = responseHeaders || null;
+        this.opaque = opaque || null;
+        this.factory = factory;
+        this.callback = callback;
+        this.res = null;
+        this.abort = null;
+        this.context = null;
+        this.trailers = null;
+        this.body = body;
+        this.onInfo = onInfo || null;
+        this.throwOnError = throwOnError || false;
+        if (util.isStream(body)) {
+          body.on("error", (err) => {
+            this.onError(err);
+          });
+        }
+        addSignal(this, signal);
+      }
+      onConnect(abort, context) {
+        if (!this.callback) {
+          throw new RequestAbortedError();
+        }
+        this.abort = abort;
+        this.context = context;
+      }
+      onHeaders(statusCode, rawHeaders, resume, statusMessage) {
+        const { factory, opaque, context, callback, responseHeaders } = this;
+        const headers = responseHeaders === "raw" ? util.parseRawHeaders(rawHeaders) : util.parseHeaders(rawHeaders);
+        if (statusCode < 200) {
+          if (this.onInfo) {
+            this.onInfo({ statusCode, headers });
+          }
+          return;
+        }
+        this.factory = null;
+        let res;
+        if (this.throwOnError && statusCode >= 400) {
+          const parsedHeaders = responseHeaders === "raw" ? util.parseHeaders(rawHeaders) : headers;
+          const contentType2 = parsedHeaders["content-type"];
+          res = new PassThrough();
+          this.callback = null;
+          this.runInAsyncScope(
+            getResolveErrorBodyCallback,
+            null,
+            { callback, body: res, contentType: contentType2, statusCode, statusMessage, headers }
+          );
+        } else {
+          if (factory === null) {
+            return;
+          }
+          res = this.runInAsyncScope(factory, null, {
+            statusCode,
+            headers,
+            opaque,
+            context
+          });
+          if (!res || typeof res.write !== "function" || typeof res.end !== "function" || typeof res.on !== "function") {
+            throw new InvalidReturnValueError("expected Writable");
+          }
+          finished(res, { readable: false }, (err) => {
+            const { callback: callback2, res: res2, opaque: opaque2, trailers, abort } = this;
+            this.res = null;
+            if (err || !res2.readable) {
+              util.destroy(res2, err);
+            }
+            this.callback = null;
+            this.runInAsyncScope(callback2, null, err || null, { opaque: opaque2, trailers });
+            if (err) {
+              abort();
+            }
+          });
+        }
+        res.on("drain", resume);
+        this.res = res;
+        const needDrain = res.writableNeedDrain !== void 0 ? res.writableNeedDrain : res._writableState && res._writableState.needDrain;
+        return needDrain !== true;
+      }
+      onData(chunk) {
+        const { res } = this;
+        return res ? res.write(chunk) : true;
+      }
+      onComplete(trailers) {
+        const { res } = this;
+        removeSignal(this);
+        if (!res) {
+          return;
+        }
+        this.trailers = util.parseHeaders(trailers);
+        res.end();
+      }
+      onError(err) {
+        const { res, callback, opaque, body } = this;
+        removeSignal(this);
+        this.factory = null;
+        if (res) {
+          this.res = null;
+          util.destroy(res, err);
+        } else if (callback) {
+          this.callback = null;
+          queueMicrotask(() => {
+            this.runInAsyncScope(callback, null, err, { opaque });
+          });
+        }
+        if (body) {
+          this.body = null;
+          util.destroy(body, err);
+        }
+      }
+    };
+    function stream(opts, factory, callback) {
+      if (callback === void 0) {
+        return new Promise((resolve, reject) => {
+          stream.call(this, opts, factory, (err, data) => {
+            return err ? reject(err) : resolve(data);
+          });
+        });
+      }
+      try {
+        this.dispatch(opts, new StreamHandler(opts, factory, callback));
+      } catch (err) {
+        if (typeof callback !== "function") {
+          throw err;
+        }
+        const opaque = opts && opts.opaque;
+        queueMicrotask(() => callback(err, { opaque }));
+      }
+    }
+    module2.exports = stream;
+  }
+});
+
+// alexa/node_modules/undici/lib/api/api-pipeline.js
+var require_api_pipeline = __commonJS({
+  "alexa/node_modules/undici/lib/api/api-pipeline.js"(exports2, module2) {
+    "use strict";
+    var {
+      Readable,
+      Duplex,
+      PassThrough
+    } = require("stream");
+    var {
+      InvalidArgumentError,
+      InvalidReturnValueError,
+      RequestAbortedError
+    } = require_errors();
+    var util = require_util();
+    var { AsyncResource } = require("async_hooks");
+    var { addSignal, removeSignal } = require_abort_signal();
+    var assert2 = require("assert");
+    var kResume = /* @__PURE__ */ Symbol("resume");
+    var PipelineRequest = class extends Readable {
+      constructor() {
+        super({ autoDestroy: true });
+        this[kResume] = null;
+      }
+      _read() {
+        const { [kResume]: resume } = this;
+        if (resume) {
+          this[kResume] = null;
+          resume();
+        }
+      }
+      _destroy(err, callback) {
+        this._read();
+        callback(err);
+      }
+    };
+    var PipelineResponse = class extends Readable {
+      constructor(resume) {
+        super({ autoDestroy: true });
+        this[kResume] = resume;
+      }
+      _read() {
+        this[kResume]();
+      }
+      _destroy(err, callback) {
+        if (!err && !this._readableState.endEmitted) {
+          err = new RequestAbortedError();
+        }
+        callback(err);
+      }
+    };
+    var PipelineHandler = class extends AsyncResource {
+      constructor(opts, handler2) {
+        if (!opts || typeof opts !== "object") {
+          throw new InvalidArgumentError("invalid opts");
+        }
+        if (typeof handler2 !== "function") {
+          throw new InvalidArgumentError("invalid handler");
+        }
+        const { signal, method, opaque, onInfo, responseHeaders } = opts;
+        if (signal && typeof signal.on !== "function" && typeof signal.addEventListener !== "function") {
+          throw new InvalidArgumentError("signal must be an EventEmitter or EventTarget");
+        }
+        if (method === "CONNECT") {
+          throw new InvalidArgumentError("invalid method");
+        }
+        if (onInfo && typeof onInfo !== "function") {
+          throw new InvalidArgumentError("invalid onInfo callback");
+        }
+        super("UNDICI_PIPELINE");
+        this.opaque = opaque || null;
+        this.responseHeaders = responseHeaders || null;
+        this.handler = handler2;
+        this.abort = null;
+        this.context = null;
+        this.onInfo = onInfo || null;
+        this.req = new PipelineRequest().on("error", util.nop);
+        this.ret = new Duplex({
+          readableObjectMode: opts.objectMode,
+          autoDestroy: true,
+          read: () => {
+            const { body } = this;
+            if (body && body.resume) {
+              body.resume();
+            }
+          },
+          write: (chunk, encoding, callback) => {
+            const { req } = this;
+            if (req.push(chunk, encoding) || req._readableState.destroyed) {
+              callback();
+            } else {
+              req[kResume] = callback;
+            }
+          },
+          destroy: (err, callback) => {
+            const { body, req, res, ret, abort } = this;
+            if (!err && !ret._readableState.endEmitted) {
+              err = new RequestAbortedError();
+            }
+            if (abort && err) {
+              abort();
+            }
+            util.destroy(body, err);
+            util.destroy(req, err);
+            util.destroy(res, err);
+            removeSignal(this);
+            callback(err);
+          }
+        }).on("prefinish", () => {
+          const { req } = this;
+          req.push(null);
+        });
+        this.res = null;
+        addSignal(this, signal);
+      }
+      onConnect(abort, context) {
+        const { ret, res } = this;
+        assert2(!res, "pipeline cannot be retried");
+        if (ret.destroyed) {
+          throw new RequestAbortedError();
+        }
+        this.abort = abort;
+        this.context = context;
+      }
+      onHeaders(statusCode, rawHeaders, resume) {
+        const { opaque, handler: handler2, context } = this;
+        if (statusCode < 200) {
+          if (this.onInfo) {
+            const headers = this.responseHeaders === "raw" ? util.parseRawHeaders(rawHeaders) : util.parseHeaders(rawHeaders);
+            this.onInfo({ statusCode, headers });
+          }
+          return;
+        }
+        this.res = new PipelineResponse(resume);
+        let body;
+        try {
+          this.handler = null;
+          const headers = this.responseHeaders === "raw" ? util.parseRawHeaders(rawHeaders) : util.parseHeaders(rawHeaders);
+          body = this.runInAsyncScope(handler2, null, {
+            statusCode,
+            headers,
+            opaque,
+            body: this.res,
+            context
+          });
+        } catch (err) {
+          this.res.on("error", util.nop);
+          throw err;
+        }
+        if (!body || typeof body.on !== "function") {
+          throw new InvalidReturnValueError("expected Readable");
+        }
+        body.on("data", (chunk) => {
+          const { ret, body: body2 } = this;
+          if (!ret.push(chunk) && body2.pause) {
+            body2.pause();
+          }
+        }).on("error", (err) => {
+          const { ret } = this;
+          util.destroy(ret, err);
+        }).on("end", () => {
+          const { ret } = this;
+          ret.push(null);
+        }).on("close", () => {
+          const { ret } = this;
+          if (!ret._readableState.ended) {
+            util.destroy(ret, new RequestAbortedError());
+          }
+        });
+        this.body = body;
+      }
+      onData(chunk) {
+        const { res } = this;
+        return res.push(chunk);
+      }
+      onComplete(trailers) {
+        const { res } = this;
+        res.push(null);
+      }
+      onError(err) {
+        const { ret } = this;
+        this.handler = null;
+        util.destroy(ret, err);
+      }
+    };
+    function pipeline(opts, handler2) {
+      try {
+        const pipelineHandler = new PipelineHandler(opts, handler2);
+        this.dispatch({ ...opts, body: pipelineHandler.req }, pipelineHandler);
+        return pipelineHandler.ret;
+      } catch (err) {
+        return new PassThrough().destroy(err);
+      }
+    }
+    module2.exports = pipeline;
+  }
+});
+
+// alexa/node_modules/undici/lib/api/api-upgrade.js
+var require_api_upgrade = __commonJS({
+  "alexa/node_modules/undici/lib/api/api-upgrade.js"(exports2, module2) {
+    "use strict";
+    var { InvalidArgumentError, RequestAbortedError, SocketError } = require_errors();
+    var { AsyncResource } = require("async_hooks");
+    var util = require_util();
+    var { addSignal, removeSignal } = require_abort_signal();
+    var assert2 = require("assert");
+    var UpgradeHandler = class extends AsyncResource {
+      constructor(opts, callback) {
+        if (!opts || typeof opts !== "object") {
+          throw new InvalidArgumentError("invalid opts");
+        }
+        if (typeof callback !== "function") {
+          throw new InvalidArgumentError("invalid callback");
+        }
+        const { signal, opaque, responseHeaders } = opts;
+        if (signal && typeof signal.on !== "function" && typeof signal.addEventListener !== "function") {
+          throw new InvalidArgumentError("signal must be an EventEmitter or EventTarget");
+        }
+        super("UNDICI_UPGRADE");
+        this.responseHeaders = responseHeaders || null;
+        this.opaque = opaque || null;
+        this.callback = callback;
+        this.abort = null;
+        this.context = null;
+        addSignal(this, signal);
+      }
+      onConnect(abort, context) {
+        if (!this.callback) {
+          throw new RequestAbortedError();
+        }
+        this.abort = abort;
+        this.context = null;
+      }
+      onHeaders() {
+        throw new SocketError("bad upgrade", null);
+      }
+      onUpgrade(statusCode, rawHeaders, socket) {
+        const { callback, opaque, context } = this;
+        assert2.strictEqual(statusCode, 101);
+        removeSignal(this);
+        this.callback = null;
+        const headers = this.responseHeaders === "raw" ? util.parseRawHeaders(rawHeaders) : util.parseHeaders(rawHeaders);
+        this.runInAsyncScope(callback, null, null, {
+          headers,
+          socket,
+          opaque,
+          context
+        });
+      }
+      onError(err) {
+        const { callback, opaque } = this;
+        removeSignal(this);
+        if (callback) {
+          this.callback = null;
+          queueMicrotask(() => {
+            this.runInAsyncScope(callback, null, err, { opaque });
+          });
+        }
+      }
+    };
+    function upgrade(opts, callback) {
+      if (callback === void 0) {
+        return new Promise((resolve, reject) => {
+          upgrade.call(this, opts, (err, data) => {
+            return err ? reject(err) : resolve(data);
+          });
+        });
+      }
+      try {
+        const upgradeHandler = new UpgradeHandler(opts, callback);
+        this.dispatch({
+          ...opts,
+          method: opts.method || "GET",
+          upgrade: opts.protocol || "Websocket"
+        }, upgradeHandler);
+      } catch (err) {
+        if (typeof callback !== "function") {
+          throw err;
+        }
+        const opaque = opts && opts.opaque;
+        queueMicrotask(() => callback(err, { opaque }));
+      }
+    }
+    module2.exports = upgrade;
+  }
+});
+
+// alexa/node_modules/undici/lib/api/api-connect.js
+var require_api_connect = __commonJS({
+  "alexa/node_modules/undici/lib/api/api-connect.js"(exports2, module2) {
+    "use strict";
+    var { AsyncResource } = require("async_hooks");
+    var { InvalidArgumentError, RequestAbortedError, SocketError } = require_errors();
+    var util = require_util();
+    var { addSignal, removeSignal } = require_abort_signal();
+    var ConnectHandler = class extends AsyncResource {
+      constructor(opts, callback) {
+        if (!opts || typeof opts !== "object") {
+          throw new InvalidArgumentError("invalid opts");
+        }
+        if (typeof callback !== "function") {
+          throw new InvalidArgumentError("invalid callback");
+        }
+        const { signal, opaque, responseHeaders } = opts;
+        if (signal && typeof signal.on !== "function" && typeof signal.addEventListener !== "function") {
+          throw new InvalidArgumentError("signal must be an EventEmitter or EventTarget");
+        }
+        super("UNDICI_CONNECT");
+        this.opaque = opaque || null;
+        this.responseHeaders = responseHeaders || null;
+        this.callback = callback;
+        this.abort = null;
+        addSignal(this, signal);
+      }
+      onConnect(abort, context) {
+        if (!this.callback) {
+          throw new RequestAbortedError();
+        }
+        this.abort = abort;
+        this.context = context;
+      }
+      onHeaders() {
+        throw new SocketError("bad connect", null);
+      }
+      onUpgrade(statusCode, rawHeaders, socket) {
+        const { callback, opaque, context } = this;
+        removeSignal(this);
+        this.callback = null;
+        let headers = rawHeaders;
+        if (headers != null) {
+          headers = this.responseHeaders === "raw" ? util.parseRawHeaders(rawHeaders) : util.parseHeaders(rawHeaders);
+        }
+        this.runInAsyncScope(callback, null, null, {
+          statusCode,
+          headers,
+          socket,
+          opaque,
+          context
+        });
+      }
+      onError(err) {
+        const { callback, opaque } = this;
+        removeSignal(this);
+        if (callback) {
+          this.callback = null;
+          queueMicrotask(() => {
+            this.runInAsyncScope(callback, null, err, { opaque });
+          });
+        }
+      }
+    };
+    function connect(opts, callback) {
+      if (callback === void 0) {
+        return new Promise((resolve, reject) => {
+          connect.call(this, opts, (err, data) => {
+            return err ? reject(err) : resolve(data);
+          });
+        });
+      }
+      try {
+        const connectHandler = new ConnectHandler(opts, callback);
+        this.dispatch({ ...opts, method: "CONNECT" }, connectHandler);
+      } catch (err) {
+        if (typeof callback !== "function") {
+          throw err;
+        }
+        const opaque = opts && opts.opaque;
+        queueMicrotask(() => callback(err, { opaque }));
+      }
+    }
+    module2.exports = connect;
+  }
+});
+
+// alexa/node_modules/undici/lib/api/index.js
+var require_api = __commonJS({
+  "alexa/node_modules/undici/lib/api/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports.request = require_api_request();
+    module2.exports.stream = require_api_stream();
+    module2.exports.pipeline = require_api_pipeline();
+    module2.exports.upgrade = require_api_upgrade();
+    module2.exports.connect = require_api_connect();
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/mock-errors.js
+var require_mock_errors = __commonJS({
+  "alexa/node_modules/undici/lib/mock/mock-errors.js"(exports2, module2) {
+    "use strict";
+    var { UndiciError } = require_errors();
+    var MockNotMatchedError = class _MockNotMatchedError extends UndiciError {
+      constructor(message) {
+        super(message);
+        Error.captureStackTrace(this, _MockNotMatchedError);
+        this.name = "MockNotMatchedError";
+        this.message = message || "The request does not match any registered mock dispatches";
+        this.code = "UND_MOCK_ERR_MOCK_NOT_MATCHED";
+      }
+    };
+    module2.exports = {
+      MockNotMatchedError
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/mock-symbols.js
+var require_mock_symbols = __commonJS({
+  "alexa/node_modules/undici/lib/mock/mock-symbols.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      kAgent: /* @__PURE__ */ Symbol("agent"),
+      kOptions: /* @__PURE__ */ Symbol("options"),
+      kFactory: /* @__PURE__ */ Symbol("factory"),
+      kDispatches: /* @__PURE__ */ Symbol("dispatches"),
+      kDispatchKey: /* @__PURE__ */ Symbol("dispatch key"),
+      kDefaultHeaders: /* @__PURE__ */ Symbol("default headers"),
+      kDefaultTrailers: /* @__PURE__ */ Symbol("default trailers"),
+      kContentLength: /* @__PURE__ */ Symbol("content length"),
+      kMockAgent: /* @__PURE__ */ Symbol("mock agent"),
+      kMockAgentSet: /* @__PURE__ */ Symbol("mock agent set"),
+      kMockAgentGet: /* @__PURE__ */ Symbol("mock agent get"),
+      kMockDispatch: /* @__PURE__ */ Symbol("mock dispatch"),
+      kClose: /* @__PURE__ */ Symbol("close"),
+      kOriginalClose: /* @__PURE__ */ Symbol("original agent close"),
+      kOrigin: /* @__PURE__ */ Symbol("origin"),
+      kIsMockActive: /* @__PURE__ */ Symbol("is mock active"),
+      kNetConnect: /* @__PURE__ */ Symbol("net connect"),
+      kGetNetConnect: /* @__PURE__ */ Symbol("get net connect"),
+      kConnected: /* @__PURE__ */ Symbol("connected")
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/mock-utils.js
+var require_mock_utils = __commonJS({
+  "alexa/node_modules/undici/lib/mock/mock-utils.js"(exports2, module2) {
+    "use strict";
+    var { MockNotMatchedError } = require_mock_errors();
+    var {
+      kDispatches,
+      kMockAgent,
+      kOriginalDispatch,
+      kOrigin,
+      kGetNetConnect
+    } = require_mock_symbols();
+    var { buildURL, nop } = require_util();
+    var { STATUS_CODES } = require("http");
+    var {
+      types: {
+        isPromise
+      }
+    } = require("util");
+    function matchValue(match, value) {
+      if (typeof match === "string") {
+        return match === value;
+      }
+      if (match instanceof RegExp) {
+        return match.test(value);
+      }
+      if (typeof match === "function") {
+        return match(value) === true;
+      }
+      return false;
+    }
+    function lowerCaseEntries(headers) {
+      return Object.fromEntries(
+        Object.entries(headers).map(([headerName, headerValue]) => {
+          return [headerName.toLocaleLowerCase(), headerValue];
+        })
+      );
+    }
+    function getHeaderByName(headers, key) {
+      if (Array.isArray(headers)) {
+        for (let i = 0; i < headers.length; i += 2) {
+          if (headers[i].toLocaleLowerCase() === key.toLocaleLowerCase()) {
+            return headers[i + 1];
+          }
+        }
+        return void 0;
+      } else if (typeof headers.get === "function") {
+        return headers.get(key);
+      } else {
+        return lowerCaseEntries(headers)[key.toLocaleLowerCase()];
+      }
+    }
+    function buildHeadersFromArray(headers) {
+      const clone2 = headers.slice();
+      const entries = [];
+      for (let index = 0; index < clone2.length; index += 2) {
+        entries.push([clone2[index], clone2[index + 1]]);
+      }
+      return Object.fromEntries(entries);
+    }
+    function matchHeaders(mockDispatch2, headers) {
+      if (typeof mockDispatch2.headers === "function") {
+        if (Array.isArray(headers)) {
+          headers = buildHeadersFromArray(headers);
+        }
+        return mockDispatch2.headers(headers ? lowerCaseEntries(headers) : {});
+      }
+      if (typeof mockDispatch2.headers === "undefined") {
+        return true;
+      }
+      if (typeof headers !== "object" || typeof mockDispatch2.headers !== "object") {
+        return false;
+      }
+      for (const [matchHeaderName, matchHeaderValue] of Object.entries(mockDispatch2.headers)) {
+        const headerValue = getHeaderByName(headers, matchHeaderName);
+        if (!matchValue(matchHeaderValue, headerValue)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    function safeUrl(path) {
+      if (typeof path !== "string") {
+        return path;
+      }
+      const pathSegments = path.split("?");
+      if (pathSegments.length !== 2) {
+        return path;
+      }
+      const qp = new URLSearchParams(pathSegments.pop());
+      qp.sort();
+      return [...pathSegments, qp.toString()].join("?");
+    }
+    function matchKey(mockDispatch2, { path, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path);
+      const methodMatch = matchValue(mockDispatch2.method, method);
+      const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
+      const headersMatch = matchHeaders(mockDispatch2, headers);
+      return pathMatch && methodMatch && bodyMatch && headersMatch;
+    }
+    function getResponseData(data) {
+      if (Buffer.isBuffer(data)) {
+        return data;
+      } else if (typeof data === "object") {
+        return JSON.stringify(data);
+      } else {
+        return data.toString();
+      }
+    }
+    function getMockDispatch(mockDispatches, key) {
+      const basePath = key.query ? buildURL(key.path, key.query) : key.path;
+      const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path }) => matchValue(safeUrl(path), resolvedPath));
+      if (matchedMockDispatches.length === 0) {
+        throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
+      }
+      matchedMockDispatches = matchedMockDispatches.filter(({ method }) => matchValue(method, key.method));
+      if (matchedMockDispatches.length === 0) {
+        throw new MockNotMatchedError(`Mock dispatch not matched for method '${key.method}'`);
+      }
+      matchedMockDispatches = matchedMockDispatches.filter(({ body }) => typeof body !== "undefined" ? matchValue(body, key.body) : true);
+      if (matchedMockDispatches.length === 0) {
+        throw new MockNotMatchedError(`Mock dispatch not matched for body '${key.body}'`);
+      }
+      matchedMockDispatches = matchedMockDispatches.filter((mockDispatch2) => matchHeaders(mockDispatch2, key.headers));
+      if (matchedMockDispatches.length === 0) {
+        throw new MockNotMatchedError(`Mock dispatch not matched for headers '${typeof key.headers === "object" ? JSON.stringify(key.headers) : key.headers}'`);
+      }
+      return matchedMockDispatches[0];
+    }
+    function addMockDispatch(mockDispatches, key, data) {
+      const baseData = { timesInvoked: 0, times: 1, persist: false, consumed: false };
+      const replyData = typeof data === "function" ? { callback: data } : { ...data };
+      const newMockDispatch = { ...baseData, ...key, pending: true, data: { error: null, ...replyData } };
+      mockDispatches.push(newMockDispatch);
+      return newMockDispatch;
+    }
+    function deleteMockDispatch(mockDispatches, key) {
+      const index = mockDispatches.findIndex((dispatch) => {
+        if (!dispatch.consumed) {
+          return false;
+        }
+        return matchKey(dispatch, key);
+      });
+      if (index !== -1) {
+        mockDispatches.splice(index, 1);
+      }
+    }
+    function buildKey(opts) {
+      const { path, method, body, headers, query } = opts;
+      return {
+        path,
+        method,
+        body,
+        headers,
+        query
+      };
+    }
+    function generateKeyValues(data) {
+      return Object.entries(data).reduce((keyValuePairs, [key, value]) => [
+        ...keyValuePairs,
+        Buffer.from(`${key}`),
+        Array.isArray(value) ? value.map((x) => Buffer.from(`${x}`)) : Buffer.from(`${value}`)
+      ], []);
+    }
+    function getStatusText(statusCode) {
+      return STATUS_CODES[statusCode] || "unknown";
+    }
+    async function getResponse(body) {
+      const buffers = [];
+      for await (const data of body) {
+        buffers.push(data);
+      }
+      return Buffer.concat(buffers).toString("utf8");
+    }
+    function mockDispatch(opts, handler2) {
+      const key = buildKey(opts);
+      const mockDispatch2 = getMockDispatch(this[kDispatches], key);
+      mockDispatch2.timesInvoked++;
+      if (mockDispatch2.data.callback) {
+        mockDispatch2.data = { ...mockDispatch2.data, ...mockDispatch2.data.callback(opts) };
+      }
+      const { data: { statusCode, data, headers, trailers, error: error2 }, delay, persist } = mockDispatch2;
+      const { timesInvoked, times } = mockDispatch2;
+      mockDispatch2.consumed = !persist && timesInvoked >= times;
+      mockDispatch2.pending = timesInvoked < times;
+      if (error2 !== null) {
+        deleteMockDispatch(this[kDispatches], key);
+        handler2.onError(error2);
+        return true;
+      }
+      if (typeof delay === "number" && delay > 0) {
+        setTimeout(() => {
+          handleReply(this[kDispatches]);
+        }, delay);
+      } else {
+        handleReply(this[kDispatches]);
+      }
+      function handleReply(mockDispatches, _data = data) {
+        const optsHeaders = Array.isArray(opts.headers) ? buildHeadersFromArray(opts.headers) : opts.headers;
+        const body = typeof _data === "function" ? _data({ ...opts, headers: optsHeaders }) : _data;
+        if (isPromise(body)) {
+          body.then((newData) => handleReply(mockDispatches, newData));
+          return;
+        }
+        const responseData = getResponseData(body);
+        const responseHeaders = generateKeyValues(headers);
+        const responseTrailers = generateKeyValues(trailers);
+        handler2.abort = nop;
+        handler2.onHeaders(statusCode, responseHeaders, resume, getStatusText(statusCode));
+        handler2.onData(Buffer.from(responseData));
+        handler2.onComplete(responseTrailers);
+        deleteMockDispatch(mockDispatches, key);
+      }
+      function resume() {
+      }
+      return true;
+    }
+    function buildMockDispatch() {
+      const agent = this[kMockAgent];
+      const origin = this[kOrigin];
+      const originalDispatch = this[kOriginalDispatch];
+      return function dispatch(opts, handler2) {
+        if (agent.isMockActive) {
+          try {
+            mockDispatch.call(this, opts, handler2);
+          } catch (error2) {
+            if (error2 instanceof MockNotMatchedError) {
+              const netConnect = agent[kGetNetConnect]();
+              if (netConnect === false) {
+                throw new MockNotMatchedError(`${error2.message}: subsequent request to origin ${origin} was not allowed (net.connect disabled)`);
+              }
+              if (checkNetConnect(netConnect, origin)) {
+                originalDispatch.call(this, opts, handler2);
+              } else {
+                throw new MockNotMatchedError(`${error2.message}: subsequent request to origin ${origin} was not allowed (net.connect is not enabled for this origin)`);
+              }
+            } else {
+              throw error2;
+            }
+          }
+        } else {
+          originalDispatch.call(this, opts, handler2);
+        }
+      };
+    }
+    function checkNetConnect(netConnect, origin) {
+      const url2 = new URL(origin);
+      if (netConnect === true) {
+        return true;
+      } else if (Array.isArray(netConnect) && netConnect.some((matcher) => matchValue(matcher, url2.host))) {
+        return true;
+      }
+      return false;
+    }
+    function buildMockOptions(opts) {
+      if (opts) {
+        const { agent, ...mockOptions } = opts;
+        return mockOptions;
+      }
+    }
+    module2.exports = {
+      getResponseData,
+      getMockDispatch,
+      addMockDispatch,
+      deleteMockDispatch,
+      buildKey,
+      generateKeyValues,
+      matchValue,
+      getResponse,
+      getStatusText,
+      mockDispatch,
+      buildMockDispatch,
+      checkNetConnect,
+      buildMockOptions,
+      getHeaderByName
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/mock-interceptor.js
+var require_mock_interceptor = __commonJS({
+  "alexa/node_modules/undici/lib/mock/mock-interceptor.js"(exports2, module2) {
+    "use strict";
+    var { getResponseData, buildKey, addMockDispatch } = require_mock_utils();
+    var {
+      kDispatches,
+      kDispatchKey,
+      kDefaultHeaders,
+      kDefaultTrailers,
+      kContentLength,
+      kMockDispatch
+    } = require_mock_symbols();
+    var { InvalidArgumentError } = require_errors();
+    var { buildURL } = require_util();
+    var MockScope = class {
+      constructor(mockDispatch) {
+        this[kMockDispatch] = mockDispatch;
+      }
+      /**
+       * Delay a reply by a set amount in ms.
+       */
+      delay(waitInMs) {
+        if (typeof waitInMs !== "number" || !Number.isInteger(waitInMs) || waitInMs <= 0) {
+          throw new InvalidArgumentError("waitInMs must be a valid integer > 0");
+        }
+        this[kMockDispatch].delay = waitInMs;
+        return this;
+      }
+      /**
+       * For a defined reply, never mark as consumed.
+       */
+      persist() {
+        this[kMockDispatch].persist = true;
+        return this;
+      }
+      /**
+       * Allow one to define a reply for a set amount of matching requests.
+       */
+      times(repeatTimes) {
+        if (typeof repeatTimes !== "number" || !Number.isInteger(repeatTimes) || repeatTimes <= 0) {
+          throw new InvalidArgumentError("repeatTimes must be a valid integer > 0");
+        }
+        this[kMockDispatch].times = repeatTimes;
+        return this;
+      }
+    };
+    var MockInterceptor = class {
+      constructor(opts, mockDispatches) {
+        if (typeof opts !== "object") {
+          throw new InvalidArgumentError("opts must be an object");
+        }
+        if (typeof opts.path === "undefined") {
+          throw new InvalidArgumentError("opts.path must be defined");
+        }
+        if (typeof opts.method === "undefined") {
+          opts.method = "GET";
+        }
+        if (typeof opts.path === "string") {
+          if (opts.query) {
+            opts.path = buildURL(opts.path, opts.query);
+          } else {
+            const parsedURL = new URL(opts.path, "data://");
+            opts.path = parsedURL.pathname + parsedURL.search;
+          }
+        }
+        if (typeof opts.method === "string") {
+          opts.method = opts.method.toUpperCase();
+        }
+        this[kDispatchKey] = buildKey(opts);
+        this[kDispatches] = mockDispatches;
+        this[kDefaultHeaders] = {};
+        this[kDefaultTrailers] = {};
+        this[kContentLength] = false;
+      }
+      createMockScopeDispatchData(statusCode, data, responseOptions = {}) {
+        const responseData = getResponseData(data);
+        const contentLength = this[kContentLength] ? { "content-length": responseData.length } : {};
+        const headers = { ...this[kDefaultHeaders], ...contentLength, ...responseOptions.headers };
+        const trailers = { ...this[kDefaultTrailers], ...responseOptions.trailers };
+        return { statusCode, data, headers, trailers };
+      }
+      validateReplyParameters(statusCode, data, responseOptions) {
+        if (typeof statusCode === "undefined") {
+          throw new InvalidArgumentError("statusCode must be defined");
+        }
+        if (typeof data === "undefined") {
+          throw new InvalidArgumentError("data must be defined");
+        }
+        if (typeof responseOptions !== "object") {
+          throw new InvalidArgumentError("responseOptions must be an object");
+        }
+      }
+      /**
+       * Mock an undici request with a defined reply.
+       */
+      reply(replyData) {
+        if (typeof replyData === "function") {
+          const wrappedDefaultsCallback = (opts) => {
+            const resolvedData = replyData(opts);
+            if (typeof resolvedData !== "object") {
+              throw new InvalidArgumentError("reply options callback must return an object");
+            }
+            const { statusCode: statusCode2, data: data2 = "", responseOptions: responseOptions2 = {} } = resolvedData;
+            this.validateReplyParameters(statusCode2, data2, responseOptions2);
+            return {
+              ...this.createMockScopeDispatchData(statusCode2, data2, responseOptions2)
+            };
+          };
+          const newMockDispatch2 = addMockDispatch(this[kDispatches], this[kDispatchKey], wrappedDefaultsCallback);
+          return new MockScope(newMockDispatch2);
+        }
+        const [statusCode, data = "", responseOptions = {}] = [...arguments];
+        this.validateReplyParameters(statusCode, data, responseOptions);
+        const dispatchData = this.createMockScopeDispatchData(statusCode, data, responseOptions);
+        const newMockDispatch = addMockDispatch(this[kDispatches], this[kDispatchKey], dispatchData);
+        return new MockScope(newMockDispatch);
+      }
+      /**
+       * Mock an undici request with a defined error.
+       */
+      replyWithError(error2) {
+        if (typeof error2 === "undefined") {
+          throw new InvalidArgumentError("error must be defined");
+        }
+        const newMockDispatch = addMockDispatch(this[kDispatches], this[kDispatchKey], { error: error2 });
+        return new MockScope(newMockDispatch);
+      }
+      /**
+       * Set default reply headers on the interceptor for subsequent replies
+       */
+      defaultReplyHeaders(headers) {
+        if (typeof headers === "undefined") {
+          throw new InvalidArgumentError("headers must be defined");
+        }
+        this[kDefaultHeaders] = headers;
+        return this;
+      }
+      /**
+       * Set default reply trailers on the interceptor for subsequent replies
+       */
+      defaultReplyTrailers(trailers) {
+        if (typeof trailers === "undefined") {
+          throw new InvalidArgumentError("trailers must be defined");
+        }
+        this[kDefaultTrailers] = trailers;
+        return this;
+      }
+      /**
+       * Set reply content length header for replies on the interceptor
+       */
+      replyContentLength() {
+        this[kContentLength] = true;
+        return this;
+      }
+    };
+    module2.exports.MockInterceptor = MockInterceptor;
+    module2.exports.MockScope = MockScope;
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/mock-client.js
+var require_mock_client = __commonJS({
+  "alexa/node_modules/undici/lib/mock/mock-client.js"(exports2, module2) {
+    "use strict";
+    var { promisify } = require("util");
+    var Client2 = require_client();
+    var { buildMockDispatch } = require_mock_utils();
+    var {
+      kDispatches,
+      kMockAgent,
+      kClose,
+      kOriginalClose,
+      kOrigin,
+      kOriginalDispatch,
+      kConnected
+    } = require_mock_symbols();
+    var { MockInterceptor } = require_mock_interceptor();
+    var Symbols = require_symbols();
+    var { InvalidArgumentError } = require_errors();
+    var MockClient = class extends Client2 {
+      constructor(origin, opts) {
+        super(origin, opts);
+        if (!opts || !opts.agent || typeof opts.agent.dispatch !== "function") {
+          throw new InvalidArgumentError("Argument opts.agent must implement Agent");
+        }
+        this[kMockAgent] = opts.agent;
+        this[kOrigin] = origin;
+        this[kDispatches] = [];
+        this[kConnected] = 1;
+        this[kOriginalDispatch] = this.dispatch;
+        this[kOriginalClose] = this.close.bind(this);
+        this.dispatch = buildMockDispatch.call(this);
+        this.close = this[kClose];
+      }
+      get [Symbols.kConnected]() {
+        return this[kConnected];
+      }
+      /**
+       * Sets up the base interceptor for mocking replies from undici.
+       */
+      intercept(opts) {
+        return new MockInterceptor(opts, this[kDispatches]);
+      }
+      async [kClose]() {
+        await promisify(this[kOriginalClose])();
+        this[kConnected] = 0;
+        this[kMockAgent][Symbols.kClients].delete(this[kOrigin]);
+      }
+    };
+    module2.exports = MockClient;
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/mock-pool.js
+var require_mock_pool = __commonJS({
+  "alexa/node_modules/undici/lib/mock/mock-pool.js"(exports2, module2) {
+    "use strict";
+    var { promisify } = require("util");
+    var Pool = require_pool();
+    var { buildMockDispatch } = require_mock_utils();
+    var {
+      kDispatches,
+      kMockAgent,
+      kClose,
+      kOriginalClose,
+      kOrigin,
+      kOriginalDispatch,
+      kConnected
+    } = require_mock_symbols();
+    var { MockInterceptor } = require_mock_interceptor();
+    var Symbols = require_symbols();
+    var { InvalidArgumentError } = require_errors();
+    var MockPool = class extends Pool {
+      constructor(origin, opts) {
+        super(origin, opts);
+        if (!opts || !opts.agent || typeof opts.agent.dispatch !== "function") {
+          throw new InvalidArgumentError("Argument opts.agent must implement Agent");
+        }
+        this[kMockAgent] = opts.agent;
+        this[kOrigin] = origin;
+        this[kDispatches] = [];
+        this[kConnected] = 1;
+        this[kOriginalDispatch] = this.dispatch;
+        this[kOriginalClose] = this.close.bind(this);
+        this.dispatch = buildMockDispatch.call(this);
+        this.close = this[kClose];
+      }
+      get [Symbols.kConnected]() {
+        return this[kConnected];
+      }
+      /**
+       * Sets up the base interceptor for mocking replies from undici.
+       */
+      intercept(opts) {
+        return new MockInterceptor(opts, this[kDispatches]);
+      }
+      async [kClose]() {
+        await promisify(this[kOriginalClose])();
+        this[kConnected] = 0;
+        this[kMockAgent][Symbols.kClients].delete(this[kOrigin]);
+      }
+    };
+    module2.exports = MockPool;
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/pluralizer.js
+var require_pluralizer = __commonJS({
+  "alexa/node_modules/undici/lib/mock/pluralizer.js"(exports2, module2) {
+    "use strict";
+    var singulars = {
+      pronoun: "it",
+      is: "is",
+      was: "was",
+      this: "this"
+    };
+    var plurals = {
+      pronoun: "they",
+      is: "are",
+      was: "were",
+      this: "these"
+    };
+    module2.exports = class Pluralizer {
+      constructor(singular, plural) {
+        this.singular = singular;
+        this.plural = plural;
+      }
+      pluralize(count) {
+        const one = count === 1;
+        const keys = one ? singulars : plurals;
+        const noun = one ? this.singular : this.plural;
+        return { ...keys, count, noun };
+      }
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/pending-interceptors-formatter.js
+var require_pending_interceptors_formatter = __commonJS({
+  "alexa/node_modules/undici/lib/mock/pending-interceptors-formatter.js"(exports2, module2) {
+    "use strict";
+    var { Transform } = require("stream");
+    var { Console } = require("console");
+    module2.exports = class PendingInterceptorsFormatter {
+      constructor({ disableColors } = {}) {
+        this.transform = new Transform({
+          transform(chunk, _enc, cb) {
+            cb(null, chunk);
+          }
+        });
+        this.logger = new Console({
+          stdout: this.transform,
+          inspectOptions: {
+            colors: !disableColors && !process.env.CI
+          }
+        });
+      }
+      format(pendingInterceptors) {
+        const withPrettyHeaders = pendingInterceptors.map(
+          ({ method, path, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+            Method: method,
+            Origin: origin,
+            Path: path,
+            "Status code": statusCode,
+            Persistent: persist ? "\u2705" : "\u274C",
+            Invocations: timesInvoked,
+            Remaining: persist ? Infinity : times - timesInvoked
+          })
+        );
+        this.logger.table(withPrettyHeaders);
+        return this.transform.read().toString();
+      }
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/mock/mock-agent.js
+var require_mock_agent = __commonJS({
+  "alexa/node_modules/undici/lib/mock/mock-agent.js"(exports2, module2) {
+    "use strict";
+    var { kClients } = require_symbols();
+    var Agent = require_agent();
+    var {
+      kAgent,
+      kMockAgentSet,
+      kMockAgentGet,
+      kDispatches,
+      kIsMockActive,
+      kNetConnect,
+      kGetNetConnect,
+      kOptions,
+      kFactory
+    } = require_mock_symbols();
+    var MockClient = require_mock_client();
+    var MockPool = require_mock_pool();
+    var { matchValue, buildMockOptions } = require_mock_utils();
+    var { InvalidArgumentError, UndiciError } = require_errors();
+    var Dispatcher = require_dispatcher();
+    var Pluralizer = require_pluralizer();
+    var PendingInterceptorsFormatter = require_pending_interceptors_formatter();
+    var FakeWeakRef = class {
+      constructor(value) {
+        this.value = value;
+      }
+      deref() {
+        return this.value;
+      }
+    };
+    var MockAgent = class extends Dispatcher {
+      constructor(opts) {
+        super(opts);
+        this[kNetConnect] = true;
+        this[kIsMockActive] = true;
+        if (opts && opts.agent && typeof opts.agent.dispatch !== "function") {
+          throw new InvalidArgumentError("Argument opts.agent must implement Agent");
+        }
+        const agent = opts && opts.agent ? opts.agent : new Agent(opts);
+        this[kAgent] = agent;
+        this[kClients] = agent[kClients];
+        this[kOptions] = buildMockOptions(opts);
+      }
+      get(origin) {
+        let dispatcher = this[kMockAgentGet](origin);
+        if (!dispatcher) {
+          dispatcher = this[kFactory](origin);
+          this[kMockAgentSet](origin, dispatcher);
+        }
+        return dispatcher;
+      }
+      dispatch(opts, handler2) {
+        this.get(opts.origin);
+        return this[kAgent].dispatch(opts, handler2);
+      }
+      async close() {
+        await this[kAgent].close();
+        this[kClients].clear();
+      }
+      deactivate() {
+        this[kIsMockActive] = false;
+      }
+      activate() {
+        this[kIsMockActive] = true;
+      }
+      enableNetConnect(matcher) {
+        if (typeof matcher === "string" || typeof matcher === "function" || matcher instanceof RegExp) {
+          if (Array.isArray(this[kNetConnect])) {
+            this[kNetConnect].push(matcher);
+          } else {
+            this[kNetConnect] = [matcher];
+          }
+        } else if (typeof matcher === "undefined") {
+          this[kNetConnect] = true;
+        } else {
+          throw new InvalidArgumentError("Unsupported matcher. Must be one of String|Function|RegExp.");
+        }
+      }
+      disableNetConnect() {
+        this[kNetConnect] = false;
+      }
+      // This is required to bypass issues caused by using global symbols - see:
+      // https://github.com/nodejs/undici/issues/1447
+      get isMockActive() {
+        return this[kIsMockActive];
+      }
+      [kMockAgentSet](origin, dispatcher) {
+        this[kClients].set(origin, new FakeWeakRef(dispatcher));
+      }
+      [kFactory](origin) {
+        const mockOptions = Object.assign({ agent: this }, this[kOptions]);
+        return this[kOptions] && this[kOptions].connections === 1 ? new MockClient(origin, mockOptions) : new MockPool(origin, mockOptions);
+      }
+      [kMockAgentGet](origin) {
+        const ref = this[kClients].get(origin);
+        if (ref) {
+          return ref.deref();
+        }
+        if (typeof origin !== "string") {
+          const dispatcher = this[kFactory]("http://localhost:9999");
+          this[kMockAgentSet](origin, dispatcher);
+          return dispatcher;
+        }
+        for (const [keyMatcher, nonExplicitRef] of Array.from(this[kClients])) {
+          const nonExplicitDispatcher = nonExplicitRef.deref();
+          if (nonExplicitDispatcher && typeof keyMatcher !== "string" && matchValue(keyMatcher, origin)) {
+            const dispatcher = this[kFactory](origin);
+            this[kMockAgentSet](origin, dispatcher);
+            dispatcher[kDispatches] = nonExplicitDispatcher[kDispatches];
+            return dispatcher;
+          }
+        }
+      }
+      [kGetNetConnect]() {
+        return this[kNetConnect];
+      }
+      pendingInterceptors() {
+        const mockAgentClients = this[kClients];
+        return Array.from(mockAgentClients.entries()).flatMap(([origin, scope]) => scope.deref()[kDispatches].map((dispatch) => ({ ...dispatch, origin }))).filter(({ pending }) => pending);
+      }
+      assertNoPendingInterceptors({ pendingInterceptorsFormatter = new PendingInterceptorsFormatter() } = {}) {
+        const pending = this.pendingInterceptors();
+        if (pending.length === 0) {
+          return;
+        }
+        const pluralizer = new Pluralizer("interceptor", "interceptors").pluralize(pending.length);
+        throw new UndiciError(`
+${pluralizer.count} ${pluralizer.noun} ${pluralizer.is} pending:
+
+${pendingInterceptorsFormatter.format(pending)}
+`.trim());
+      }
+    };
+    module2.exports = MockAgent;
+  }
+});
+
+// alexa/node_modules/undici/lib/proxy-agent.js
+var require_proxy_agent = __commonJS({
+  "alexa/node_modules/undici/lib/proxy-agent.js"(exports2, module2) {
+    "use strict";
+    var { kProxy, kClose, kDestroy, kInterceptors } = require_symbols();
+    var { URL: URL2 } = require("url");
+    var Agent = require_agent();
+    var Pool = require_pool();
+    var DispatcherBase = require_dispatcher_base();
+    var { InvalidArgumentError, RequestAbortedError } = require_errors();
+    var buildConnector = require_connect();
+    var kAgent = /* @__PURE__ */ Symbol("proxy agent");
+    var kClient = /* @__PURE__ */ Symbol("proxy client");
+    var kProxyHeaders = /* @__PURE__ */ Symbol("proxy headers");
+    var kRequestTls = /* @__PURE__ */ Symbol("request tls settings");
+    var kProxyTls = /* @__PURE__ */ Symbol("proxy tls settings");
+    var kConnectEndpoint = /* @__PURE__ */ Symbol("connect endpoint function");
+    function defaultProtocolPort(protocol) {
+      return protocol === "https:" ? 443 : 80;
+    }
+    function buildProxyOptions(opts) {
+      if (typeof opts === "string") {
+        opts = { uri: opts };
+      }
+      if (!opts || !opts.uri) {
+        throw new InvalidArgumentError("Proxy opts.uri is mandatory");
+      }
+      return {
+        uri: opts.uri,
+        protocol: opts.protocol || "https"
+      };
+    }
+    function defaultFactory(origin, opts) {
+      return new Pool(origin, opts);
+    }
+    var ProxyAgent = class extends DispatcherBase {
+      constructor(opts) {
+        super(opts);
+        this[kProxy] = buildProxyOptions(opts);
+        this[kAgent] = new Agent(opts);
+        this[kInterceptors] = opts.interceptors && opts.interceptors.ProxyAgent && Array.isArray(opts.interceptors.ProxyAgent) ? opts.interceptors.ProxyAgent : [];
+        if (typeof opts === "string") {
+          opts = { uri: opts };
+        }
+        if (!opts || !opts.uri) {
+          throw new InvalidArgumentError("Proxy opts.uri is mandatory");
+        }
+        const { clientFactory = defaultFactory } = opts;
+        if (typeof clientFactory !== "function") {
+          throw new InvalidArgumentError("Proxy opts.clientFactory must be a function.");
+        }
+        this[kRequestTls] = opts.requestTls;
+        this[kProxyTls] = opts.proxyTls;
+        this[kProxyHeaders] = opts.headers || {};
+        const resolvedUrl = new URL2(opts.uri);
+        const { origin, port, host, username, password } = resolvedUrl;
+        if (opts.auth && opts.token) {
+          throw new InvalidArgumentError("opts.auth cannot be used in combination with opts.token");
+        } else if (opts.auth) {
+          this[kProxyHeaders]["proxy-authorization"] = `Basic ${opts.auth}`;
+        } else if (opts.token) {
+          this[kProxyHeaders]["proxy-authorization"] = opts.token;
+        } else if (username && password) {
+          this[kProxyHeaders]["proxy-authorization"] = `Basic ${Buffer.from(`${decodeURIComponent(username)}:${decodeURIComponent(password)}`).toString("base64")}`;
+        }
+        const connect = buildConnector({ ...opts.proxyTls });
+        this[kConnectEndpoint] = buildConnector({ ...opts.requestTls });
+        this[kClient] = clientFactory(resolvedUrl, { connect });
+        this[kAgent] = new Agent({
+          ...opts,
+          connect: async (opts2, callback) => {
+            let requestedHost = opts2.host;
+            if (!opts2.port) {
+              requestedHost += `:${defaultProtocolPort(opts2.protocol)}`;
+            }
+            try {
+              const { socket, statusCode } = await this[kClient].connect({
+                origin,
+                port,
+                path: requestedHost,
+                signal: opts2.signal,
+                headers: {
+                  ...this[kProxyHeaders],
+                  host
+                }
+              });
+              if (statusCode !== 200) {
+                socket.on("error", () => {
+                }).destroy();
+                callback(new RequestAbortedError(`Proxy response (${statusCode}) !== 200 when HTTP Tunneling`));
+              }
+              if (opts2.protocol !== "https:") {
+                callback(null, socket);
+                return;
+              }
+              let servername;
+              if (this[kRequestTls]) {
+                servername = this[kRequestTls].servername;
+              } else {
+                servername = opts2.servername;
+              }
+              this[kConnectEndpoint]({ ...opts2, servername, httpSocket: socket }, callback);
+            } catch (err) {
+              callback(err);
+            }
+          }
+        });
+      }
+      dispatch(opts, handler2) {
+        const { host } = new URL2(opts.origin);
+        const headers = buildHeaders(opts.headers);
+        throwIfProxyAuthIsSent(headers);
+        return this[kAgent].dispatch(
+          {
+            ...opts,
+            headers: {
+              ...headers,
+              host
+            }
+          },
+          handler2
+        );
+      }
+      async [kClose]() {
+        await this[kAgent].close();
+        await this[kClient].close();
+      }
+      async [kDestroy]() {
+        await this[kAgent].destroy();
+        await this[kClient].destroy();
+      }
+    };
+    function buildHeaders(headers) {
+      if (Array.isArray(headers)) {
+        const headersPair = {};
+        for (let i = 0; i < headers.length; i += 2) {
+          headersPair[headers[i]] = headers[i + 1];
+        }
+        return headersPair;
+      }
+      return headers;
+    }
+    function throwIfProxyAuthIsSent(headers) {
+      const existProxyAuth = headers && Object.keys(headers).find((key) => key.toLowerCase() === "proxy-authorization");
+      if (existProxyAuth) {
+        throw new InvalidArgumentError("Proxy-Authorization should be sent in ProxyAgent constructor");
+      }
+    }
+    module2.exports = ProxyAgent;
+  }
+});
+
+// alexa/node_modules/undici/lib/handler/RetryHandler.js
+var require_RetryHandler = __commonJS({
+  "alexa/node_modules/undici/lib/handler/RetryHandler.js"(exports2, module2) {
+    var assert2 = require("assert");
+    var { kRetryHandlerDefaultRetry } = require_symbols();
+    var { RequestRetryError } = require_errors();
+    var { isDisturbed, parseHeaders, parseRangeHeader } = require_util();
+    function calculateRetryAfterHeader(retryAfter) {
+      const current = Date.now();
+      const diff = new Date(retryAfter).getTime() - current;
+      return diff;
+    }
+    var RetryHandler = class _RetryHandler {
+      constructor(opts, handlers) {
+        const { retryOptions, ...dispatchOpts } = opts;
+        const {
+          // Retry scoped
+          retry: retryFn,
+          maxRetries,
+          maxTimeout,
+          minTimeout,
+          timeoutFactor,
+          // Response scoped
+          methods,
+          errorCodes,
+          retryAfter,
+          statusCodes
+        } = retryOptions ?? {};
+        this.dispatch = handlers.dispatch;
+        this.handler = handlers.handler;
+        this.opts = dispatchOpts;
+        this.abort = null;
+        this.aborted = false;
+        this.retryOpts = {
+          retry: retryFn ?? _RetryHandler[kRetryHandlerDefaultRetry],
+          retryAfter: retryAfter ?? true,
+          maxTimeout: maxTimeout ?? 30 * 1e3,
+          // 30s,
+          timeout: minTimeout ?? 500,
+          // .5s
+          timeoutFactor: timeoutFactor ?? 2,
+          maxRetries: maxRetries ?? 5,
+          // What errors we should retry
+          methods: methods ?? ["GET", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE"],
+          // Indicates which errors to retry
+          statusCodes: statusCodes ?? [500, 502, 503, 504, 429],
+          // List of errors to retry
+          errorCodes: errorCodes ?? [
+            "ECONNRESET",
+            "ECONNREFUSED",
+            "ENOTFOUND",
+            "ENETDOWN",
+            "ENETUNREACH",
+            "EHOSTDOWN",
+            "EHOSTUNREACH",
+            "EPIPE"
+          ]
+        };
+        this.retryCount = 0;
+        this.start = 0;
+        this.end = null;
+        this.etag = null;
+        this.resume = null;
+        this.handler.onConnect((reason) => {
+          this.aborted = true;
+          if (this.abort) {
+            this.abort(reason);
+          } else {
+            this.reason = reason;
+          }
+        });
+      }
+      onRequestSent() {
+        if (this.handler.onRequestSent) {
+          this.handler.onRequestSent();
+        }
+      }
+      onUpgrade(statusCode, headers, socket) {
+        if (this.handler.onUpgrade) {
+          this.handler.onUpgrade(statusCode, headers, socket);
+        }
+      }
+      onConnect(abort) {
+        if (this.aborted) {
+          abort(this.reason);
+        } else {
+          this.abort = abort;
+        }
+      }
+      onBodySent(chunk) {
+        if (this.handler.onBodySent) return this.handler.onBodySent(chunk);
+      }
+      static [kRetryHandlerDefaultRetry](err, { state, opts }, cb) {
+        const { statusCode, code, headers } = err;
+        const { method, retryOptions } = opts;
+        const {
+          maxRetries,
+          timeout,
+          maxTimeout,
+          timeoutFactor,
+          statusCodes,
+          errorCodes,
+          methods
+        } = retryOptions;
+        let { counter, currentTimeout } = state;
+        currentTimeout = currentTimeout != null && currentTimeout > 0 ? currentTimeout : timeout;
+        if (code && code !== "UND_ERR_REQ_RETRY" && code !== "UND_ERR_SOCKET" && !errorCodes.includes(code)) {
+          cb(err);
+          return;
+        }
+        if (Array.isArray(methods) && !methods.includes(method)) {
+          cb(err);
+          return;
+        }
+        if (statusCode != null && Array.isArray(statusCodes) && !statusCodes.includes(statusCode)) {
+          cb(err);
+          return;
+        }
+        if (counter > maxRetries) {
+          cb(err);
+          return;
+        }
+        let retryAfterHeader = headers != null && headers["retry-after"];
+        if (retryAfterHeader) {
+          retryAfterHeader = Number(retryAfterHeader);
+          retryAfterHeader = isNaN(retryAfterHeader) ? calculateRetryAfterHeader(retryAfterHeader) : retryAfterHeader * 1e3;
+        }
+        const retryTimeout = retryAfterHeader > 0 ? Math.min(retryAfterHeader, maxTimeout) : Math.min(currentTimeout * timeoutFactor ** counter, maxTimeout);
+        state.currentTimeout = retryTimeout;
+        setTimeout(() => cb(null), retryTimeout);
+      }
+      onHeaders(statusCode, rawHeaders, resume, statusMessage) {
+        const headers = parseHeaders(rawHeaders);
+        this.retryCount += 1;
+        if (statusCode >= 300) {
+          this.abort(
+            new RequestRetryError("Request failed", statusCode, {
+              headers,
+              count: this.retryCount
+            })
+          );
+          return false;
+        }
+        if (this.resume != null) {
+          this.resume = null;
+          if (statusCode !== 206) {
+            return true;
+          }
+          const contentRange = parseRangeHeader(headers["content-range"]);
+          if (!contentRange) {
+            this.abort(
+              new RequestRetryError("Content-Range mismatch", statusCode, {
+                headers,
+                count: this.retryCount
+              })
+            );
+            return false;
+          }
+          if (this.etag != null && this.etag !== headers.etag) {
+            this.abort(
+              new RequestRetryError("ETag mismatch", statusCode, {
+                headers,
+                count: this.retryCount
+              })
+            );
+            return false;
+          }
+          const { start, size, end = size } = contentRange;
+          assert2(this.start === start, "content-range mismatch");
+          assert2(this.end == null || this.end === end, "content-range mismatch");
+          this.resume = resume;
+          return true;
+        }
+        if (this.end == null) {
+          if (statusCode === 206) {
+            const range = parseRangeHeader(headers["content-range"]);
+            if (range == null) {
+              return this.handler.onHeaders(
+                statusCode,
+                rawHeaders,
+                resume,
+                statusMessage
+              );
+            }
+            const { start, size, end = size } = range;
+            assert2(
+              start != null && Number.isFinite(start) && this.start !== start,
+              "content-range mismatch"
+            );
+            assert2(Number.isFinite(start));
+            assert2(
+              end != null && Number.isFinite(end) && this.end !== end,
+              "invalid content-length"
+            );
+            this.start = start;
+            this.end = end;
+          }
+          if (this.end == null) {
+            const contentLength = headers["content-length"];
+            this.end = contentLength != null ? Number(contentLength) : null;
+          }
+          assert2(Number.isFinite(this.start));
+          assert2(
+            this.end == null || Number.isFinite(this.end),
+            "invalid content-length"
+          );
+          this.resume = resume;
+          this.etag = headers.etag != null ? headers.etag : null;
+          return this.handler.onHeaders(
+            statusCode,
+            rawHeaders,
+            resume,
+            statusMessage
+          );
+        }
+        const err = new RequestRetryError("Request failed", statusCode, {
+          headers,
+          count: this.retryCount
+        });
+        this.abort(err);
+        return false;
+      }
+      onData(chunk) {
+        this.start += chunk.length;
+        return this.handler.onData(chunk);
+      }
+      onComplete(rawTrailers) {
+        this.retryCount = 0;
+        return this.handler.onComplete(rawTrailers);
+      }
+      onError(err) {
+        if (this.aborted || isDisturbed(this.opts.body)) {
+          return this.handler.onError(err);
+        }
+        this.retryOpts.retry(
+          err,
+          {
+            state: { counter: this.retryCount++, currentTimeout: this.retryAfter },
+            opts: { retryOptions: this.retryOpts, ...this.opts }
+          },
+          onRetry.bind(this)
+        );
+        function onRetry(err2) {
+          if (err2 != null || this.aborted || isDisturbed(this.opts.body)) {
+            return this.handler.onError(err2);
+          }
+          if (this.start !== 0) {
+            this.opts = {
+              ...this.opts,
+              headers: {
+                ...this.opts.headers,
+                range: `bytes=${this.start}-${this.end ?? ""}`
+              }
+            };
+          }
+          try {
+            this.dispatch(this.opts, this);
+          } catch (err3) {
+            this.handler.onError(err3);
+          }
+        }
+      }
+    };
+    module2.exports = RetryHandler;
+  }
+});
+
+// alexa/node_modules/undici/lib/global.js
+var require_global2 = __commonJS({
+  "alexa/node_modules/undici/lib/global.js"(exports2, module2) {
+    "use strict";
+    var globalDispatcher = /* @__PURE__ */ Symbol.for("undici.globalDispatcher.1");
+    var { InvalidArgumentError } = require_errors();
+    var Agent = require_agent();
+    if (getGlobalDispatcher() === void 0) {
+      setGlobalDispatcher(new Agent());
+    }
+    function setGlobalDispatcher(agent) {
+      if (!agent || typeof agent.dispatch !== "function") {
+        throw new InvalidArgumentError("Argument agent must implement Agent");
+      }
+      Object.defineProperty(globalThis, globalDispatcher, {
+        value: agent,
+        writable: true,
+        enumerable: false,
+        configurable: false
+      });
+    }
+    function getGlobalDispatcher() {
+      return globalThis[globalDispatcher];
+    }
+    module2.exports = {
+      setGlobalDispatcher,
+      getGlobalDispatcher
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/handler/DecoratorHandler.js
+var require_DecoratorHandler = __commonJS({
+  "alexa/node_modules/undici/lib/handler/DecoratorHandler.js"(exports2, module2) {
+    "use strict";
+    module2.exports = class DecoratorHandler {
+      constructor(handler2) {
+        this.handler = handler2;
+      }
+      onConnect(...args) {
+        return this.handler.onConnect(...args);
+      }
+      onError(...args) {
+        return this.handler.onError(...args);
+      }
+      onUpgrade(...args) {
+        return this.handler.onUpgrade(...args);
+      }
+      onHeaders(...args) {
+        return this.handler.onHeaders(...args);
+      }
+      onData(...args) {
+        return this.handler.onData(...args);
+      }
+      onComplete(...args) {
+        return this.handler.onComplete(...args);
+      }
+      onBodySent(...args) {
+        return this.handler.onBodySent(...args);
+      }
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/headers.js
+var require_headers = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/headers.js"(exports2, module2) {
+    "use strict";
+    var { kHeadersList, kConstruct } = require_symbols();
+    var { kGuard } = require_symbols2();
+    var { kEnumerableProperty } = require_util();
+    var {
+      makeIterator,
+      isValidHeaderName,
+      isValidHeaderValue
+    } = require_util2();
+    var { webidl } = require_webidl();
+    var assert2 = require("assert");
+    var kHeadersMap = /* @__PURE__ */ Symbol("headers map");
+    var kHeadersSortedMap = /* @__PURE__ */ Symbol("headers map sorted");
+    function isHTTPWhiteSpaceCharCode(code) {
+      return code === 10 || code === 13 || code === 9 || code === 32;
+    }
+    function headerValueNormalize(potentialValue) {
+      let i = 0;
+      let j = potentialValue.length;
+      while (j > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(j - 1))) --j;
+      while (j > i && isHTTPWhiteSpaceCharCode(potentialValue.charCodeAt(i))) ++i;
+      return i === 0 && j === potentialValue.length ? potentialValue : potentialValue.substring(i, j);
+    }
+    function fill(headers, object3) {
+      if (Array.isArray(object3)) {
+        for (let i = 0; i < object3.length; ++i) {
+          const header = object3[i];
+          if (header.length !== 2) {
+            throw webidl.errors.exception({
+              header: "Headers constructor",
+              message: `expected name/value pair to be length 2, found ${header.length}.`
+            });
+          }
+          appendHeader(headers, header[0], header[1]);
+        }
+      } else if (typeof object3 === "object" && object3 !== null) {
+        const keys = Object.keys(object3);
+        for (let i = 0; i < keys.length; ++i) {
+          appendHeader(headers, keys[i], object3[keys[i]]);
+        }
+      } else {
+        throw webidl.errors.conversionFailed({
+          prefix: "Headers constructor",
+          argument: "Argument 1",
+          types: ["sequence<sequence<ByteString>>", "record<ByteString, ByteString>"]
+        });
+      }
+    }
+    function appendHeader(headers, name, value) {
+      value = headerValueNormalize(value);
+      if (!isValidHeaderName(name)) {
+        throw webidl.errors.invalidArgument({
+          prefix: "Headers.append",
+          value: name,
+          type: "header name"
+        });
+      } else if (!isValidHeaderValue(value)) {
+        throw webidl.errors.invalidArgument({
+          prefix: "Headers.append",
+          value,
+          type: "header value"
+        });
+      }
+      if (headers[kGuard] === "immutable") {
+        throw new TypeError("immutable");
+      } else if (headers[kGuard] === "request-no-cors") {
+      }
+      return headers[kHeadersList].append(name, value);
+    }
+    var HeadersList = class _HeadersList {
+      /** @type {[string, string][]|null} */
+      cookies = null;
+      constructor(init) {
+        if (init instanceof _HeadersList) {
+          this[kHeadersMap] = new Map(init[kHeadersMap]);
+          this[kHeadersSortedMap] = init[kHeadersSortedMap];
+          this.cookies = init.cookies === null ? null : [...init.cookies];
+        } else {
+          this[kHeadersMap] = new Map(init);
+          this[kHeadersSortedMap] = null;
+        }
+      }
+      // https://fetch.spec.whatwg.org/#header-list-contains
+      contains(name) {
+        name = name.toLowerCase();
+        return this[kHeadersMap].has(name);
+      }
+      clear() {
+        this[kHeadersMap].clear();
+        this[kHeadersSortedMap] = null;
+        this.cookies = null;
+      }
+      // https://fetch.spec.whatwg.org/#concept-header-list-append
+      append(name, value) {
+        this[kHeadersSortedMap] = null;
+        const lowercaseName = name.toLowerCase();
+        const exists = this[kHeadersMap].get(lowercaseName);
+        if (exists) {
+          const delimiter = lowercaseName === "cookie" ? "; " : ", ";
+          this[kHeadersMap].set(lowercaseName, {
+            name: exists.name,
+            value: `${exists.value}${delimiter}${value}`
+          });
+        } else {
+          this[kHeadersMap].set(lowercaseName, { name, value });
+        }
+        if (lowercaseName === "set-cookie") {
+          this.cookies ??= [];
+          this.cookies.push(value);
+        }
+      }
+      // https://fetch.spec.whatwg.org/#concept-header-list-set
+      set(name, value) {
+        this[kHeadersSortedMap] = null;
+        const lowercaseName = name.toLowerCase();
+        if (lowercaseName === "set-cookie") {
+          this.cookies = [value];
+        }
+        this[kHeadersMap].set(lowercaseName, { name, value });
+      }
+      // https://fetch.spec.whatwg.org/#concept-header-list-delete
+      delete(name) {
+        this[kHeadersSortedMap] = null;
+        name = name.toLowerCase();
+        if (name === "set-cookie") {
+          this.cookies = null;
+        }
+        this[kHeadersMap].delete(name);
+      }
+      // https://fetch.spec.whatwg.org/#concept-header-list-get
+      get(name) {
+        const value = this[kHeadersMap].get(name.toLowerCase());
+        return value === void 0 ? null : value.value;
+      }
+      *[Symbol.iterator]() {
+        for (const [name, { value }] of this[kHeadersMap]) {
+          yield [name, value];
+        }
+      }
+      get entries() {
+        const headers = {};
+        if (this[kHeadersMap].size) {
+          for (const { name, value } of this[kHeadersMap].values()) {
+            headers[name] = value;
+          }
+        }
+        return headers;
+      }
+    };
+    var Headers3 = class _Headers {
+      constructor(init = void 0) {
+        if (init === kConstruct) {
+          return;
+        }
+        this[kHeadersList] = new HeadersList();
+        this[kGuard] = "none";
+        if (init !== void 0) {
+          init = webidl.converters.HeadersInit(init);
+          fill(this, init);
+        }
+      }
+      // https://fetch.spec.whatwg.org/#dom-headers-append
+      append(name, value) {
+        webidl.brandCheck(this, _Headers);
+        webidl.argumentLengthCheck(arguments, 2, { header: "Headers.append" });
+        name = webidl.converters.ByteString(name);
+        value = webidl.converters.ByteString(value);
+        return appendHeader(this, name, value);
+      }
+      // https://fetch.spec.whatwg.org/#dom-headers-delete
+      delete(name) {
+        webidl.brandCheck(this, _Headers);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Headers.delete" });
+        name = webidl.converters.ByteString(name);
+        if (!isValidHeaderName(name)) {
+          throw webidl.errors.invalidArgument({
+            prefix: "Headers.delete",
+            value: name,
+            type: "header name"
+          });
+        }
+        if (this[kGuard] === "immutable") {
+          throw new TypeError("immutable");
+        } else if (this[kGuard] === "request-no-cors") {
+        }
+        if (!this[kHeadersList].contains(name)) {
+          return;
+        }
+        this[kHeadersList].delete(name);
+      }
+      // https://fetch.spec.whatwg.org/#dom-headers-get
+      get(name) {
+        webidl.brandCheck(this, _Headers);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Headers.get" });
+        name = webidl.converters.ByteString(name);
+        if (!isValidHeaderName(name)) {
+          throw webidl.errors.invalidArgument({
+            prefix: "Headers.get",
+            value: name,
+            type: "header name"
+          });
+        }
+        return this[kHeadersList].get(name);
+      }
+      // https://fetch.spec.whatwg.org/#dom-headers-has
+      has(name) {
+        webidl.brandCheck(this, _Headers);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Headers.has" });
+        name = webidl.converters.ByteString(name);
+        if (!isValidHeaderName(name)) {
+          throw webidl.errors.invalidArgument({
+            prefix: "Headers.has",
+            value: name,
+            type: "header name"
+          });
+        }
+        return this[kHeadersList].contains(name);
+      }
+      // https://fetch.spec.whatwg.org/#dom-headers-set
+      set(name, value) {
+        webidl.brandCheck(this, _Headers);
+        webidl.argumentLengthCheck(arguments, 2, { header: "Headers.set" });
+        name = webidl.converters.ByteString(name);
+        value = webidl.converters.ByteString(value);
+        value = headerValueNormalize(value);
+        if (!isValidHeaderName(name)) {
+          throw webidl.errors.invalidArgument({
+            prefix: "Headers.set",
+            value: name,
+            type: "header name"
+          });
+        } else if (!isValidHeaderValue(value)) {
+          throw webidl.errors.invalidArgument({
+            prefix: "Headers.set",
+            value,
+            type: "header value"
+          });
+        }
+        if (this[kGuard] === "immutable") {
+          throw new TypeError("immutable");
+        } else if (this[kGuard] === "request-no-cors") {
+        }
+        this[kHeadersList].set(name, value);
+      }
+      // https://fetch.spec.whatwg.org/#dom-headers-getsetcookie
+      getSetCookie() {
+        webidl.brandCheck(this, _Headers);
+        const list = this[kHeadersList].cookies;
+        if (list) {
+          return [...list];
+        }
+        return [];
+      }
+      // https://fetch.spec.whatwg.org/#concept-header-list-sort-and-combine
+      get [kHeadersSortedMap]() {
+        if (this[kHeadersList][kHeadersSortedMap]) {
+          return this[kHeadersList][kHeadersSortedMap];
+        }
+        const headers = [];
+        const names = [...this[kHeadersList]].sort((a, b) => a[0] < b[0] ? -1 : 1);
+        const cookies = this[kHeadersList].cookies;
+        for (let i = 0; i < names.length; ++i) {
+          const [name, value] = names[i];
+          if (name === "set-cookie") {
+            for (let j = 0; j < cookies.length; ++j) {
+              headers.push([name, cookies[j]]);
+            }
+          } else {
+            assert2(value !== null);
+            headers.push([name, value]);
+          }
+        }
+        this[kHeadersList][kHeadersSortedMap] = headers;
+        return headers;
+      }
+      keys() {
+        webidl.brandCheck(this, _Headers);
+        if (this[kGuard] === "immutable") {
+          const value = this[kHeadersSortedMap];
+          return makeIterator(
+            () => value,
+            "Headers",
+            "key"
+          );
+        }
+        return makeIterator(
+          () => [...this[kHeadersSortedMap].values()],
+          "Headers",
+          "key"
+        );
+      }
+      values() {
+        webidl.brandCheck(this, _Headers);
+        if (this[kGuard] === "immutable") {
+          const value = this[kHeadersSortedMap];
+          return makeIterator(
+            () => value,
+            "Headers",
+            "value"
+          );
+        }
+        return makeIterator(
+          () => [...this[kHeadersSortedMap].values()],
+          "Headers",
+          "value"
+        );
+      }
+      entries() {
+        webidl.brandCheck(this, _Headers);
+        if (this[kGuard] === "immutable") {
+          const value = this[kHeadersSortedMap];
+          return makeIterator(
+            () => value,
+            "Headers",
+            "key+value"
+          );
+        }
+        return makeIterator(
+          () => [...this[kHeadersSortedMap].values()],
+          "Headers",
+          "key+value"
+        );
+      }
+      /**
+       * @param {(value: string, key: string, self: Headers) => void} callbackFn
+       * @param {unknown} thisArg
+       */
+      forEach(callbackFn, thisArg = globalThis) {
+        webidl.brandCheck(this, _Headers);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Headers.forEach" });
+        if (typeof callbackFn !== "function") {
+          throw new TypeError(
+            "Failed to execute 'forEach' on 'Headers': parameter 1 is not of type 'Function'."
+          );
+        }
+        for (const [key, value] of this) {
+          callbackFn.apply(thisArg, [value, key, this]);
+        }
+      }
+      [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
+        webidl.brandCheck(this, _Headers);
+        return this[kHeadersList];
+      }
+    };
+    Headers3.prototype[Symbol.iterator] = Headers3.prototype.entries;
+    Object.defineProperties(Headers3.prototype, {
+      append: kEnumerableProperty,
+      delete: kEnumerableProperty,
+      get: kEnumerableProperty,
+      has: kEnumerableProperty,
+      set: kEnumerableProperty,
+      getSetCookie: kEnumerableProperty,
+      keys: kEnumerableProperty,
+      values: kEnumerableProperty,
+      entries: kEnumerableProperty,
+      forEach: kEnumerableProperty,
+      [Symbol.iterator]: { enumerable: false },
+      [Symbol.toStringTag]: {
+        value: "Headers",
+        configurable: true
+      }
+    });
+    webidl.converters.HeadersInit = function(V) {
+      if (webidl.util.Type(V) === "Object") {
+        if (V[Symbol.iterator]) {
+          return webidl.converters["sequence<sequence<ByteString>>"](V);
+        }
+        return webidl.converters["record<ByteString, ByteString>"](V);
+      }
+      throw webidl.errors.conversionFailed({
+        prefix: "Headers constructor",
+        argument: "Argument 1",
+        types: ["sequence<sequence<ByteString>>", "record<ByteString, ByteString>"]
+      });
+    };
+    module2.exports = {
+      fill,
+      Headers: Headers3,
+      HeadersList
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/response.js
+var require_response = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/response.js"(exports2, module2) {
+    "use strict";
+    var { Headers: Headers3, HeadersList, fill } = require_headers();
+    var { extractBody, cloneBody, mixinBody } = require_body();
+    var util = require_util();
+    var { kEnumerableProperty } = util;
+    var {
+      isValidReasonPhrase,
+      isCancelled,
+      isAborted,
+      isBlobLike,
+      serializeJavascriptValueToJSONString,
+      isErrorLike,
+      isomorphicEncode
+    } = require_util2();
+    var {
+      redirectStatusSet,
+      nullBodyStatus,
+      DOMException: DOMException2
+    } = require_constants2();
+    var { kState, kHeaders, kGuard, kRealm } = require_symbols2();
+    var { webidl } = require_webidl();
+    var { FormData: FormData2 } = require_formdata();
+    var { getGlobalOrigin } = require_global();
+    var { URLSerializer } = require_dataURL();
+    var { kHeadersList, kConstruct } = require_symbols();
+    var assert2 = require("assert");
+    var { types } = require("util");
+    var ReadableStream = globalThis.ReadableStream || require("stream/web").ReadableStream;
+    var textEncoder = new TextEncoder("utf-8");
+    var Response3 = class _Response {
+      // Creates network error Response.
+      static error() {
+        const relevantRealm = { settingsObject: {} };
+        const responseObject = new _Response();
+        responseObject[kState] = makeNetworkError();
+        responseObject[kRealm] = relevantRealm;
+        responseObject[kHeaders][kHeadersList] = responseObject[kState].headersList;
+        responseObject[kHeaders][kGuard] = "immutable";
+        responseObject[kHeaders][kRealm] = relevantRealm;
+        return responseObject;
+      }
+      // https://fetch.spec.whatwg.org/#dom-response-json
+      static json(data, init = {}) {
+        webidl.argumentLengthCheck(arguments, 1, { header: "Response.json" });
+        if (init !== null) {
+          init = webidl.converters.ResponseInit(init);
+        }
+        const bytes = textEncoder.encode(
+          serializeJavascriptValueToJSONString(data)
+        );
+        const body = extractBody(bytes);
+        const relevantRealm = { settingsObject: {} };
+        const responseObject = new _Response();
+        responseObject[kRealm] = relevantRealm;
+        responseObject[kHeaders][kGuard] = "response";
+        responseObject[kHeaders][kRealm] = relevantRealm;
+        initializeResponse(responseObject, init, { body: body[0], type: "application/json" });
+        return responseObject;
+      }
+      // Creates a redirect Response that redirects to url with status status.
+      static redirect(url2, status = 302) {
+        const relevantRealm = { settingsObject: {} };
+        webidl.argumentLengthCheck(arguments, 1, { header: "Response.redirect" });
+        url2 = webidl.converters.USVString(url2);
+        status = webidl.converters["unsigned short"](status);
+        let parsedURL;
+        try {
+          parsedURL = new URL(url2, getGlobalOrigin());
+        } catch (err) {
+          throw Object.assign(new TypeError("Failed to parse URL from " + url2), {
+            cause: err
+          });
+        }
+        if (!redirectStatusSet.has(status)) {
+          throw new RangeError("Invalid status code " + status);
+        }
+        const responseObject = new _Response();
+        responseObject[kRealm] = relevantRealm;
+        responseObject[kHeaders][kGuard] = "immutable";
+        responseObject[kHeaders][kRealm] = relevantRealm;
+        responseObject[kState].status = status;
+        const value = isomorphicEncode(URLSerializer(parsedURL));
+        responseObject[kState].headersList.append("location", value);
+        return responseObject;
+      }
+      // https://fetch.spec.whatwg.org/#dom-response
+      constructor(body = null, init = {}) {
+        if (body !== null) {
+          body = webidl.converters.BodyInit(body);
+        }
+        init = webidl.converters.ResponseInit(init);
+        this[kRealm] = { settingsObject: {} };
+        this[kState] = makeResponse({});
+        this[kHeaders] = new Headers3(kConstruct);
+        this[kHeaders][kGuard] = "response";
+        this[kHeaders][kHeadersList] = this[kState].headersList;
+        this[kHeaders][kRealm] = this[kRealm];
+        let bodyWithType = null;
+        if (body != null) {
+          const [extractedBody, type] = extractBody(body);
+          bodyWithType = { body: extractedBody, type };
+        }
+        initializeResponse(this, init, bodyWithType);
+      }
+      // Returns response’s type, e.g., "cors".
+      get type() {
+        webidl.brandCheck(this, _Response);
+        return this[kState].type;
+      }
+      // Returns response’s URL, if it has one; otherwise the empty string.
+      get url() {
+        webidl.brandCheck(this, _Response);
+        const urlList = this[kState].urlList;
+        const url2 = urlList[urlList.length - 1] ?? null;
+        if (url2 === null) {
+          return "";
+        }
+        return URLSerializer(url2, true);
+      }
+      // Returns whether response was obtained through a redirect.
+      get redirected() {
+        webidl.brandCheck(this, _Response);
+        return this[kState].urlList.length > 1;
+      }
+      // Returns response’s status.
+      get status() {
+        webidl.brandCheck(this, _Response);
+        return this[kState].status;
+      }
+      // Returns whether response’s status is an ok status.
+      get ok() {
+        webidl.brandCheck(this, _Response);
+        return this[kState].status >= 200 && this[kState].status <= 299;
+      }
+      // Returns response’s status message.
+      get statusText() {
+        webidl.brandCheck(this, _Response);
+        return this[kState].statusText;
+      }
+      // Returns response’s headers as Headers.
+      get headers() {
+        webidl.brandCheck(this, _Response);
+        return this[kHeaders];
+      }
+      get body() {
+        webidl.brandCheck(this, _Response);
+        return this[kState].body ? this[kState].body.stream : null;
+      }
+      get bodyUsed() {
+        webidl.brandCheck(this, _Response);
+        return !!this[kState].body && util.isDisturbed(this[kState].body.stream);
+      }
+      // Returns a clone of response.
+      clone() {
+        webidl.brandCheck(this, _Response);
+        if (this.bodyUsed || this.body && this.body.locked) {
+          throw webidl.errors.exception({
+            header: "Response.clone",
+            message: "Body has already been consumed."
+          });
+        }
+        const clonedResponse = cloneResponse(this[kState]);
+        const clonedResponseObject = new _Response();
+        clonedResponseObject[kState] = clonedResponse;
+        clonedResponseObject[kRealm] = this[kRealm];
+        clonedResponseObject[kHeaders][kHeadersList] = clonedResponse.headersList;
+        clonedResponseObject[kHeaders][kGuard] = this[kHeaders][kGuard];
+        clonedResponseObject[kHeaders][kRealm] = this[kHeaders][kRealm];
+        return clonedResponseObject;
+      }
+    };
+    mixinBody(Response3);
+    Object.defineProperties(Response3.prototype, {
+      type: kEnumerableProperty,
+      url: kEnumerableProperty,
+      status: kEnumerableProperty,
+      ok: kEnumerableProperty,
+      redirected: kEnumerableProperty,
+      statusText: kEnumerableProperty,
+      headers: kEnumerableProperty,
+      clone: kEnumerableProperty,
+      body: kEnumerableProperty,
+      bodyUsed: kEnumerableProperty,
+      [Symbol.toStringTag]: {
+        value: "Response",
+        configurable: true
+      }
+    });
+    Object.defineProperties(Response3, {
+      json: kEnumerableProperty,
+      redirect: kEnumerableProperty,
+      error: kEnumerableProperty
+    });
+    function cloneResponse(response) {
+      if (response.internalResponse) {
+        return filterResponse(
+          cloneResponse(response.internalResponse),
+          response.type
+        );
+      }
+      const newResponse = makeResponse({ ...response, body: null });
+      if (response.body != null) {
+        newResponse.body = cloneBody(response.body);
+      }
+      return newResponse;
+    }
+    function makeResponse(init) {
+      return {
+        aborted: false,
+        rangeRequested: false,
+        timingAllowPassed: false,
+        requestIncludesCredentials: false,
+        type: "default",
+        status: 200,
+        timingInfo: null,
+        cacheState: "",
+        statusText: "",
+        ...init,
+        headersList: init.headersList ? new HeadersList(init.headersList) : new HeadersList(),
+        urlList: init.urlList ? [...init.urlList] : []
+      };
+    }
+    function makeNetworkError(reason) {
+      const isError = isErrorLike(reason);
+      return makeResponse({
+        type: "error",
+        status: 0,
+        error: isError ? reason : new Error(reason ? String(reason) : reason),
+        aborted: reason && reason.name === "AbortError"
+      });
+    }
+    function makeFilteredResponse(response, state) {
+      state = {
+        internalResponse: response,
+        ...state
+      };
+      return new Proxy(response, {
+        get(target, p) {
+          return p in state ? state[p] : target[p];
+        },
+        set(target, p, value) {
+          assert2(!(p in state));
+          target[p] = value;
+          return true;
+        }
+      });
+    }
+    function filterResponse(response, type) {
+      if (type === "basic") {
+        return makeFilteredResponse(response, {
+          type: "basic",
+          headersList: response.headersList
+        });
+      } else if (type === "cors") {
+        return makeFilteredResponse(response, {
+          type: "cors",
+          headersList: response.headersList
+        });
+      } else if (type === "opaque") {
+        return makeFilteredResponse(response, {
+          type: "opaque",
+          urlList: Object.freeze([]),
+          status: 0,
+          statusText: "",
+          body: null
+        });
+      } else if (type === "opaqueredirect") {
+        return makeFilteredResponse(response, {
+          type: "opaqueredirect",
+          status: 0,
+          statusText: "",
+          headersList: [],
+          body: null
+        });
+      } else {
+        assert2(false);
+      }
+    }
+    function makeAppropriateNetworkError(fetchParams, err = null) {
+      assert2(isCancelled(fetchParams));
+      return isAborted(fetchParams) ? makeNetworkError(Object.assign(new DOMException2("The operation was aborted.", "AbortError"), { cause: err })) : makeNetworkError(Object.assign(new DOMException2("Request was cancelled."), { cause: err }));
+    }
+    function initializeResponse(response, init, body) {
+      if (init.status !== null && (init.status < 200 || init.status > 599)) {
+        throw new RangeError('init["status"] must be in the range of 200 to 599, inclusive.');
+      }
+      if ("statusText" in init && init.statusText != null) {
+        if (!isValidReasonPhrase(String(init.statusText))) {
+          throw new TypeError("Invalid statusText");
+        }
+      }
+      if ("status" in init && init.status != null) {
+        response[kState].status = init.status;
+      }
+      if ("statusText" in init && init.statusText != null) {
+        response[kState].statusText = init.statusText;
+      }
+      if ("headers" in init && init.headers != null) {
+        fill(response[kHeaders], init.headers);
+      }
+      if (body) {
+        if (nullBodyStatus.includes(response.status)) {
+          throw webidl.errors.exception({
+            header: "Response constructor",
+            message: "Invalid response status code " + response.status
+          });
+        }
+        response[kState].body = body.body;
+        if (body.type != null && !response[kState].headersList.contains("Content-Type")) {
+          response[kState].headersList.append("content-type", body.type);
+        }
+      }
+    }
+    webidl.converters.ReadableStream = webidl.interfaceConverter(
+      ReadableStream
+    );
+    webidl.converters.FormData = webidl.interfaceConverter(
+      FormData2
+    );
+    webidl.converters.URLSearchParams = webidl.interfaceConverter(
+      URLSearchParams
+    );
+    webidl.converters.XMLHttpRequestBodyInit = function(V) {
+      if (typeof V === "string") {
+        return webidl.converters.USVString(V);
+      }
+      if (isBlobLike(V)) {
+        return webidl.converters.Blob(V, { strict: false });
+      }
+      if (types.isArrayBuffer(V) || types.isTypedArray(V) || types.isDataView(V)) {
+        return webidl.converters.BufferSource(V);
+      }
+      if (util.isFormDataLike(V)) {
+        return webidl.converters.FormData(V, { strict: false });
+      }
+      if (V instanceof URLSearchParams) {
+        return webidl.converters.URLSearchParams(V);
+      }
+      return webidl.converters.DOMString(V);
+    };
+    webidl.converters.BodyInit = function(V) {
+      if (V instanceof ReadableStream) {
+        return webidl.converters.ReadableStream(V);
+      }
+      if (V == null ? void 0 : V[Symbol.asyncIterator]) {
+        return V;
+      }
+      return webidl.converters.XMLHttpRequestBodyInit(V);
+    };
+    webidl.converters.ResponseInit = webidl.dictionaryConverter([
+      {
+        key: "status",
+        converter: webidl.converters["unsigned short"],
+        defaultValue: 200
+      },
+      {
+        key: "statusText",
+        converter: webidl.converters.ByteString,
+        defaultValue: ""
+      },
+      {
+        key: "headers",
+        converter: webidl.converters.HeadersInit
+      }
+    ]);
+    module2.exports = {
+      makeNetworkError,
+      makeResponse,
+      makeAppropriateNetworkError,
+      filterResponse,
+      Response: Response3,
+      cloneResponse
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/request.js
+var require_request2 = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/request.js"(exports2, module2) {
+    "use strict";
+    var { extractBody, mixinBody, cloneBody } = require_body();
+    var { Headers: Headers3, fill: fillHeaders, HeadersList } = require_headers();
+    var { FinalizationRegistry } = require_dispatcher_weakref()();
+    var util = require_util();
+    var {
+      isValidHTTPToken,
+      sameOrigin,
+      normalizeMethod,
+      makePolicyContainer,
+      normalizeMethodRecord
+    } = require_util2();
+    var {
+      forbiddenMethodsSet,
+      corsSafeListedMethodsSet,
+      referrerPolicy,
+      requestRedirect,
+      requestMode,
+      requestCredentials,
+      requestCache,
+      requestDuplex
+    } = require_constants2();
+    var { kEnumerableProperty } = util;
+    var { kHeaders, kSignal, kState, kGuard, kRealm } = require_symbols2();
+    var { webidl } = require_webidl();
+    var { getGlobalOrigin } = require_global();
+    var { URLSerializer } = require_dataURL();
+    var { kHeadersList, kConstruct } = require_symbols();
+    var assert2 = require("assert");
+    var { getMaxListeners, setMaxListeners, getEventListeners, defaultMaxListeners } = require("events");
+    var TransformStream2 = globalThis.TransformStream;
+    var kAbortController = /* @__PURE__ */ Symbol("abortController");
+    var requestFinalizer = new FinalizationRegistry(({ signal, abort }) => {
+      signal.removeEventListener("abort", abort);
+    });
+    var Request2 = class _Request {
+      // https://fetch.spec.whatwg.org/#dom-request
+      constructor(input, init = {}) {
+        var _a4, _b;
+        if (input === kConstruct) {
+          return;
+        }
+        webidl.argumentLengthCheck(arguments, 1, { header: "Request constructor" });
+        input = webidl.converters.RequestInfo(input);
+        init = webidl.converters.RequestInit(init);
+        this[kRealm] = {
+          settingsObject: {
+            baseUrl: getGlobalOrigin(),
+            get origin() {
+              var _a5;
+              return (_a5 = this.baseUrl) == null ? void 0 : _a5.origin;
+            },
+            policyContainer: makePolicyContainer()
+          }
+        };
+        let request = null;
+        let fallbackMode = null;
+        const baseUrl = this[kRealm].settingsObject.baseUrl;
+        let signal = null;
+        if (typeof input === "string") {
+          let parsedURL;
+          try {
+            parsedURL = new URL(input, baseUrl);
+          } catch (err) {
+            throw new TypeError("Failed to parse URL from " + input, { cause: err });
+          }
+          if (parsedURL.username || parsedURL.password) {
+            throw new TypeError(
+              "Request cannot be constructed from a URL that includes credentials: " + input
+            );
+          }
+          request = makeRequest({ urlList: [parsedURL] });
+          fallbackMode = "cors";
+        } else {
+          assert2(input instanceof _Request);
+          request = input[kState];
+          signal = input[kSignal];
+        }
+        const origin = this[kRealm].settingsObject.origin;
+        let window = "client";
+        if (((_b = (_a4 = request.window) == null ? void 0 : _a4.constructor) == null ? void 0 : _b.name) === "EnvironmentSettingsObject" && sameOrigin(request.window, origin)) {
+          window = request.window;
+        }
+        if (init.window != null) {
+          throw new TypeError(`'window' option '${window}' must be null`);
+        }
+        if ("window" in init) {
+          window = "no-window";
+        }
+        request = makeRequest({
+          // URL request’s URL.
+          // undici implementation note: this is set as the first item in request's urlList in makeRequest
+          // method request’s method.
+          method: request.method,
+          // header list A copy of request’s header list.
+          // undici implementation note: headersList is cloned in makeRequest
+          headersList: request.headersList,
+          // unsafe-request flag Set.
+          unsafeRequest: request.unsafeRequest,
+          // client This’s relevant settings object.
+          client: this[kRealm].settingsObject,
+          // window window.
+          window,
+          // priority request’s priority.
+          priority: request.priority,
+          // origin request’s origin. The propagation of the origin is only significant for navigation requests
+          // being handled by a service worker. In this scenario a request can have an origin that is different
+          // from the current client.
+          origin: request.origin,
+          // referrer request’s referrer.
+          referrer: request.referrer,
+          // referrer policy request’s referrer policy.
+          referrerPolicy: request.referrerPolicy,
+          // mode request’s mode.
+          mode: request.mode,
+          // credentials mode request’s credentials mode.
+          credentials: request.credentials,
+          // cache mode request’s cache mode.
+          cache: request.cache,
+          // redirect mode request’s redirect mode.
+          redirect: request.redirect,
+          // integrity metadata request’s integrity metadata.
+          integrity: request.integrity,
+          // keepalive request’s keepalive.
+          keepalive: request.keepalive,
+          // reload-navigation flag request’s reload-navigation flag.
+          reloadNavigation: request.reloadNavigation,
+          // history-navigation flag request’s history-navigation flag.
+          historyNavigation: request.historyNavigation,
+          // URL list A clone of request’s URL list.
+          urlList: [...request.urlList]
+        });
+        const initHasKey = Object.keys(init).length !== 0;
+        if (initHasKey) {
+          if (request.mode === "navigate") {
+            request.mode = "same-origin";
+          }
+          request.reloadNavigation = false;
+          request.historyNavigation = false;
+          request.origin = "client";
+          request.referrer = "client";
+          request.referrerPolicy = "";
+          request.url = request.urlList[request.urlList.length - 1];
+          request.urlList = [request.url];
+        }
+        if (init.referrer !== void 0) {
+          const referrer = init.referrer;
+          if (referrer === "") {
+            request.referrer = "no-referrer";
+          } else {
+            let parsedReferrer;
+            try {
+              parsedReferrer = new URL(referrer, baseUrl);
+            } catch (err) {
+              throw new TypeError(`Referrer "${referrer}" is not a valid URL.`, { cause: err });
+            }
+            if (parsedReferrer.protocol === "about:" && parsedReferrer.hostname === "client" || origin && !sameOrigin(parsedReferrer, this[kRealm].settingsObject.baseUrl)) {
+              request.referrer = "client";
+            } else {
+              request.referrer = parsedReferrer;
+            }
+          }
+        }
+        if (init.referrerPolicy !== void 0) {
+          request.referrerPolicy = init.referrerPolicy;
+        }
+        let mode;
+        if (init.mode !== void 0) {
+          mode = init.mode;
+        } else {
+          mode = fallbackMode;
+        }
+        if (mode === "navigate") {
+          throw webidl.errors.exception({
+            header: "Request constructor",
+            message: "invalid request mode navigate."
+          });
+        }
+        if (mode != null) {
+          request.mode = mode;
+        }
+        if (init.credentials !== void 0) {
+          request.credentials = init.credentials;
+        }
+        if (init.cache !== void 0) {
+          request.cache = init.cache;
+        }
+        if (request.cache === "only-if-cached" && request.mode !== "same-origin") {
+          throw new TypeError(
+            "'only-if-cached' can be set only with 'same-origin' mode"
+          );
+        }
+        if (init.redirect !== void 0) {
+          request.redirect = init.redirect;
+        }
+        if (init.integrity != null) {
+          request.integrity = String(init.integrity);
+        }
+        if (init.keepalive !== void 0) {
+          request.keepalive = Boolean(init.keepalive);
+        }
+        if (init.method !== void 0) {
+          let method = init.method;
+          if (!isValidHTTPToken(method)) {
+            throw new TypeError(`'${method}' is not a valid HTTP method.`);
+          }
+          if (forbiddenMethodsSet.has(method.toUpperCase())) {
+            throw new TypeError(`'${method}' HTTP method is unsupported.`);
+          }
+          method = normalizeMethodRecord[method] ?? normalizeMethod(method);
+          request.method = method;
+        }
+        if (init.signal !== void 0) {
+          signal = init.signal;
+        }
+        this[kState] = request;
+        const ac = new AbortController();
+        this[kSignal] = ac.signal;
+        this[kSignal][kRealm] = this[kRealm];
+        if (signal != null) {
+          if (!signal || typeof signal.aborted !== "boolean" || typeof signal.addEventListener !== "function") {
+            throw new TypeError(
+              "Failed to construct 'Request': member signal is not of type AbortSignal."
+            );
+          }
+          if (signal.aborted) {
+            ac.abort(signal.reason);
+          } else {
+            this[kAbortController] = ac;
+            const acRef = new WeakRef(ac);
+            const abort = function() {
+              const ac2 = acRef.deref();
+              if (ac2 !== void 0) {
+                ac2.abort(this.reason);
+              }
+            };
+            try {
+              if (typeof getMaxListeners === "function" && getMaxListeners(signal) === defaultMaxListeners) {
+                setMaxListeners(100, signal);
+              } else if (getEventListeners(signal, "abort").length >= defaultMaxListeners) {
+                setMaxListeners(100, signal);
+              }
+            } catch {
+            }
+            util.addAbortListener(signal, abort);
+            requestFinalizer.register(ac, { signal, abort });
+          }
+        }
+        this[kHeaders] = new Headers3(kConstruct);
+        this[kHeaders][kHeadersList] = request.headersList;
+        this[kHeaders][kGuard] = "request";
+        this[kHeaders][kRealm] = this[kRealm];
+        if (mode === "no-cors") {
+          if (!corsSafeListedMethodsSet.has(request.method)) {
+            throw new TypeError(
+              `'${request.method} is unsupported in no-cors mode.`
+            );
+          }
+          this[kHeaders][kGuard] = "request-no-cors";
+        }
+        if (initHasKey) {
+          const headersList = this[kHeaders][kHeadersList];
+          const headers = init.headers !== void 0 ? init.headers : new HeadersList(headersList);
+          headersList.clear();
+          if (headers instanceof HeadersList) {
+            for (const [key, val] of headers) {
+              headersList.append(key, val);
+            }
+            headersList.cookies = headers.cookies;
+          } else {
+            fillHeaders(this[kHeaders], headers);
+          }
+        }
+        const inputBody = input instanceof _Request ? input[kState].body : null;
+        if ((init.body != null || inputBody != null) && (request.method === "GET" || request.method === "HEAD")) {
+          throw new TypeError("Request with GET/HEAD method cannot have body.");
+        }
+        let initBody = null;
+        if (init.body != null) {
+          const [extractedBody, contentType2] = extractBody(
+            init.body,
+            request.keepalive
+          );
+          initBody = extractedBody;
+          if (contentType2 && !this[kHeaders][kHeadersList].contains("content-type")) {
+            this[kHeaders].append("content-type", contentType2);
+          }
+        }
+        const inputOrInitBody = initBody ?? inputBody;
+        if (inputOrInitBody != null && inputOrInitBody.source == null) {
+          if (initBody != null && init.duplex == null) {
+            throw new TypeError("RequestInit: duplex option is required when sending a body.");
+          }
+          if (request.mode !== "same-origin" && request.mode !== "cors") {
+            throw new TypeError(
+              'If request is made from ReadableStream, mode should be "same-origin" or "cors"'
+            );
+          }
+          request.useCORSPreflightFlag = true;
+        }
+        let finalBody = inputOrInitBody;
+        if (initBody == null && inputBody != null) {
+          if (util.isDisturbed(inputBody.stream) || inputBody.stream.locked) {
+            throw new TypeError(
+              "Cannot construct a Request with a Request object that has already been used."
+            );
+          }
+          if (!TransformStream2) {
+            TransformStream2 = require("stream/web").TransformStream;
+          }
+          const identityTransform = new TransformStream2();
+          inputBody.stream.pipeThrough(identityTransform);
+          finalBody = {
+            source: inputBody.source,
+            length: inputBody.length,
+            stream: identityTransform.readable
+          };
+        }
+        this[kState].body = finalBody;
+      }
+      // Returns request’s HTTP method, which is "GET" by default.
+      get method() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].method;
+      }
+      // Returns the URL of request as a string.
+      get url() {
+        webidl.brandCheck(this, _Request);
+        return URLSerializer(this[kState].url);
+      }
+      // Returns a Headers object consisting of the headers associated with request.
+      // Note that headers added in the network layer by the user agent will not
+      // be accounted for in this object, e.g., the "Host" header.
+      get headers() {
+        webidl.brandCheck(this, _Request);
+        return this[kHeaders];
+      }
+      // Returns the kind of resource requested by request, e.g., "document"
+      // or "script".
+      get destination() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].destination;
+      }
+      // Returns the referrer of request. Its value can be a same-origin URL if
+      // explicitly set in init, the empty string to indicate no referrer, and
+      // "about:client" when defaulting to the global’s default. This is used
+      // during fetching to determine the value of the `Referer` header of the
+      // request being made.
+      get referrer() {
+        webidl.brandCheck(this, _Request);
+        if (this[kState].referrer === "no-referrer") {
+          return "";
+        }
+        if (this[kState].referrer === "client") {
+          return "about:client";
+        }
+        return this[kState].referrer.toString();
+      }
+      // Returns the referrer policy associated with request.
+      // This is used during fetching to compute the value of the request’s
+      // referrer.
+      get referrerPolicy() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].referrerPolicy;
+      }
+      // Returns the mode associated with request, which is a string indicating
+      // whether the request will use CORS, or will be restricted to same-origin
+      // URLs.
+      get mode() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].mode;
+      }
+      // Returns the credentials mode associated with request,
+      // which is a string indicating whether credentials will be sent with the
+      // request always, never, or only when sent to a same-origin URL.
+      get credentials() {
+        return this[kState].credentials;
+      }
+      // Returns the cache mode associated with request,
+      // which is a string indicating how the request will
+      // interact with the browser’s cache when fetching.
+      get cache() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].cache;
+      }
+      // Returns the redirect mode associated with request,
+      // which is a string indicating how redirects for the
+      // request will be handled during fetching. A request
+      // will follow redirects by default.
+      get redirect() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].redirect;
+      }
+      // Returns request’s subresource integrity metadata, which is a
+      // cryptographic hash of the resource being fetched. Its value
+      // consists of multiple hashes separated by whitespace. [SRI]
+      get integrity() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].integrity;
+      }
+      // Returns a boolean indicating whether or not request can outlive the
+      // global in which it was created.
+      get keepalive() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].keepalive;
+      }
+      // Returns a boolean indicating whether or not request is for a reload
+      // navigation.
+      get isReloadNavigation() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].reloadNavigation;
+      }
+      // Returns a boolean indicating whether or not request is for a history
+      // navigation (a.k.a. back-foward navigation).
+      get isHistoryNavigation() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].historyNavigation;
+      }
+      // Returns the signal associated with request, which is an AbortSignal
+      // object indicating whether or not request has been aborted, and its
+      // abort event handler.
+      get signal() {
+        webidl.brandCheck(this, _Request);
+        return this[kSignal];
+      }
+      get body() {
+        webidl.brandCheck(this, _Request);
+        return this[kState].body ? this[kState].body.stream : null;
+      }
+      get bodyUsed() {
+        webidl.brandCheck(this, _Request);
+        return !!this[kState].body && util.isDisturbed(this[kState].body.stream);
+      }
+      get duplex() {
+        webidl.brandCheck(this, _Request);
+        return "half";
+      }
+      // Returns a clone of request.
+      clone() {
+        var _a4;
+        webidl.brandCheck(this, _Request);
+        if (this.bodyUsed || ((_a4 = this.body) == null ? void 0 : _a4.locked)) {
+          throw new TypeError("unusable");
+        }
+        const clonedRequest = cloneRequest(this[kState]);
+        const clonedRequestObject = new _Request(kConstruct);
+        clonedRequestObject[kState] = clonedRequest;
+        clonedRequestObject[kRealm] = this[kRealm];
+        clonedRequestObject[kHeaders] = new Headers3(kConstruct);
+        clonedRequestObject[kHeaders][kHeadersList] = clonedRequest.headersList;
+        clonedRequestObject[kHeaders][kGuard] = this[kHeaders][kGuard];
+        clonedRequestObject[kHeaders][kRealm] = this[kHeaders][kRealm];
+        const ac = new AbortController();
+        if (this.signal.aborted) {
+          ac.abort(this.signal.reason);
+        } else {
+          util.addAbortListener(
+            this.signal,
+            () => {
+              ac.abort(this.signal.reason);
+            }
+          );
+        }
+        clonedRequestObject[kSignal] = ac.signal;
+        return clonedRequestObject;
+      }
+    };
+    mixinBody(Request2);
+    function makeRequest(init) {
+      const request = {
+        method: "GET",
+        localURLsOnly: false,
+        unsafeRequest: false,
+        body: null,
+        client: null,
+        reservedClient: null,
+        replacesClientId: "",
+        window: "client",
+        keepalive: false,
+        serviceWorkers: "all",
+        initiator: "",
+        destination: "",
+        priority: null,
+        origin: "client",
+        policyContainer: "client",
+        referrer: "client",
+        referrerPolicy: "",
+        mode: "no-cors",
+        useCORSPreflightFlag: false,
+        credentials: "same-origin",
+        useCredentials: false,
+        cache: "default",
+        redirect: "follow",
+        integrity: "",
+        cryptoGraphicsNonceMetadata: "",
+        parserMetadata: "",
+        reloadNavigation: false,
+        historyNavigation: false,
+        userActivation: false,
+        taintedOrigin: false,
+        redirectCount: 0,
+        responseTainting: "basic",
+        preventNoCacheCacheControlHeaderModification: false,
+        done: false,
+        timingAllowFailed: false,
+        ...init,
+        headersList: init.headersList ? new HeadersList(init.headersList) : new HeadersList()
+      };
+      request.url = request.urlList[0];
+      return request;
+    }
+    function cloneRequest(request) {
+      const newRequest = makeRequest({ ...request, body: null });
+      if (request.body != null) {
+        newRequest.body = cloneBody(request.body);
+      }
+      return newRequest;
+    }
+    Object.defineProperties(Request2.prototype, {
+      method: kEnumerableProperty,
+      url: kEnumerableProperty,
+      headers: kEnumerableProperty,
+      redirect: kEnumerableProperty,
+      clone: kEnumerableProperty,
+      signal: kEnumerableProperty,
+      duplex: kEnumerableProperty,
+      destination: kEnumerableProperty,
+      body: kEnumerableProperty,
+      bodyUsed: kEnumerableProperty,
+      isHistoryNavigation: kEnumerableProperty,
+      isReloadNavigation: kEnumerableProperty,
+      keepalive: kEnumerableProperty,
+      integrity: kEnumerableProperty,
+      cache: kEnumerableProperty,
+      credentials: kEnumerableProperty,
+      attribute: kEnumerableProperty,
+      referrerPolicy: kEnumerableProperty,
+      referrer: kEnumerableProperty,
+      mode: kEnumerableProperty,
+      [Symbol.toStringTag]: {
+        value: "Request",
+        configurable: true
+      }
+    });
+    webidl.converters.Request = webidl.interfaceConverter(
+      Request2
+    );
+    webidl.converters.RequestInfo = function(V) {
+      if (typeof V === "string") {
+        return webidl.converters.USVString(V);
+      }
+      if (V instanceof Request2) {
+        return webidl.converters.Request(V);
+      }
+      return webidl.converters.USVString(V);
+    };
+    webidl.converters.AbortSignal = webidl.interfaceConverter(
+      AbortSignal
+    );
+    webidl.converters.RequestInit = webidl.dictionaryConverter([
+      {
+        key: "method",
+        converter: webidl.converters.ByteString
+      },
+      {
+        key: "headers",
+        converter: webidl.converters.HeadersInit
+      },
+      {
+        key: "body",
+        converter: webidl.nullableConverter(
+          webidl.converters.BodyInit
+        )
+      },
+      {
+        key: "referrer",
+        converter: webidl.converters.USVString
+      },
+      {
+        key: "referrerPolicy",
+        converter: webidl.converters.DOMString,
+        // https://w3c.github.io/webappsec-referrer-policy/#referrer-policy
+        allowedValues: referrerPolicy
+      },
+      {
+        key: "mode",
+        converter: webidl.converters.DOMString,
+        // https://fetch.spec.whatwg.org/#concept-request-mode
+        allowedValues: requestMode
+      },
+      {
+        key: "credentials",
+        converter: webidl.converters.DOMString,
+        // https://fetch.spec.whatwg.org/#requestcredentials
+        allowedValues: requestCredentials
+      },
+      {
+        key: "cache",
+        converter: webidl.converters.DOMString,
+        // https://fetch.spec.whatwg.org/#requestcache
+        allowedValues: requestCache
+      },
+      {
+        key: "redirect",
+        converter: webidl.converters.DOMString,
+        // https://fetch.spec.whatwg.org/#requestredirect
+        allowedValues: requestRedirect
+      },
+      {
+        key: "integrity",
+        converter: webidl.converters.DOMString
+      },
+      {
+        key: "keepalive",
+        converter: webidl.converters.boolean
+      },
+      {
+        key: "signal",
+        converter: webidl.nullableConverter(
+          (signal) => webidl.converters.AbortSignal(
+            signal,
+            { strict: false }
+          )
+        )
+      },
+      {
+        key: "window",
+        converter: webidl.converters.any
+      },
+      {
+        key: "duplex",
+        converter: webidl.converters.DOMString,
+        allowedValues: requestDuplex
+      }
+    ]);
+    module2.exports = { Request: Request2, makeRequest };
+  }
+});
+
+// alexa/node_modules/undici/lib/fetch/index.js
+var require_fetch = __commonJS({
+  "alexa/node_modules/undici/lib/fetch/index.js"(exports2, module2) {
+    "use strict";
+    var {
+      Response: Response3,
+      makeNetworkError,
+      makeAppropriateNetworkError,
+      filterResponse,
+      makeResponse
+    } = require_response();
+    var { Headers: Headers3 } = require_headers();
+    var { Request: Request2, makeRequest } = require_request2();
+    var zlib = require("zlib");
+    var {
+      bytesMatch,
+      makePolicyContainer,
+      clonePolicyContainer,
+      requestBadPort,
+      TAOCheck,
+      appendRequestOriginHeader,
+      responseLocationURL,
+      requestCurrentURL,
+      setRequestReferrerPolicyOnRedirect,
+      tryUpgradeRequestToAPotentiallyTrustworthyURL,
+      createOpaqueTimingInfo,
+      appendFetchMetadata,
+      corsCheck,
+      crossOriginResourcePolicyCheck,
+      determineRequestsReferrer,
+      coarsenedSharedCurrentTime,
+      createDeferredPromise,
+      isBlobLike,
+      sameOrigin,
+      isCancelled,
+      isAborted,
+      isErrorLike,
+      fullyReadBody,
+      readableStreamClose,
+      isomorphicEncode,
+      urlIsLocal,
+      urlIsHttpHttpsScheme,
+      urlHasHttpsScheme
+    } = require_util2();
+    var { kState, kHeaders, kGuard, kRealm } = require_symbols2();
+    var assert2 = require("assert");
+    var { safelyExtractBody } = require_body();
+    var {
+      redirectStatusSet,
+      nullBodyStatus,
+      safeMethodsSet,
+      requestBodyHeader,
+      subresourceSet,
+      DOMException: DOMException2
+    } = require_constants2();
+    var { kHeadersList } = require_symbols();
+    var EE = require("events");
+    var { Readable, pipeline } = require("stream");
+    var { addAbortListener, isErrored, isReadable, nodeMajor, nodeMinor } = require_util();
+    var { dataURLProcessor, serializeAMimeType } = require_dataURL();
+    var { TransformStream: TransformStream2 } = require("stream/web");
+    var { getGlobalDispatcher } = require_global2();
+    var { webidl } = require_webidl();
+    var { STATUS_CODES } = require("http");
+    var GET_OR_HEAD = ["GET", "HEAD"];
+    var resolveObjectURL;
+    var ReadableStream = globalThis.ReadableStream;
+    var Fetch = class extends EE {
+      constructor(dispatcher) {
+        super();
+        this.dispatcher = dispatcher;
+        this.connection = null;
+        this.dump = false;
+        this.state = "ongoing";
+        this.setMaxListeners(21);
+      }
+      terminate(reason) {
+        var _a4;
+        if (this.state !== "ongoing") {
+          return;
+        }
+        this.state = "terminated";
+        (_a4 = this.connection) == null ? void 0 : _a4.destroy(reason);
+        this.emit("terminated", reason);
+      }
+      // https://fetch.spec.whatwg.org/#fetch-controller-abort
+      abort(error2) {
+        var _a4;
+        if (this.state !== "ongoing") {
+          return;
+        }
+        this.state = "aborted";
+        if (!error2) {
+          error2 = new DOMException2("The operation was aborted.", "AbortError");
+        }
+        this.serializedAbortReason = error2;
+        (_a4 = this.connection) == null ? void 0 : _a4.destroy(error2);
+        this.emit("terminated", error2);
+      }
+    };
+    function fetch3(input, init = {}) {
+      var _a4;
+      webidl.argumentLengthCheck(arguments, 1, { header: "globalThis.fetch" });
+      const p = createDeferredPromise();
+      let requestObject;
+      try {
+        requestObject = new Request2(input, init);
+      } catch (e) {
+        p.reject(e);
+        return p.promise;
+      }
+      const request = requestObject[kState];
+      if (requestObject.signal.aborted) {
+        abortFetch(p, request, null, requestObject.signal.reason);
+        return p.promise;
+      }
+      const globalObject = request.client.globalObject;
+      if (((_a4 = globalObject == null ? void 0 : globalObject.constructor) == null ? void 0 : _a4.name) === "ServiceWorkerGlobalScope") {
+        request.serviceWorkers = "none";
+      }
+      let responseObject = null;
+      const relevantRealm = null;
+      let locallyAborted = false;
+      let controller = null;
+      addAbortListener(
+        requestObject.signal,
+        () => {
+          locallyAborted = true;
+          assert2(controller != null);
+          controller.abort(requestObject.signal.reason);
+          abortFetch(p, request, responseObject, requestObject.signal.reason);
+        }
+      );
+      const handleFetchDone = (response) => finalizeAndReportTiming(response, "fetch");
+      const processResponse = (response) => {
+        if (locallyAborted) {
+          return Promise.resolve();
+        }
+        if (response.aborted) {
+          abortFetch(p, request, responseObject, controller.serializedAbortReason);
+          return Promise.resolve();
+        }
+        if (response.type === "error") {
+          p.reject(
+            Object.assign(new TypeError("fetch failed"), { cause: response.error })
+          );
+          return Promise.resolve();
+        }
+        responseObject = new Response3();
+        responseObject[kState] = response;
+        responseObject[kRealm] = relevantRealm;
+        responseObject[kHeaders][kHeadersList] = response.headersList;
+        responseObject[kHeaders][kGuard] = "immutable";
+        responseObject[kHeaders][kRealm] = relevantRealm;
+        p.resolve(responseObject);
+      };
+      controller = fetching({
+        request,
+        processResponseEndOfBody: handleFetchDone,
+        processResponse,
+        dispatcher: init.dispatcher ?? getGlobalDispatcher()
+        // undici
+      });
+      return p.promise;
+    }
+    function finalizeAndReportTiming(response, initiatorType = "other") {
+      var _a4;
+      if (response.type === "error" && response.aborted) {
+        return;
+      }
+      if (!((_a4 = response.urlList) == null ? void 0 : _a4.length)) {
+        return;
+      }
+      const originalURL = response.urlList[0];
+      let timingInfo = response.timingInfo;
+      let cacheState = response.cacheState;
+      if (!urlIsHttpHttpsScheme(originalURL)) {
+        return;
+      }
+      if (timingInfo === null) {
+        return;
+      }
+      if (!response.timingAllowPassed) {
+        timingInfo = createOpaqueTimingInfo({
+          startTime: timingInfo.startTime
+        });
+        cacheState = "";
+      }
+      timingInfo.endTime = coarsenedSharedCurrentTime();
+      response.timingInfo = timingInfo;
+      markResourceTiming(
+        timingInfo,
+        originalURL,
+        initiatorType,
+        globalThis,
+        cacheState
+      );
+    }
+    function markResourceTiming(timingInfo, originalURL, initiatorType, globalThis2, cacheState) {
+      if (nodeMajor > 18 || nodeMajor === 18 && nodeMinor >= 2) {
+        performance.markResourceTiming(timingInfo, originalURL.href, initiatorType, globalThis2, cacheState);
+      }
+    }
+    function abortFetch(p, request, responseObject, error2) {
+      var _a4, _b;
+      if (!error2) {
+        error2 = new DOMException2("The operation was aborted.", "AbortError");
+      }
+      p.reject(error2);
+      if (request.body != null && isReadable((_a4 = request.body) == null ? void 0 : _a4.stream)) {
+        request.body.stream.cancel(error2).catch((err) => {
+          if (err.code === "ERR_INVALID_STATE") {
+            return;
+          }
+          throw err;
+        });
+      }
+      if (responseObject == null) {
+        return;
+      }
+      const response = responseObject[kState];
+      if (response.body != null && isReadable((_b = response.body) == null ? void 0 : _b.stream)) {
+        response.body.stream.cancel(error2).catch((err) => {
+          if (err.code === "ERR_INVALID_STATE") {
+            return;
+          }
+          throw err;
+        });
+      }
+    }
+    function fetching({
+      request,
+      processRequestBodyChunkLength,
+      processRequestEndOfBody,
+      processResponse,
+      processResponseEndOfBody,
+      processResponseConsumeBody,
+      useParallelQueue = false,
+      dispatcher
+      // undici
+    }) {
+      var _a4, _b, _c, _d;
+      let taskDestination = null;
+      let crossOriginIsolatedCapability = false;
+      if (request.client != null) {
+        taskDestination = request.client.globalObject;
+        crossOriginIsolatedCapability = request.client.crossOriginIsolatedCapability;
+      }
+      const currenTime = coarsenedSharedCurrentTime(crossOriginIsolatedCapability);
+      const timingInfo = createOpaqueTimingInfo({
+        startTime: currenTime
+      });
+      const fetchParams = {
+        controller: new Fetch(dispatcher),
+        request,
+        timingInfo,
+        processRequestBodyChunkLength,
+        processRequestEndOfBody,
+        processResponse,
+        processResponseConsumeBody,
+        processResponseEndOfBody,
+        taskDestination,
+        crossOriginIsolatedCapability
+      };
+      assert2(!request.body || request.body.stream);
+      if (request.window === "client") {
+        request.window = ((_c = (_b = (_a4 = request.client) == null ? void 0 : _a4.globalObject) == null ? void 0 : _b.constructor) == null ? void 0 : _c.name) === "Window" ? request.client : "no-window";
+      }
+      if (request.origin === "client") {
+        request.origin = (_d = request.client) == null ? void 0 : _d.origin;
+      }
+      if (request.policyContainer === "client") {
+        if (request.client != null) {
+          request.policyContainer = clonePolicyContainer(
+            request.client.policyContainer
+          );
+        } else {
+          request.policyContainer = makePolicyContainer();
+        }
+      }
+      if (!request.headersList.contains("accept")) {
+        const value = "*/*";
+        request.headersList.append("accept", value);
+      }
+      if (!request.headersList.contains("accept-language")) {
+        request.headersList.append("accept-language", "*");
+      }
+      if (request.priority === null) {
+      }
+      if (subresourceSet.has(request.destination)) {
+      }
+      mainFetch(fetchParams).catch((err) => {
+        fetchParams.controller.terminate(err);
+      });
+      return fetchParams.controller;
+    }
+    async function mainFetch(fetchParams, recursive2 = false) {
+      const request = fetchParams.request;
+      let response = null;
+      if (request.localURLsOnly && !urlIsLocal(requestCurrentURL(request))) {
+        response = makeNetworkError("local URLs only");
+      }
+      tryUpgradeRequestToAPotentiallyTrustworthyURL(request);
+      if (requestBadPort(request) === "blocked") {
+        response = makeNetworkError("bad port");
+      }
+      if (request.referrerPolicy === "") {
+        request.referrerPolicy = request.policyContainer.referrerPolicy;
+      }
+      if (request.referrer !== "no-referrer") {
+        request.referrer = determineRequestsReferrer(request);
+      }
+      if (response === null) {
+        response = await (async () => {
+          const currentURL = requestCurrentURL(request);
+          if (
+            // - request’s current URL’s origin is same origin with request’s origin,
+            //   and request’s response tainting is "basic"
+            sameOrigin(currentURL, request.url) && request.responseTainting === "basic" || // request’s current URL’s scheme is "data"
+            currentURL.protocol === "data:" || // - request’s mode is "navigate" or "websocket"
+            (request.mode === "navigate" || request.mode === "websocket")
+          ) {
+            request.responseTainting = "basic";
+            return await schemeFetch(fetchParams);
+          }
+          if (request.mode === "same-origin") {
+            return makeNetworkError('request mode cannot be "same-origin"');
+          }
+          if (request.mode === "no-cors") {
+            if (request.redirect !== "follow") {
+              return makeNetworkError(
+                'redirect mode cannot be "follow" for "no-cors" request'
+              );
+            }
+            request.responseTainting = "opaque";
+            return await schemeFetch(fetchParams);
+          }
+          if (!urlIsHttpHttpsScheme(requestCurrentURL(request))) {
+            return makeNetworkError("URL scheme must be a HTTP(S) scheme");
+          }
+          request.responseTainting = "cors";
+          return await httpFetch(fetchParams);
+        })();
+      }
+      if (recursive2) {
+        return response;
+      }
+      if (response.status !== 0 && !response.internalResponse) {
+        if (request.responseTainting === "cors") {
+        }
+        if (request.responseTainting === "basic") {
+          response = filterResponse(response, "basic");
+        } else if (request.responseTainting === "cors") {
+          response = filterResponse(response, "cors");
+        } else if (request.responseTainting === "opaque") {
+          response = filterResponse(response, "opaque");
+        } else {
+          assert2(false);
+        }
+      }
+      let internalResponse = response.status === 0 ? response : response.internalResponse;
+      if (internalResponse.urlList.length === 0) {
+        internalResponse.urlList.push(...request.urlList);
+      }
+      if (!request.timingAllowFailed) {
+        response.timingAllowPassed = true;
+      }
+      if (response.type === "opaque" && internalResponse.status === 206 && internalResponse.rangeRequested && !request.headers.contains("range")) {
+        response = internalResponse = makeNetworkError();
+      }
+      if (response.status !== 0 && (request.method === "HEAD" || request.method === "CONNECT" || nullBodyStatus.includes(internalResponse.status))) {
+        internalResponse.body = null;
+        fetchParams.controller.dump = true;
+      }
+      if (request.integrity) {
+        const processBodyError = (reason) => fetchFinale(fetchParams, makeNetworkError(reason));
+        if (request.responseTainting === "opaque" || response.body == null) {
+          processBodyError(response.error);
+          return;
+        }
+        const processBody = (bytes) => {
+          if (!bytesMatch(bytes, request.integrity)) {
+            processBodyError("integrity mismatch");
+            return;
+          }
+          response.body = safelyExtractBody(bytes)[0];
+          fetchFinale(fetchParams, response);
+        };
+        await fullyReadBody(response.body, processBody, processBodyError);
+      } else {
+        fetchFinale(fetchParams, response);
+      }
+    }
+    function schemeFetch(fetchParams) {
+      if (isCancelled(fetchParams) && fetchParams.request.redirectCount === 0) {
+        return Promise.resolve(makeAppropriateNetworkError(fetchParams));
+      }
+      const { request } = fetchParams;
+      const { protocol: scheme } = requestCurrentURL(request);
+      switch (scheme) {
+        case "about:": {
+          return Promise.resolve(makeNetworkError("about scheme is not supported"));
+        }
+        case "blob:": {
+          if (!resolveObjectURL) {
+            resolveObjectURL = require("buffer").resolveObjectURL;
+          }
+          const blobURLEntry = requestCurrentURL(request);
+          if (blobURLEntry.search.length !== 0) {
+            return Promise.resolve(makeNetworkError("NetworkError when attempting to fetch resource."));
+          }
+          const blobURLEntryObject = resolveObjectURL(blobURLEntry.toString());
+          if (request.method !== "GET" || !isBlobLike(blobURLEntryObject)) {
+            return Promise.resolve(makeNetworkError("invalid method"));
+          }
+          const bodyWithType = safelyExtractBody(blobURLEntryObject);
+          const body = bodyWithType[0];
+          const length = isomorphicEncode(`${body.length}`);
+          const type = bodyWithType[1] ?? "";
+          const response = makeResponse({
+            statusText: "OK",
+            headersList: [
+              ["content-length", { name: "Content-Length", value: length }],
+              ["content-type", { name: "Content-Type", value: type }]
+            ]
+          });
+          response.body = body;
+          return Promise.resolve(response);
+        }
+        case "data:": {
+          const currentURL = requestCurrentURL(request);
+          const dataURLStruct = dataURLProcessor(currentURL);
+          if (dataURLStruct === "failure") {
+            return Promise.resolve(makeNetworkError("failed to fetch the data URL"));
+          }
+          const mimeType = serializeAMimeType(dataURLStruct.mimeType);
+          return Promise.resolve(makeResponse({
+            statusText: "OK",
+            headersList: [
+              ["content-type", { name: "Content-Type", value: mimeType }]
+            ],
+            body: safelyExtractBody(dataURLStruct.body)[0]
+          }));
+        }
+        case "file:": {
+          return Promise.resolve(makeNetworkError("not implemented... yet..."));
+        }
+        case "http:":
+        case "https:": {
+          return httpFetch(fetchParams).catch((err) => makeNetworkError(err));
+        }
+        default: {
+          return Promise.resolve(makeNetworkError("unknown scheme"));
+        }
+      }
+    }
+    function finalizeResponse(fetchParams, response) {
+      fetchParams.request.done = true;
+      if (fetchParams.processResponseDone != null) {
+        queueMicrotask(() => fetchParams.processResponseDone(response));
+      }
+    }
+    function fetchFinale(fetchParams, response) {
+      if (response.type === "error") {
+        response.urlList = [fetchParams.request.urlList[0]];
+        response.timingInfo = createOpaqueTimingInfo({
+          startTime: fetchParams.timingInfo.startTime
+        });
+      }
+      const processResponseEndOfBody = () => {
+        fetchParams.request.done = true;
+        if (fetchParams.processResponseEndOfBody != null) {
+          queueMicrotask(() => fetchParams.processResponseEndOfBody(response));
+        }
+      };
+      if (fetchParams.processResponse != null) {
+        queueMicrotask(() => fetchParams.processResponse(response));
+      }
+      if (response.body == null) {
+        processResponseEndOfBody();
+      } else {
+        const identityTransformAlgorithm = (chunk, controller) => {
+          controller.enqueue(chunk);
+        };
+        const transformStream = new TransformStream2({
+          start() {
+          },
+          transform: identityTransformAlgorithm,
+          flush: processResponseEndOfBody
+        }, {
+          size() {
+            return 1;
+          }
+        }, {
+          size() {
+            return 1;
+          }
+        });
+        response.body = { stream: response.body.stream.pipeThrough(transformStream) };
+      }
+      if (fetchParams.processResponseConsumeBody != null) {
+        const processBody = (nullOrBytes) => fetchParams.processResponseConsumeBody(response, nullOrBytes);
+        const processBodyError = (failure2) => fetchParams.processResponseConsumeBody(response, failure2);
+        if (response.body == null) {
+          queueMicrotask(() => processBody(null));
+        } else {
+          return fullyReadBody(response.body, processBody, processBodyError);
+        }
+        return Promise.resolve();
+      }
+    }
+    async function httpFetch(fetchParams) {
+      const request = fetchParams.request;
+      let response = null;
+      let actualResponse = null;
+      const timingInfo = fetchParams.timingInfo;
+      if (request.serviceWorkers === "all") {
+      }
+      if (response === null) {
+        if (request.redirect === "follow") {
+          request.serviceWorkers = "none";
+        }
+        actualResponse = response = await httpNetworkOrCacheFetch(fetchParams);
+        if (request.responseTainting === "cors" && corsCheck(request, response) === "failure") {
+          return makeNetworkError("cors failure");
+        }
+        if (TAOCheck(request, response) === "failure") {
+          request.timingAllowFailed = true;
+        }
+      }
+      if ((request.responseTainting === "opaque" || response.type === "opaque") && crossOriginResourcePolicyCheck(
+        request.origin,
+        request.client,
+        request.destination,
+        actualResponse
+      ) === "blocked") {
+        return makeNetworkError("blocked");
+      }
+      if (redirectStatusSet.has(actualResponse.status)) {
+        if (request.redirect !== "manual") {
+          fetchParams.controller.connection.destroy();
+        }
+        if (request.redirect === "error") {
+          response = makeNetworkError("unexpected redirect");
+        } else if (request.redirect === "manual") {
+          response = actualResponse;
+        } else if (request.redirect === "follow") {
+          response = await httpRedirectFetch(fetchParams, response);
+        } else {
+          assert2(false);
+        }
+      }
+      response.timingInfo = timingInfo;
+      return response;
+    }
+    function httpRedirectFetch(fetchParams, response) {
+      const request = fetchParams.request;
+      const actualResponse = response.internalResponse ? response.internalResponse : response;
+      let locationURL;
+      try {
+        locationURL = responseLocationURL(
+          actualResponse,
+          requestCurrentURL(request).hash
+        );
+        if (locationURL == null) {
+          return response;
+        }
+      } catch (err) {
+        return Promise.resolve(makeNetworkError(err));
+      }
+      if (!urlIsHttpHttpsScheme(locationURL)) {
+        return Promise.resolve(makeNetworkError("URL scheme must be a HTTP(S) scheme"));
+      }
+      if (request.redirectCount === 20) {
+        return Promise.resolve(makeNetworkError("redirect count exceeded"));
+      }
+      request.redirectCount += 1;
+      if (request.mode === "cors" && (locationURL.username || locationURL.password) && !sameOrigin(request, locationURL)) {
+        return Promise.resolve(makeNetworkError('cross origin not allowed for request mode "cors"'));
+      }
+      if (request.responseTainting === "cors" && (locationURL.username || locationURL.password)) {
+        return Promise.resolve(makeNetworkError(
+          'URL cannot contain credentials for request mode "cors"'
+        ));
+      }
+      if (actualResponse.status !== 303 && request.body != null && request.body.source == null) {
+        return Promise.resolve(makeNetworkError());
+      }
+      if ([301, 302].includes(actualResponse.status) && request.method === "POST" || actualResponse.status === 303 && !GET_OR_HEAD.includes(request.method)) {
+        request.method = "GET";
+        request.body = null;
+        for (const headerName of requestBodyHeader) {
+          request.headersList.delete(headerName);
+        }
+      }
+      if (!sameOrigin(requestCurrentURL(request), locationURL)) {
+        request.headersList.delete("authorization");
+        request.headersList.delete("proxy-authorization", true);
+        request.headersList.delete("cookie");
+        request.headersList.delete("host");
+      }
+      if (request.body != null) {
+        assert2(request.body.source != null);
+        request.body = safelyExtractBody(request.body.source)[0];
+      }
+      const timingInfo = fetchParams.timingInfo;
+      timingInfo.redirectEndTime = timingInfo.postRedirectStartTime = coarsenedSharedCurrentTime(fetchParams.crossOriginIsolatedCapability);
+      if (timingInfo.redirectStartTime === 0) {
+        timingInfo.redirectStartTime = timingInfo.startTime;
+      }
+      request.urlList.push(locationURL);
+      setRequestReferrerPolicyOnRedirect(request, actualResponse);
+      return mainFetch(fetchParams, true);
+    }
+    async function httpNetworkOrCacheFetch(fetchParams, isAuthenticationFetch = false, isNewConnectionFetch = false) {
+      const request = fetchParams.request;
+      let httpFetchParams = null;
+      let httpRequest = null;
+      let response = null;
+      const httpCache = null;
+      const revalidatingFlag = false;
+      if (request.window === "no-window" && request.redirect === "error") {
+        httpFetchParams = fetchParams;
+        httpRequest = request;
+      } else {
+        httpRequest = makeRequest(request);
+        httpFetchParams = { ...fetchParams };
+        httpFetchParams.request = httpRequest;
+      }
+      const includeCredentials = request.credentials === "include" || request.credentials === "same-origin" && request.responseTainting === "basic";
+      const contentLength = httpRequest.body ? httpRequest.body.length : null;
+      let contentLengthHeaderValue = null;
+      if (httpRequest.body == null && ["POST", "PUT"].includes(httpRequest.method)) {
+        contentLengthHeaderValue = "0";
+      }
+      if (contentLength != null) {
+        contentLengthHeaderValue = isomorphicEncode(`${contentLength}`);
+      }
+      if (contentLengthHeaderValue != null) {
+        httpRequest.headersList.append("content-length", contentLengthHeaderValue);
+      }
+      if (contentLength != null && httpRequest.keepalive) {
+      }
+      if (httpRequest.referrer instanceof URL) {
+        httpRequest.headersList.append("referer", isomorphicEncode(httpRequest.referrer.href));
+      }
+      appendRequestOriginHeader(httpRequest);
+      appendFetchMetadata(httpRequest);
+      if (!httpRequest.headersList.contains("user-agent")) {
+        httpRequest.headersList.append("user-agent", typeof esbuildDetection === "undefined" ? "undici" : "node");
+      }
+      if (httpRequest.cache === "default" && (httpRequest.headersList.contains("if-modified-since") || httpRequest.headersList.contains("if-none-match") || httpRequest.headersList.contains("if-unmodified-since") || httpRequest.headersList.contains("if-match") || httpRequest.headersList.contains("if-range"))) {
+        httpRequest.cache = "no-store";
+      }
+      if (httpRequest.cache === "no-cache" && !httpRequest.preventNoCacheCacheControlHeaderModification && !httpRequest.headersList.contains("cache-control")) {
+        httpRequest.headersList.append("cache-control", "max-age=0");
+      }
+      if (httpRequest.cache === "no-store" || httpRequest.cache === "reload") {
+        if (!httpRequest.headersList.contains("pragma")) {
+          httpRequest.headersList.append("pragma", "no-cache");
+        }
+        if (!httpRequest.headersList.contains("cache-control")) {
+          httpRequest.headersList.append("cache-control", "no-cache");
+        }
+      }
+      if (httpRequest.headersList.contains("range")) {
+        httpRequest.headersList.append("accept-encoding", "identity");
+      }
+      if (!httpRequest.headersList.contains("accept-encoding")) {
+        if (urlHasHttpsScheme(requestCurrentURL(httpRequest))) {
+          httpRequest.headersList.append("accept-encoding", "br, gzip, deflate");
+        } else {
+          httpRequest.headersList.append("accept-encoding", "gzip, deflate");
+        }
+      }
+      httpRequest.headersList.delete("host");
+      if (includeCredentials) {
+      }
+      if (httpCache == null) {
+        httpRequest.cache = "no-store";
+      }
+      if (httpRequest.mode !== "no-store" && httpRequest.mode !== "reload") {
+      }
+      if (response == null) {
+        if (httpRequest.mode === "only-if-cached") {
+          return makeNetworkError("only if cached");
+        }
+        const forwardResponse = await httpNetworkFetch(
+          httpFetchParams,
+          includeCredentials,
+          isNewConnectionFetch
+        );
+        if (!safeMethodsSet.has(httpRequest.method) && forwardResponse.status >= 200 && forwardResponse.status <= 399) {
+        }
+        if (revalidatingFlag && forwardResponse.status === 304) {
+        }
+        if (response == null) {
+          response = forwardResponse;
+        }
+      }
+      response.urlList = [...httpRequest.urlList];
+      if (httpRequest.headersList.contains("range")) {
+        response.rangeRequested = true;
+      }
+      response.requestIncludesCredentials = includeCredentials;
+      if (response.status === 407) {
+        if (request.window === "no-window") {
+          return makeNetworkError();
+        }
+        if (isCancelled(fetchParams)) {
+          return makeAppropriateNetworkError(fetchParams);
+        }
+        return makeNetworkError("proxy authentication required");
+      }
+      if (
+        // response’s status is 421
+        response.status === 421 && // isNewConnectionFetch is false
+        !isNewConnectionFetch && // request’s body is null, or request’s body is non-null and request’s body’s source is non-null
+        (request.body == null || request.body.source != null)
+      ) {
+        if (isCancelled(fetchParams)) {
+          return makeAppropriateNetworkError(fetchParams);
+        }
+        fetchParams.controller.connection.destroy();
+        response = await httpNetworkOrCacheFetch(
+          fetchParams,
+          isAuthenticationFetch,
+          true
+        );
+      }
+      if (isAuthenticationFetch) {
+      }
+      return response;
+    }
+    async function httpNetworkFetch(fetchParams, includeCredentials = false, forceNewConnection = false) {
+      assert2(!fetchParams.controller.connection || fetchParams.controller.connection.destroyed);
+      fetchParams.controller.connection = {
+        abort: null,
+        destroyed: false,
+        destroy(err) {
+          var _a4;
+          if (!this.destroyed) {
+            this.destroyed = true;
+            (_a4 = this.abort) == null ? void 0 : _a4.call(this, err ?? new DOMException2("The operation was aborted.", "AbortError"));
+          }
+        }
+      };
+      const request = fetchParams.request;
+      let response = null;
+      const timingInfo = fetchParams.timingInfo;
+      const httpCache = null;
+      if (httpCache == null) {
+        request.cache = "no-store";
+      }
+      const newConnection = forceNewConnection ? "yes" : "no";
+      if (request.mode === "websocket") {
+      } else {
+      }
+      let requestBody = null;
+      if (request.body == null && fetchParams.processRequestEndOfBody) {
+        queueMicrotask(() => fetchParams.processRequestEndOfBody());
+      } else if (request.body != null) {
+        const processBodyChunk = async function* (bytes) {
+          var _a4;
+          if (isCancelled(fetchParams)) {
+            return;
+          }
+          yield bytes;
+          (_a4 = fetchParams.processRequestBodyChunkLength) == null ? void 0 : _a4.call(fetchParams, bytes.byteLength);
+        };
+        const processEndOfBody = () => {
+          if (isCancelled(fetchParams)) {
+            return;
+          }
+          if (fetchParams.processRequestEndOfBody) {
+            fetchParams.processRequestEndOfBody();
+          }
+        };
+        const processBodyError = (e) => {
+          if (isCancelled(fetchParams)) {
+            return;
+          }
+          if (e.name === "AbortError") {
+            fetchParams.controller.abort();
+          } else {
+            fetchParams.controller.terminate(e);
+          }
+        };
+        requestBody = (async function* () {
+          try {
+            for await (const bytes of request.body.stream) {
+              yield* processBodyChunk(bytes);
+            }
+            processEndOfBody();
+          } catch (err) {
+            processBodyError(err);
+          }
+        })();
+      }
+      try {
+        const { body, status, statusText, headersList, socket } = await dispatch({ body: requestBody });
+        if (socket) {
+          response = makeResponse({ status, statusText, headersList, socket });
+        } else {
+          const iterator = body[Symbol.asyncIterator]();
+          fetchParams.controller.next = () => iterator.next();
+          response = makeResponse({ status, statusText, headersList });
+        }
+      } catch (err) {
+        if (err.name === "AbortError") {
+          fetchParams.controller.connection.destroy();
+          return makeAppropriateNetworkError(fetchParams, err);
+        }
+        return makeNetworkError(err);
+      }
+      const pullAlgorithm = () => {
+        fetchParams.controller.resume();
+      };
+      const cancelAlgorithm = (reason) => {
+        fetchParams.controller.abort(reason);
+      };
+      if (!ReadableStream) {
+        ReadableStream = require("stream/web").ReadableStream;
+      }
+      const stream = new ReadableStream(
+        {
+          async start(controller) {
+            fetchParams.controller.controller = controller;
+          },
+          async pull(controller) {
+            await pullAlgorithm(controller);
+          },
+          async cancel(reason) {
+            await cancelAlgorithm(reason);
+          }
+        },
+        {
+          highWaterMark: 0,
+          size() {
+            return 1;
+          }
+        }
+      );
+      response.body = { stream };
+      fetchParams.controller.on("terminated", onAborted);
+      fetchParams.controller.resume = async () => {
+        while (true) {
+          let bytes;
+          let isFailure;
+          try {
+            const { done, value } = await fetchParams.controller.next();
+            if (isAborted(fetchParams)) {
+              break;
+            }
+            bytes = done ? void 0 : value;
+          } catch (err) {
+            if (fetchParams.controller.ended && !timingInfo.encodedBodySize) {
+              bytes = void 0;
+            } else {
+              bytes = err;
+              isFailure = true;
+            }
+          }
+          if (bytes === void 0) {
+            readableStreamClose(fetchParams.controller.controller);
+            finalizeResponse(fetchParams, response);
+            return;
+          }
+          timingInfo.decodedBodySize += (bytes == null ? void 0 : bytes.byteLength) ?? 0;
+          if (isFailure) {
+            fetchParams.controller.terminate(bytes);
+            return;
+          }
+          fetchParams.controller.controller.enqueue(new Uint8Array(bytes));
+          if (isErrored(stream)) {
+            fetchParams.controller.terminate();
+            return;
+          }
+          if (!fetchParams.controller.controller.desiredSize) {
+            return;
+          }
+        }
+      };
+      function onAborted(reason) {
+        if (isAborted(fetchParams)) {
+          response.aborted = true;
+          if (isReadable(stream)) {
+            fetchParams.controller.controller.error(
+              fetchParams.controller.serializedAbortReason
+            );
+          }
+        } else {
+          if (isReadable(stream)) {
+            fetchParams.controller.controller.error(new TypeError("terminated", {
+              cause: isErrorLike(reason) ? reason : void 0
+            }));
+          }
+        }
+        fetchParams.controller.connection.destroy();
+      }
+      return response;
+      async function dispatch({ body }) {
+        const url2 = requestCurrentURL(request);
+        const agent = fetchParams.controller.dispatcher;
+        return new Promise((resolve, reject) => agent.dispatch(
+          {
+            path: url2.pathname + url2.search,
+            origin: url2.origin,
+            method: request.method,
+            body: fetchParams.controller.dispatcher.isMockActive ? request.body && (request.body.source || request.body.stream) : body,
+            headers: request.headersList.entries,
+            maxRedirections: 0,
+            upgrade: request.mode === "websocket" ? "websocket" : void 0
+          },
+          {
+            body: null,
+            abort: null,
+            onConnect(abort) {
+              const { connection } = fetchParams.controller;
+              if (connection.destroyed) {
+                abort(new DOMException2("The operation was aborted.", "AbortError"));
+              } else {
+                fetchParams.controller.on("terminated", abort);
+                this.abort = connection.abort = abort;
+              }
+            },
+            onHeaders(status, headersList, resume, statusText) {
+              if (status < 200) {
+                return;
+              }
+              let codings = [];
+              let location = "";
+              const headers = new Headers3();
+              if (Array.isArray(headersList)) {
+                for (let n = 0; n < headersList.length; n += 2) {
+                  const key = headersList[n + 0].toString("latin1");
+                  const val = headersList[n + 1].toString("latin1");
+                  if (key.toLowerCase() === "content-encoding") {
+                    codings = val.toLowerCase().split(",").map((x) => x.trim());
+                  } else if (key.toLowerCase() === "location") {
+                    location = val;
+                  }
+                  headers[kHeadersList].append(key, val);
+                }
+              } else {
+                const keys = Object.keys(headersList);
+                for (const key of keys) {
+                  const val = headersList[key];
+                  if (key.toLowerCase() === "content-encoding") {
+                    codings = val.toLowerCase().split(",").map((x) => x.trim()).reverse();
+                  } else if (key.toLowerCase() === "location") {
+                    location = val;
+                  }
+                  headers[kHeadersList].append(key, val);
+                }
+              }
+              this.body = new Readable({ read: resume });
+              const decoders = [];
+              const willFollow = request.redirect === "follow" && location && redirectStatusSet.has(status);
+              if (request.method !== "HEAD" && request.method !== "CONNECT" && !nullBodyStatus.includes(status) && !willFollow) {
+                for (const coding of codings) {
+                  if (coding === "x-gzip" || coding === "gzip") {
+                    decoders.push(zlib.createGunzip({
+                      // Be less strict when decoding compressed responses, since sometimes
+                      // servers send slightly invalid responses that are still accepted
+                      // by common browsers.
+                      // Always using Z_SYNC_FLUSH is what cURL does.
+                      flush: zlib.constants.Z_SYNC_FLUSH,
+                      finishFlush: zlib.constants.Z_SYNC_FLUSH
+                    }));
+                  } else if (coding === "deflate") {
+                    decoders.push(zlib.createInflate());
+                  } else if (coding === "br") {
+                    decoders.push(zlib.createBrotliDecompress());
+                  } else {
+                    decoders.length = 0;
+                    break;
+                  }
+                }
+              }
+              resolve({
+                status,
+                statusText,
+                headersList: headers[kHeadersList],
+                body: decoders.length ? pipeline(this.body, ...decoders, () => {
+                }) : this.body.on("error", () => {
+                })
+              });
+              return true;
+            },
+            onData(chunk) {
+              if (fetchParams.controller.dump) {
+                return;
+              }
+              const bytes = chunk;
+              timingInfo.encodedBodySize += bytes.byteLength;
+              return this.body.push(bytes);
+            },
+            onComplete() {
+              if (this.abort) {
+                fetchParams.controller.off("terminated", this.abort);
+              }
+              fetchParams.controller.ended = true;
+              this.body.push(null);
+            },
+            onError(error2) {
+              var _a4;
+              if (this.abort) {
+                fetchParams.controller.off("terminated", this.abort);
+              }
+              (_a4 = this.body) == null ? void 0 : _a4.destroy(error2);
+              fetchParams.controller.terminate(error2);
+              reject(error2);
+            },
+            onUpgrade(status, headersList, socket) {
+              if (status !== 101) {
+                return;
+              }
+              const headers = new Headers3();
+              for (let n = 0; n < headersList.length; n += 2) {
+                const key = headersList[n + 0].toString("latin1");
+                const val = headersList[n + 1].toString("latin1");
+                headers[kHeadersList].append(key, val);
+              }
+              resolve({
+                status,
+                statusText: STATUS_CODES[status],
+                headersList: headers[kHeadersList],
+                socket
+              });
+              return true;
+            }
+          }
+        ));
+      }
+    }
+    module2.exports = {
+      fetch: fetch3,
+      Fetch,
+      fetching,
+      finalizeAndReportTiming
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fileapi/symbols.js
+var require_symbols3 = __commonJS({
+  "alexa/node_modules/undici/lib/fileapi/symbols.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      kState: /* @__PURE__ */ Symbol("FileReader state"),
+      kResult: /* @__PURE__ */ Symbol("FileReader result"),
+      kError: /* @__PURE__ */ Symbol("FileReader error"),
+      kLastProgressEventFired: /* @__PURE__ */ Symbol("FileReader last progress event fired timestamp"),
+      kEvents: /* @__PURE__ */ Symbol("FileReader events"),
+      kAborted: /* @__PURE__ */ Symbol("FileReader aborted")
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fileapi/progressevent.js
+var require_progressevent = __commonJS({
+  "alexa/node_modules/undici/lib/fileapi/progressevent.js"(exports2, module2) {
+    "use strict";
+    var { webidl } = require_webidl();
+    var kState = /* @__PURE__ */ Symbol("ProgressEvent state");
+    var ProgressEvent = class _ProgressEvent extends Event {
+      constructor(type, eventInitDict = {}) {
+        type = webidl.converters.DOMString(type);
+        eventInitDict = webidl.converters.ProgressEventInit(eventInitDict ?? {});
+        super(type, eventInitDict);
+        this[kState] = {
+          lengthComputable: eventInitDict.lengthComputable,
+          loaded: eventInitDict.loaded,
+          total: eventInitDict.total
+        };
+      }
+      get lengthComputable() {
+        webidl.brandCheck(this, _ProgressEvent);
+        return this[kState].lengthComputable;
+      }
+      get loaded() {
+        webidl.brandCheck(this, _ProgressEvent);
+        return this[kState].loaded;
+      }
+      get total() {
+        webidl.brandCheck(this, _ProgressEvent);
+        return this[kState].total;
+      }
+    };
+    webidl.converters.ProgressEventInit = webidl.dictionaryConverter([
+      {
+        key: "lengthComputable",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "loaded",
+        converter: webidl.converters["unsigned long long"],
+        defaultValue: 0
+      },
+      {
+        key: "total",
+        converter: webidl.converters["unsigned long long"],
+        defaultValue: 0
+      },
+      {
+        key: "bubbles",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "cancelable",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "composed",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      }
+    ]);
+    module2.exports = {
+      ProgressEvent
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fileapi/encoding.js
+var require_encoding = __commonJS({
+  "alexa/node_modules/undici/lib/fileapi/encoding.js"(exports2, module2) {
+    "use strict";
+    function getEncoding(label) {
+      if (!label) {
+        return "failure";
+      }
+      switch (label.trim().toLowerCase()) {
+        case "unicode-1-1-utf-8":
+        case "unicode11utf8":
+        case "unicode20utf8":
+        case "utf-8":
+        case "utf8":
+        case "x-unicode20utf8":
+          return "UTF-8";
+        case "866":
+        case "cp866":
+        case "csibm866":
+        case "ibm866":
+          return "IBM866";
+        case "csisolatin2":
+        case "iso-8859-2":
+        case "iso-ir-101":
+        case "iso8859-2":
+        case "iso88592":
+        case "iso_8859-2":
+        case "iso_8859-2:1987":
+        case "l2":
+        case "latin2":
+          return "ISO-8859-2";
+        case "csisolatin3":
+        case "iso-8859-3":
+        case "iso-ir-109":
+        case "iso8859-3":
+        case "iso88593":
+        case "iso_8859-3":
+        case "iso_8859-3:1988":
+        case "l3":
+        case "latin3":
+          return "ISO-8859-3";
+        case "csisolatin4":
+        case "iso-8859-4":
+        case "iso-ir-110":
+        case "iso8859-4":
+        case "iso88594":
+        case "iso_8859-4":
+        case "iso_8859-4:1988":
+        case "l4":
+        case "latin4":
+          return "ISO-8859-4";
+        case "csisolatincyrillic":
+        case "cyrillic":
+        case "iso-8859-5":
+        case "iso-ir-144":
+        case "iso8859-5":
+        case "iso88595":
+        case "iso_8859-5":
+        case "iso_8859-5:1988":
+          return "ISO-8859-5";
+        case "arabic":
+        case "asmo-708":
+        case "csiso88596e":
+        case "csiso88596i":
+        case "csisolatinarabic":
+        case "ecma-114":
+        case "iso-8859-6":
+        case "iso-8859-6-e":
+        case "iso-8859-6-i":
+        case "iso-ir-127":
+        case "iso8859-6":
+        case "iso88596":
+        case "iso_8859-6":
+        case "iso_8859-6:1987":
+          return "ISO-8859-6";
+        case "csisolatingreek":
+        case "ecma-118":
+        case "elot_928":
+        case "greek":
+        case "greek8":
+        case "iso-8859-7":
+        case "iso-ir-126":
+        case "iso8859-7":
+        case "iso88597":
+        case "iso_8859-7":
+        case "iso_8859-7:1987":
+        case "sun_eu_greek":
+          return "ISO-8859-7";
+        case "csiso88598e":
+        case "csisolatinhebrew":
+        case "hebrew":
+        case "iso-8859-8":
+        case "iso-8859-8-e":
+        case "iso-ir-138":
+        case "iso8859-8":
+        case "iso88598":
+        case "iso_8859-8":
+        case "iso_8859-8:1988":
+        case "visual":
+          return "ISO-8859-8";
+        case "csiso88598i":
+        case "iso-8859-8-i":
+        case "logical":
+          return "ISO-8859-8-I";
+        case "csisolatin6":
+        case "iso-8859-10":
+        case "iso-ir-157":
+        case "iso8859-10":
+        case "iso885910":
+        case "l6":
+        case "latin6":
+          return "ISO-8859-10";
+        case "iso-8859-13":
+        case "iso8859-13":
+        case "iso885913":
+          return "ISO-8859-13";
+        case "iso-8859-14":
+        case "iso8859-14":
+        case "iso885914":
+          return "ISO-8859-14";
+        case "csisolatin9":
+        case "iso-8859-15":
+        case "iso8859-15":
+        case "iso885915":
+        case "iso_8859-15":
+        case "l9":
+          return "ISO-8859-15";
+        case "iso-8859-16":
+          return "ISO-8859-16";
+        case "cskoi8r":
+        case "koi":
+        case "koi8":
+        case "koi8-r":
+        case "koi8_r":
+          return "KOI8-R";
+        case "koi8-ru":
+        case "koi8-u":
+          return "KOI8-U";
+        case "csmacintosh":
+        case "mac":
+        case "macintosh":
+        case "x-mac-roman":
+          return "macintosh";
+        case "iso-8859-11":
+        case "iso8859-11":
+        case "iso885911":
+        case "tis-620":
+        case "windows-874":
+          return "windows-874";
+        case "cp1250":
+        case "windows-1250":
+        case "x-cp1250":
+          return "windows-1250";
+        case "cp1251":
+        case "windows-1251":
+        case "x-cp1251":
+          return "windows-1251";
+        case "ansi_x3.4-1968":
+        case "ascii":
+        case "cp1252":
+        case "cp819":
+        case "csisolatin1":
+        case "ibm819":
+        case "iso-8859-1":
+        case "iso-ir-100":
+        case "iso8859-1":
+        case "iso88591":
+        case "iso_8859-1":
+        case "iso_8859-1:1987":
+        case "l1":
+        case "latin1":
+        case "us-ascii":
+        case "windows-1252":
+        case "x-cp1252":
+          return "windows-1252";
+        case "cp1253":
+        case "windows-1253":
+        case "x-cp1253":
+          return "windows-1253";
+        case "cp1254":
+        case "csisolatin5":
+        case "iso-8859-9":
+        case "iso-ir-148":
+        case "iso8859-9":
+        case "iso88599":
+        case "iso_8859-9":
+        case "iso_8859-9:1989":
+        case "l5":
+        case "latin5":
+        case "windows-1254":
+        case "x-cp1254":
+          return "windows-1254";
+        case "cp1255":
+        case "windows-1255":
+        case "x-cp1255":
+          return "windows-1255";
+        case "cp1256":
+        case "windows-1256":
+        case "x-cp1256":
+          return "windows-1256";
+        case "cp1257":
+        case "windows-1257":
+        case "x-cp1257":
+          return "windows-1257";
+        case "cp1258":
+        case "windows-1258":
+        case "x-cp1258":
+          return "windows-1258";
+        case "x-mac-cyrillic":
+        case "x-mac-ukrainian":
+          return "x-mac-cyrillic";
+        case "chinese":
+        case "csgb2312":
+        case "csiso58gb231280":
+        case "gb2312":
+        case "gb_2312":
+        case "gb_2312-80":
+        case "gbk":
+        case "iso-ir-58":
+        case "x-gbk":
+          return "GBK";
+        case "gb18030":
+          return "gb18030";
+        case "big5":
+        case "big5-hkscs":
+        case "cn-big5":
+        case "csbig5":
+        case "x-x-big5":
+          return "Big5";
+        case "cseucpkdfmtjapanese":
+        case "euc-jp":
+        case "x-euc-jp":
+          return "EUC-JP";
+        case "csiso2022jp":
+        case "iso-2022-jp":
+          return "ISO-2022-JP";
+        case "csshiftjis":
+        case "ms932":
+        case "ms_kanji":
+        case "shift-jis":
+        case "shift_jis":
+        case "sjis":
+        case "windows-31j":
+        case "x-sjis":
+          return "Shift_JIS";
+        case "cseuckr":
+        case "csksc56011987":
+        case "euc-kr":
+        case "iso-ir-149":
+        case "korean":
+        case "ks_c_5601-1987":
+        case "ks_c_5601-1989":
+        case "ksc5601":
+        case "ksc_5601":
+        case "windows-949":
+          return "EUC-KR";
+        case "csiso2022kr":
+        case "hz-gb-2312":
+        case "iso-2022-cn":
+        case "iso-2022-cn-ext":
+        case "iso-2022-kr":
+        case "replacement":
+          return "replacement";
+        case "unicodefffe":
+        case "utf-16be":
+          return "UTF-16BE";
+        case "csunicode":
+        case "iso-10646-ucs-2":
+        case "ucs-2":
+        case "unicode":
+        case "unicodefeff":
+        case "utf-16":
+        case "utf-16le":
+          return "UTF-16LE";
+        case "x-user-defined":
+          return "x-user-defined";
+        default:
+          return "failure";
+      }
+    }
+    module2.exports = {
+      getEncoding
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fileapi/util.js
+var require_util4 = __commonJS({
+  "alexa/node_modules/undici/lib/fileapi/util.js"(exports2, module2) {
+    "use strict";
+    var {
+      kState,
+      kError,
+      kResult,
+      kAborted,
+      kLastProgressEventFired
+    } = require_symbols3();
+    var { ProgressEvent } = require_progressevent();
+    var { getEncoding } = require_encoding();
+    var { DOMException: DOMException2 } = require_constants2();
+    var { serializeAMimeType, parseMIMEType } = require_dataURL();
+    var { types } = require("util");
+    var { StringDecoder } = require("string_decoder");
+    var { btoa: btoa2 } = require("buffer");
+    var staticPropertyDescriptors = {
+      enumerable: true,
+      writable: false,
+      configurable: false
+    };
+    function readOperation(fr, blob, type, encodingName) {
+      if (fr[kState] === "loading") {
+        throw new DOMException2("Invalid state", "InvalidStateError");
+      }
+      fr[kState] = "loading";
+      fr[kResult] = null;
+      fr[kError] = null;
+      const stream = blob.stream();
+      const reader = stream.getReader();
+      const bytes = [];
+      let chunkPromise = reader.read();
+      let isFirstChunk = true;
+      (async () => {
+        while (!fr[kAborted]) {
+          try {
+            const { done, value } = await chunkPromise;
+            if (isFirstChunk && !fr[kAborted]) {
+              queueMicrotask(() => {
+                fireAProgressEvent("loadstart", fr);
+              });
+            }
+            isFirstChunk = false;
+            if (!done && types.isUint8Array(value)) {
+              bytes.push(value);
+              if ((fr[kLastProgressEventFired] === void 0 || Date.now() - fr[kLastProgressEventFired] >= 50) && !fr[kAborted]) {
+                fr[kLastProgressEventFired] = Date.now();
+                queueMicrotask(() => {
+                  fireAProgressEvent("progress", fr);
+                });
+              }
+              chunkPromise = reader.read();
+            } else if (done) {
+              queueMicrotask(() => {
+                fr[kState] = "done";
+                try {
+                  const result = packageData(bytes, type, blob.type, encodingName);
+                  if (fr[kAborted]) {
+                    return;
+                  }
+                  fr[kResult] = result;
+                  fireAProgressEvent("load", fr);
+                } catch (error2) {
+                  fr[kError] = error2;
+                  fireAProgressEvent("error", fr);
+                }
+                if (fr[kState] !== "loading") {
+                  fireAProgressEvent("loadend", fr);
+                }
+              });
+              break;
+            }
+          } catch (error2) {
+            if (fr[kAborted]) {
+              return;
+            }
+            queueMicrotask(() => {
+              fr[kState] = "done";
+              fr[kError] = error2;
+              fireAProgressEvent("error", fr);
+              if (fr[kState] !== "loading") {
+                fireAProgressEvent("loadend", fr);
+              }
+            });
+            break;
+          }
+        }
+      })();
+    }
+    function fireAProgressEvent(e, reader) {
+      const event = new ProgressEvent(e, {
+        bubbles: false,
+        cancelable: false
+      });
+      reader.dispatchEvent(event);
+    }
+    function packageData(bytes, type, mimeType, encodingName) {
+      switch (type) {
+        case "DataURL": {
+          let dataURL = "data:";
+          const parsed = parseMIMEType(mimeType || "application/octet-stream");
+          if (parsed !== "failure") {
+            dataURL += serializeAMimeType(parsed);
+          }
+          dataURL += ";base64,";
+          const decoder = new StringDecoder("latin1");
+          for (const chunk of bytes) {
+            dataURL += btoa2(decoder.write(chunk));
+          }
+          dataURL += btoa2(decoder.end());
+          return dataURL;
+        }
+        case "Text": {
+          let encoding = "failure";
+          if (encodingName) {
+            encoding = getEncoding(encodingName);
+          }
+          if (encoding === "failure" && mimeType) {
+            const type2 = parseMIMEType(mimeType);
+            if (type2 !== "failure") {
+              encoding = getEncoding(type2.parameters.get("charset"));
+            }
+          }
+          if (encoding === "failure") {
+            encoding = "UTF-8";
+          }
+          return decode3(bytes, encoding);
+        }
+        case "ArrayBuffer": {
+          const sequence = combineByteSequences(bytes);
+          return sequence.buffer;
+        }
+        case "BinaryString": {
+          let binaryString = "";
+          const decoder = new StringDecoder("latin1");
+          for (const chunk of bytes) {
+            binaryString += decoder.write(chunk);
+          }
+          binaryString += decoder.end();
+          return binaryString;
+        }
+      }
+    }
+    function decode3(ioQueue, encoding) {
+      const bytes = combineByteSequences(ioQueue);
+      const BOMEncoding = BOMSniffing(bytes);
+      let slice = 0;
+      if (BOMEncoding !== null) {
+        encoding = BOMEncoding;
+        slice = BOMEncoding === "UTF-8" ? 3 : 2;
+      }
+      const sliced = bytes.slice(slice);
+      return new TextDecoder(encoding).decode(sliced);
+    }
+    function BOMSniffing(ioQueue) {
+      const [a, b, c] = ioQueue;
+      if (a === 239 && b === 187 && c === 191) {
+        return "UTF-8";
+      } else if (a === 254 && b === 255) {
+        return "UTF-16BE";
+      } else if (a === 255 && b === 254) {
+        return "UTF-16LE";
+      }
+      return null;
+    }
+    function combineByteSequences(sequences) {
+      const size = sequences.reduce((a, b) => {
+        return a + b.byteLength;
+      }, 0);
+      let offset = 0;
+      return sequences.reduce((a, b) => {
+        a.set(b, offset);
+        offset += b.byteLength;
+        return a;
+      }, new Uint8Array(size));
+    }
+    module2.exports = {
+      staticPropertyDescriptors,
+      readOperation,
+      fireAProgressEvent
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/fileapi/filereader.js
+var require_filereader = __commonJS({
+  "alexa/node_modules/undici/lib/fileapi/filereader.js"(exports2, module2) {
+    "use strict";
+    var {
+      staticPropertyDescriptors,
+      readOperation,
+      fireAProgressEvent
+    } = require_util4();
+    var {
+      kState,
+      kError,
+      kResult,
+      kEvents,
+      kAborted
+    } = require_symbols3();
+    var { webidl } = require_webidl();
+    var { kEnumerableProperty } = require_util();
+    var FileReader = class _FileReader extends EventTarget {
+      constructor() {
+        super();
+        this[kState] = "empty";
+        this[kResult] = null;
+        this[kError] = null;
+        this[kEvents] = {
+          loadend: null,
+          error: null,
+          abort: null,
+          load: null,
+          progress: null,
+          loadstart: null
+        };
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#dfn-readAsArrayBuffer
+       * @param {import('buffer').Blob} blob
+       */
+      readAsArrayBuffer(blob) {
+        webidl.brandCheck(this, _FileReader);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FileReader.readAsArrayBuffer" });
+        blob = webidl.converters.Blob(blob, { strict: false });
+        readOperation(this, blob, "ArrayBuffer");
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#readAsBinaryString
+       * @param {import('buffer').Blob} blob
+       */
+      readAsBinaryString(blob) {
+        webidl.brandCheck(this, _FileReader);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FileReader.readAsBinaryString" });
+        blob = webidl.converters.Blob(blob, { strict: false });
+        readOperation(this, blob, "BinaryString");
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#readAsDataText
+       * @param {import('buffer').Blob} blob
+       * @param {string?} encoding
+       */
+      readAsText(blob, encoding = void 0) {
+        webidl.brandCheck(this, _FileReader);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FileReader.readAsText" });
+        blob = webidl.converters.Blob(blob, { strict: false });
+        if (encoding !== void 0) {
+          encoding = webidl.converters.DOMString(encoding);
+        }
+        readOperation(this, blob, "Text", encoding);
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#dfn-readAsDataURL
+       * @param {import('buffer').Blob} blob
+       */
+      readAsDataURL(blob) {
+        webidl.brandCheck(this, _FileReader);
+        webidl.argumentLengthCheck(arguments, 1, { header: "FileReader.readAsDataURL" });
+        blob = webidl.converters.Blob(blob, { strict: false });
+        readOperation(this, blob, "DataURL");
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#dfn-abort
+       */
+      abort() {
+        if (this[kState] === "empty" || this[kState] === "done") {
+          this[kResult] = null;
+          return;
+        }
+        if (this[kState] === "loading") {
+          this[kState] = "done";
+          this[kResult] = null;
+        }
+        this[kAborted] = true;
+        fireAProgressEvent("abort", this);
+        if (this[kState] !== "loading") {
+          fireAProgressEvent("loadend", this);
+        }
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#dom-filereader-readystate
+       */
+      get readyState() {
+        webidl.brandCheck(this, _FileReader);
+        switch (this[kState]) {
+          case "empty":
+            return this.EMPTY;
+          case "loading":
+            return this.LOADING;
+          case "done":
+            return this.DONE;
+        }
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#dom-filereader-result
+       */
+      get result() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kResult];
+      }
+      /**
+       * @see https://w3c.github.io/FileAPI/#dom-filereader-error
+       */
+      get error() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kError];
+      }
+      get onloadend() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kEvents].loadend;
+      }
+      set onloadend(fn) {
+        webidl.brandCheck(this, _FileReader);
+        if (this[kEvents].loadend) {
+          this.removeEventListener("loadend", this[kEvents].loadend);
+        }
+        if (typeof fn === "function") {
+          this[kEvents].loadend = fn;
+          this.addEventListener("loadend", fn);
+        } else {
+          this[kEvents].loadend = null;
+        }
+      }
+      get onerror() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kEvents].error;
+      }
+      set onerror(fn) {
+        webidl.brandCheck(this, _FileReader);
+        if (this[kEvents].error) {
+          this.removeEventListener("error", this[kEvents].error);
+        }
+        if (typeof fn === "function") {
+          this[kEvents].error = fn;
+          this.addEventListener("error", fn);
+        } else {
+          this[kEvents].error = null;
+        }
+      }
+      get onloadstart() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kEvents].loadstart;
+      }
+      set onloadstart(fn) {
+        webidl.brandCheck(this, _FileReader);
+        if (this[kEvents].loadstart) {
+          this.removeEventListener("loadstart", this[kEvents].loadstart);
+        }
+        if (typeof fn === "function") {
+          this[kEvents].loadstart = fn;
+          this.addEventListener("loadstart", fn);
+        } else {
+          this[kEvents].loadstart = null;
+        }
+      }
+      get onprogress() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kEvents].progress;
+      }
+      set onprogress(fn) {
+        webidl.brandCheck(this, _FileReader);
+        if (this[kEvents].progress) {
+          this.removeEventListener("progress", this[kEvents].progress);
+        }
+        if (typeof fn === "function") {
+          this[kEvents].progress = fn;
+          this.addEventListener("progress", fn);
+        } else {
+          this[kEvents].progress = null;
+        }
+      }
+      get onload() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kEvents].load;
+      }
+      set onload(fn) {
+        webidl.brandCheck(this, _FileReader);
+        if (this[kEvents].load) {
+          this.removeEventListener("load", this[kEvents].load);
+        }
+        if (typeof fn === "function") {
+          this[kEvents].load = fn;
+          this.addEventListener("load", fn);
+        } else {
+          this[kEvents].load = null;
+        }
+      }
+      get onabort() {
+        webidl.brandCheck(this, _FileReader);
+        return this[kEvents].abort;
+      }
+      set onabort(fn) {
+        webidl.brandCheck(this, _FileReader);
+        if (this[kEvents].abort) {
+          this.removeEventListener("abort", this[kEvents].abort);
+        }
+        if (typeof fn === "function") {
+          this[kEvents].abort = fn;
+          this.addEventListener("abort", fn);
+        } else {
+          this[kEvents].abort = null;
+        }
+      }
+    };
+    FileReader.EMPTY = FileReader.prototype.EMPTY = 0;
+    FileReader.LOADING = FileReader.prototype.LOADING = 1;
+    FileReader.DONE = FileReader.prototype.DONE = 2;
+    Object.defineProperties(FileReader.prototype, {
+      EMPTY: staticPropertyDescriptors,
+      LOADING: staticPropertyDescriptors,
+      DONE: staticPropertyDescriptors,
+      readAsArrayBuffer: kEnumerableProperty,
+      readAsBinaryString: kEnumerableProperty,
+      readAsText: kEnumerableProperty,
+      readAsDataURL: kEnumerableProperty,
+      abort: kEnumerableProperty,
+      readyState: kEnumerableProperty,
+      result: kEnumerableProperty,
+      error: kEnumerableProperty,
+      onloadstart: kEnumerableProperty,
+      onprogress: kEnumerableProperty,
+      onload: kEnumerableProperty,
+      onabort: kEnumerableProperty,
+      onerror: kEnumerableProperty,
+      onloadend: kEnumerableProperty,
+      [Symbol.toStringTag]: {
+        value: "FileReader",
+        writable: false,
+        enumerable: false,
+        configurable: true
+      }
+    });
+    Object.defineProperties(FileReader, {
+      EMPTY: staticPropertyDescriptors,
+      LOADING: staticPropertyDescriptors,
+      DONE: staticPropertyDescriptors
+    });
+    module2.exports = {
+      FileReader
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cache/symbols.js
+var require_symbols4 = __commonJS({
+  "alexa/node_modules/undici/lib/cache/symbols.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      kConstruct: require_symbols().kConstruct
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cache/util.js
+var require_util5 = __commonJS({
+  "alexa/node_modules/undici/lib/cache/util.js"(exports2, module2) {
+    "use strict";
+    var assert2 = require("assert");
+    var { URLSerializer } = require_dataURL();
+    var { isValidHeaderName } = require_util2();
+    function urlEquals(A, B, excludeFragment = false) {
+      const serializedA = URLSerializer(A, excludeFragment);
+      const serializedB = URLSerializer(B, excludeFragment);
+      return serializedA === serializedB;
+    }
+    function fieldValues(header) {
+      assert2(header !== null);
+      const values = [];
+      for (let value of header.split(",")) {
+        value = value.trim();
+        if (!value.length) {
+          continue;
+        } else if (!isValidHeaderName(value)) {
+          continue;
+        }
+        values.push(value);
+      }
+      return values;
+    }
+    module2.exports = {
+      urlEquals,
+      fieldValues
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cache/cache.js
+var require_cache = __commonJS({
+  "alexa/node_modules/undici/lib/cache/cache.js"(exports2, module2) {
+    "use strict";
+    var { kConstruct } = require_symbols4();
+    var { urlEquals, fieldValues: getFieldValues } = require_util5();
+    var { kEnumerableProperty, isDisturbed } = require_util();
+    var { kHeadersList } = require_symbols();
+    var { webidl } = require_webidl();
+    var { Response: Response3, cloneResponse } = require_response();
+    var { Request: Request2 } = require_request2();
+    var { kState, kHeaders, kGuard, kRealm } = require_symbols2();
+    var { fetching } = require_fetch();
+    var { urlIsHttpHttpsScheme, createDeferredPromise, readAllBytes } = require_util2();
+    var assert2 = require("assert");
+    var { getGlobalDispatcher } = require_global2();
+    var Cache = class _Cache {
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#dfn-relevant-request-response-list
+       * @type {requestResponseList}
+       */
+      #relevantRequestResponseList;
+      constructor() {
+        if (arguments[0] !== kConstruct) {
+          webidl.illegalConstructor();
+        }
+        this.#relevantRequestResponseList = arguments[1];
+      }
+      async match(request, options = {}) {
+        webidl.brandCheck(this, _Cache);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Cache.match" });
+        request = webidl.converters.RequestInfo(request);
+        options = webidl.converters.CacheQueryOptions(options);
+        const p = await this.matchAll(request, options);
+        if (p.length === 0) {
+          return;
+        }
+        return p[0];
+      }
+      async matchAll(request = void 0, options = {}) {
+        var _a4;
+        webidl.brandCheck(this, _Cache);
+        if (request !== void 0) request = webidl.converters.RequestInfo(request);
+        options = webidl.converters.CacheQueryOptions(options);
+        let r = null;
+        if (request !== void 0) {
+          if (request instanceof Request2) {
+            r = request[kState];
+            if (r.method !== "GET" && !options.ignoreMethod) {
+              return [];
+            }
+          } else if (typeof request === "string") {
+            r = new Request2(request)[kState];
+          }
+        }
+        const responses = [];
+        if (request === void 0) {
+          for (const requestResponse of this.#relevantRequestResponseList) {
+            responses.push(requestResponse[1]);
+          }
+        } else {
+          const requestResponses = this.#queryCache(r, options);
+          for (const requestResponse of requestResponses) {
+            responses.push(requestResponse[1]);
+          }
+        }
+        const responseList = [];
+        for (const response of responses) {
+          const responseObject = new Response3(((_a4 = response.body) == null ? void 0 : _a4.source) ?? null);
+          const body = responseObject[kState].body;
+          responseObject[kState] = response;
+          responseObject[kState].body = body;
+          responseObject[kHeaders][kHeadersList] = response.headersList;
+          responseObject[kHeaders][kGuard] = "immutable";
+          responseList.push(responseObject);
+        }
+        return Object.freeze(responseList);
+      }
+      async add(request) {
+        webidl.brandCheck(this, _Cache);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Cache.add" });
+        request = webidl.converters.RequestInfo(request);
+        const requests = [request];
+        const responseArrayPromise = this.addAll(requests);
+        return await responseArrayPromise;
+      }
+      async addAll(requests) {
+        webidl.brandCheck(this, _Cache);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Cache.addAll" });
+        requests = webidl.converters["sequence<RequestInfo>"](requests);
+        const responsePromises = [];
+        const requestList = [];
+        for (const request of requests) {
+          if (typeof request === "string") {
+            continue;
+          }
+          const r = request[kState];
+          if (!urlIsHttpHttpsScheme(r.url) || r.method !== "GET") {
+            throw webidl.errors.exception({
+              header: "Cache.addAll",
+              message: "Expected http/s scheme when method is not GET."
+            });
+          }
+        }
+        const fetchControllers = [];
+        for (const request of requests) {
+          const r = new Request2(request)[kState];
+          if (!urlIsHttpHttpsScheme(r.url)) {
+            throw webidl.errors.exception({
+              header: "Cache.addAll",
+              message: "Expected http/s scheme."
+            });
+          }
+          r.initiator = "fetch";
+          r.destination = "subresource";
+          requestList.push(r);
+          const responsePromise = createDeferredPromise();
+          fetchControllers.push(fetching({
+            request: r,
+            dispatcher: getGlobalDispatcher(),
+            processResponse(response) {
+              if (response.type === "error" || response.status === 206 || response.status < 200 || response.status > 299) {
+                responsePromise.reject(webidl.errors.exception({
+                  header: "Cache.addAll",
+                  message: "Received an invalid status code or the request failed."
+                }));
+              } else if (response.headersList.contains("vary")) {
+                const fieldValues = getFieldValues(response.headersList.get("vary"));
+                for (const fieldValue of fieldValues) {
+                  if (fieldValue === "*") {
+                    responsePromise.reject(webidl.errors.exception({
+                      header: "Cache.addAll",
+                      message: "invalid vary field value"
+                    }));
+                    for (const controller of fetchControllers) {
+                      controller.abort();
+                    }
+                    return;
+                  }
+                }
+              }
+            },
+            processResponseEndOfBody(response) {
+              if (response.aborted) {
+                responsePromise.reject(new DOMException("aborted", "AbortError"));
+                return;
+              }
+              responsePromise.resolve(response);
+            }
+          }));
+          responsePromises.push(responsePromise.promise);
+        }
+        const p = Promise.all(responsePromises);
+        const responses = await p;
+        const operations = [];
+        let index = 0;
+        for (const response of responses) {
+          const operation = {
+            type: "put",
+            // 7.3.2
+            request: requestList[index],
+            // 7.3.3
+            response
+            // 7.3.4
+          };
+          operations.push(operation);
+          index++;
+        }
+        const cacheJobPromise = createDeferredPromise();
+        let errorData = null;
+        try {
+          this.#batchCacheOperations(operations);
+        } catch (e) {
+          errorData = e;
+        }
+        queueMicrotask(() => {
+          if (errorData === null) {
+            cacheJobPromise.resolve(void 0);
+          } else {
+            cacheJobPromise.reject(errorData);
+          }
+        });
+        return cacheJobPromise.promise;
+      }
+      async put(request, response) {
+        webidl.brandCheck(this, _Cache);
+        webidl.argumentLengthCheck(arguments, 2, { header: "Cache.put" });
+        request = webidl.converters.RequestInfo(request);
+        response = webidl.converters.Response(response);
+        let innerRequest = null;
+        if (request instanceof Request2) {
+          innerRequest = request[kState];
+        } else {
+          innerRequest = new Request2(request)[kState];
+        }
+        if (!urlIsHttpHttpsScheme(innerRequest.url) || innerRequest.method !== "GET") {
+          throw webidl.errors.exception({
+            header: "Cache.put",
+            message: "Expected an http/s scheme when method is not GET"
+          });
+        }
+        const innerResponse = response[kState];
+        if (innerResponse.status === 206) {
+          throw webidl.errors.exception({
+            header: "Cache.put",
+            message: "Got 206 status"
+          });
+        }
+        if (innerResponse.headersList.contains("vary")) {
+          const fieldValues = getFieldValues(innerResponse.headersList.get("vary"));
+          for (const fieldValue of fieldValues) {
+            if (fieldValue === "*") {
+              throw webidl.errors.exception({
+                header: "Cache.put",
+                message: "Got * vary field value"
+              });
+            }
+          }
+        }
+        if (innerResponse.body && (isDisturbed(innerResponse.body.stream) || innerResponse.body.stream.locked)) {
+          throw webidl.errors.exception({
+            header: "Cache.put",
+            message: "Response body is locked or disturbed"
+          });
+        }
+        const clonedResponse = cloneResponse(innerResponse);
+        const bodyReadPromise = createDeferredPromise();
+        if (innerResponse.body != null) {
+          const stream = innerResponse.body.stream;
+          const reader = stream.getReader();
+          readAllBytes(reader).then(bodyReadPromise.resolve, bodyReadPromise.reject);
+        } else {
+          bodyReadPromise.resolve(void 0);
+        }
+        const operations = [];
+        const operation = {
+          type: "put",
+          // 14.
+          request: innerRequest,
+          // 15.
+          response: clonedResponse
+          // 16.
+        };
+        operations.push(operation);
+        const bytes = await bodyReadPromise.promise;
+        if (clonedResponse.body != null) {
+          clonedResponse.body.source = bytes;
+        }
+        const cacheJobPromise = createDeferredPromise();
+        let errorData = null;
+        try {
+          this.#batchCacheOperations(operations);
+        } catch (e) {
+          errorData = e;
+        }
+        queueMicrotask(() => {
+          if (errorData === null) {
+            cacheJobPromise.resolve();
+          } else {
+            cacheJobPromise.reject(errorData);
+          }
+        });
+        return cacheJobPromise.promise;
+      }
+      async delete(request, options = {}) {
+        webidl.brandCheck(this, _Cache);
+        webidl.argumentLengthCheck(arguments, 1, { header: "Cache.delete" });
+        request = webidl.converters.RequestInfo(request);
+        options = webidl.converters.CacheQueryOptions(options);
+        let r = null;
+        if (request instanceof Request2) {
+          r = request[kState];
+          if (r.method !== "GET" && !options.ignoreMethod) {
+            return false;
+          }
+        } else {
+          assert2(typeof request === "string");
+          r = new Request2(request)[kState];
+        }
+        const operations = [];
+        const operation = {
+          type: "delete",
+          request: r,
+          options
+        };
+        operations.push(operation);
+        const cacheJobPromise = createDeferredPromise();
+        let errorData = null;
+        let requestResponses;
+        try {
+          requestResponses = this.#batchCacheOperations(operations);
+        } catch (e) {
+          errorData = e;
+        }
+        queueMicrotask(() => {
+          if (errorData === null) {
+            cacheJobPromise.resolve(!!(requestResponses == null ? void 0 : requestResponses.length));
+          } else {
+            cacheJobPromise.reject(errorData);
+          }
+        });
+        return cacheJobPromise.promise;
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#dom-cache-keys
+       * @param {any} request
+       * @param {import('../../types/cache').CacheQueryOptions} options
+       * @returns {readonly Request[]}
+       */
+      async keys(request = void 0, options = {}) {
+        webidl.brandCheck(this, _Cache);
+        if (request !== void 0) request = webidl.converters.RequestInfo(request);
+        options = webidl.converters.CacheQueryOptions(options);
+        let r = null;
+        if (request !== void 0) {
+          if (request instanceof Request2) {
+            r = request[kState];
+            if (r.method !== "GET" && !options.ignoreMethod) {
+              return [];
+            }
+          } else if (typeof request === "string") {
+            r = new Request2(request)[kState];
+          }
+        }
+        const promise = createDeferredPromise();
+        const requests = [];
+        if (request === void 0) {
+          for (const requestResponse of this.#relevantRequestResponseList) {
+            requests.push(requestResponse[0]);
+          }
+        } else {
+          const requestResponses = this.#queryCache(r, options);
+          for (const requestResponse of requestResponses) {
+            requests.push(requestResponse[0]);
+          }
+        }
+        queueMicrotask(() => {
+          const requestList = [];
+          for (const request2 of requests) {
+            const requestObject = new Request2("https://a");
+            requestObject[kState] = request2;
+            requestObject[kHeaders][kHeadersList] = request2.headersList;
+            requestObject[kHeaders][kGuard] = "immutable";
+            requestObject[kRealm] = request2.client;
+            requestList.push(requestObject);
+          }
+          promise.resolve(Object.freeze(requestList));
+        });
+        return promise.promise;
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#batch-cache-operations-algorithm
+       * @param {CacheBatchOperation[]} operations
+       * @returns {requestResponseList}
+       */
+      #batchCacheOperations(operations) {
+        const cache = this.#relevantRequestResponseList;
+        const backupCache = [...cache];
+        const addedItems = [];
+        const resultList = [];
+        try {
+          for (const operation of operations) {
+            if (operation.type !== "delete" && operation.type !== "put") {
+              throw webidl.errors.exception({
+                header: "Cache.#batchCacheOperations",
+                message: 'operation type does not match "delete" or "put"'
+              });
+            }
+            if (operation.type === "delete" && operation.response != null) {
+              throw webidl.errors.exception({
+                header: "Cache.#batchCacheOperations",
+                message: "delete operation should not have an associated response"
+              });
+            }
+            if (this.#queryCache(operation.request, operation.options, addedItems).length) {
+              throw new DOMException("???", "InvalidStateError");
+            }
+            let requestResponses;
+            if (operation.type === "delete") {
+              requestResponses = this.#queryCache(operation.request, operation.options);
+              if (requestResponses.length === 0) {
+                return [];
+              }
+              for (const requestResponse of requestResponses) {
+                const idx = cache.indexOf(requestResponse);
+                assert2(idx !== -1);
+                cache.splice(idx, 1);
+              }
+            } else if (operation.type === "put") {
+              if (operation.response == null) {
+                throw webidl.errors.exception({
+                  header: "Cache.#batchCacheOperations",
+                  message: "put operation should have an associated response"
+                });
+              }
+              const r = operation.request;
+              if (!urlIsHttpHttpsScheme(r.url)) {
+                throw webidl.errors.exception({
+                  header: "Cache.#batchCacheOperations",
+                  message: "expected http or https scheme"
+                });
+              }
+              if (r.method !== "GET") {
+                throw webidl.errors.exception({
+                  header: "Cache.#batchCacheOperations",
+                  message: "not get method"
+                });
+              }
+              if (operation.options != null) {
+                throw webidl.errors.exception({
+                  header: "Cache.#batchCacheOperations",
+                  message: "options must not be defined"
+                });
+              }
+              requestResponses = this.#queryCache(operation.request);
+              for (const requestResponse of requestResponses) {
+                const idx = cache.indexOf(requestResponse);
+                assert2(idx !== -1);
+                cache.splice(idx, 1);
+              }
+              cache.push([operation.request, operation.response]);
+              addedItems.push([operation.request, operation.response]);
+            }
+            resultList.push([operation.request, operation.response]);
+          }
+          return resultList;
+        } catch (e) {
+          this.#relevantRequestResponseList.length = 0;
+          this.#relevantRequestResponseList = backupCache;
+          throw e;
+        }
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#query-cache
+       * @param {any} requestQuery
+       * @param {import('../../types/cache').CacheQueryOptions} options
+       * @param {requestResponseList} targetStorage
+       * @returns {requestResponseList}
+       */
+      #queryCache(requestQuery, options, targetStorage) {
+        const resultList = [];
+        const storage = targetStorage ?? this.#relevantRequestResponseList;
+        for (const requestResponse of storage) {
+          const [cachedRequest, cachedResponse] = requestResponse;
+          if (this.#requestMatchesCachedItem(requestQuery, cachedRequest, cachedResponse, options)) {
+            resultList.push(requestResponse);
+          }
+        }
+        return resultList;
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#request-matches-cached-item-algorithm
+       * @param {any} requestQuery
+       * @param {any} request
+       * @param {any | null} response
+       * @param {import('../../types/cache').CacheQueryOptions | undefined} options
+       * @returns {boolean}
+       */
+      #requestMatchesCachedItem(requestQuery, request, response = null, options) {
+        const queryURL = new URL(requestQuery.url);
+        const cachedURL = new URL(request.url);
+        if (options == null ? void 0 : options.ignoreSearch) {
+          cachedURL.search = "";
+          queryURL.search = "";
+        }
+        if (!urlEquals(queryURL, cachedURL, true)) {
+          return false;
+        }
+        if (response == null || (options == null ? void 0 : options.ignoreVary) || !response.headersList.contains("vary")) {
+          return true;
+        }
+        const fieldValues = getFieldValues(response.headersList.get("vary"));
+        for (const fieldValue of fieldValues) {
+          if (fieldValue === "*") {
+            return false;
+          }
+          const requestValue = request.headersList.get(fieldValue);
+          const queryValue = requestQuery.headersList.get(fieldValue);
+          if (requestValue !== queryValue) {
+            return false;
+          }
+        }
+        return true;
+      }
+    };
+    Object.defineProperties(Cache.prototype, {
+      [Symbol.toStringTag]: {
+        value: "Cache",
+        configurable: true
+      },
+      match: kEnumerableProperty,
+      matchAll: kEnumerableProperty,
+      add: kEnumerableProperty,
+      addAll: kEnumerableProperty,
+      put: kEnumerableProperty,
+      delete: kEnumerableProperty,
+      keys: kEnumerableProperty
+    });
+    var cacheQueryOptionConverters = [
+      {
+        key: "ignoreSearch",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "ignoreMethod",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "ignoreVary",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      }
+    ];
+    webidl.converters.CacheQueryOptions = webidl.dictionaryConverter(cacheQueryOptionConverters);
+    webidl.converters.MultiCacheQueryOptions = webidl.dictionaryConverter([
+      ...cacheQueryOptionConverters,
+      {
+        key: "cacheName",
+        converter: webidl.converters.DOMString
+      }
+    ]);
+    webidl.converters.Response = webidl.interfaceConverter(Response3);
+    webidl.converters["sequence<RequestInfo>"] = webidl.sequenceConverter(
+      webidl.converters.RequestInfo
+    );
+    module2.exports = {
+      Cache
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cache/cachestorage.js
+var require_cachestorage = __commonJS({
+  "alexa/node_modules/undici/lib/cache/cachestorage.js"(exports2, module2) {
+    "use strict";
+    var { kConstruct } = require_symbols4();
+    var { Cache } = require_cache();
+    var { webidl } = require_webidl();
+    var { kEnumerableProperty } = require_util();
+    var CacheStorage = class _CacheStorage {
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#dfn-relevant-name-to-cache-map
+       * @type {Map<string, import('./cache').requestResponseList}
+       */
+      #caches = /* @__PURE__ */ new Map();
+      constructor() {
+        if (arguments[0] !== kConstruct) {
+          webidl.illegalConstructor();
+        }
+      }
+      async match(request, options = {}) {
+        webidl.brandCheck(this, _CacheStorage);
+        webidl.argumentLengthCheck(arguments, 1, { header: "CacheStorage.match" });
+        request = webidl.converters.RequestInfo(request);
+        options = webidl.converters.MultiCacheQueryOptions(options);
+        if (options.cacheName != null) {
+          if (this.#caches.has(options.cacheName)) {
+            const cacheList = this.#caches.get(options.cacheName);
+            const cache = new Cache(kConstruct, cacheList);
+            return await cache.match(request, options);
+          }
+        } else {
+          for (const cacheList of this.#caches.values()) {
+            const cache = new Cache(kConstruct, cacheList);
+            const response = await cache.match(request, options);
+            if (response !== void 0) {
+              return response;
+            }
+          }
+        }
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#cache-storage-has
+       * @param {string} cacheName
+       * @returns {Promise<boolean>}
+       */
+      async has(cacheName) {
+        webidl.brandCheck(this, _CacheStorage);
+        webidl.argumentLengthCheck(arguments, 1, { header: "CacheStorage.has" });
+        cacheName = webidl.converters.DOMString(cacheName);
+        return this.#caches.has(cacheName);
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#dom-cachestorage-open
+       * @param {string} cacheName
+       * @returns {Promise<Cache>}
+       */
+      async open(cacheName) {
+        webidl.brandCheck(this, _CacheStorage);
+        webidl.argumentLengthCheck(arguments, 1, { header: "CacheStorage.open" });
+        cacheName = webidl.converters.DOMString(cacheName);
+        if (this.#caches.has(cacheName)) {
+          const cache2 = this.#caches.get(cacheName);
+          return new Cache(kConstruct, cache2);
+        }
+        const cache = [];
+        this.#caches.set(cacheName, cache);
+        return new Cache(kConstruct, cache);
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#cache-storage-delete
+       * @param {string} cacheName
+       * @returns {Promise<boolean>}
+       */
+      async delete(cacheName) {
+        webidl.brandCheck(this, _CacheStorage);
+        webidl.argumentLengthCheck(arguments, 1, { header: "CacheStorage.delete" });
+        cacheName = webidl.converters.DOMString(cacheName);
+        return this.#caches.delete(cacheName);
+      }
+      /**
+       * @see https://w3c.github.io/ServiceWorker/#cache-storage-keys
+       * @returns {string[]}
+       */
+      async keys() {
+        webidl.brandCheck(this, _CacheStorage);
+        const keys = this.#caches.keys();
+        return [...keys];
+      }
+    };
+    Object.defineProperties(CacheStorage.prototype, {
+      [Symbol.toStringTag]: {
+        value: "CacheStorage",
+        configurable: true
+      },
+      match: kEnumerableProperty,
+      has: kEnumerableProperty,
+      open: kEnumerableProperty,
+      delete: kEnumerableProperty,
+      keys: kEnumerableProperty
+    });
+    module2.exports = {
+      CacheStorage
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cookies/constants.js
+var require_constants4 = __commonJS({
+  "alexa/node_modules/undici/lib/cookies/constants.js"(exports2, module2) {
+    "use strict";
+    var maxAttributeValueSize = 1024;
+    var maxNameValuePairSize = 4096;
+    module2.exports = {
+      maxAttributeValueSize,
+      maxNameValuePairSize
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cookies/util.js
+var require_util6 = __commonJS({
+  "alexa/node_modules/undici/lib/cookies/util.js"(exports2, module2) {
+    "use strict";
+    var assert2 = require("assert");
+    var { kHeadersList } = require_symbols();
+    function isCTLExcludingHtab(value) {
+      if (value.length === 0) {
+        return false;
+      }
+      for (const char of value) {
+        const code = char.charCodeAt(0);
+        if (code >= 0 || code <= 8 || (code >= 10 || code <= 31) || code === 127) {
+          return false;
+        }
+      }
+    }
+    function validateCookieName(name) {
+      for (const char of name) {
+        const code = char.charCodeAt(0);
+        if (code <= 32 || code > 127 || char === "(" || char === ")" || char === ">" || char === "<" || char === "@" || char === "," || char === ";" || char === ":" || char === "\\" || char === '"' || char === "/" || char === "[" || char === "]" || char === "?" || char === "=" || char === "{" || char === "}") {
+          throw new Error("Invalid cookie name");
+        }
+      }
+    }
+    function validateCookieValue(value) {
+      for (const char of value) {
+        const code = char.charCodeAt(0);
+        if (code < 33 || // exclude CTLs (0-31)
+        code === 34 || code === 44 || code === 59 || code === 92 || code > 126) {
+          throw new Error("Invalid header value");
+        }
+      }
+    }
+    function validateCookiePath(path) {
+      for (const char of path) {
+        const code = char.charCodeAt(0);
+        if (code < 33 || char === ";") {
+          throw new Error("Invalid cookie path");
+        }
+      }
+    }
+    function validateCookieDomain(domain) {
+      if (domain.startsWith("-") || domain.endsWith(".") || domain.endsWith("-")) {
+        throw new Error("Invalid cookie domain");
+      }
+    }
+    function toIMFDate(date4) {
+      if (typeof date4 === "number") {
+        date4 = new Date(date4);
+      }
+      const days = [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ];
+      const dayName = days[date4.getUTCDay()];
+      const day = date4.getUTCDate().toString().padStart(2, "0");
+      const month = months[date4.getUTCMonth()];
+      const year = date4.getUTCFullYear();
+      const hour = date4.getUTCHours().toString().padStart(2, "0");
+      const minute = date4.getUTCMinutes().toString().padStart(2, "0");
+      const second = date4.getUTCSeconds().toString().padStart(2, "0");
+      return `${dayName}, ${day} ${month} ${year} ${hour}:${minute}:${second} GMT`;
+    }
+    function validateCookieMaxAge(maxAge) {
+      if (maxAge < 0) {
+        throw new Error("Invalid cookie max-age");
+      }
+    }
+    function stringify(cookie) {
+      if (cookie.name.length === 0) {
+        return null;
+      }
+      validateCookieName(cookie.name);
+      validateCookieValue(cookie.value);
+      const out = [`${cookie.name}=${cookie.value}`];
+      if (cookie.name.startsWith("__Secure-")) {
+        cookie.secure = true;
+      }
+      if (cookie.name.startsWith("__Host-")) {
+        cookie.secure = true;
+        cookie.domain = null;
+        cookie.path = "/";
+      }
+      if (cookie.secure) {
+        out.push("Secure");
+      }
+      if (cookie.httpOnly) {
+        out.push("HttpOnly");
+      }
+      if (typeof cookie.maxAge === "number") {
+        validateCookieMaxAge(cookie.maxAge);
+        out.push(`Max-Age=${cookie.maxAge}`);
+      }
+      if (cookie.domain) {
+        validateCookieDomain(cookie.domain);
+        out.push(`Domain=${cookie.domain}`);
+      }
+      if (cookie.path) {
+        validateCookiePath(cookie.path);
+        out.push(`Path=${cookie.path}`);
+      }
+      if (cookie.expires && cookie.expires.toString() !== "Invalid Date") {
+        out.push(`Expires=${toIMFDate(cookie.expires)}`);
+      }
+      if (cookie.sameSite) {
+        out.push(`SameSite=${cookie.sameSite}`);
+      }
+      for (const part of cookie.unparsed) {
+        if (!part.includes("=")) {
+          throw new Error("Invalid unparsed");
+        }
+        const [key, ...value] = part.split("=");
+        out.push(`${key.trim()}=${value.join("=")}`);
+      }
+      return out.join("; ");
+    }
+    var kHeadersListNode;
+    function getHeadersList(headers) {
+      if (headers[kHeadersList]) {
+        return headers[kHeadersList];
+      }
+      if (!kHeadersListNode) {
+        kHeadersListNode = Object.getOwnPropertySymbols(headers).find(
+          (symbol) => symbol.description === "headers list"
+        );
+        assert2(kHeadersListNode, "Headers cannot be parsed");
+      }
+      const headersList = headers[kHeadersListNode];
+      assert2(headersList);
+      return headersList;
+    }
+    module2.exports = {
+      isCTLExcludingHtab,
+      stringify,
+      getHeadersList
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cookies/parse.js
+var require_parse = __commonJS({
+  "alexa/node_modules/undici/lib/cookies/parse.js"(exports2, module2) {
+    "use strict";
+    var { maxNameValuePairSize, maxAttributeValueSize } = require_constants4();
+    var { isCTLExcludingHtab } = require_util6();
+    var { collectASequenceOfCodePointsFast } = require_dataURL();
+    var assert2 = require("assert");
+    function parseSetCookie(header) {
+      if (isCTLExcludingHtab(header)) {
+        return null;
+      }
+      let nameValuePair = "";
+      let unparsedAttributes = "";
+      let name = "";
+      let value = "";
+      if (header.includes(";")) {
+        const position = { position: 0 };
+        nameValuePair = collectASequenceOfCodePointsFast(";", header, position);
+        unparsedAttributes = header.slice(position.position);
+      } else {
+        nameValuePair = header;
+      }
+      if (!nameValuePair.includes("=")) {
+        value = nameValuePair;
+      } else {
+        const position = { position: 0 };
+        name = collectASequenceOfCodePointsFast(
+          "=",
+          nameValuePair,
+          position
+        );
+        value = nameValuePair.slice(position.position + 1);
+      }
+      name = name.trim();
+      value = value.trim();
+      if (name.length + value.length > maxNameValuePairSize) {
+        return null;
+      }
+      return {
+        name,
+        value,
+        ...parseUnparsedAttributes(unparsedAttributes)
+      };
+    }
+    function parseUnparsedAttributes(unparsedAttributes, cookieAttributeList = {}) {
+      if (unparsedAttributes.length === 0) {
+        return cookieAttributeList;
+      }
+      assert2(unparsedAttributes[0] === ";");
+      unparsedAttributes = unparsedAttributes.slice(1);
+      let cookieAv = "";
+      if (unparsedAttributes.includes(";")) {
+        cookieAv = collectASequenceOfCodePointsFast(
+          ";",
+          unparsedAttributes,
+          { position: 0 }
+        );
+        unparsedAttributes = unparsedAttributes.slice(cookieAv.length);
+      } else {
+        cookieAv = unparsedAttributes;
+        unparsedAttributes = "";
+      }
+      let attributeName = "";
+      let attributeValue = "";
+      if (cookieAv.includes("=")) {
+        const position = { position: 0 };
+        attributeName = collectASequenceOfCodePointsFast(
+          "=",
+          cookieAv,
+          position
+        );
+        attributeValue = cookieAv.slice(position.position + 1);
+      } else {
+        attributeName = cookieAv;
+      }
+      attributeName = attributeName.trim();
+      attributeValue = attributeValue.trim();
+      if (attributeValue.length > maxAttributeValueSize) {
+        return parseUnparsedAttributes(unparsedAttributes, cookieAttributeList);
+      }
+      const attributeNameLowercase = attributeName.toLowerCase();
+      if (attributeNameLowercase === "expires") {
+        const expiryTime = new Date(attributeValue);
+        cookieAttributeList.expires = expiryTime;
+      } else if (attributeNameLowercase === "max-age") {
+        const charCode = attributeValue.charCodeAt(0);
+        if ((charCode < 48 || charCode > 57) && attributeValue[0] !== "-") {
+          return parseUnparsedAttributes(unparsedAttributes, cookieAttributeList);
+        }
+        if (!/^\d+$/.test(attributeValue)) {
+          return parseUnparsedAttributes(unparsedAttributes, cookieAttributeList);
+        }
+        const deltaSeconds = Number(attributeValue);
+        cookieAttributeList.maxAge = deltaSeconds;
+      } else if (attributeNameLowercase === "domain") {
+        let cookieDomain = attributeValue;
+        if (cookieDomain[0] === ".") {
+          cookieDomain = cookieDomain.slice(1);
+        }
+        cookieDomain = cookieDomain.toLowerCase();
+        cookieAttributeList.domain = cookieDomain;
+      } else if (attributeNameLowercase === "path") {
+        let cookiePath = "";
+        if (attributeValue.length === 0 || attributeValue[0] !== "/") {
+          cookiePath = "/";
+        } else {
+          cookiePath = attributeValue;
+        }
+        cookieAttributeList.path = cookiePath;
+      } else if (attributeNameLowercase === "secure") {
+        cookieAttributeList.secure = true;
+      } else if (attributeNameLowercase === "httponly") {
+        cookieAttributeList.httpOnly = true;
+      } else if (attributeNameLowercase === "samesite") {
+        let enforcement = "Default";
+        const attributeValueLowercase = attributeValue.toLowerCase();
+        if (attributeValueLowercase.includes("none")) {
+          enforcement = "None";
+        }
+        if (attributeValueLowercase.includes("strict")) {
+          enforcement = "Strict";
+        }
+        if (attributeValueLowercase.includes("lax")) {
+          enforcement = "Lax";
+        }
+        cookieAttributeList.sameSite = enforcement;
+      } else {
+        cookieAttributeList.unparsed ??= [];
+        cookieAttributeList.unparsed.push(`${attributeName}=${attributeValue}`);
+      }
+      return parseUnparsedAttributes(unparsedAttributes, cookieAttributeList);
+    }
+    module2.exports = {
+      parseSetCookie,
+      parseUnparsedAttributes
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/cookies/index.js
+var require_cookies = __commonJS({
+  "alexa/node_modules/undici/lib/cookies/index.js"(exports2, module2) {
+    "use strict";
+    var { parseSetCookie } = require_parse();
+    var { stringify, getHeadersList } = require_util6();
+    var { webidl } = require_webidl();
+    var { Headers: Headers3 } = require_headers();
+    function getCookies(headers) {
+      webidl.argumentLengthCheck(arguments, 1, { header: "getCookies" });
+      webidl.brandCheck(headers, Headers3, { strict: false });
+      const cookie = headers.get("cookie");
+      const out = {};
+      if (!cookie) {
+        return out;
+      }
+      for (const piece of cookie.split(";")) {
+        const [name, ...value] = piece.split("=");
+        out[name.trim()] = value.join("=");
+      }
+      return out;
+    }
+    function deleteCookie(headers, name, attributes) {
+      webidl.argumentLengthCheck(arguments, 2, { header: "deleteCookie" });
+      webidl.brandCheck(headers, Headers3, { strict: false });
+      name = webidl.converters.DOMString(name);
+      attributes = webidl.converters.DeleteCookieAttributes(attributes);
+      setCookie(headers, {
+        name,
+        value: "",
+        expires: /* @__PURE__ */ new Date(0),
+        ...attributes
+      });
+    }
+    function getSetCookies(headers) {
+      webidl.argumentLengthCheck(arguments, 1, { header: "getSetCookies" });
+      webidl.brandCheck(headers, Headers3, { strict: false });
+      const cookies = getHeadersList(headers).cookies;
+      if (!cookies) {
+        return [];
+      }
+      return cookies.map((pair) => parseSetCookie(Array.isArray(pair) ? pair[1] : pair));
+    }
+    function setCookie(headers, cookie) {
+      webidl.argumentLengthCheck(arguments, 2, { header: "setCookie" });
+      webidl.brandCheck(headers, Headers3, { strict: false });
+      cookie = webidl.converters.Cookie(cookie);
+      const str = stringify(cookie);
+      if (str) {
+        headers.append("Set-Cookie", stringify(cookie));
+      }
+    }
+    webidl.converters.DeleteCookieAttributes = webidl.dictionaryConverter([
+      {
+        converter: webidl.nullableConverter(webidl.converters.DOMString),
+        key: "path",
+        defaultValue: null
+      },
+      {
+        converter: webidl.nullableConverter(webidl.converters.DOMString),
+        key: "domain",
+        defaultValue: null
+      }
+    ]);
+    webidl.converters.Cookie = webidl.dictionaryConverter([
+      {
+        converter: webidl.converters.DOMString,
+        key: "name"
+      },
+      {
+        converter: webidl.converters.DOMString,
+        key: "value"
+      },
+      {
+        converter: webidl.nullableConverter((value) => {
+          if (typeof value === "number") {
+            return webidl.converters["unsigned long long"](value);
+          }
+          return new Date(value);
+        }),
+        key: "expires",
+        defaultValue: null
+      },
+      {
+        converter: webidl.nullableConverter(webidl.converters["long long"]),
+        key: "maxAge",
+        defaultValue: null
+      },
+      {
+        converter: webidl.nullableConverter(webidl.converters.DOMString),
+        key: "domain",
+        defaultValue: null
+      },
+      {
+        converter: webidl.nullableConverter(webidl.converters.DOMString),
+        key: "path",
+        defaultValue: null
+      },
+      {
+        converter: webidl.nullableConverter(webidl.converters.boolean),
+        key: "secure",
+        defaultValue: null
+      },
+      {
+        converter: webidl.nullableConverter(webidl.converters.boolean),
+        key: "httpOnly",
+        defaultValue: null
+      },
+      {
+        converter: webidl.converters.USVString,
+        key: "sameSite",
+        allowedValues: ["Strict", "Lax", "None"]
+      },
+      {
+        converter: webidl.sequenceConverter(webidl.converters.DOMString),
+        key: "unparsed",
+        defaultValue: []
+      }
+    ]);
+    module2.exports = {
+      getCookies,
+      deleteCookie,
+      getSetCookies,
+      setCookie
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/constants.js
+var require_constants5 = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/constants.js"(exports2, module2) {
+    "use strict";
+    var uid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    var staticPropertyDescriptors = {
+      enumerable: true,
+      writable: false,
+      configurable: false
+    };
+    var states = {
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSING: 2,
+      CLOSED: 3
+    };
+    var opcodes = {
+      CONTINUATION: 0,
+      TEXT: 1,
+      BINARY: 2,
+      CLOSE: 8,
+      PING: 9,
+      PONG: 10
+    };
+    var maxUnsigned16Bit = 2 ** 16 - 1;
+    var parserStates = {
+      INFO: 0,
+      PAYLOADLENGTH_16: 2,
+      PAYLOADLENGTH_64: 3,
+      READ_DATA: 4
+    };
+    var emptyBuffer = Buffer.allocUnsafe(0);
+    module2.exports = {
+      uid,
+      staticPropertyDescriptors,
+      states,
+      opcodes,
+      maxUnsigned16Bit,
+      parserStates,
+      emptyBuffer
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/symbols.js
+var require_symbols5 = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/symbols.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      kWebSocketURL: /* @__PURE__ */ Symbol("url"),
+      kReadyState: /* @__PURE__ */ Symbol("ready state"),
+      kController: /* @__PURE__ */ Symbol("controller"),
+      kResponse: /* @__PURE__ */ Symbol("response"),
+      kBinaryType: /* @__PURE__ */ Symbol("binary type"),
+      kSentClose: /* @__PURE__ */ Symbol("sent close"),
+      kReceivedClose: /* @__PURE__ */ Symbol("received close"),
+      kByteParser: /* @__PURE__ */ Symbol("byte parser")
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/events.js
+var require_events = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/events.js"(exports2, module2) {
+    "use strict";
+    var { webidl } = require_webidl();
+    var { kEnumerableProperty } = require_util();
+    var { MessagePort } = require("worker_threads");
+    var MessageEvent = class _MessageEvent extends Event {
+      #eventInit;
+      constructor(type, eventInitDict = {}) {
+        webidl.argumentLengthCheck(arguments, 1, { header: "MessageEvent constructor" });
+        type = webidl.converters.DOMString(type);
+        eventInitDict = webidl.converters.MessageEventInit(eventInitDict);
+        super(type, eventInitDict);
+        this.#eventInit = eventInitDict;
+      }
+      get data() {
+        webidl.brandCheck(this, _MessageEvent);
+        return this.#eventInit.data;
+      }
+      get origin() {
+        webidl.brandCheck(this, _MessageEvent);
+        return this.#eventInit.origin;
+      }
+      get lastEventId() {
+        webidl.brandCheck(this, _MessageEvent);
+        return this.#eventInit.lastEventId;
+      }
+      get source() {
+        webidl.brandCheck(this, _MessageEvent);
+        return this.#eventInit.source;
+      }
+      get ports() {
+        webidl.brandCheck(this, _MessageEvent);
+        if (!Object.isFrozen(this.#eventInit.ports)) {
+          Object.freeze(this.#eventInit.ports);
+        }
+        return this.#eventInit.ports;
+      }
+      initMessageEvent(type, bubbles = false, cancelable = false, data = null, origin = "", lastEventId = "", source = null, ports = []) {
+        webidl.brandCheck(this, _MessageEvent);
+        webidl.argumentLengthCheck(arguments, 1, { header: "MessageEvent.initMessageEvent" });
+        return new _MessageEvent(type, {
+          bubbles,
+          cancelable,
+          data,
+          origin,
+          lastEventId,
+          source,
+          ports
+        });
+      }
+    };
+    var CloseEvent = class _CloseEvent extends Event {
+      #eventInit;
+      constructor(type, eventInitDict = {}) {
+        webidl.argumentLengthCheck(arguments, 1, { header: "CloseEvent constructor" });
+        type = webidl.converters.DOMString(type);
+        eventInitDict = webidl.converters.CloseEventInit(eventInitDict);
+        super(type, eventInitDict);
+        this.#eventInit = eventInitDict;
+      }
+      get wasClean() {
+        webidl.brandCheck(this, _CloseEvent);
+        return this.#eventInit.wasClean;
+      }
+      get code() {
+        webidl.brandCheck(this, _CloseEvent);
+        return this.#eventInit.code;
+      }
+      get reason() {
+        webidl.brandCheck(this, _CloseEvent);
+        return this.#eventInit.reason;
+      }
+    };
+    var ErrorEvent = class _ErrorEvent extends Event {
+      #eventInit;
+      constructor(type, eventInitDict) {
+        webidl.argumentLengthCheck(arguments, 1, { header: "ErrorEvent constructor" });
+        super(type, eventInitDict);
+        type = webidl.converters.DOMString(type);
+        eventInitDict = webidl.converters.ErrorEventInit(eventInitDict ?? {});
+        this.#eventInit = eventInitDict;
+      }
+      get message() {
+        webidl.brandCheck(this, _ErrorEvent);
+        return this.#eventInit.message;
+      }
+      get filename() {
+        webidl.brandCheck(this, _ErrorEvent);
+        return this.#eventInit.filename;
+      }
+      get lineno() {
+        webidl.brandCheck(this, _ErrorEvent);
+        return this.#eventInit.lineno;
+      }
+      get colno() {
+        webidl.brandCheck(this, _ErrorEvent);
+        return this.#eventInit.colno;
+      }
+      get error() {
+        webidl.brandCheck(this, _ErrorEvent);
+        return this.#eventInit.error;
+      }
+    };
+    Object.defineProperties(MessageEvent.prototype, {
+      [Symbol.toStringTag]: {
+        value: "MessageEvent",
+        configurable: true
+      },
+      data: kEnumerableProperty,
+      origin: kEnumerableProperty,
+      lastEventId: kEnumerableProperty,
+      source: kEnumerableProperty,
+      ports: kEnumerableProperty,
+      initMessageEvent: kEnumerableProperty
+    });
+    Object.defineProperties(CloseEvent.prototype, {
+      [Symbol.toStringTag]: {
+        value: "CloseEvent",
+        configurable: true
+      },
+      reason: kEnumerableProperty,
+      code: kEnumerableProperty,
+      wasClean: kEnumerableProperty
+    });
+    Object.defineProperties(ErrorEvent.prototype, {
+      [Symbol.toStringTag]: {
+        value: "ErrorEvent",
+        configurable: true
+      },
+      message: kEnumerableProperty,
+      filename: kEnumerableProperty,
+      lineno: kEnumerableProperty,
+      colno: kEnumerableProperty,
+      error: kEnumerableProperty
+    });
+    webidl.converters.MessagePort = webidl.interfaceConverter(MessagePort);
+    webidl.converters["sequence<MessagePort>"] = webidl.sequenceConverter(
+      webidl.converters.MessagePort
+    );
+    var eventInit = [
+      {
+        key: "bubbles",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "cancelable",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "composed",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      }
+    ];
+    webidl.converters.MessageEventInit = webidl.dictionaryConverter([
+      ...eventInit,
+      {
+        key: "data",
+        converter: webidl.converters.any,
+        defaultValue: null
+      },
+      {
+        key: "origin",
+        converter: webidl.converters.USVString,
+        defaultValue: ""
+      },
+      {
+        key: "lastEventId",
+        converter: webidl.converters.DOMString,
+        defaultValue: ""
+      },
+      {
+        key: "source",
+        // Node doesn't implement WindowProxy or ServiceWorker, so the only
+        // valid value for source is a MessagePort.
+        converter: webidl.nullableConverter(webidl.converters.MessagePort),
+        defaultValue: null
+      },
+      {
+        key: "ports",
+        converter: webidl.converters["sequence<MessagePort>"],
+        get defaultValue() {
+          return [];
+        }
+      }
+    ]);
+    webidl.converters.CloseEventInit = webidl.dictionaryConverter([
+      ...eventInit,
+      {
+        key: "wasClean",
+        converter: webidl.converters.boolean,
+        defaultValue: false
+      },
+      {
+        key: "code",
+        converter: webidl.converters["unsigned short"],
+        defaultValue: 0
+      },
+      {
+        key: "reason",
+        converter: webidl.converters.USVString,
+        defaultValue: ""
+      }
+    ]);
+    webidl.converters.ErrorEventInit = webidl.dictionaryConverter([
+      ...eventInit,
+      {
+        key: "message",
+        converter: webidl.converters.DOMString,
+        defaultValue: ""
+      },
+      {
+        key: "filename",
+        converter: webidl.converters.USVString,
+        defaultValue: ""
+      },
+      {
+        key: "lineno",
+        converter: webidl.converters["unsigned long"],
+        defaultValue: 0
+      },
+      {
+        key: "colno",
+        converter: webidl.converters["unsigned long"],
+        defaultValue: 0
+      },
+      {
+        key: "error",
+        converter: webidl.converters.any
+      }
+    ]);
+    module2.exports = {
+      MessageEvent,
+      CloseEvent,
+      ErrorEvent
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/util.js
+var require_util7 = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/util.js"(exports2, module2) {
+    "use strict";
+    var { kReadyState, kController, kResponse, kBinaryType, kWebSocketURL } = require_symbols5();
+    var { states, opcodes } = require_constants5();
+    var { MessageEvent, ErrorEvent } = require_events();
+    function isEstablished(ws) {
+      return ws[kReadyState] === states.OPEN;
+    }
+    function isClosing(ws) {
+      return ws[kReadyState] === states.CLOSING;
+    }
+    function isClosed(ws) {
+      return ws[kReadyState] === states.CLOSED;
+    }
+    function fireEvent(e, target, eventConstructor = Event, eventInitDict) {
+      const event = new eventConstructor(e, eventInitDict);
+      target.dispatchEvent(event);
+    }
+    function websocketMessageReceived(ws, type, data) {
+      if (ws[kReadyState] !== states.OPEN) {
+        return;
+      }
+      let dataForEvent;
+      if (type === opcodes.TEXT) {
+        try {
+          dataForEvent = new TextDecoder("utf-8", { fatal: true }).decode(data);
+        } catch {
+          failWebsocketConnection(ws, "Received invalid UTF-8 in text frame.");
+          return;
+        }
+      } else if (type === opcodes.BINARY) {
+        if (ws[kBinaryType] === "blob") {
+          dataForEvent = new Blob([data]);
+        } else {
+          dataForEvent = new Uint8Array(data).buffer;
+        }
+      }
+      fireEvent("message", ws, MessageEvent, {
+        origin: ws[kWebSocketURL].origin,
+        data: dataForEvent
+      });
+    }
+    function isValidSubprotocol(protocol) {
+      if (protocol.length === 0) {
+        return false;
+      }
+      for (const char of protocol) {
+        const code = char.charCodeAt(0);
+        if (code < 33 || code > 126 || char === "(" || char === ")" || char === "<" || char === ">" || char === "@" || char === "," || char === ";" || char === ":" || char === "\\" || char === '"' || char === "/" || char === "[" || char === "]" || char === "?" || char === "=" || char === "{" || char === "}" || code === 32 || // SP
+        code === 9) {
+          return false;
+        }
+      }
+      return true;
+    }
+    function isValidStatusCode(code) {
+      if (code >= 1e3 && code < 1015) {
+        return code !== 1004 && // reserved
+        code !== 1005 && // "MUST NOT be set as a status code"
+        code !== 1006;
+      }
+      return code >= 3e3 && code <= 4999;
+    }
+    function failWebsocketConnection(ws, reason) {
+      const { [kController]: controller, [kResponse]: response } = ws;
+      controller.abort();
+      if ((response == null ? void 0 : response.socket) && !response.socket.destroyed) {
+        response.socket.destroy();
+      }
+      if (reason) {
+        fireEvent("error", ws, ErrorEvent, {
+          error: new Error(reason)
+        });
+      }
+    }
+    module2.exports = {
+      isEstablished,
+      isClosing,
+      isClosed,
+      fireEvent,
+      isValidSubprotocol,
+      isValidStatusCode,
+      failWebsocketConnection,
+      websocketMessageReceived
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/connection.js
+var require_connection = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/connection.js"(exports2, module2) {
+    "use strict";
+    var diagnosticsChannel = require("diagnostics_channel");
+    var { uid, states } = require_constants5();
+    var {
+      kReadyState,
+      kSentClose,
+      kByteParser,
+      kReceivedClose
+    } = require_symbols5();
+    var { fireEvent, failWebsocketConnection } = require_util7();
+    var { CloseEvent } = require_events();
+    var { makeRequest } = require_request2();
+    var { fetching } = require_fetch();
+    var { Headers: Headers3 } = require_headers();
+    var { getGlobalDispatcher } = require_global2();
+    var { kHeadersList } = require_symbols();
+    var channels = {};
+    channels.open = diagnosticsChannel.channel("undici:websocket:open");
+    channels.close = diagnosticsChannel.channel("undici:websocket:close");
+    channels.socketError = diagnosticsChannel.channel("undici:websocket:socket_error");
+    var crypto2;
+    try {
+      crypto2 = require("crypto");
+    } catch {
+    }
+    function establishWebSocketConnection(url2, protocols, ws, onEstablish, options) {
+      const requestURL = url2;
+      requestURL.protocol = url2.protocol === "ws:" ? "http:" : "https:";
+      const request = makeRequest({
+        urlList: [requestURL],
+        serviceWorkers: "none",
+        referrer: "no-referrer",
+        mode: "websocket",
+        credentials: "include",
+        cache: "no-store",
+        redirect: "error"
+      });
+      if (options.headers) {
+        const headersList = new Headers3(options.headers)[kHeadersList];
+        request.headersList = headersList;
+      }
+      const keyValue = crypto2.randomBytes(16).toString("base64");
+      request.headersList.append("sec-websocket-key", keyValue);
+      request.headersList.append("sec-websocket-version", "13");
+      for (const protocol of protocols) {
+        request.headersList.append("sec-websocket-protocol", protocol);
+      }
+      const permessageDeflate = "";
+      const controller = fetching({
+        request,
+        useParallelQueue: true,
+        dispatcher: options.dispatcher ?? getGlobalDispatcher(),
+        processResponse(response) {
+          var _a4, _b;
+          if (response.type === "error" || response.status !== 101) {
+            failWebsocketConnection(ws, "Received network error or non-101 status code.");
+            return;
+          }
+          if (protocols.length !== 0 && !response.headersList.get("Sec-WebSocket-Protocol")) {
+            failWebsocketConnection(ws, "Server did not respond with sent protocols.");
+            return;
+          }
+          if (((_a4 = response.headersList.get("Upgrade")) == null ? void 0 : _a4.toLowerCase()) !== "websocket") {
+            failWebsocketConnection(ws, 'Server did not set Upgrade header to "websocket".');
+            return;
+          }
+          if (((_b = response.headersList.get("Connection")) == null ? void 0 : _b.toLowerCase()) !== "upgrade") {
+            failWebsocketConnection(ws, 'Server did not set Connection header to "upgrade".');
+            return;
+          }
+          const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
+          const digest = crypto2.createHash("sha1").update(keyValue + uid).digest("base64");
+          if (secWSAccept !== digest) {
+            failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
+            return;
+          }
+          const secExtension = response.headersList.get("Sec-WebSocket-Extensions");
+          if (secExtension !== null && secExtension !== permessageDeflate) {
+            failWebsocketConnection(ws, "Received different permessage-deflate than the one set.");
+            return;
+          }
+          const secProtocol = response.headersList.get("Sec-WebSocket-Protocol");
+          if (secProtocol !== null && secProtocol !== request.headersList.get("Sec-WebSocket-Protocol")) {
+            failWebsocketConnection(ws, "Protocol was not set in the opening handshake.");
+            return;
+          }
+          response.socket.on("data", onSocketData);
+          response.socket.on("close", onSocketClose);
+          response.socket.on("error", onSocketError);
+          if (channels.open.hasSubscribers) {
+            channels.open.publish({
+              address: response.socket.address(),
+              protocol: secProtocol,
+              extensions: secExtension
+            });
+          }
+          onEstablish(response);
+        }
+      });
+      return controller;
+    }
+    function onSocketData(chunk) {
+      if (!this.ws[kByteParser].write(chunk)) {
+        this.pause();
+      }
+    }
+    function onSocketClose() {
+      const { ws } = this;
+      const wasClean = ws[kSentClose] && ws[kReceivedClose];
+      let code = 1005;
+      let reason = "";
+      const result = ws[kByteParser].closingInfo;
+      if (result) {
+        code = result.code ?? 1005;
+        reason = result.reason;
+      } else if (!ws[kSentClose]) {
+        code = 1006;
+      }
+      ws[kReadyState] = states.CLOSED;
+      fireEvent("close", ws, CloseEvent, {
+        wasClean,
+        code,
+        reason
+      });
+      if (channels.close.hasSubscribers) {
+        channels.close.publish({
+          websocket: ws,
+          code,
+          reason
+        });
+      }
+    }
+    function onSocketError(error2) {
+      const { ws } = this;
+      ws[kReadyState] = states.CLOSING;
+      if (channels.socketError.hasSubscribers) {
+        channels.socketError.publish(error2);
+      }
+      this.destroy();
+    }
+    module2.exports = {
+      establishWebSocketConnection
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/frame.js
+var require_frame = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/frame.js"(exports2, module2) {
+    "use strict";
+    var { maxUnsigned16Bit } = require_constants5();
+    var crypto2;
+    try {
+      crypto2 = require("crypto");
+    } catch {
+    }
+    var WebsocketFrameSend = class {
+      /**
+       * @param {Buffer|undefined} data
+       */
+      constructor(data) {
+        this.frameData = data;
+        this.maskKey = crypto2.randomBytes(4);
+      }
+      createFrame(opcode) {
+        var _a4;
+        const bodyLength = ((_a4 = this.frameData) == null ? void 0 : _a4.byteLength) ?? 0;
+        let payloadLength = bodyLength;
+        let offset = 6;
+        if (bodyLength > maxUnsigned16Bit) {
+          offset += 8;
+          payloadLength = 127;
+        } else if (bodyLength > 125) {
+          offset += 2;
+          payloadLength = 126;
+        }
+        const buffer = Buffer.allocUnsafe(bodyLength + offset);
+        buffer[0] = buffer[1] = 0;
+        buffer[0] |= 128;
+        buffer[0] = (buffer[0] & 240) + opcode;
+        buffer[offset - 4] = this.maskKey[0];
+        buffer[offset - 3] = this.maskKey[1];
+        buffer[offset - 2] = this.maskKey[2];
+        buffer[offset - 1] = this.maskKey[3];
+        buffer[1] = payloadLength;
+        if (payloadLength === 126) {
+          buffer.writeUInt16BE(bodyLength, 2);
+        } else if (payloadLength === 127) {
+          buffer[2] = buffer[3] = 0;
+          buffer.writeUIntBE(bodyLength, 4, 6);
+        }
+        buffer[1] |= 128;
+        for (let i = 0; i < bodyLength; i++) {
+          buffer[offset + i] = this.frameData[i] ^ this.maskKey[i % 4];
+        }
+        return buffer;
+      }
+    };
+    module2.exports = {
+      WebsocketFrameSend
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/receiver.js
+var require_receiver = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/receiver.js"(exports2, module2) {
+    "use strict";
+    var { Writable } = require("stream");
+    var diagnosticsChannel = require("diagnostics_channel");
+    var { parserStates, opcodes, states, emptyBuffer } = require_constants5();
+    var { kReadyState, kSentClose, kResponse, kReceivedClose } = require_symbols5();
+    var { isValidStatusCode, failWebsocketConnection, websocketMessageReceived } = require_util7();
+    var { WebsocketFrameSend } = require_frame();
+    var channels = {};
+    channels.ping = diagnosticsChannel.channel("undici:websocket:ping");
+    channels.pong = diagnosticsChannel.channel("undici:websocket:pong");
+    var ByteParser = class extends Writable {
+      #buffers = [];
+      #byteOffset = 0;
+      #state = parserStates.INFO;
+      #info = {};
+      #fragments = [];
+      constructor(ws) {
+        super();
+        this.ws = ws;
+      }
+      /**
+       * @param {Buffer} chunk
+       * @param {() => void} callback
+       */
+      _write(chunk, _, callback) {
+        this.#buffers.push(chunk);
+        this.#byteOffset += chunk.length;
+        this.run(callback);
+      }
+      /**
+       * Runs whenever a new chunk is received.
+       * Callback is called whenever there are no more chunks buffering,
+       * or not enough bytes are buffered to parse.
+       */
+      run(callback) {
+        while (true) {
+          if (this.#state === parserStates.INFO) {
+            if (this.#byteOffset < 2) {
+              return callback();
+            }
+            const buffer = this.consume(2);
+            this.#info.fin = (buffer[0] & 128) !== 0;
+            this.#info.opcode = buffer[0] & 15;
+            this.#info.originalOpcode ??= this.#info.opcode;
+            this.#info.fragmented = !this.#info.fin && this.#info.opcode !== opcodes.CONTINUATION;
+            if (this.#info.fragmented && this.#info.opcode !== opcodes.BINARY && this.#info.opcode !== opcodes.TEXT) {
+              failWebsocketConnection(this.ws, "Invalid frame type was fragmented.");
+              return;
+            }
+            const payloadLength = buffer[1] & 127;
+            if (payloadLength <= 125) {
+              this.#info.payloadLength = payloadLength;
+              this.#state = parserStates.READ_DATA;
+            } else if (payloadLength === 126) {
+              this.#state = parserStates.PAYLOADLENGTH_16;
+            } else if (payloadLength === 127) {
+              this.#state = parserStates.PAYLOADLENGTH_64;
+            }
+            if (this.#info.fragmented && payloadLength > 125) {
+              failWebsocketConnection(this.ws, "Fragmented frame exceeded 125 bytes.");
+              return;
+            } else if ((this.#info.opcode === opcodes.PING || this.#info.opcode === opcodes.PONG || this.#info.opcode === opcodes.CLOSE) && payloadLength > 125) {
+              failWebsocketConnection(this.ws, "Payload length for control frame exceeded 125 bytes.");
+              return;
+            } else if (this.#info.opcode === opcodes.CLOSE) {
+              if (payloadLength === 1) {
+                failWebsocketConnection(this.ws, "Received close frame with a 1-byte body.");
+                return;
+              }
+              const body = this.consume(payloadLength);
+              this.#info.closeInfo = this.parseCloseBody(false, body);
+              if (!this.ws[kSentClose]) {
+                const body2 = Buffer.allocUnsafe(2);
+                body2.writeUInt16BE(this.#info.closeInfo.code, 0);
+                const closeFrame = new WebsocketFrameSend(body2);
+                this.ws[kResponse].socket.write(
+                  closeFrame.createFrame(opcodes.CLOSE),
+                  (err) => {
+                    if (!err) {
+                      this.ws[kSentClose] = true;
+                    }
+                  }
+                );
+              }
+              this.ws[kReadyState] = states.CLOSING;
+              this.ws[kReceivedClose] = true;
+              this.end();
+              return;
+            } else if (this.#info.opcode === opcodes.PING) {
+              const body = this.consume(payloadLength);
+              if (!this.ws[kReceivedClose]) {
+                const frame = new WebsocketFrameSend(body);
+                this.ws[kResponse].socket.write(frame.createFrame(opcodes.PONG));
+                if (channels.ping.hasSubscribers) {
+                  channels.ping.publish({
+                    payload: body
+                  });
+                }
+              }
+              this.#state = parserStates.INFO;
+              if (this.#byteOffset > 0) {
+                continue;
+              } else {
+                callback();
+                return;
+              }
+            } else if (this.#info.opcode === opcodes.PONG) {
+              const body = this.consume(payloadLength);
+              if (channels.pong.hasSubscribers) {
+                channels.pong.publish({
+                  payload: body
+                });
+              }
+              if (this.#byteOffset > 0) {
+                continue;
+              } else {
+                callback();
+                return;
+              }
+            }
+          } else if (this.#state === parserStates.PAYLOADLENGTH_16) {
+            if (this.#byteOffset < 2) {
+              return callback();
+            }
+            const buffer = this.consume(2);
+            this.#info.payloadLength = buffer.readUInt16BE(0);
+            this.#state = parserStates.READ_DATA;
+          } else if (this.#state === parserStates.PAYLOADLENGTH_64) {
+            if (this.#byteOffset < 8) {
+              return callback();
+            }
+            const buffer = this.consume(8);
+            const upper = buffer.readUInt32BE(0);
+            if (upper > 2 ** 31 - 1) {
+              failWebsocketConnection(this.ws, "Received payload length > 2^31 bytes.");
+              return;
+            }
+            const lower = buffer.readUInt32BE(4);
+            this.#info.payloadLength = (upper << 8) + lower;
+            this.#state = parserStates.READ_DATA;
+          } else if (this.#state === parserStates.READ_DATA) {
+            if (this.#byteOffset < this.#info.payloadLength) {
+              return callback();
+            } else if (this.#byteOffset >= this.#info.payloadLength) {
+              const body = this.consume(this.#info.payloadLength);
+              this.#fragments.push(body);
+              if (!this.#info.fragmented || this.#info.fin && this.#info.opcode === opcodes.CONTINUATION) {
+                const fullMessage = Buffer.concat(this.#fragments);
+                websocketMessageReceived(this.ws, this.#info.originalOpcode, fullMessage);
+                this.#info = {};
+                this.#fragments.length = 0;
+              }
+              this.#state = parserStates.INFO;
+            }
+          }
+          if (this.#byteOffset > 0) {
+            continue;
+          } else {
+            callback();
+            break;
+          }
+        }
+      }
+      /**
+       * Take n bytes from the buffered Buffers
+       * @param {number} n
+       * @returns {Buffer|null}
+       */
+      consume(n) {
+        if (n > this.#byteOffset) {
+          return null;
+        } else if (n === 0) {
+          return emptyBuffer;
+        }
+        if (this.#buffers[0].length === n) {
+          this.#byteOffset -= this.#buffers[0].length;
+          return this.#buffers.shift();
+        }
+        const buffer = Buffer.allocUnsafe(n);
+        let offset = 0;
+        while (offset !== n) {
+          const next = this.#buffers[0];
+          const { length } = next;
+          if (length + offset === n) {
+            buffer.set(this.#buffers.shift(), offset);
+            break;
+          } else if (length + offset > n) {
+            buffer.set(next.subarray(0, n - offset), offset);
+            this.#buffers[0] = next.subarray(n - offset);
+            break;
+          } else {
+            buffer.set(this.#buffers.shift(), offset);
+            offset += next.length;
+          }
+        }
+        this.#byteOffset -= n;
+        return buffer;
+      }
+      parseCloseBody(onlyCode, data) {
+        let code;
+        if (data.length >= 2) {
+          code = data.readUInt16BE(0);
+        }
+        if (onlyCode) {
+          if (!isValidStatusCode(code)) {
+            return null;
+          }
+          return { code };
+        }
+        let reason = data.subarray(2);
+        if (reason[0] === 239 && reason[1] === 187 && reason[2] === 191) {
+          reason = reason.subarray(3);
+        }
+        if (code !== void 0 && !isValidStatusCode(code)) {
+          return null;
+        }
+        try {
+          reason = new TextDecoder("utf-8", { fatal: true }).decode(reason);
+        } catch {
+          return null;
+        }
+        return { code, reason };
+      }
+      get closingInfo() {
+        return this.#info.closeInfo;
+      }
+    };
+    module2.exports = {
+      ByteParser
+    };
+  }
+});
+
+// alexa/node_modules/undici/lib/websocket/websocket.js
+var require_websocket = __commonJS({
+  "alexa/node_modules/undici/lib/websocket/websocket.js"(exports2, module2) {
+    "use strict";
+    var { webidl } = require_webidl();
+    var { DOMException: DOMException2 } = require_constants2();
+    var { URLSerializer } = require_dataURL();
+    var { getGlobalOrigin } = require_global();
+    var { staticPropertyDescriptors, states, opcodes, emptyBuffer } = require_constants5();
+    var {
+      kWebSocketURL,
+      kReadyState,
+      kController,
+      kBinaryType,
+      kResponse,
+      kSentClose,
+      kByteParser
+    } = require_symbols5();
+    var { isEstablished, isClosing, isValidSubprotocol, failWebsocketConnection, fireEvent } = require_util7();
+    var { establishWebSocketConnection } = require_connection();
+    var { WebsocketFrameSend } = require_frame();
+    var { ByteParser } = require_receiver();
+    var { kEnumerableProperty, isBlobLike } = require_util();
+    var { getGlobalDispatcher } = require_global2();
+    var { types } = require("util");
+    var experimentalWarned = false;
+    var WebSocket = class _WebSocket extends EventTarget {
+      #events = {
+        open: null,
+        error: null,
+        close: null,
+        message: null
+      };
+      #bufferedAmount = 0;
+      #protocol = "";
+      #extensions = "";
+      /**
+       * @param {string} url
+       * @param {string|string[]} protocols
+       */
+      constructor(url2, protocols = []) {
+        super();
+        webidl.argumentLengthCheck(arguments, 1, { header: "WebSocket constructor" });
+        if (!experimentalWarned) {
+          experimentalWarned = true;
+          process.emitWarning("WebSockets are experimental, expect them to change at any time.", {
+            code: "UNDICI-WS"
+          });
+        }
+        const options = webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"](protocols);
+        url2 = webidl.converters.USVString(url2);
+        protocols = options.protocols;
+        const baseURL = getGlobalOrigin();
+        let urlRecord;
+        try {
+          urlRecord = new URL(url2, baseURL);
+        } catch (e) {
+          throw new DOMException2(e, "SyntaxError");
+        }
+        if (urlRecord.protocol === "http:") {
+          urlRecord.protocol = "ws:";
+        } else if (urlRecord.protocol === "https:") {
+          urlRecord.protocol = "wss:";
+        }
+        if (urlRecord.protocol !== "ws:" && urlRecord.protocol !== "wss:") {
+          throw new DOMException2(
+            `Expected a ws: or wss: protocol, got ${urlRecord.protocol}`,
+            "SyntaxError"
+          );
+        }
+        if (urlRecord.hash || urlRecord.href.endsWith("#")) {
+          throw new DOMException2("Got fragment", "SyntaxError");
+        }
+        if (typeof protocols === "string") {
+          protocols = [protocols];
+        }
+        if (protocols.length !== new Set(protocols.map((p) => p.toLowerCase())).size) {
+          throw new DOMException2("Invalid Sec-WebSocket-Protocol value", "SyntaxError");
+        }
+        if (protocols.length > 0 && !protocols.every((p) => isValidSubprotocol(p))) {
+          throw new DOMException2("Invalid Sec-WebSocket-Protocol value", "SyntaxError");
+        }
+        this[kWebSocketURL] = new URL(urlRecord.href);
+        this[kController] = establishWebSocketConnection(
+          urlRecord,
+          protocols,
+          this,
+          (response) => this.#onConnectionEstablished(response),
+          options
+        );
+        this[kReadyState] = _WebSocket.CONNECTING;
+        this[kBinaryType] = "blob";
+      }
+      /**
+       * @see https://websockets.spec.whatwg.org/#dom-websocket-close
+       * @param {number|undefined} code
+       * @param {string|undefined} reason
+       */
+      close(code = void 0, reason = void 0) {
+        webidl.brandCheck(this, _WebSocket);
+        if (code !== void 0) {
+          code = webidl.converters["unsigned short"](code, { clamp: true });
+        }
+        if (reason !== void 0) {
+          reason = webidl.converters.USVString(reason);
+        }
+        if (code !== void 0) {
+          if (code !== 1e3 && (code < 3e3 || code > 4999)) {
+            throw new DOMException2("invalid code", "InvalidAccessError");
+          }
+        }
+        let reasonByteLength = 0;
+        if (reason !== void 0) {
+          reasonByteLength = Buffer.byteLength(reason);
+          if (reasonByteLength > 123) {
+            throw new DOMException2(
+              `Reason must be less than 123 bytes; received ${reasonByteLength}`,
+              "SyntaxError"
+            );
+          }
+        }
+        if (this[kReadyState] === _WebSocket.CLOSING || this[kReadyState] === _WebSocket.CLOSED) {
+        } else if (!isEstablished(this)) {
+          failWebsocketConnection(this, "Connection was closed before it was established.");
+          this[kReadyState] = _WebSocket.CLOSING;
+        } else if (!isClosing(this)) {
+          const frame = new WebsocketFrameSend();
+          if (code !== void 0 && reason === void 0) {
+            frame.frameData = Buffer.allocUnsafe(2);
+            frame.frameData.writeUInt16BE(code, 0);
+          } else if (code !== void 0 && reason !== void 0) {
+            frame.frameData = Buffer.allocUnsafe(2 + reasonByteLength);
+            frame.frameData.writeUInt16BE(code, 0);
+            frame.frameData.write(reason, 2, "utf-8");
+          } else {
+            frame.frameData = emptyBuffer;
+          }
+          const socket = this[kResponse].socket;
+          socket.write(frame.createFrame(opcodes.CLOSE), (err) => {
+            if (!err) {
+              this[kSentClose] = true;
+            }
+          });
+          this[kReadyState] = states.CLOSING;
+        } else {
+          this[kReadyState] = _WebSocket.CLOSING;
+        }
+      }
+      /**
+       * @see https://websockets.spec.whatwg.org/#dom-websocket-send
+       * @param {NodeJS.TypedArray|ArrayBuffer|Blob|string} data
+       */
+      send(data) {
+        webidl.brandCheck(this, _WebSocket);
+        webidl.argumentLengthCheck(arguments, 1, { header: "WebSocket.send" });
+        data = webidl.converters.WebSocketSendData(data);
+        if (this[kReadyState] === _WebSocket.CONNECTING) {
+          throw new DOMException2("Sent before connected.", "InvalidStateError");
+        }
+        if (!isEstablished(this) || isClosing(this)) {
+          return;
+        }
+        const socket = this[kResponse].socket;
+        if (typeof data === "string") {
+          const value = Buffer.from(data);
+          const frame = new WebsocketFrameSend(value);
+          const buffer = frame.createFrame(opcodes.TEXT);
+          this.#bufferedAmount += value.byteLength;
+          socket.write(buffer, () => {
+            this.#bufferedAmount -= value.byteLength;
+          });
+        } else if (types.isArrayBuffer(data)) {
+          const value = Buffer.from(data);
+          const frame = new WebsocketFrameSend(value);
+          const buffer = frame.createFrame(opcodes.BINARY);
+          this.#bufferedAmount += value.byteLength;
+          socket.write(buffer, () => {
+            this.#bufferedAmount -= value.byteLength;
+          });
+        } else if (ArrayBuffer.isView(data)) {
+          const ab = Buffer.from(data, data.byteOffset, data.byteLength);
+          const frame = new WebsocketFrameSend(ab);
+          const buffer = frame.createFrame(opcodes.BINARY);
+          this.#bufferedAmount += ab.byteLength;
+          socket.write(buffer, () => {
+            this.#bufferedAmount -= ab.byteLength;
+          });
+        } else if (isBlobLike(data)) {
+          const frame = new WebsocketFrameSend();
+          data.arrayBuffer().then((ab) => {
+            const value = Buffer.from(ab);
+            frame.frameData = value;
+            const buffer = frame.createFrame(opcodes.BINARY);
+            this.#bufferedAmount += value.byteLength;
+            socket.write(buffer, () => {
+              this.#bufferedAmount -= value.byteLength;
+            });
+          });
+        }
+      }
+      get readyState() {
+        webidl.brandCheck(this, _WebSocket);
+        return this[kReadyState];
+      }
+      get bufferedAmount() {
+        webidl.brandCheck(this, _WebSocket);
+        return this.#bufferedAmount;
+      }
+      get url() {
+        webidl.brandCheck(this, _WebSocket);
+        return URLSerializer(this[kWebSocketURL]);
+      }
+      get extensions() {
+        webidl.brandCheck(this, _WebSocket);
+        return this.#extensions;
+      }
+      get protocol() {
+        webidl.brandCheck(this, _WebSocket);
+        return this.#protocol;
+      }
+      get onopen() {
+        webidl.brandCheck(this, _WebSocket);
+        return this.#events.open;
+      }
+      set onopen(fn) {
+        webidl.brandCheck(this, _WebSocket);
+        if (this.#events.open) {
+          this.removeEventListener("open", this.#events.open);
+        }
+        if (typeof fn === "function") {
+          this.#events.open = fn;
+          this.addEventListener("open", fn);
+        } else {
+          this.#events.open = null;
+        }
+      }
+      get onerror() {
+        webidl.brandCheck(this, _WebSocket);
+        return this.#events.error;
+      }
+      set onerror(fn) {
+        webidl.brandCheck(this, _WebSocket);
+        if (this.#events.error) {
+          this.removeEventListener("error", this.#events.error);
+        }
+        if (typeof fn === "function") {
+          this.#events.error = fn;
+          this.addEventListener("error", fn);
+        } else {
+          this.#events.error = null;
+        }
+      }
+      get onclose() {
+        webidl.brandCheck(this, _WebSocket);
+        return this.#events.close;
+      }
+      set onclose(fn) {
+        webidl.brandCheck(this, _WebSocket);
+        if (this.#events.close) {
+          this.removeEventListener("close", this.#events.close);
+        }
+        if (typeof fn === "function") {
+          this.#events.close = fn;
+          this.addEventListener("close", fn);
+        } else {
+          this.#events.close = null;
+        }
+      }
+      get onmessage() {
+        webidl.brandCheck(this, _WebSocket);
+        return this.#events.message;
+      }
+      set onmessage(fn) {
+        webidl.brandCheck(this, _WebSocket);
+        if (this.#events.message) {
+          this.removeEventListener("message", this.#events.message);
+        }
+        if (typeof fn === "function") {
+          this.#events.message = fn;
+          this.addEventListener("message", fn);
+        } else {
+          this.#events.message = null;
+        }
+      }
+      get binaryType() {
+        webidl.brandCheck(this, _WebSocket);
+        return this[kBinaryType];
+      }
+      set binaryType(type) {
+        webidl.brandCheck(this, _WebSocket);
+        if (type !== "blob" && type !== "arraybuffer") {
+          this[kBinaryType] = "blob";
+        } else {
+          this[kBinaryType] = type;
+        }
+      }
+      /**
+       * @see https://websockets.spec.whatwg.org/#feedback-from-the-protocol
+       */
+      #onConnectionEstablished(response) {
+        this[kResponse] = response;
+        const parser = new ByteParser(this);
+        parser.on("drain", function onParserDrain() {
+          this.ws[kResponse].socket.resume();
+        });
+        response.socket.ws = this;
+        this[kByteParser] = parser;
+        this[kReadyState] = states.OPEN;
+        const extensions = response.headersList.get("sec-websocket-extensions");
+        if (extensions !== null) {
+          this.#extensions = extensions;
+        }
+        const protocol = response.headersList.get("sec-websocket-protocol");
+        if (protocol !== null) {
+          this.#protocol = protocol;
+        }
+        fireEvent("open", this);
+      }
+    };
+    WebSocket.CONNECTING = WebSocket.prototype.CONNECTING = states.CONNECTING;
+    WebSocket.OPEN = WebSocket.prototype.OPEN = states.OPEN;
+    WebSocket.CLOSING = WebSocket.prototype.CLOSING = states.CLOSING;
+    WebSocket.CLOSED = WebSocket.prototype.CLOSED = states.CLOSED;
+    Object.defineProperties(WebSocket.prototype, {
+      CONNECTING: staticPropertyDescriptors,
+      OPEN: staticPropertyDescriptors,
+      CLOSING: staticPropertyDescriptors,
+      CLOSED: staticPropertyDescriptors,
+      url: kEnumerableProperty,
+      readyState: kEnumerableProperty,
+      bufferedAmount: kEnumerableProperty,
+      onopen: kEnumerableProperty,
+      onerror: kEnumerableProperty,
+      onclose: kEnumerableProperty,
+      close: kEnumerableProperty,
+      onmessage: kEnumerableProperty,
+      binaryType: kEnumerableProperty,
+      send: kEnumerableProperty,
+      extensions: kEnumerableProperty,
+      protocol: kEnumerableProperty,
+      [Symbol.toStringTag]: {
+        value: "WebSocket",
+        writable: false,
+        enumerable: false,
+        configurable: true
+      }
+    });
+    Object.defineProperties(WebSocket, {
+      CONNECTING: staticPropertyDescriptors,
+      OPEN: staticPropertyDescriptors,
+      CLOSING: staticPropertyDescriptors,
+      CLOSED: staticPropertyDescriptors
+    });
+    webidl.converters["sequence<DOMString>"] = webidl.sequenceConverter(
+      webidl.converters.DOMString
+    );
+    webidl.converters["DOMString or sequence<DOMString>"] = function(V) {
+      if (webidl.util.Type(V) === "Object" && Symbol.iterator in V) {
+        return webidl.converters["sequence<DOMString>"](V);
+      }
+      return webidl.converters.DOMString(V);
+    };
+    webidl.converters.WebSocketInit = webidl.dictionaryConverter([
+      {
+        key: "protocols",
+        converter: webidl.converters["DOMString or sequence<DOMString>"],
+        get defaultValue() {
+          return [];
+        }
+      },
+      {
+        key: "dispatcher",
+        converter: (V) => V,
+        get defaultValue() {
+          return getGlobalDispatcher();
+        }
+      },
+      {
+        key: "headers",
+        converter: webidl.nullableConverter(webidl.converters.HeadersInit)
+      }
+    ]);
+    webidl.converters["DOMString or sequence<DOMString> or WebSocketInit"] = function(V) {
+      if (webidl.util.Type(V) === "Object" && !(Symbol.iterator in V)) {
+        return webidl.converters.WebSocketInit(V);
+      }
+      return { protocols: webidl.converters["DOMString or sequence<DOMString>"](V) };
+    };
+    webidl.converters.WebSocketSendData = function(V) {
+      if (webidl.util.Type(V) === "Object") {
+        if (isBlobLike(V)) {
+          return webidl.converters.Blob(V, { strict: false });
+        }
+        if (ArrayBuffer.isView(V) || types.isAnyArrayBuffer(V)) {
+          return webidl.converters.BufferSource(V);
+        }
+      }
+      return webidl.converters.USVString(V);
+    };
+    module2.exports = {
+      WebSocket
+    };
+  }
+});
+
+// alexa/node_modules/undici/index.js
+var require_undici = __commonJS({
+  "alexa/node_modules/undici/index.js"(exports2, module2) {
+    "use strict";
+    var Client2 = require_client();
+    var Dispatcher = require_dispatcher();
+    var errors = require_errors();
+    var Pool = require_pool();
+    var BalancedPool = require_balanced_pool();
+    var Agent = require_agent();
+    var util = require_util();
+    var { InvalidArgumentError } = errors;
+    var api = require_api();
+    var buildConnector = require_connect();
+    var MockClient = require_mock_client();
+    var MockAgent = require_mock_agent();
+    var MockPool = require_mock_pool();
+    var mockErrors = require_mock_errors();
+    var ProxyAgent = require_proxy_agent();
+    var RetryHandler = require_RetryHandler();
+    var { getGlobalDispatcher, setGlobalDispatcher } = require_global2();
+    var DecoratorHandler = require_DecoratorHandler();
+    var RedirectHandler = require_RedirectHandler();
+    var createRedirectInterceptor = require_redirectInterceptor();
+    var hasCrypto;
+    try {
+      require("crypto");
+      hasCrypto = true;
+    } catch {
+      hasCrypto = false;
+    }
+    Object.assign(Dispatcher.prototype, api);
+    module2.exports.Dispatcher = Dispatcher;
+    module2.exports.Client = Client2;
+    module2.exports.Pool = Pool;
+    module2.exports.BalancedPool = BalancedPool;
+    module2.exports.Agent = Agent;
+    module2.exports.ProxyAgent = ProxyAgent;
+    module2.exports.RetryHandler = RetryHandler;
+    module2.exports.DecoratorHandler = DecoratorHandler;
+    module2.exports.RedirectHandler = RedirectHandler;
+    module2.exports.createRedirectInterceptor = createRedirectInterceptor;
+    module2.exports.buildConnector = buildConnector;
+    module2.exports.errors = errors;
+    function makeDispatcher(fn) {
+      return (url2, opts, handler2) => {
+        if (typeof opts === "function") {
+          handler2 = opts;
+          opts = null;
+        }
+        if (!url2 || typeof url2 !== "string" && typeof url2 !== "object" && !(url2 instanceof URL)) {
+          throw new InvalidArgumentError("invalid url");
+        }
+        if (opts != null && typeof opts !== "object") {
+          throw new InvalidArgumentError("invalid opts");
+        }
+        if (opts && opts.path != null) {
+          if (typeof opts.path !== "string") {
+            throw new InvalidArgumentError("invalid opts.path");
+          }
+          let path = opts.path;
+          if (!opts.path.startsWith("/")) {
+            path = `/${path}`;
+          }
+          url2 = new URL(util.parseOrigin(url2).origin + path);
+        } else {
+          if (!opts) {
+            opts = typeof url2 === "object" ? url2 : {};
+          }
+          url2 = util.parseURL(url2);
+        }
+        const { agent, dispatcher = getGlobalDispatcher() } = opts;
+        if (agent) {
+          throw new InvalidArgumentError("unsupported opts.agent. Did you mean opts.client?");
+        }
+        return fn.call(dispatcher, {
+          ...opts,
+          origin: url2.origin,
+          path: url2.search ? `${url2.pathname}${url2.search}` : url2.pathname,
+          method: opts.method || (opts.body ? "PUT" : "GET")
+        }, handler2);
+      };
+    }
+    module2.exports.setGlobalDispatcher = setGlobalDispatcher;
+    module2.exports.getGlobalDispatcher = getGlobalDispatcher;
+    if (util.nodeMajor > 16 || util.nodeMajor === 16 && util.nodeMinor >= 8) {
+      let fetchImpl = null;
+      module2.exports.fetch = async function fetch3(resource) {
+        if (!fetchImpl) {
+          fetchImpl = require_fetch().fetch;
+        }
+        try {
+          return await fetchImpl(...arguments);
+        } catch (err) {
+          if (typeof err === "object") {
+            Error.captureStackTrace(err, this);
+          }
+          throw err;
+        }
+      };
+      module2.exports.Headers = require_headers().Headers;
+      module2.exports.Response = require_response().Response;
+      module2.exports.Request = require_request2().Request;
+      module2.exports.FormData = require_formdata().FormData;
+      module2.exports.File = require_file().File;
+      module2.exports.FileReader = require_filereader().FileReader;
+      const { setGlobalOrigin, getGlobalOrigin } = require_global();
+      module2.exports.setGlobalOrigin = setGlobalOrigin;
+      module2.exports.getGlobalOrigin = getGlobalOrigin;
+      const { CacheStorage } = require_cachestorage();
+      const { kConstruct } = require_symbols4();
+      module2.exports.caches = new CacheStorage(kConstruct);
+    }
+    if (util.nodeMajor >= 16) {
+      const { deleteCookie, getCookies, getSetCookies, setCookie } = require_cookies();
+      module2.exports.deleteCookie = deleteCookie;
+      module2.exports.getCookies = getCookies;
+      module2.exports.getSetCookies = getSetCookies;
+      module2.exports.setCookie = setCookie;
+      const { parseMIMEType, serializeAMimeType } = require_dataURL();
+      module2.exports.parseMIMEType = parseMIMEType;
+      module2.exports.serializeAMimeType = serializeAMimeType;
+    }
+    if (util.nodeMajor >= 18 && hasCrypto) {
+      const { WebSocket } = require_websocket();
+      module2.exports.WebSocket = WebSocket;
+    }
+    module2.exports.request = makeDispatcher(api.request);
+    module2.exports.stream = makeDispatcher(api.stream);
+    module2.exports.pipeline = makeDispatcher(api.pipeline);
+    module2.exports.connect = makeDispatcher(api.connect);
+    module2.exports.upgrade = makeDispatcher(api.upgrade);
+    module2.exports.MockClient = MockClient;
+    module2.exports.MockPool = MockPool;
+    module2.exports.MockAgent = MockAgent;
+    module2.exports.mockErrors = mockErrors;
+  }
+});
+
 // node_modules/ajv/dist/compile/codegen/code.js
 var require_code = __commonJS({
   "node_modules/ajv/dist/compile/codegen/code.js"(exports2) {
@@ -78,12 +16848,12 @@ var require_code = __commonJS({
         return item === "" || item === '""';
       }
       get str() {
-        var _a3;
-        return (_a3 = this._str) !== null && _a3 !== void 0 ? _a3 : this._str = this._items.reduce((s2, c) => `${s2}${c}`, "");
+        var _a4;
+        return (_a4 = this._str) !== null && _a4 !== void 0 ? _a4 : this._str = this._items.reduce((s2, c) => `${s2}${c}`, "");
       }
       get names() {
-        var _a3;
-        return (_a3 = this._names) !== null && _a3 !== void 0 ? _a3 : this._names = this._items.reduce((names, c) => {
+        var _a4;
+        return (_a4 = this._names) !== null && _a4 !== void 0 ? _a4 : this._names = this._items.reduce((names, c) => {
           if (c instanceof Name)
             names[c.str] = (names[c.str] || 0) + 1;
           return names;
@@ -229,8 +16999,8 @@ var require_scope = __commonJS({
         return `${prefix}${ng.index++}`;
       }
       _nameGroup(prefix) {
-        var _a3, _b;
-        if (((_b = (_a3 = this._parent) === null || _a3 === void 0 ? void 0 : _a3._prefixes) === null || _b === void 0 ? void 0 : _b.has(prefix)) || this._prefixes && !this._prefixes.has(prefix)) {
+        var _a4, _b;
+        if (((_b = (_a4 = this._parent) === null || _a4 === void 0 ? void 0 : _a4._prefixes) === null || _b === void 0 ? void 0 : _b.has(prefix)) || this._prefixes && !this._prefixes.has(prefix)) {
           throw new Error(`CodeGen: prefix "${prefix}" is not allowed in this scope`);
         }
         return this._names[prefix] = { prefix, index: 0 };
@@ -263,12 +17033,12 @@ var require_scope = __commonJS({
         return new ValueScopeName(prefix, this._newName(prefix));
       }
       value(nameOrPrefix, value) {
-        var _a3;
+        var _a4;
         if (value.ref === void 0)
           throw new Error("CodeGen: ref must be passed in value");
         const name = this.toName(nameOrPrefix);
         const { prefix } = name;
-        const valueKey = (_a3 = value.key) !== null && _a3 !== void 0 ? _a3 : value.ref;
+        const valueKey = (_a4 = value.key) !== null && _a4 !== void 0 ? _a4 : value.ref;
         let vs = this._values[prefix];
         if (vs) {
           const _name = vs.get(valueKey);
@@ -586,8 +17356,8 @@ var require_codegen = __commonJS({
         return this;
       }
       optimizeNames(names, constants) {
-        var _a3;
-        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants);
+        var _a4;
+        this.else = (_a4 = this.else) === null || _a4 === void 0 ? void 0 : _a4.optimizeNames(names, constants);
         if (!(super.optimizeNames(names, constants) || this.else))
           return;
         this.condition = optimizeExpr(this.condition, names, constants);
@@ -691,16 +17461,16 @@ var require_codegen = __commonJS({
         return code;
       }
       optimizeNodes() {
-        var _a3, _b;
+        var _a4, _b;
         super.optimizeNodes();
-        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNodes();
+        (_a4 = this.catch) === null || _a4 === void 0 ? void 0 : _a4.optimizeNodes();
         (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNodes();
         return this;
       }
       optimizeNames(names, constants) {
-        var _a3, _b;
+        var _a4, _b;
         super.optimizeNames(names, constants);
-        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants);
+        (_a4 = this.catch) === null || _a4 === void 0 ? void 0 : _a4.optimizeNames(names, constants);
         (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names, constants);
         return this;
       }
@@ -1055,7 +17825,7 @@ var require_codegen = __commonJS({
 });
 
 // node_modules/ajv/dist/compile/util.js
-var require_util = __commonJS({
+var require_util8 = __commonJS({
   "node_modules/ajv/dist/compile/util.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -1261,13 +18031,13 @@ var require_names = __commonJS({
 });
 
 // node_modules/ajv/dist/compile/errors.js
-var require_errors = __commonJS({
+var require_errors2 = __commonJS({
   "node_modules/ajv/dist/compile/errors.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.extendErrors = exports2.resetErrorsCount = exports2.reportExtraError = exports2.reportError = exports2.keyword$DataError = exports2.keywordError = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var names_1 = require_names();
     exports2.keywordError = {
       message: ({ keyword }) => (0, codegen_1.str)`must pass "${keyword}" keyword validation`
@@ -1388,7 +18158,7 @@ var require_boolSchema = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.boolOrEmptySchema = exports2.topBoolOrEmptySchema = void 0;
-    var errors_1 = require_errors();
+    var errors_1 = require_errors2();
     var codegen_1 = require_codegen();
     var names_1 = require_names();
     var boolError = {
@@ -1480,8 +18250,8 @@ var require_applicability = __commonJS({
     }
     exports2.shouldUseGroup = shouldUseGroup;
     function shouldUseRule(schema, rule) {
-      var _a3;
-      return schema[rule.keyword] !== void 0 || ((_a3 = rule.definition.implements) === null || _a3 === void 0 ? void 0 : _a3.some((kwd) => schema[kwd] !== void 0));
+      var _a4;
+      return schema[rule.keyword] !== void 0 || ((_a4 = rule.definition.implements) === null || _a4 === void 0 ? void 0 : _a4.some((kwd) => schema[kwd] !== void 0));
     }
     exports2.shouldUseRule = shouldUseRule;
   }
@@ -1495,9 +18265,9 @@ var require_dataType = __commonJS({
     exports2.reportTypeError = exports2.checkDataTypes = exports2.checkDataType = exports2.coerceAndCheckDataType = exports2.getJSONTypes = exports2.getSchemaTypes = exports2.DataType = void 0;
     var rules_1 = require_rules();
     var applicability_1 = require_applicability();
-    var errors_1 = require_errors();
+    var errors_1 = require_errors2();
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var DataType;
     (function(DataType2) {
       DataType2[DataType2["Correct"] = 0] = "Correct";
@@ -1678,7 +18448,7 @@ var require_defaults = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.assignDefaults = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     function assignDefaults(it, ty) {
       const { properties, items } = it.schema;
       if (ty === "object" && properties) {
@@ -1715,9 +18485,9 @@ var require_code2 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateUnion = exports2.validateArray = exports2.usePattern = exports2.callValidateCode = exports2.schemaProperties = exports2.allSchemaProperties = exports2.noPropertyInData = exports2.propertyInData = exports2.isOwnProperty = exports2.hasPropFunc = exports2.reportMissingProp = exports2.checkMissingProp = exports2.checkReportMissingProp = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var names_1 = require_names();
-    var util_2 = require_util();
+    var util_2 = require_util8();
     function checkReportMissingProp(cxt, prop) {
       const { gen, data, it } = cxt;
       gen.if(noPropertyInData(gen, data, prop, it.opts.ownProperties), () => {
@@ -1850,7 +18620,7 @@ var require_keyword = __commonJS({
     var codegen_1 = require_codegen();
     var names_1 = require_names();
     var code_1 = require_code2();
-    var errors_1 = require_errors();
+    var errors_1 = require_errors2();
     function macroKeywordCode(cxt, def) {
       const { gen, keyword, schema, parentSchema, it } = cxt;
       const macroSchema = def.macro.call(it.self, schema, parentSchema, it);
@@ -1869,14 +18639,14 @@ var require_keyword = __commonJS({
     }
     exports2.macroKeywordCode = macroKeywordCode;
     function funcKeywordCode(cxt, def) {
-      var _a3;
+      var _a4;
       const { gen, keyword, schema, parentSchema, $data, it } = cxt;
       checkAsyncKeyword(it, def);
       const validate2 = !$data && def.compile ? def.compile.call(it.self, schema, parentSchema, it) : def.validate;
       const validateRef = useKeyword(gen, keyword, validate2);
       const valid = gen.let("valid");
       cxt.block$data(valid, validateKeyword);
-      cxt.ok((_a3 = def.valid) !== null && _a3 !== void 0 ? _a3 : valid);
+      cxt.ok((_a4 = def.valid) !== null && _a4 !== void 0 ? _a4 : valid);
       function validateKeyword() {
         if (def.errors === false) {
           assignValid();
@@ -1907,8 +18677,8 @@ var require_keyword = __commonJS({
         gen.assign(valid, (0, codegen_1._)`${_await}${(0, code_1.callValidateCode)(cxt, validateRef, passCxt, passSchema)}`, def.modifying);
       }
       function reportErrs(errors) {
-        var _a4;
-        gen.if((0, codegen_1.not)((_a4 = def.valid) !== null && _a4 !== void 0 ? _a4 : valid), errors);
+        var _a5;
+        gen.if((0, codegen_1.not)((_a5 = def.valid) !== null && _a5 !== void 0 ? _a5 : valid), errors);
       }
     }
     exports2.funcKeywordCode = funcKeywordCode;
@@ -1966,7 +18736,7 @@ var require_subschema = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.extendSubschemaMode = exports2.extendSubschemaData = exports2.getSubschema = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     function getSubschema(it, { keyword, schemaProp, schema, schemaPath, errSchemaPath, topSchemaRef }) {
       if (keyword !== void 0 && schema !== void 0) {
         throw new Error('both "keyword" and "schema" passed, only one allowed');
@@ -2171,7 +18941,7 @@ var require_resolve = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getSchemaRefs = exports2.resolveUrl = exports2.normalizeId = exports2._getFullPath = exports2.getFullPath = exports2.inlineRef = void 0;
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var equal = require_fast_deep_equal();
     var traverse = require_json_schema_traverse();
     var SIMPLE_INLINED = /* @__PURE__ */ new Set([
@@ -2337,8 +19107,8 @@ var require_validate = __commonJS({
     var codegen_1 = require_codegen();
     var names_1 = require_names();
     var resolve_1 = require_resolve();
-    var util_1 = require_util();
-    var errors_1 = require_errors();
+    var util_1 = require_util8();
+    var errors_1 = require_errors2();
     function validateFunctionCode(it) {
       if (isSchemaObj(it)) {
         checkKeywords(it);
@@ -2872,11 +19642,11 @@ var require_compile = __commonJS({
     var validation_error_1 = require_validation_error();
     var names_1 = require_names();
     var resolve_1 = require_resolve();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var validate_1 = require_validate();
     var SchemaEnv = class {
       constructor(env) {
-        var _a3;
+        var _a4;
         this.refs = {};
         this.dynamicAnchors = {};
         let schema;
@@ -2885,7 +19655,7 @@ var require_compile = __commonJS({
         this.schema = env.schema;
         this.schemaId = env.schemaId;
         this.root = env.root || this;
-        this.baseId = (_a3 = env.baseId) !== null && _a3 !== void 0 ? _a3 : (0, resolve_1.normalizeId)(schema === null || schema === void 0 ? void 0 : schema[env.schemaId || "$id"]);
+        this.baseId = (_a4 = env.baseId) !== null && _a4 !== void 0 ? _a4 : (0, resolve_1.normalizeId)(schema === null || schema === void 0 ? void 0 : schema[env.schemaId || "$id"]);
         this.schemaPath = env.schemaPath;
         this.localRefs = env.localRefs;
         this.meta = env.meta;
@@ -2981,14 +19751,14 @@ var require_compile = __commonJS({
     }
     exports2.compileSchema = compileSchema;
     function resolveRef(root, baseId, ref) {
-      var _a3;
+      var _a4;
       ref = (0, resolve_1.resolveUrl)(this.opts.uriResolver, baseId, ref);
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
       let _sch = resolve.call(this, root, ref);
       if (_sch === void 0) {
-        const schema = (_a3 = root.localRefs) === null || _a3 === void 0 ? void 0 : _a3[ref];
+        const schema = (_a4 = root.localRefs) === null || _a4 === void 0 ? void 0 : _a4[ref];
         const { schemaId } = this.opts;
         if (schema)
           _sch = new SchemaEnv({ schema, schemaId, root, baseId });
@@ -3057,8 +19827,8 @@ var require_compile = __commonJS({
       "definitions"
     ]);
     function getJsonPointer(parsedRef, { baseId, schema, root }) {
-      var _a3;
-      if (((_a3 = parsedRef.fragment) === null || _a3 === void 0 ? void 0 : _a3[0]) !== "/")
+      var _a4;
+      if (((_a4 = parsedRef.fragment) === null || _a4 === void 0 ? void 0 : _a4[0]) !== "/")
         return;
       for (const part of parsedRef.fragment.slice(1).split("/")) {
         if (typeof schema === "boolean")
@@ -3106,7 +19876,7 @@ var require_data = __commonJS({
 });
 
 // node_modules/fast-uri/lib/utils.js
-var require_utils = __commonJS({
+var require_utils2 = __commonJS({
   "node_modules/fast-uri/lib/utils.js"(exports2, module2) {
     "use strict";
     var isUUID = RegExp.prototype.test.bind(/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iu);
@@ -3611,7 +20381,7 @@ var require_utils = __commonJS({
 var require_schemes = __commonJS({
   "node_modules/fast-uri/lib/schemes.js"(exports2, module2) {
     "use strict";
-    var { isUUID } = require_utils();
+    var { isUUID } = require_utils2();
     var URN_REG = /^([\da-z][\d\-a-z]{0,31}):((?:[\w!$'()*+,\-./:;=@]|%[\da-f]{2})+)$/iu;
     var supportedSchemeNames = (
       /** @type {const} */
@@ -3822,7 +20592,7 @@ var require_schemes = __commonJS({
 var require_fast_uri = __commonJS({
   "node_modules/fast-uri/index.js"(exports2, module2) {
     "use strict";
-    var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
+    var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils2();
     var { SCHEMES, getSchemeHandler } = require_schemes();
     var VALID_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*$/u;
     var MALFORMED_SCHEME_ERROR = "URI scheme is malformed.";
@@ -4271,7 +21041,7 @@ var require_core = __commonJS({
     var codegen_2 = require_codegen();
     var resolve_1 = require_resolve();
     var dataType_1 = require_dataType();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var $dataRefSchema = require_data();
     var uri_1 = require_uri();
     var defaultRegExp = (str, flags) => new RegExp(str, flags);
@@ -4316,9 +21086,9 @@ var require_core = __commonJS({
     };
     var MAX_EXPRESSION = 200;
     function requiredOptions(o) {
-      var _a3, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0;
+      var _a4, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0;
       const s2 = o.strict;
-      const _optz = (_a3 = o.code) === null || _a3 === void 0 ? void 0 : _a3.optimize;
+      const _optz = (_a4 = o.code) === null || _a4 === void 0 ? void 0 : _a4.optimize;
       const optimize = _optz === true || _optz === void 0 ? 1 : _optz || 0;
       const regExp = (_c = (_b = o.code) === null || _b === void 0 ? void 0 : _b.regExp) !== null && _c !== void 0 ? _c : defaultRegExp;
       const uriResolver = (_d = o.uriResolver) !== null && _d !== void 0 ? _d : uri_1.default;
@@ -4792,7 +21562,7 @@ var require_core = __commonJS({
       }
     }
     function addRule(keyword, definition, dataType) {
-      var _a3;
+      var _a4;
       const post = definition === null || definition === void 0 ? void 0 : definition.post;
       if (dataType && post)
         throw new Error('keyword with "post" flag cannot have "type"');
@@ -4818,7 +21588,7 @@ var require_core = __commonJS({
       else
         ruleGroup.rules.push(rule);
       RULES.all[keyword] = rule;
-      (_a3 = definition.implements) === null || _a3 === void 0 ? void 0 : _a3.forEach((kwd) => this.addKeyword(kwd));
+      (_a4 = definition.implements) === null || _a4 === void 0 ? void 0 : _a4.forEach((kwd) => this.addKeyword(kwd));
     }
     function addBeforeRule(ruleGroup, rule, before) {
       const i = ruleGroup.rules.findIndex((_rule) => _rule.keyword === before);
@@ -4872,7 +21642,7 @@ var require_ref = __commonJS({
     var codegen_1 = require_codegen();
     var names_1 = require_names();
     var compile_1 = require_compile();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var def = {
       keyword: "$ref",
       schemaType: "string",
@@ -4952,10 +21722,10 @@ var require_ref = __commonJS({
         gen.assign(names_1.default.errors, (0, codegen_1._)`${names_1.default.vErrors}.length`);
       }
       function addEvaluatedFrom(source) {
-        var _a3;
+        var _a4;
         if (!it.opts.unevaluated)
           return;
-        const schEvaluated = (_a3 = sch === null || sch === void 0 ? void 0 : sch.validate) === null || _a3 === void 0 ? void 0 : _a3.evaluated;
+        const schEvaluated = (_a4 = sch === null || sch === void 0 ? void 0 : sch.validate) === null || _a4 === void 0 ? void 0 : _a4.evaluated;
         if (it.props !== true) {
           if (schEvaluated && !schEvaluated.dynamicProps) {
             if (schEvaluated.props !== void 0) {
@@ -5096,7 +21866,7 @@ var require_limitLength = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var ucs2length_1 = require_ucs2length();
     var error2 = {
       message({ keyword, schemaCode }) {
@@ -5128,7 +21898,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var codegen_1 = require_codegen();
     var error2 = {
       message: ({ schemaCode }) => (0, codegen_1.str)`must match pattern "${schemaCode}"`,
@@ -5195,7 +21965,7 @@ var require_required = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: ({ params: { missingProperty } }) => (0, codegen_1.str)`must have required property '${missingProperty}'`,
       params: ({ params: { missingProperty } }) => (0, codegen_1._)`{missingProperty: ${missingProperty}}`
@@ -5317,7 +22087,7 @@ var require_uniqueItems = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var dataType_1 = require_dataType();
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var equal_1 = require_equal();
     var error2 = {
       message: ({ params: { i, j } }) => (0, codegen_1.str)`must NOT have duplicate items (items ## ${j} and ${i} are identical)`,
@@ -5383,7 +22153,7 @@ var require_const = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var equal_1 = require_equal();
     var error2 = {
       message: "must be equal to constant",
@@ -5412,7 +22182,7 @@ var require_enum = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var equal_1 = require_equal();
     var error2 = {
       message: "must be equal to one of the allowed values",
@@ -5500,7 +22270,7 @@ var require_additionalItems = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateAdditionalItems = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: ({ params: { len } }) => (0, codegen_1.str)`must NOT have more than ${len} items`,
       params: ({ params: { len } }) => (0, codegen_1._)`{limit: ${len}}`
@@ -5553,7 +22323,7 @@ var require_items = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateTuple = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var code_1 = require_code2();
     var def = {
       keyword: "items",
@@ -5626,7 +22396,7 @@ var require_items2020 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var code_1 = require_code2();
     var additionalItems_1 = require_additionalItems();
     var error2 = {
@@ -5661,7 +22431,7 @@ var require_contains = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: ({ params: { min, max } }) => max === void 0 ? (0, codegen_1.str)`must contain at least ${min} valid item(s)` : (0, codegen_1.str)`must contain at least ${min} and no more than ${max} valid item(s)`,
       params: ({ params: { min, max } }) => max === void 0 ? (0, codegen_1._)`{minContains: ${min}}` : (0, codegen_1._)`{minContains: ${min}, maxContains: ${max}}`
@@ -5756,7 +22526,7 @@ var require_dependencies = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateSchemaDeps = exports2.validatePropertyDeps = exports2.error = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var code_1 = require_code2();
     exports2.error = {
       message: ({ params: { property, depsCount, deps } }) => {
@@ -5849,7 +22619,7 @@ var require_propertyNames = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: "property name must be valid",
       params: ({ params }) => (0, codegen_1._)`{propertyName: ${params.propertyName}}`
@@ -5894,7 +22664,7 @@ var require_additionalProperties = __commonJS({
     var code_1 = require_code2();
     var codegen_1 = require_codegen();
     var names_1 = require_names();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: "must NOT have additional properties",
       params: ({ params }) => (0, codegen_1._)`{additionalProperty: ${params.additionalProperty}}`
@@ -5999,7 +22769,7 @@ var require_properties = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var validate_1 = require_validate();
     var code_1 = require_code2();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var additionalProperties_1 = require_additionalProperties();
     var def = {
       keyword: "properties",
@@ -6057,8 +22827,8 @@ var require_patternProperties = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
-    var util_2 = require_util();
+    var util_1 = require_util8();
+    var util_2 = require_util8();
     var def = {
       keyword: "patternProperties",
       type: "object",
@@ -6129,7 +22899,7 @@ var require_not = __commonJS({
   "node_modules/ajv/dist/vocabularies/applicator/not.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var def = {
       keyword: "not",
       schemaType: ["object", "boolean"],
@@ -6178,7 +22948,7 @@ var require_oneOf = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: "must match exactly one schema in oneOf",
       params: ({ params }) => (0, codegen_1._)`{passingSchemas: ${params.passing}}`
@@ -6235,7 +23005,7 @@ var require_allOf = __commonJS({
   "node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var def = {
       keyword: "allOf",
       schemaType: "array",
@@ -6263,7 +23033,7 @@ var require_if = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: ({ params }) => (0, codegen_1.str)`must match "${params.ifClause}" schema`,
       params: ({ params }) => (0, codegen_1._)`{failingKeyword: ${params.ifClause}}`
@@ -6331,7 +23101,7 @@ var require_thenElse = __commonJS({
   "node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var def = {
       keyword: ["then", "else"],
       schemaType: ["object", "boolean"],
@@ -6561,7 +23331,7 @@ var require_discriminator = __commonJS({
     var types_1 = require_types();
     var compile_1 = require_compile();
     var ref_error_1 = require_ref_error();
-    var util_1 = require_util();
+    var util_1 = require_util8();
     var error2 = {
       message: ({ params: { discrError, tagName } }) => discrError === types_1.DiscrError.Tag ? `tag "${tagName}" must be string` : `value of tag "${tagName}" must be in oneOf`,
       params: ({ params: { discrError, tag, tagName } }) => (0, codegen_1._)`{error: ${discrError}, tag: ${tagName}, tagValue: ${tag}}`
@@ -6606,7 +23376,7 @@ var require_discriminator = __commonJS({
           return _valid;
         }
         function getMapping() {
-          var _a3;
+          var _a4;
           const oneOfMapping = {};
           const topRequired = hasRequired(parentSchema);
           let tagRequired = true;
@@ -6620,7 +23390,7 @@ var require_discriminator = __commonJS({
               if (sch === void 0)
                 throw new ref_error_1.default(it.opts.uriResolver, it.baseId, ref);
             }
-            const propSch = (_a3 = sch === null || sch === void 0 ? void 0 : sch.properties) === null || _a3 === void 0 ? void 0 : _a3[tagName];
+            const propSch = (_a4 = sch === null || sch === void 0 ? void 0 : sch.properties) === null || _a4 === void 0 ? void 0 : _a4[tagName];
             if (typeof propSch != "object") {
               throw new Error(`discriminator: oneOf subschemas (or referenced schemas) must have "properties/${tagName}"`);
             }
@@ -7189,9 +23959,9 @@ var require_dist = __commonJS({
       return f;
     };
     function addFormats(ajv, list, fs, exportName) {
-      var _a3;
+      var _a4;
       var _b;
-      (_a3 = (_b = ajv.opts.code).formats) !== null && _a3 !== void 0 ? _a3 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
+      (_a4 = (_b = ajv.opts.code).formats) !== null && _a4 !== void 0 ? _a4 : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
         ajv.addFormat(f, fs[f]);
     }
@@ -7311,6 +24081,15 @@ __export(index_exports, {
   handler: () => handler
 });
 module.exports = __toCommonJS(index_exports);
+
+// alexa/src/polyfill.ts
+var import_undici = __toESM(require_undici());
+var web = __toESM(require("node:stream/web"));
+var g = globalThis;
+if (typeof g.fetch !== "function") Object.assign(g, { fetch: import_undici.fetch, Headers: import_undici.Headers, Request: import_undici.Request, Response: import_undici.Response, FormData: import_undici.FormData });
+for (const name of ["ReadableStream", "WritableStream", "TransformStream", "TextDecoderStream", "TextEncoderStream"]) {
+  if (!g[name] && web[name]) g[name] = web[name];
+}
 
 // alexa/src/skill.ts
 var import_node_crypto = require("node:crypto");
@@ -7493,7 +24272,7 @@ function assignProp(target, prop, value) {
 }
 function rawShape(def) {
   const desc = Object.getOwnPropertyDescriptor(def, "shape");
-  return desc?.get ? desc.get.raw : desc?.value;
+  return (desc == null ? void 0 : desc.get) ? desc.get.raw : desc == null ? void 0 : desc.value;
 }
 function sourceShape(schema) {
   return rawShape(schema._zod.def) ?? schema._zod.def.shape;
@@ -7555,7 +24334,7 @@ function cloneDef(schema) {
 function getElementAtPath(obj, path) {
   if (!path)
     return obj;
-  return path.reduce((acc, key) => acc?.[key], obj);
+  return path.reduce((acc, key) => acc == null ? void 0 : acc[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -7588,10 +24367,11 @@ function isObject(data) {
   return typeof data === "object" && data !== null && !Array.isArray(data);
 }
 var allowsEval = /* @__PURE__ */ cached(() => {
+  var _a4;
   if (globalConfig.jitless) {
     return false;
   }
-  if (typeof navigator !== "undefined" && navigator?.userAgent?.includes("Cloudflare")) {
+  if (typeof navigator !== "undefined" && ((_a4 = navigator == null ? void 0 : navigator.userAgent) == null ? void 0 : _a4.includes("Cloudflare"))) {
     return false;
   }
   try {
@@ -7696,7 +24476,7 @@ function escapeRegex(str) {
 }
 function clone(inst, def, params) {
   const cl = new inst._zod.constr(def ?? inst._zod.def);
-  if (!def || params?.parent)
+  if (!def || (params == null ? void 0 : params.parent))
     cl._zod.parent = inst;
   return cl;
 }
@@ -7706,8 +24486,8 @@ function normalizeParams(_params) {
     return {};
   if (typeof params === "string")
     return { error: () => params };
-  if (params?.message !== void 0) {
-    if (params?.error !== void 0)
+  if ((params == null ? void 0 : params.message) !== void 0) {
+    if ((params == null ? void 0 : params.error) !== void 0)
       throw new Error("Cannot specify both `message` and `error` params");
     params.error = params.message;
   }
@@ -7784,10 +24564,11 @@ function pick(schema, mask) {
   return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
 function maskedKeys(schema, mask) {
+  var _a4;
   const raw = sourceShape(schema);
   const keys = [];
   for (const key of Reflect.ownKeys(mask)) {
-    if (!Object.getOwnPropertyDescriptor(raw, key)?.enumerable) {
+    if (!((_a4 = Object.getOwnPropertyDescriptor(raw, key)) == null ? void 0 : _a4.enumerable)) {
       throw new Error(`Unrecognized key: "${String(key)}"`);
     }
     if (mask[key])
@@ -7836,10 +24617,11 @@ function safeExtend(schema, shape) {
   return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape) }));
 }
 function merge(a, b) {
-  if (!b?._zod?.def) {
+  var _a4, _b;
+  if (!((_a4 = b == null ? void 0 : b._zod) == null ? void 0 : _a4.def)) {
     throw new Error("Invalid input to merge: expected an object schema. To merge a plain shape, use `.extend()`.");
   }
-  if (a._zod.def.checks?.length) {
+  if ((_b = a._zod.def.checks) == null ? void 0 : _b.length) {
     throw new Error(".merge() cannot be used on object schemas containing refinements. Use .safeExtend() instead.");
   }
   const newShape = {};
@@ -7876,20 +24658,22 @@ function required(Class2, schema, mask) {
   return clone(schema, mergeDefs(schema._zod.def, { shape: newShape }));
 }
 function aborted(x, startIndex = 0) {
+  var _a4;
   if (x.aborted === true)
     return true;
   for (let i = startIndex; i < x.issues.length; i++) {
-    if (x.issues[i]?.continue !== true) {
+    if (((_a4 = x.issues[i]) == null ? void 0 : _a4.continue) !== true) {
       return true;
     }
   }
   return false;
 }
 function explicitlyAborted(x, startIndex = 0) {
+  var _a4;
   if (x.aborted === true)
     return true;
   for (let i = startIndex; i < x.issues.length; i++) {
-    if (x.issues[i]?.continue === false) {
+    if (((_a4 = x.issues[i]) == null ? void 0 : _a4.continue) === false) {
       return true;
     }
   }
@@ -7897,14 +24681,14 @@ function explicitlyAborted(x, startIndex = 0) {
 }
 function prefixIssues(path, issues) {
   return issues.map((iss) => {
-    var _a3;
-    (_a3 = iss).path ?? (_a3.path = []);
+    var _a4;
+    (_a4 = iss).path ?? (_a4.path = []);
     iss.path.unshift(path);
     return iss;
   });
 }
 function unwrapMessage(message) {
-  return typeof message === "string" ? message : message?.message;
+  return typeof message === "string" ? message : message == null ? void 0 : message.message;
 }
 function sizeCaps(defChecks) {
   const caps = [];
@@ -7919,22 +24703,23 @@ function sizeCaps(defChecks) {
   return caps;
 }
 function attachSchema(issues, start, inst) {
-  var _a3;
+  var _a4;
   for (let i = start; i < issues.length; i++) {
-    (_a3 = issues[i]).schema ?? (_a3.schema = inst);
+    (_a4 = issues[i]).schema ?? (_a4.schema = inst);
   }
 }
 function finalizeIssue(iss, ctx, config2) {
-  var _a3;
-  const traits = iss.inst?._zod?.traits;
-  if (traits?.has("$ZodType")) {
+  var _a5, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+  var _a4;
+  const traits = (_b = (_a5 = iss.inst) == null ? void 0 : _a5._zod) == null ? void 0 : _b.traits;
+  if (traits == null ? void 0 : traits.has("$ZodType")) {
     if (traits.has("$ZodCheck"))
-      (_a3 = iss).schema ?? (_a3.schema = iss.inst);
+      (_a4 = iss).schema ?? (_a4.schema = iss.inst);
     else
       iss.schema = iss.inst;
   }
-  const schemaError = iss.schema !== iss.inst ? iss.schema?._zod.def?.error : void 0;
-  const message = iss.message ? iss.message : unwrapMessage(iss.inst?._zod.def?.error?.(iss)) ?? unwrapMessage(schemaError?.(iss)) ?? unwrapMessage(ctx?.error?.(iss)) ?? unwrapMessage(config2.customError?.(iss)) ?? unwrapMessage(config2.localeError?.(iss)) ?? "Invalid input";
+  const schemaError = iss.schema !== iss.inst ? (_d = (_c = iss.schema) == null ? void 0 : _c._zod.def) == null ? void 0 : _d.error : void 0;
+  const message = iss.message ? iss.message : unwrapMessage((_g = (_f = (_e = iss.inst) == null ? void 0 : _e._zod.def) == null ? void 0 : _f.error) == null ? void 0 : _g.call(_f, iss)) ?? unwrapMessage(schemaError == null ? void 0 : schemaError(iss)) ?? unwrapMessage((_h = ctx == null ? void 0 : ctx.error) == null ? void 0 : _h.call(ctx, iss)) ?? unwrapMessage((_i = config2.customError) == null ? void 0 : _i.call(config2, iss)) ?? unwrapMessage((_j = config2.localeError) == null ? void 0 : _j.call(config2, iss)) ?? "Invalid input";
   const full = {};
   for (const k of Object.keys(iss)) {
     if (k === "inst" || k === "schema" || k === "continue" || k === "input" || k === "__proto__")
@@ -7943,7 +24728,7 @@ function finalizeIssue(iss, ctx, config2) {
   }
   full.path ?? (full.path = []);
   full.message = message;
-  if (ctx?.reportInput) {
+  if (ctx == null ? void 0 : ctx.reportInput) {
     full.input = iss.input;
   }
   return full;
@@ -8243,12 +25028,13 @@ function $constructor(name, initializer3, proto, params) {
       }
     }
   }
-  const Parent = params?.Parent ?? Object;
+  const Parent = (params == null ? void 0 : params.Parent) ?? Object;
   class Definition extends Parent {
   }
   Object.defineProperty(Definition, "name", { value: name });
   function _(def) {
-    const inst = params?.Parent ? newError(Definition) : this;
+    var _a4;
+    const inst = (params == null ? void 0 : params.Parent) ? newError(Definition) : this;
     init(inst, def);
     const deferred = inst._zod.deferred;
     if (deferred) {
@@ -8257,7 +25043,7 @@ function $constructor(name, initializer3, proto, params) {
       }
       inst._zod.deferred = void 0;
     }
-    const pp = globalThis.__zod_globalConfig?.postProcessor;
+    const pp = (_a4 = globalThis.__zod_globalConfig) == null ? void 0 : _a4.postProcessor;
     if (pp)
       pp(inst);
     return inst;
@@ -8265,9 +25051,10 @@ function $constructor(name, initializer3, proto, params) {
   Object.defineProperty(_, "init", { value: init });
   Object.defineProperty(_, Symbol.hasInstance, {
     value: (inst) => {
-      if (params?.Parent && inst instanceof params.Parent)
+      var _a4, _b;
+      if ((params == null ? void 0 : params.Parent) && inst instanceof params.Parent)
         return true;
-      return inst?._zod?.traits?.has(name);
+      return (_b = (_a4 = inst == null ? void 0 : inst._zod) == null ? void 0 : _a4.traits) == null ? void 0 : _b.has(name);
     }
   });
   Object.defineProperty(_, "name", { value: name });
@@ -8409,7 +25196,7 @@ function formatError(error2, mapper = (issue2) => issue2.message) {
 
 // node_modules/zod/v4/core/parse.js
 function finalizeParams(callee, params) {
-  return { callee: params?.callee ?? callee, Err: params?.Err };
+  return { callee: (params == null ? void 0 : params.callee) ?? callee, Err: params == null ? void 0 : params.Err };
 }
 var _parse = (_Err) => {
   const fn = (schema, value, _ctx, _params) => {
@@ -8419,8 +25206,8 @@ var _parse = (_Err) => {
       throw new $ZodAsyncError();
     }
     if (result.issues.length) {
-      const e = new (_params?.Err ?? _Err)(result.issues.map((iss) => finalizeIssue(iss, ctx, config())));
-      captureStackTrace(e, _params?.callee ?? fn);
+      const e = new ((_params == null ? void 0 : _params.Err) ?? _Err)(result.issues.map((iss) => finalizeIssue(iss, ctx, config())));
+      captureStackTrace(e, (_params == null ? void 0 : _params.callee) ?? fn);
       throw e;
     }
     return result.value;
@@ -8434,8 +25221,8 @@ var _parseAsync = (_Err) => {
     if (result instanceof Promise)
       result = await result;
     if (result.issues.length) {
-      const e = new (params?.Err ?? _Err)(result.issues.map((iss) => finalizeIssue(iss, ctx, config())));
-      captureStackTrace(e, params?.callee ?? fn);
+      const e = new ((params == null ? void 0 : params.Err) ?? _Err)(result.issues.map((iss) => finalizeIssue(iss, ctx, config())));
+      captureStackTrace(e, (params == null ? void 0 : params.callee) ?? fn);
       throw e;
     }
     return result.value;
@@ -8618,10 +25405,10 @@ var uppercase = /^[^a-z]*$/;
 
 // node_modules/zod/v4/core/checks.js
 var $ZodCheck = /* @__PURE__ */ $constructor("$ZodCheck", (inst, def) => {
-  var _a3;
+  var _a4;
   inst._zod ?? (inst._zod = {});
   inst._zod.def = def;
-  (_a3 = inst._zod).onattach ?? (_a3.onattach = []);
+  (_a4 = inst._zod).onattach ?? (_a4.onattach = []);
 });
 var _whenHasLength = (payload) => {
   const val = payload.value;
@@ -8690,9 +25477,10 @@ var $ZodCheckMultipleOf = /* @__PURE__ */ $constructor("$ZodCheckMultipleOf", (i
   };
 });
 var $ZodCheckNumberFormat = /* @__PURE__ */ $constructor("$ZodCheckNumberFormat", (inst, def) => {
+  var _a4;
   $ZodCheck.init(inst, def);
   def.format = def.format || "float64";
-  const isInt = def.format?.includes("int");
+  const isInt = (_a4 = def.format) == null ? void 0 : _a4.includes("int");
   const origin = isInt ? "int" : "number";
   const [minimum, maximum] = NUMBER_FORMAT_RANGES[def.format];
   inst._zod.check = (payload) => {
@@ -8761,9 +25549,9 @@ var $ZodCheckNumberFormat = /* @__PURE__ */ $constructor("$ZodCheckNumberFormat"
   };
 });
 var $ZodCheckMaxLength = /* @__PURE__ */ $constructor("$ZodCheckMaxLength", (inst, def) => {
-  var _a3;
+  var _a4;
   $ZodCheck.init(inst, def);
-  (_a3 = inst._zod.def).when ?? (_a3.when = _whenHasLength);
+  (_a4 = inst._zod.def).when ?? (_a4.when = _whenHasLength);
   inst._zod.check = (payload) => {
     const input = payload.value;
     const units = input.length;
@@ -8783,9 +25571,9 @@ var $ZodCheckMaxLength = /* @__PURE__ */ $constructor("$ZodCheckMaxLength", (ins
   };
 });
 var $ZodCheckMinLength = /* @__PURE__ */ $constructor("$ZodCheckMinLength", (inst, def) => {
-  var _a3;
+  var _a4;
   $ZodCheck.init(inst, def);
-  (_a3 = inst._zod.def).when ?? (_a3.when = _whenHasLength);
+  (_a4 = inst._zod.def).when ?? (_a4.when = _whenHasLength);
   inst._zod.check = (payload) => {
     const input = payload.value;
     const units = input.length;
@@ -8805,9 +25593,9 @@ var $ZodCheckMinLength = /* @__PURE__ */ $constructor("$ZodCheckMinLength", (ins
   };
 });
 var $ZodCheckLengthEquals = /* @__PURE__ */ $constructor("$ZodCheckLengthEquals", (inst, def) => {
-  var _a3;
+  var _a4;
   $ZodCheck.init(inst, def);
-  (_a3 = inst._zod.def).when ?? (_a3.when = _whenHasLength);
+  (_a4 = inst._zod.def).when ?? (_a4.when = _whenHasLength);
   inst._zod.check = (payload) => {
     const input = payload.value;
     const units = input.length;
@@ -8828,10 +25616,10 @@ var $ZodCheckLengthEquals = /* @__PURE__ */ $constructor("$ZodCheckLengthEquals"
   };
 });
 var $ZodCheckStringFormat = /* @__PURE__ */ $constructor("$ZodCheckStringFormat", (inst, def) => {
-  var _a3, _b;
+  var _a4, _b;
   $ZodCheck.init(inst, def);
   if (def.pattern)
-    (_a3 = inst._zod).check ?? (_a3.check = (payload) => {
+    (_a4 = inst._zod).check ?? (_a4.check = (payload) => {
       def.pattern.lastIndex = 0;
       if (def.pattern.test(payload.value))
         return;
@@ -8969,7 +25757,7 @@ var Doc = class {
   }
   compile() {
     const F = Function;
-    const content = this?.content ?? [``];
+    const content = (this == null ? void 0 : this.content) ?? [``];
     const factory = new F(...Object.keys(this.closed), `return function (${this.args.join(", ")}) {
 ${content.join("\n")}
 };`);
@@ -8986,21 +25774,22 @@ var version = {
 
 // node_modules/zod/v4/core/schemas.js
 var $ZodType = /* @__PURE__ */ $constructor("$ZodType", (inst, def) => {
-  var _a3;
+  var _a5;
+  var _a4;
   inst ?? (inst = {});
   inst._zod.def = def;
   inst._zod.bag = inst._zod.bag || {};
   inst._zod.version = version;
   const defChecks = inst._zod.def.checks;
-  const checks = inst._zod.traits.has("$ZodCheck") ? [inst, ...defChecks ?? []] : defChecks?.length ? [...defChecks] : [];
+  const checks = inst._zod.traits.has("$ZodCheck") ? [inst, ...defChecks ?? []] : (defChecks == null ? void 0 : defChecks.length) ? [...defChecks] : [];
   for (const ch of checks) {
     for (const fn of ch._zod.onattach) {
       fn(inst);
     }
   }
   if (checks.length === 0) {
-    (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
-    inst._zod.deferred?.push(() => {
+    (_a4 = inst._zod).deferred ?? (_a4.deferred = []);
+    (_a5 = inst._zod.deferred) == null ? void 0 : _a5.push(() => {
       inst._zod.run = inst._zod.parse;
     });
   } else {
@@ -9021,7 +25810,7 @@ var $ZodType = /* @__PURE__ */ $constructor("$ZodType", (inst, def) => {
         }
         const currLen = payload.issues.length;
         const _ = ch._zod.check(payload);
-        if (_ instanceof Promise && ctx?.async === false) {
+        if (_ instanceof Promise && (ctx == null ? void 0 : ctx.async) === false) {
           throw new $ZodAsyncError();
         }
         if (asyncResult || _ instanceof Promise) {
@@ -9186,7 +25975,8 @@ function validateURL(trimmed, def) {
   return parseURLObject(trimmed, def);
 }
 function parseURLObject(trimmed, def) {
-  if (!def.normalize && def.protocol?.source === httpProtocol.source && !/^https?:\/\//i.test(trimmed)) {
+  var _a4;
+  if (!def.normalize && ((_a4 = def.protocol) == null ? void 0 : _a4.source) === httpProtocol.source && !/^https?:\/\//i.test(trimmed)) {
     return URL_BAD_FORMAT;
   }
   try {
@@ -9448,7 +26238,7 @@ function isValidJWT(token, algorithm = null) {
     if (!header)
       return false;
     const parsedHeader = JSON.parse(atob(header));
-    if ("typ" in parsedHeader && parsedHeader?.typ !== "JWT")
+    if ("typ" in parsedHeader && (parsedHeader == null ? void 0 : parsedHeader.typ) !== "JWT")
       return false;
     if (!parsedHeader.alg)
       return false;
@@ -9611,7 +26401,7 @@ function capSize(inst, size) {
   const parse3 = inst._zod.parse;
   inst._zod.parse = (payload, ctx) => {
     const n = size(payload.value);
-    if (n > cap2 && !ctx?.skipChecks && ctx?.direction !== "backward") {
+    if (n > cap2 && !(ctx == null ? void 0 : ctx.skipChecks) && (ctx == null ? void 0 : ctx.direction) !== "backward") {
       for (const [max, ch] of sizeCaps(inst._zod.def.checks)) {
         if (n > max && ch._zod.def.when(payload)) {
           const start = payload.issues.length;
@@ -9635,7 +26425,7 @@ function handleArrayResult(result, final, index) {
 var $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
   $ZodType.init(inst, def);
   const memo2 = globalConfig.memoizer;
-  memo2?.attach(inst);
+  memo2 == null ? void 0 : memo2.attach(inst);
   inst._zod.parse = (payload, ctx) => {
     const input = payload.value;
     if (!Array.isArray(input)) {
@@ -9649,7 +26439,7 @@ var $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
     }
     payload.value = memo2 ? memo2.alloc(inst, payload, Array(input.length), ctx) : Array(input.length);
     const proms = [];
-    const abortEarly = ctx?.abortEarly;
+    const abortEarly = ctx == null ? void 0 : ctx.abortEarly;
     for (let i = 0; i < input.length; i++) {
       const item = input[i];
       const result = def.element._zod.run({
@@ -9704,12 +26494,13 @@ function handlePropertyResult(result, final, key, input, optin, optout) {
 }
 var NO_SYMBOL_KEYS = [];
 function normalizeDef(def) {
+  var _a4, _b, _c, _d;
   const keys = Object.keys(def.shape);
   const ownSymbols = Object.getOwnPropertySymbols(def.shape);
   const symbolKeys = ownSymbols.length ? ownSymbols : NO_SYMBOL_KEYS;
   const allKeys = symbolKeys.length ? [...keys, ...symbolKeys] : keys;
   for (const k of allKeys) {
-    if (!def.shape?.[k]?._zod?.traits?.has("$ZodType")) {
+    if (!((_d = (_c = (_b = (_a4 = def.shape) == null ? void 0 : _a4[k]) == null ? void 0 : _b._zod) == null ? void 0 : _c.traits) == null ? void 0 : _d.has("$ZodType"))) {
       throw new Error(`Invalid element at key "${String(k)}": expected a Zod schema`);
     }
   }
@@ -9775,7 +26566,7 @@ function handleCatchall(proms, input, payload, ctx, def, inst, abortEarly) {
 var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
   $ZodType.init(inst, def);
   const desc = Object.getOwnPropertyDescriptor(def, "shape");
-  const sh = desc?.get ? desc.get.raw : def.shape ?? {};
+  const sh = (desc == null ? void 0 : desc.get) ? desc.get.raw : def.shape ?? {};
   if (sh) {
     const get = () => {
       const newSh = { ...sh };
@@ -9808,7 +26599,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
   const catchall = def.catchall;
   let value;
   const memo2 = globalConfig.memoizer;
-  memo2?.attach(inst);
+  memo2 == null ? void 0 : memo2.attach(inst);
   inst._zod.parse = (payload, ctx) => {
     value ?? (value = _normalized.value);
     const input = payload.value;
@@ -9824,7 +26615,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     payload.value = memo2 ? memo2.alloc(inst, payload, {}, ctx) : {};
     const proms = [];
     const shape = value.shape;
-    const abortEarly = ctx?.abortEarly;
+    const abortEarly = ctx == null ? void 0 : ctx.abortEarly;
     let seen = payload.issues.length;
     for (const key of value.allKeys) {
       if (abortEarly && payload.issues.length !== seen) {
@@ -9856,6 +26647,7 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
   const _normalized = cached(() => normalizeDef(def));
   const memo2 = globalConfig.memoizer;
   const generateFastpass = (shape) => {
+    var _a4, _b;
     const normalized = _normalized.value;
     const syms = normalized.symbolKeys;
     const doc = new Doc(["payload", "ctx"], { shape, inst, memo: memo2, syms });
@@ -9886,9 +26678,9 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
       const k = typeof key === "symbol" ? `syms[${syms.indexOf(key)}]` : esc(key);
       const isPresent = `${k} in input`;
       const schema = shape[key];
-      const optin = schema?._zod?.optin;
+      const optin = (_a4 = schema == null ? void 0 : schema._zod) == null ? void 0 : _a4.optin;
       const isOptionalIn = optin !== void 0;
-      const isOptionalOut = schema?._zod?.optout === "optional";
+      const isOptionalOut = ((_b = schema == null ? void 0 : schema._zod) == null ? void 0 : _b.optout) === "optional";
       doc.write(`const ${id} = ${parseStr(k)};`);
       if (isOptionalIn && isOptionalOut) {
         const assign = optin === "optional" ? `${id}_present` : `${id}.value !== undefined || ${id}_present`;
@@ -9966,13 +26758,13 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
       });
       return payload;
     }
-    if (jit && fastEnabled && ctx?.async === false && ctx.jitless !== true) {
+    if (jit && fastEnabled && (ctx == null ? void 0 : ctx.async) === false && ctx.jitless !== true) {
       if (!fastpass)
         fastpass = generateFastpass(def.shape);
       payload = fastpass(payload, ctx);
       if (!catchall)
         return payload;
-      return handleCatchall([], input, payload, ctx, value, inst, ctx?.abortEarly === true);
+      return handleCatchall([], input, payload, ctx, value, inst, (ctx == null ? void 0 : ctx.abortEarly) === true);
     }
     return superParse(payload, ctx);
   };
@@ -10043,9 +26835,10 @@ var $ZodUnion = /* @__PURE__ */ $constructor("$ZodUnion", (inst, def) => {
   };
 });
 function discriminatorMap(def) {
+  var _a4;
   const map = /* @__PURE__ */ new Map();
   for (const option of def.options) {
-    const values = option._zod.propValues?.[def.discriminator];
+    const values = (_a4 = option._zod.propValues) == null ? void 0 : _a4[def.discriminator];
     if (!values || values.size === 0)
       throw new Error(`Invalid discriminated union option at index "${def.options.indexOf(option)}"`);
     for (const value of values) {
@@ -10065,13 +26858,14 @@ var $ZodDiscriminatedUnion = /* @__PURE__ */ $constructor("$ZodDiscriminatedUnio
   $ZodUnion.init(inst, def);
   const _super = inst._zod.parse;
   defineLazyInternal(inst, "propValues", (zod) => {
+    var _a4, _b;
     const propValues = {};
     let undefinedCount = 0;
     for (const option of zod.def.options) {
       const pv = option._zod.propValues;
       if (!pv || Object.keys(pv).length === 0)
         throw new Error(`Invalid discriminated union option at index "${zod.def.options.indexOf(option)}"`);
-      if (pv[zod.def.discriminator]?.has(void 0))
+      if ((_a4 = pv[zod.def.discriminator]) == null ? void 0 : _a4.has(void 0))
         undefinedCount++;
       for (const [k, v] of Object.entries(pv)) {
         if (!Object.prototype.hasOwnProperty.call(propValues, k)) {
@@ -10083,7 +26877,7 @@ var $ZodDiscriminatedUnion = /* @__PURE__ */ $constructor("$ZodDiscriminatedUnio
       }
     }
     if (!zod.def.unionFallback && undefinedCount > 1)
-      propValues[zod.def.discriminator]?.delete(void 0);
+      (_b = propValues[zod.def.discriminator]) == null ? void 0 : _b.delete(void 0);
     return propValues;
   });
   def.options.forEach((option, i) => {
@@ -10104,7 +26898,7 @@ var $ZodDiscriminatedUnion = /* @__PURE__ */ $constructor("$ZodDiscriminatedUnio
       });
       return payload;
     }
-    const value = input?.[def.discriminator];
+    const value = input == null ? void 0 : input[def.discriminator];
     const opt = disc.value.get(value);
     if (opt && (value !== void 0 || ctx.direction !== "backward")) {
       return opt._zod.run(payload, ctx);
@@ -10193,11 +26987,12 @@ function handleIntersectionResults(result, left, right) {
   let unrecIssue;
   const keyIssues = /* @__PURE__ */ new Map();
   const collect = (iss, side) => {
+    var _a4, _b;
     let keys;
-    if (iss.code === "unrecognized_keys" && !iss.path?.length) {
+    if (iss.code === "unrecognized_keys" && !((_a4 = iss.path) == null ? void 0 : _a4.length)) {
       unrecIssue ?? (unrecIssue = iss);
       keys = iss.keys;
-    } else if (iss.code === "invalid_key" && iss.origin === "record" && iss.path?.length === 1) {
+    } else if (iss.code === "invalid_key" && iss.origin === "record" && ((_b = iss.path) == null ? void 0 : _b.length) === 1) {
       const k = String(iss.path[0]);
       if (!keyIssues.has(k))
         keyIssues.set(k, iss);
@@ -10242,7 +27037,7 @@ function handleIntersectionResults(result, left, right) {
 var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
   $ZodType.init(inst, def);
   const memo2 = globalConfig.memoizer;
-  memo2?.attach(inst);
+  memo2 == null ? void 0 : memo2.attach(inst);
   inst._zod.parse = (payload, ctx) => {
     const input = payload.value;
     if (!isPlainObject(input)) {
@@ -10440,9 +27235,10 @@ var $ZodLiteral = /* @__PURE__ */ $constructor("$ZodLiteral", (inst, def) => {
   };
 });
 var $ZodTransform = /* @__PURE__ */ $constructor("$ZodTransform", (inst, def) => {
+  var _a4;
   $ZodType.init(inst, def);
   inst._zod.optin = "optional";
-  globalConfig.memoizer?.guard(inst);
+  (_a4 = globalConfig.memoizer) == null ? void 0 : _a4.guard(inst);
   inst._zod.parse = (payload, ctx) => {
     if (ctx.direction === "backward") {
       throw new $ZodEncodeError(inst.constructor.name);
@@ -10647,8 +27443,14 @@ var $ZodReadonly = /* @__PURE__ */ $constructor("$ZodReadonly", (inst, def) => {
   $ZodType.init(inst, def);
   defineLazyInternal(inst, "propValues", (zod) => zod.def.innerType._zod.propValues);
   defineLazyInternal(inst, "values", (zod) => zod.def.innerType._zod.values);
-  defineLazyInternal(inst, "optin", (zod) => zod.def.innerType?._zod?.optin);
-  defineLazyInternal(inst, "optout", (zod) => zod.def.innerType?._zod?.optout);
+  defineLazyInternal(inst, "optin", (zod) => {
+    var _a4, _b;
+    return (_b = (_a4 = zod.def.innerType) == null ? void 0 : _a4._zod) == null ? void 0 : _b.optin;
+  });
+  defineLazyInternal(inst, "optout", (zod) => {
+    var _a4, _b;
+    return (_b = (_a4 = zod.def.innerType) == null ? void 0 : _a4._zod) == null ? void 0 : _b.optout;
+  });
   inst._zod.parse = (payload, ctx) => {
     if (ctx.direction === "backward") {
       return def.innerType._zod.run(payload, ctx);
@@ -10727,19 +27529,20 @@ function isRecursive(inst, stack, resolve) {
   stack.add(inst);
   let result = NONE;
   const check = (child) => {
-    if (result !== PROVEN && child?._zod) {
+    if (result !== PROVEN && (child == null ? void 0 : child._zod)) {
       const answer = isRecursive(child, stack, resolve);
       if (answer > result)
         result = answer;
     }
   };
   const shape = (sh, spread) => {
+    var _a4;
     let answer = NONE;
     for (const key of Reflect.ownKeys(sh)) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
       if (spread && !desc.enumerable)
         continue;
-      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve) : NONE;
+      const child = desc.get ? ASSUMED : ((_a4 = desc.value) == null ? void 0 : _a4._zod) ? isRecursive(desc.value, stack, resolve) : NONE;
       if (child > answer)
         answer = child;
     }
@@ -10877,8 +27680,8 @@ var memo = {
     return empty;
   },
   guard(inst) {
-    var _a3;
-    (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
+    var _a4;
+    (_a4 = inst._zod).deferred ?? (_a4.deferred = []);
     inst._zod.deferred.push(() => {
       const base = inst._zod.parse;
       const wrapped = (payload, ctx) => {
@@ -10892,12 +27695,12 @@ var memo = {
     });
   },
   attach(inst) {
-    var _a3;
+    var _a4;
     let isRecursiveInst;
     let rechecked = false;
     let lastCtx;
     let lastBucket;
-    (_a3 = inst._zod).deferred ?? (_a3.deferred = []);
+    (_a4 = inst._zod).deferred ?? (_a4.deferred = []);
     inst._zod.deferred.push(() => {
       const base = inst._zod.parse;
       const wrapped = (payload, ctx) => {
@@ -10969,7 +27772,8 @@ function memoizer() {
   return memo;
 }
 function isBackEdge(ctx, value) {
-  const backEdges = ctx[STATE]?.backEdges;
+  var _a4;
+  const backEdges = (_a4 = ctx[STATE]) == null ? void 0 : _a4.backEdges;
   return backEdges !== void 0 && isRef(value) && backEdges.has(value);
 }
 
@@ -11723,28 +28527,28 @@ function assignProps(target, ...sources) {
   return target;
 }
 function initializeContext(params) {
-  let target = params?.target ?? "draft-2020-12";
+  let target = (params == null ? void 0 : params.target) ?? "draft-2020-12";
   if (target === "draft-4")
     target = "draft-04";
   if (target === "draft-7")
     target = "draft-07";
   return {
     processors: params.processors ?? {},
-    metadataRegistry: params?.metadata ?? globalRegistry,
+    metadataRegistry: (params == null ? void 0 : params.metadata) ?? globalRegistry,
     target,
-    unrepresentable: params?.unrepresentable ?? "throw",
-    override: params?.override ?? (() => {
+    unrepresentable: (params == null ? void 0 : params.unrepresentable) ?? "throw",
+    override: (params == null ? void 0 : params.override) ?? (() => {
     }),
-    io: params?.io ?? "output",
+    io: (params == null ? void 0 : params.io) ?? "output",
     counter: 0,
     seen: /* @__PURE__ */ new Map(),
     sharedDefsExtractedFor: void 0,
     sharedEmitDoneFor: void 0,
-    cycles: params?.cycles ?? "ref",
-    reused: params?.reused ?? "inline",
+    cycles: (params == null ? void 0 : params.cycles) ?? "ref",
+    reused: (params == null ? void 0 : params.reused) ?? "inline",
     intersections: [],
     deferred: [],
-    external: params?.external ?? void 0
+    external: (params == null ? void 0 : params.external) ?? void 0
   };
 }
 function handleUnrepresentable(schema, ctx, json, params, message) {
@@ -11757,7 +28561,8 @@ function handleUnrepresentable(schema, ctx, json, params, message) {
   return true;
 }
 function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
-  var _a3;
+  var _a5, _b;
+  var _a4;
   const def = schema._zod.def;
   const seen = ctx.seen.get(schema);
   if (seen) {
@@ -11772,7 +28577,7 @@ function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
   ctx.seen.set(schema, result);
   ctx.sharedDefsExtractedFor = void 0;
   ctx.sharedEmitDoneFor = void 0;
-  const overrideSchema = schema._zod.toJSONSchema?.();
+  const overrideSchema = (_b = (_a5 = schema._zod).toJSONSchema) == null ? void 0 : _b.call(_a5);
   if (overrideSchema) {
     result.schema = overrideSchema;
   } else {
@@ -11807,7 +28612,7 @@ function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
     delete result.schema.default;
   }
   if (ctx.io === "input" && "_prefault" in result.schema)
-    (_a3 = result.schema).default ?? (_a3.default = result.schema._prefault);
+    (_a4 = result.schema).default ?? (_a4.default = result.schema._prefault);
   delete result.schema._prefault;
   const _result = ctx.seen.get(schema);
   return _result.schema;
@@ -11816,6 +28621,7 @@ function encodeJSONPointerSegment(segment) {
   return segment.replace(/~/g, "~0").replace(/\//g, "~1");
 }
 function extractDefs(ctx, schema) {
+  var _a4, _b, _c, _d;
   const root = ctx.seen.get(schema);
   if (!root)
     throw new Error("Unprocessed schema. This is a bug in Zod.");
@@ -11823,7 +28629,7 @@ function extractDefs(ctx, schema) {
     return;
   const idToSchema = /* @__PURE__ */ new Map();
   for (const entry of ctx.seen.entries()) {
-    const id = ctx.metadataRegistry.get(entry[0])?.id;
+    const id = (_a4 = ctx.metadataRegistry.get(entry[0])) == null ? void 0 : _a4.id;
     if (id) {
       const existing = idToSchema.get(id);
       if (existing && existing !== entry[0]) {
@@ -11833,9 +28639,10 @@ function extractDefs(ctx, schema) {
     }
   }
   const makeURI = (entry) => {
+    var _a5;
     const defsSegment = ctx.target === "draft-2020-12" ? "$defs" : "definitions";
     if (ctx.external) {
-      const externalId = ctx.external.registry.get(entry[0])?.id;
+      const externalId = (_a5 = ctx.external.registry.get(entry[0])) == null ? void 0 : _a5.id;
       const uriGenerator = ctx.external.uri ?? ((id2) => id2);
       if (externalId) {
         return { ref: uriGenerator(externalId) };
@@ -11871,7 +28678,7 @@ function extractDefs(ctx, schema) {
     for (const entry of ctx.seen.entries()) {
       const seen = entry[1];
       if (seen.cycle) {
-        throw new Error(`Cycle detected: #/${seen.cycle?.join("/")}/<root>
+        throw new Error(`Cycle detected: #/${(_b = seen.cycle) == null ? void 0 : _b.join("/")}/<root>
 
 Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.`);
       }
@@ -11884,13 +28691,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       continue;
     }
     if (ctx.external) {
-      const ext = ctx.external.registry.get(entry[0])?.id;
+      const ext = (_c = ctx.external.registry.get(entry[0])) == null ? void 0 : _c.id;
       if (schema !== entry[0] && ext) {
         extractToDef(entry);
         continue;
       }
     }
-    const id = ctx.metadataRegistry.get(entry[0])?.id;
+    const id = (_d = ctx.metadataRegistry.get(entry[0])) == null ? void 0 : _d.id;
     if (id) {
       extractToDef(entry);
       continue;
@@ -11940,6 +28747,7 @@ function undeclaredConstraint(member) {
   return Object.keys(extra).length ? extra : null;
 }
 function foldObjects(members2) {
+  var _a4;
   const objects = [];
   for (const member of members2) {
     if (typeof member !== "object" || member.type !== "object")
@@ -11958,7 +28766,7 @@ function foldObjects(members2) {
         continue;
       const parts = [];
       for (const other of objects) {
-        const part = other.properties?.[key] ?? undeclaredConstraint(other);
+        const part = ((_a4 = other.properties) == null ? void 0 : _a4[key]) ?? undeclaredConstraint(other);
         if (part === null || part === void 0)
           continue;
         if (!parts.some((seen) => JSON.stringify(seen) === JSON.stringify(part)))
@@ -12017,6 +28825,7 @@ function foldIntersection(json) {
   assignProps(json, folded);
 }
 function finalize(ctx, schema) {
+  var _a4, _b, _c, _d;
   const root = ctx.seen.get(schema);
   if (!root)
     throw new Error("Unprocessed schema. This is a bug in Zod.");
@@ -12063,7 +28872,7 @@ function finalize(ctx, schema) {
     if (parent && parent !== ref) {
       flattenRef(parent);
       const parentSeen = ctx.seen.get(parent);
-      if (parentSeen?.schema.$ref) {
+      if (parentSeen == null ? void 0 : parentSeen.schema.$ref) {
         schema2.$ref = parentSeen.schema.$ref;
         if (parentSeen.def) {
           for (const key in schema2) {
@@ -12097,7 +28906,7 @@ function finalize(ctx, schema) {
       const carriers = /* @__PURE__ */ new Map();
       for (const seen of ctx.seen.values()) {
         for (const json of [seen.schema, seen.def]) {
-          const allOf = json?.allOf;
+          const allOf = json == null ? void 0 : json.allOf;
           if (!Array.isArray(allOf))
             continue;
           const existing = carriers.get(allOf);
@@ -12123,17 +28932,17 @@ function finalize(ctx, schema) {
   } else if (ctx.target === "openapi-3.0") {
   } else {
   }
-  if (ctx.external?.uri) {
-    const id = ctx.external.registry.get(schema)?.id;
+  if ((_a4 = ctx.external) == null ? void 0 : _a4.uri) {
+    const id = (_b = ctx.external.registry.get(schema)) == null ? void 0 : _b.id;
     if (!id)
       throw new Error("Schema is missing an `id` property");
     result.$id = ctx.external.uri(id);
   }
   assignProps(result, root.defId ? root.schema : root.def ?? root.schema);
-  const rootMetaId = ctx.metadataRegistry.get(schema)?.id;
+  const rootMetaId = (_c = ctx.metadataRegistry.get(schema)) == null ? void 0 : _c.id;
   if (rootMetaId !== void 0 && result.id === rootMetaId)
     delete result.id;
-  const defs = ctx.external?.defs ?? {};
+  const defs = ((_d = ctx.external) == null ? void 0 : _d.defs) ?? {};
   if (!ctx.external || ctx.sharedEmitDoneFor !== ctx.external) {
     for (const entry of ctx.seen.entries()) {
       const seen = entry[1];
@@ -12303,11 +29112,12 @@ var contributors = {
   mime_type: (agg, def) => intersectMime(agg, def.mime)
 };
 function aggregateChecks(schema) {
+  var _a4;
   const agg = {};
   const def = schema._zod.def;
   const list = schema._zod.traits.has("$ZodCheck") ? [schema, ...def.checks ?? []] : def.checks ?? [];
   for (const ch of list)
-    contributors[ch._zod.def.check]?.(agg, ch._zod.def);
+    (_a4 = contributors[ch._zod.def.check]) == null ? void 0 : _a4.call(contributors, agg, ch._zod.def);
   const bag = schema._zod.bag;
   if (bag.minimum !== void 0)
     narrowMin(agg, "minimum", bag.minimum);
@@ -12526,6 +29336,7 @@ function inputOptin(schema) {
   return schema._zod.optin;
 }
 var objectProcessor = (schema, ctx, _json, params) => {
+  var _a4;
   const json = _json;
   const def = schema._zod.def;
   const shape = def.shape;
@@ -12551,7 +29362,7 @@ var objectProcessor = (schema, ctx, _json, params) => {
   if (requiredKeys.length > 0) {
     json.required = requiredKeys;
   }
-  if (def.catchall?._zod.def.type === "never") {
+  if (((_a4 = def.catchall) == null ? void 0 : _a4._zod.def.type) === "never") {
     json.additionalProperties = false;
   } else if (!def.catchall) {
     if (ctx.io === "output")
@@ -12595,11 +29406,12 @@ var intersectionProcessor = (schema, ctx, json, params) => {
   ctx.intersections.push(allOf);
 };
 function stringifyKeyNames(bySchema, json, visited) {
+  var _a4;
   if (json.$ref) {
     if (visited.has(json))
       return json;
     visited.add(json);
-    const def = bySchema.get(json)?.def;
+    const def = (_a4 = bySchema.get(json)) == null ? void 0 : _a4.def;
     if (!def)
       return json;
     const inlined = stringifyKeyNames(bySchema, def, visited);
@@ -12616,7 +29428,7 @@ function stringifyKeyNames(bySchema, json, visited) {
   const types = Array.isArray(json.type) ? json.type : [json.type];
   const numericType = !types.includes("string") && types.some((t) => t === "number" || t === "integer");
   const values = json.enum ?? (json.const !== void 0 ? [json.const] : void 0);
-  if (!numericType && !values?.some((v) => typeof v === "number"))
+  if (!numericType && !(values == null ? void 0 : values.some((v) => typeof v === "number")))
     return json;
   const { minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf, format, id, ...rest } = json;
   if (rest.enum)
@@ -12632,6 +29444,7 @@ function stringifyKeyNames(bySchema, json, visited) {
 }
 var pendingRecords = /* @__PURE__ */ new WeakMap();
 function rewriteKeyNames(ctx) {
+  var _a4;
   const bySchema = /* @__PURE__ */ new Map();
   for (const entry of ctx.seen.values()) {
     if (entry.def && !bySchema.has(entry.schema))
@@ -12640,7 +29453,7 @@ function rewriteKeyNames(ctx) {
   const rewrites = /* @__PURE__ */ new Map();
   for (const record2 of pendingRecords.get(ctx) ?? []) {
     const seen = ctx.seen.get(record2);
-    const names = (seen?.def ?? seen?.schema)?.propertyNames;
+    const names = (_a4 = (seen == null ? void 0 : seen.def) ?? (seen == null ? void 0 : seen.schema)) == null ? void 0 : _a4.propertyNames;
     if (!names || names === true || rewrites.has(names))
       continue;
     const rewritten = stringifyKeyNames(bySchema, names, /* @__PURE__ */ new Set());
@@ -12802,12 +29615,13 @@ function safeParse2(schema, data) {
   return result;
 }
 function getObjectShape(schema) {
+  var _a4, _b;
   if (!schema)
     return void 0;
   let rawShape2;
   if (isZ4Schema(schema)) {
     const v4Schema = schema;
-    rawShape2 = v4Schema._zod?.def?.shape;
+    rawShape2 = (_b = (_a4 = v4Schema._zod) == null ? void 0 : _a4.def) == null ? void 0 : _b.shape;
   } else {
     const v3Schema = schema;
     rawShape2 = v3Schema.shape;
@@ -12824,9 +29638,10 @@ function getObjectShape(schema) {
   return rawShape2;
 }
 function getLiteralValue(schema) {
+  var _a4;
   if (isZ4Schema(schema)) {
     const v4Schema = schema;
-    const def2 = v4Schema._zod?.def;
+    const def2 = (_a4 = v4Schema._zod) == null ? void 0 : _a4.def;
     if (def2) {
       if (def2.value !== void 0)
         return def2.value;
@@ -13046,7 +29861,7 @@ var ZodType = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
   },
   // `spa` is an alias: same function object as `safeParseAsync`, as before.
   get spa() {
-    return this?.safeParseAsync;
+    return this == null ? void 0 : this.safeParseAsync;
   },
   set spa(value) {
     util_exports.own(this, "spa", value);
@@ -13086,7 +29901,8 @@ var ZodType = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
   },
   // Reads through to the registry on every access, so it must not cache.
   get description() {
-    return globalRegistry.get(this)?.description;
+    var _a4;
+    return (_a4 = globalRegistry.get(this)) == null ? void 0 : _a4.description;
   },
   // No setter: `schema._def = x` throws, as it did when `_def` was a non-writable own property.
   get _def() {
@@ -13356,7 +30172,7 @@ var ZodNumber = /* @__PURE__ */ $constructor(
     },
     isInt: (inst) => {
       const { isInt, multipleOf } = aggregateChecks(inst);
-      return !!isInt || !!multipleOf?.some(Number.isSafeInteger);
+      return !!isInt || !!(multipleOf == null ? void 0 : multipleOf.some(Number.isSafeInteger));
     },
     format: (inst) => aggregateChecks(inst).format ?? null
   }, {
@@ -15515,7 +32331,8 @@ var UrlElicitationRequiredError = class extends McpError {
     });
   }
   get elicitations() {
-    return this.data?.elicitations ?? [];
+    var _a4;
+    return ((_a4 = this.data) == null ? void 0 : _a4.elicitations) ?? [];
   }
 };
 
@@ -15530,7 +32347,7 @@ var ALPHA_NUMERIC = new Set("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0
 // node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js
 function getMethodLiteral(schema) {
   const shape = getObjectShape(schema);
-  const methodSchema = shape?.method;
+  const methodSchema = shape == null ? void 0 : shape.method;
   if (!methodSchema) {
     throw new Error("Schema is missing a method literal");
   }
@@ -15574,8 +32391,8 @@ var Protocol = class {
       // Automatic pong by default.
       (_request) => ({})
     );
-    this._taskStore = _options?.taskStore;
-    this._taskMessageQueue = _options?.taskMessageQueue;
+    this._taskStore = _options == null ? void 0 : _options.taskStore;
+    this._taskMessageQueue = _options == null ? void 0 : _options.taskMessageQueue;
     if (this._taskStore) {
       this.setRequestHandler(GetTaskRequestSchema, async (request, extra) => {
         const task = await this._taskStore.getTask(request.params.taskId, extra.sessionId);
@@ -15588,6 +32405,7 @@ var Protocol = class {
       });
       this.setRequestHandler(GetTaskPayloadRequestSchema, async (request, extra) => {
         const handleTaskResult = async () => {
+          var _a4;
           const taskId = request.params.taskId;
           if (!await this._taskStore.getTask(taskId, extra.sessionId)) {
             throw new McpError(ErrorCode.InvalidParams, `Task not found: ${taskId}`);
@@ -15614,7 +32432,7 @@ var Protocol = class {
                 }
                 continue;
               }
-              await this._transport?.send(queuedMessage.message, { relatedRequestId: extra.requestId });
+              await ((_a4 = this._transport) == null ? void 0 : _a4.send(queuedMessage.message, { relatedRequestId: extra.requestId }));
             }
           }
           const task = await this._taskStore.getTask(taskId, extra.sessionId);
@@ -15643,8 +32461,9 @@ var Protocol = class {
         return await handleTaskResult();
       });
       this.setRequestHandler(ListTasksRequestSchema, async (request, extra) => {
+        var _a4;
         try {
-          const { tasks, nextCursor } = await this._taskStore.listTasks(request.params?.cursor, extra.sessionId);
+          const { tasks, nextCursor } = await this._taskStore.listTasks((_a4 = request.params) == null ? void 0 : _a4.cursor, extra.sessionId);
           return {
             tasks,
             nextCursor,
@@ -15687,7 +32506,7 @@ var Protocol = class {
       return;
     }
     const controller = this._requestHandlerAbortControllers.get(notification.params.requestId);
-    controller?.abort(notification.params.reason);
+    controller == null ? void 0 : controller.abort(notification.params.reason);
   }
   _setupTimeout(messageId, timeout, maxTotalTimeout, onTimeout, resetTimeoutOnProgress = false) {
     this._timeoutInfo.set(messageId, {
@@ -15728,23 +32547,24 @@ var Protocol = class {
    * The Protocol object assumes ownership of the Transport, replacing any callbacks that have already been set, and expects that it is the only user of the Transport instance going forward.
    */
   async connect(transport) {
+    var _a4, _b, _c;
     if (this._transport) {
       throw new Error("Already connected to a transport. Call close() before connecting to a new transport, or use a separate Protocol instance per connection.");
     }
     this._transport = transport;
-    const _onclose = this.transport?.onclose;
+    const _onclose = (_a4 = this.transport) == null ? void 0 : _a4.onclose;
     this._transport.onclose = () => {
-      _onclose?.();
+      _onclose == null ? void 0 : _onclose();
       this._onclose();
     };
-    const _onerror = this.transport?.onerror;
+    const _onerror = (_b = this.transport) == null ? void 0 : _b.onerror;
     this._transport.onerror = (error2) => {
-      _onerror?.(error2);
+      _onerror == null ? void 0 : _onerror(error2);
       this._onerror(error2);
     };
-    const _onmessage = this._transport?.onmessage;
+    const _onmessage = (_c = this._transport) == null ? void 0 : _c.onmessage;
     this._transport.onmessage = (message, extra) => {
-      _onmessage?.(message, extra);
+      _onmessage == null ? void 0 : _onmessage(message, extra);
       if (isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message)) {
         this._onresponse(message);
       } else if (isJSONRPCRequest(message)) {
@@ -15758,6 +32578,7 @@ var Protocol = class {
     await this._transport.start();
   }
   _onclose() {
+    var _a4;
     const responseHandlers = this._responseHandlers;
     this._responseHandlers = /* @__PURE__ */ new Map();
     this._progressHandlers.clear();
@@ -15773,13 +32594,14 @@ var Protocol = class {
     this._requestHandlerAbortControllers.clear();
     const error2 = McpError.fromError(ErrorCode.ConnectionClosed, "Connection closed");
     this._transport = void 0;
-    this.onclose?.();
+    (_a4 = this.onclose) == null ? void 0 : _a4.call(this);
     for (const handler2 of responseHandlers.values()) {
       handler2(error2);
     }
   }
   _onerror(error2) {
-    this.onerror?.(error2);
+    var _a4;
+    (_a4 = this.onerror) == null ? void 0 : _a4.call(this, error2);
   }
   _onnotification(notification) {
     const handler2 = this._notificationHandlers.get(notification.method) ?? this.fallbackNotificationHandler;
@@ -15789,10 +32611,11 @@ var Protocol = class {
     Promise.resolve().then(() => handler2(notification)).catch((error2) => this._onerror(new Error(`Uncaught error in notification handler: ${error2}`)));
   }
   _onrequest(request, extra) {
+    var _a4, _b, _c, _d;
     const handler2 = this._requestHandlers.get(request.method) ?? this.fallbackRequestHandler;
     const capturedTransport = this._transport;
-    const relatedTaskId = request.params?._meta?.[RELATED_TASK_META_KEY]?.taskId;
-    const sessionId = capturedTransport?.sessionId;
+    const relatedTaskId = (_c = (_b = (_a4 = request.params) == null ? void 0 : _a4._meta) == null ? void 0 : _b[RELATED_TASK_META_KEY]) == null ? void 0 : _c.taskId;
+    const sessionId = capturedTransport == null ? void 0 : capturedTransport.sessionId;
     const store = this._taskStore;
     let relatedTaskFound = true;
     let relatedTaskLookup;
@@ -15816,26 +32639,26 @@ var Protocol = class {
       };
       if (relatedTaskId && relatedTaskLookup) {
         const queuedError = { type: "error", message: errorResponse, timestamp: Date.now() };
-        relatedTaskLookup.then(() => this._enqueueTaskMessage(relatedTaskId, queuedError, sessionId), () => capturedTransport?.send(errorResponse)).catch((error2) => this._onerror(new Error(`Failed to send an error response: ${error2}`)));
+        relatedTaskLookup.then(() => this._enqueueTaskMessage(relatedTaskId, queuedError, sessionId), () => capturedTransport == null ? void 0 : capturedTransport.send(errorResponse)).catch((error2) => this._onerror(new Error(`Failed to send an error response: ${error2}`)));
       } else if (relatedTaskId && this._taskMessageQueue) {
         this._enqueueTaskMessage(relatedTaskId, {
           type: "error",
           message: errorResponse,
           timestamp: Date.now()
-        }, capturedTransport?.sessionId).catch((error2) => this._onerror(new Error(`Failed to enqueue error response: ${error2}`)));
+        }, capturedTransport == null ? void 0 : capturedTransport.sessionId).catch((error2) => this._onerror(new Error(`Failed to enqueue error response: ${error2}`)));
       } else {
-        capturedTransport?.send(errorResponse).catch((error2) => this._onerror(new Error(`Failed to send an error response: ${error2}`)));
+        capturedTransport == null ? void 0 : capturedTransport.send(errorResponse).catch((error2) => this._onerror(new Error(`Failed to send an error response: ${error2}`)));
       }
       return;
     }
     const abortController = new AbortController();
     this._requestHandlerAbortControllers.set(request.id, abortController);
     const taskCreationParams = isTaskAugmentedRequestParams(request.params) ? request.params.task : void 0;
-    const taskStore = this._taskStore ? this.requestTaskStore(request, capturedTransport?.sessionId) : void 0;
+    const taskStore = this._taskStore ? this.requestTaskStore(request, capturedTransport == null ? void 0 : capturedTransport.sessionId) : void 0;
     const fullExtra = {
       signal: abortController.signal,
-      sessionId: capturedTransport?.sessionId,
-      _meta: request.params?._meta,
+      sessionId: capturedTransport == null ? void 0 : capturedTransport.sessionId,
+      _meta: (_d = request.params) == null ? void 0 : _d._meta,
       sendNotification: async (notification) => {
         if (abortController.signal.aborted)
           return;
@@ -15846,6 +32669,7 @@ var Protocol = class {
         await this.notification(notification, notificationOptions);
       },
       sendRequest: async (r, resultSchema, options) => {
+        var _a5;
         if (abortController.signal.aborted) {
           throw new McpError(ErrorCode.ConnectionClosed, "Request was cancelled");
         }
@@ -15853,20 +32677,20 @@ var Protocol = class {
         if (relatedTaskId && !requestOptions.relatedTask) {
           requestOptions.relatedTask = { taskId: relatedTaskId };
         }
-        const effectiveTaskId = requestOptions.relatedTask?.taskId ?? relatedTaskId;
+        const effectiveTaskId = ((_a5 = requestOptions.relatedTask) == null ? void 0 : _a5.taskId) ?? relatedTaskId;
         if (effectiveTaskId && taskStore) {
           await taskStore.updateTaskStatus(effectiveTaskId, "input_required");
         }
         return await this.request(r, resultSchema, requestOptions);
       },
-      authInfo: extra?.authInfo,
+      authInfo: extra == null ? void 0 : extra.authInfo,
       requestId: request.id,
-      requestInfo: extra?.requestInfo,
+      requestInfo: extra == null ? void 0 : extra.requestInfo,
       taskId: relatedTaskId,
       taskStore,
-      taskRequestedTtl: taskCreationParams?.ttl,
-      closeSSEStream: extra?.closeSSEStream,
-      closeStandaloneSSEStream: extra?.closeStandaloneSSEStream
+      taskRequestedTtl: taskCreationParams == null ? void 0 : taskCreationParams.ttl,
+      closeSSEStream: extra == null ? void 0 : extra.closeSSEStream,
+      closeStandaloneSSEStream: extra == null ? void 0 : extra.closeStandaloneSSEStream
     };
     (relatedTaskLookup ?? Promise.resolve()).then(() => {
       if (relatedTaskLookup && abortController.signal.aborted) {
@@ -15889,9 +32713,9 @@ var Protocol = class {
           type: "response",
           message: response,
           timestamp: Date.now()
-        }, capturedTransport?.sessionId);
+        }, capturedTransport == null ? void 0 : capturedTransport.sessionId);
       } else {
-        await capturedTransport?.send(response);
+        await (capturedTransport == null ? void 0 : capturedTransport.send(response));
       }
     }, async (error2) => {
       if (abortController.signal.aborted) {
@@ -15911,9 +32735,9 @@ var Protocol = class {
           type: "error",
           message: errorResponse,
           timestamp: Date.now()
-        }, capturedTransport?.sessionId);
+        }, capturedTransport == null ? void 0 : capturedTransport.sessionId);
       } else {
-        await capturedTransport?.send(errorResponse);
+        await (capturedTransport == null ? void 0 : capturedTransport.send(errorResponse));
       }
     }).catch((error2) => this._onerror(new Error(`Failed to send response: ${error2}`))).finally(() => {
       if (this._requestHandlerAbortControllers.get(request.id) === abortController) {
@@ -15992,7 +32816,8 @@ var Protocol = class {
    * Closes the connection.
    */
   async close() {
-    await this._transport?.close();
+    var _a4;
+    await ((_a4 = this._transport) == null ? void 0 : _a4.close());
   }
   /**
    * Sends a request and returns an AsyncGenerator that yields response messages.
@@ -16022,6 +32847,7 @@ var Protocol = class {
    * @experimental Use `client.experimental.tasks.requestStream()` to access this method.
    */
   async *requestStream(request, resultSchema, options) {
+    var _a4, _b;
     const { task } = options ?? {};
     if (!task) {
       try {
@@ -16069,9 +32895,9 @@ var Protocol = class {
           yield { type: "result", result };
           return;
         }
-        const pollInterval = task2.pollInterval ?? this._options?.defaultTaskPollInterval ?? 1e3;
+        const pollInterval = task2.pollInterval ?? ((_a4 = this._options) == null ? void 0 : _a4.defaultTaskPollInterval) ?? 1e3;
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
-        options?.signal?.throwIfAborted();
+        (_b = options == null ? void 0 : options.signal) == null ? void 0 : _b.throwIfAborted();
       }
     } catch (error2) {
       yield {
@@ -16088,6 +32914,7 @@ var Protocol = class {
   request(request, resultSchema, options) {
     const { relatedRequestId, resumptionToken, onresumptiontoken, task, relatedTask } = options ?? {};
     return new Promise((resolve, reject) => {
+      var _a4, _b, _c, _d, _e;
       const earlyReject = (error2) => {
         reject(error2);
       };
@@ -16095,7 +32922,7 @@ var Protocol = class {
         earlyReject(new Error("Not connected"));
         return;
       }
-      if (this._options?.enforceStrictCapabilities === true) {
+      if (((_a4 = this._options) == null ? void 0 : _a4.enforceStrictCapabilities) === true) {
         try {
           this.assertCapabilityForMethod(request.method);
           if (task) {
@@ -16106,19 +32933,19 @@ var Protocol = class {
           return;
         }
       }
-      options?.signal?.throwIfAborted();
+      (_b = options == null ? void 0 : options.signal) == null ? void 0 : _b.throwIfAborted();
       const messageId = this._requestMessageId++;
       const jsonrpcRequest = {
         ...request,
         jsonrpc: "2.0",
         id: messageId
       };
-      if (options?.onprogress) {
+      if (options == null ? void 0 : options.onprogress) {
         this._progressHandlers.set(messageId, options.onprogress);
         jsonrpcRequest.params = {
           ...request.params,
           _meta: {
-            ...request.params?._meta || {},
+            ...((_c = request.params) == null ? void 0 : _c._meta) || {},
             progressToken: messageId
           }
         };
@@ -16133,16 +32960,17 @@ var Protocol = class {
         jsonrpcRequest.params = {
           ...jsonrpcRequest.params,
           _meta: {
-            ...jsonrpcRequest.params?._meta || {},
+            ...((_d = jsonrpcRequest.params) == null ? void 0 : _d._meta) || {},
             [RELATED_TASK_META_KEY]: relatedTask
           }
         };
       }
       const cancel = (reason) => {
+        var _a5;
         this._responseHandlers.delete(messageId);
         this._progressHandlers.delete(messageId);
         this._cleanupTimeout(messageId);
-        this._transport?.send({
+        (_a5 = this._transport) == null ? void 0 : _a5.send({
           jsonrpc: "2.0",
           method: "notifications/cancelled",
           params: {
@@ -16154,7 +32982,8 @@ var Protocol = class {
         reject(error2);
       };
       this._responseHandlers.set(messageId, (response) => {
-        if (options?.signal?.aborted) {
+        var _a5;
+        if ((_a5 = options == null ? void 0 : options.signal) == null ? void 0 : _a5.aborted) {
           return;
         }
         if (response instanceof Error) {
@@ -16171,13 +33000,14 @@ var Protocol = class {
           reject(error2);
         }
       });
-      options?.signal?.addEventListener("abort", () => {
-        cancel(options?.signal?.reason);
+      (_e = options == null ? void 0 : options.signal) == null ? void 0 : _e.addEventListener("abort", () => {
+        var _a5;
+        cancel((_a5 = options == null ? void 0 : options.signal) == null ? void 0 : _a5.reason);
       });
-      const timeout = options?.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
+      const timeout = (options == null ? void 0 : options.timeout) ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
       const timeoutHandler = () => cancel(McpError.fromError(ErrorCode.RequestTimeout, "Request timed out", { timeout }));
-      this._setupTimeout(messageId, timeout, options?.maxTotalTimeout, timeoutHandler, options?.resetTimeoutOnProgress ?? false);
-      const relatedTaskId = relatedTask?.taskId;
+      this._setupTimeout(messageId, timeout, options == null ? void 0 : options.maxTotalTimeout, timeoutHandler, (options == null ? void 0 : options.resetTimeoutOnProgress) ?? false);
+      const relatedTaskId = relatedTask == null ? void 0 : relatedTask.taskId;
       if (relatedTaskId) {
         const responseResolver = (response) => {
           const handler2 = this._responseHandlers.get(messageId);
@@ -16240,11 +33070,12 @@ var Protocol = class {
    * Emits a notification, which is a one-way message that does not expect a response.
    */
   async notification(notification, options) {
+    var _a4, _b, _c, _d;
     if (!this._transport) {
       throw new Error("Not connected");
     }
     this.assertNotificationCapability(notification.method);
-    const relatedTaskId = options?.relatedTask?.taskId;
+    const relatedTaskId = (_a4 = options == null ? void 0 : options.relatedTask) == null ? void 0 : _a4.taskId;
     if (relatedTaskId) {
       const jsonrpcNotification2 = {
         ...notification,
@@ -16252,7 +33083,7 @@ var Protocol = class {
         params: {
           ...notification.params,
           _meta: {
-            ...notification.params?._meta || {},
+            ...((_b = notification.params) == null ? void 0 : _b._meta) || {},
             [RELATED_TASK_META_KEY]: options.relatedTask
           }
         }
@@ -16264,14 +33095,15 @@ var Protocol = class {
       });
       return;
     }
-    const debouncedMethods = this._options?.debouncedNotificationMethods ?? [];
-    const canDebounce = debouncedMethods.includes(notification.method) && !notification.params && !options?.relatedRequestId && !options?.relatedTask;
+    const debouncedMethods = ((_c = this._options) == null ? void 0 : _c.debouncedNotificationMethods) ?? [];
+    const canDebounce = debouncedMethods.includes(notification.method) && !notification.params && !(options == null ? void 0 : options.relatedRequestId) && !(options == null ? void 0 : options.relatedTask);
     if (canDebounce) {
       if (this._pendingDebouncedNotifications.has(notification.method)) {
         return;
       }
       this._pendingDebouncedNotifications.add(notification.method);
       Promise.resolve().then(() => {
+        var _a5, _b2;
         this._pendingDebouncedNotifications.delete(notification.method);
         if (!this._transport) {
           return;
@@ -16280,19 +33112,19 @@ var Protocol = class {
           ...notification,
           jsonrpc: "2.0"
         };
-        if (options?.relatedTask) {
+        if (options == null ? void 0 : options.relatedTask) {
           jsonrpcNotification2 = {
             ...jsonrpcNotification2,
             params: {
               ...jsonrpcNotification2.params,
               _meta: {
-                ...jsonrpcNotification2.params?._meta || {},
+                ...((_a5 = jsonrpcNotification2.params) == null ? void 0 : _a5._meta) || {},
                 [RELATED_TASK_META_KEY]: options.relatedTask
               }
             }
           };
         }
-        this._transport?.send(jsonrpcNotification2, options).catch((error2) => this._onerror(error2));
+        (_b2 = this._transport) == null ? void 0 : _b2.send(jsonrpcNotification2, options).catch((error2) => this._onerror(error2));
       });
       return;
     }
@@ -16300,13 +33132,13 @@ var Protocol = class {
       ...notification,
       jsonrpc: "2.0"
     };
-    if (options?.relatedTask) {
+    if (options == null ? void 0 : options.relatedTask) {
       jsonrpcNotification = {
         ...jsonrpcNotification,
         params: {
           ...jsonrpcNotification.params,
           _meta: {
-            ...jsonrpcNotification.params?._meta || {},
+            ...((_d = jsonrpcNotification.params) == null ? void 0 : _d._meta) || {},
             [RELATED_TASK_META_KEY]: options.relatedTask
           }
         }
@@ -16382,11 +33214,12 @@ var Protocol = class {
    * simply propagates the error.
    */
   async _enqueueTaskMessage(taskId, message, sessionId) {
+    var _a4, _b;
     if (!this._taskStore || !this._taskMessageQueue) {
       throw new Error("Cannot enqueue task message: taskStore and taskMessageQueue are not configured");
     }
-    const maxQueueSize = this._options?.maxTaskQueueSize;
-    await this._taskMessageQueue.enqueue(taskId, message, sessionId ?? this._transport?.sessionId, maxQueueSize);
+    const maxQueueSize = (_a4 = this._options) == null ? void 0 : _a4.maxTaskQueueSize;
+    await this._taskMessageQueue.enqueue(taskId, message, sessionId ?? ((_b = this._transport) == null ? void 0 : _b.sessionId), maxQueueSize);
   }
   /**
    * Clears the message queue for a task and rejects any pending request resolvers.
@@ -16419,10 +33252,11 @@ var Protocol = class {
    * @returns Promise that resolves when an update occurs or rejects if aborted
    */
   async _waitForTaskUpdate(taskId, signal, sessionId) {
-    let interval = this._options?.defaultTaskPollInterval ?? 1e3;
+    var _a4, _b;
+    let interval = ((_a4 = this._options) == null ? void 0 : _a4.defaultTaskPollInterval) ?? 1e3;
     try {
-      const task = await this._taskStore?.getTask(taskId, sessionId);
-      if (task?.pollInterval) {
+      const task = await ((_b = this._taskStore) == null ? void 0 : _b.getTask(taskId, sessionId));
+      if (task == null ? void 0 : task.pollInterval) {
         interval = task.pollInterval;
       }
     } catch {
@@ -16640,7 +33474,7 @@ var ExperimentalClientTasks = class {
       ...options,
       // We check if the tool is known to be a task during auto-configuration, but assume
       // the caller knows what they're doing if they pass this explicitly
-      task: options?.task ?? (clientInternal.isToolTask(params.name) ? {} : void 0)
+      task: (options == null ? void 0 : options.task) ?? (clientInternal.isToolTask(params.name) ? {} : void 0)
     };
     const stream = clientInternal.requestStream({ method: "tools/call", params }, resultSchema, optionsWithTask);
     const validator = clientInternal.getToolOutputValidator(params.name);
@@ -16749,12 +33583,13 @@ var ExperimentalClientTasks = class {
 
 // node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js
 function assertToolsCallTaskCapability(requests, method, entityName) {
+  var _a4;
   if (!requests) {
     throw new Error(`${entityName} does not support task creation (required for ${method})`);
   }
   switch (method) {
     case "tools/call":
-      if (!requests.tools?.call) {
+      if (!((_a4 = requests.tools) == null ? void 0 : _a4.call)) {
         throw new Error(`${entityName} does not support task creation for tools/call (required for ${method})`);
       }
       break;
@@ -16763,17 +33598,18 @@ function assertToolsCallTaskCapability(requests, method, entityName) {
   }
 }
 function assertClientRequestTaskCapability(requests, method, entityName) {
+  var _a4, _b;
   if (!requests) {
     throw new Error(`${entityName} does not support task creation (required for ${method})`);
   }
   switch (method) {
     case "sampling/createMessage":
-      if (!requests.sampling?.createMessage) {
+      if (!((_a4 = requests.sampling) == null ? void 0 : _a4.createMessage)) {
         throw new Error(`${entityName} does not support task creation for sampling/createMessage (required for ${method})`);
       }
       break;
     case "elicitation/create":
-      if (!requests.elicitation?.create) {
+      if (!((_b = requests.elicitation) == null ? void 0 : _b.create)) {
         throw new Error(`${entityName} does not support task creation for elicitation/create (required for ${method})`);
       }
       break;
@@ -16835,9 +33671,9 @@ var Client = class extends Protocol {
     this._cachedKnownTaskTools = /* @__PURE__ */ new Set();
     this._cachedRequiredTaskTools = /* @__PURE__ */ new Set();
     this._listChangedDebounceTimers = /* @__PURE__ */ new Map();
-    this._capabilities = options?.capabilities ?? {};
-    this._jsonSchemaValidator = options?.jsonSchemaValidator ?? new AjvJsonSchemaValidator();
-    if (options?.listChanged) {
+    this._capabilities = (options == null ? void 0 : options.capabilities) ?? {};
+    this._jsonSchemaValidator = (options == null ? void 0 : options.jsonSchemaValidator) ?? new AjvJsonSchemaValidator();
+    if (options == null ? void 0 : options.listChanged) {
       this._pendingListChangedConfig = options.listChanged;
     }
   }
@@ -16848,19 +33684,20 @@ var Client = class extends Protocol {
    * @internal
    */
   _setupListChangedHandlers(config2) {
-    if (config2.tools && this._serverCapabilities?.tools?.listChanged) {
+    var _a4, _b, _c, _d, _e, _f;
+    if (config2.tools && ((_b = (_a4 = this._serverCapabilities) == null ? void 0 : _a4.tools) == null ? void 0 : _b.listChanged)) {
       this._setupListChangedHandler("tools", ToolListChangedNotificationSchema, config2.tools, async () => {
         const result = await this.listTools();
         return result.tools;
       });
     }
-    if (config2.prompts && this._serverCapabilities?.prompts?.listChanged) {
+    if (config2.prompts && ((_d = (_c = this._serverCapabilities) == null ? void 0 : _c.prompts) == null ? void 0 : _d.listChanged)) {
       this._setupListChangedHandler("prompts", PromptListChangedNotificationSchema, config2.prompts, async () => {
         const result = await this.listPrompts();
         return result.prompts;
       });
     }
-    if (config2.resources && this._serverCapabilities?.resources?.listChanged) {
+    if (config2.resources && ((_f = (_e = this._serverCapabilities) == null ? void 0 : _e.resources) == null ? void 0 : _f.listChanged)) {
       this._setupListChangedHandler("resources", ResourceListChangedNotificationSchema, config2.resources, async () => {
         const result = await this.listResources();
         return result.resources;
@@ -16898,7 +33735,7 @@ var Client = class extends Protocol {
    */
   setRequestHandler(requestSchema, handler2) {
     const shape = getObjectShape(requestSchema);
-    const methodSchema = shape?.method;
+    const methodSchema = shape == null ? void 0 : shape.method;
     if (!methodSchema) {
       throw new Error("Schema is missing a method literal");
     }
@@ -16909,6 +33746,7 @@ var Client = class extends Protocol {
     const method = methodValue;
     if (method === "elicitation/create") {
       const wrappedHandler = async (request, extra) => {
+        var _a4, _b;
         const validatedRequest = safeParse2(ElicitRequestSchema, request);
         if (!validatedRequest.success) {
           const errorMessage = validatedRequest.error instanceof Error ? validatedRequest.error.message : String(validatedRequest.error);
@@ -16940,7 +33778,7 @@ var Client = class extends Protocol {
         const validatedResult = validationResult.data;
         const requestedSchema = params.mode === "form" ? params.requestedSchema : void 0;
         if (params.mode === "form" && validatedResult.action === "accept" && validatedResult.content && requestedSchema) {
-          if (this._capabilities.elicitation?.form?.applyDefaults) {
+          if ((_b = (_a4 = this._capabilities.elicitation) == null ? void 0 : _a4.form) == null ? void 0 : _b.applyDefaults) {
             try {
               applyElicitationDefaults(requestedSchema, validatedResult.content);
             } catch {
@@ -16982,7 +33820,8 @@ var Client = class extends Protocol {
     return super.setRequestHandler(requestSchema, handler2);
   }
   assertCapability(capability, method) {
-    if (!this._serverCapabilities?.[capability]) {
+    var _a4;
+    if (!((_a4 = this._serverCapabilities) == null ? void 0 : _a4[capability])) {
       throw new Error(`Server does not support ${capability} (required for ${method})`);
     }
   }
@@ -17043,15 +33882,16 @@ var Client = class extends Protocol {
     return this._instructions;
   }
   assertCapabilityForMethod(method) {
+    var _a4, _b, _c, _d, _e;
     switch (method) {
       case "logging/setLevel":
-        if (!this._serverCapabilities?.logging) {
+        if (!((_a4 = this._serverCapabilities) == null ? void 0 : _a4.logging)) {
           throw new Error(`Server does not support logging (required for ${method})`);
         }
         break;
       case "prompts/get":
       case "prompts/list":
-        if (!this._serverCapabilities?.prompts) {
+        if (!((_b = this._serverCapabilities) == null ? void 0 : _b.prompts)) {
           throw new Error(`Server does not support prompts (required for ${method})`);
         }
         break;
@@ -17060,7 +33900,7 @@ var Client = class extends Protocol {
       case "resources/read":
       case "resources/subscribe":
       case "resources/unsubscribe":
-        if (!this._serverCapabilities?.resources) {
+        if (!((_c = this._serverCapabilities) == null ? void 0 : _c.resources)) {
           throw new Error(`Server does not support resources (required for ${method})`);
         }
         if (method === "resources/subscribe" && !this._serverCapabilities.resources.subscribe) {
@@ -17069,12 +33909,12 @@ var Client = class extends Protocol {
         break;
       case "tools/call":
       case "tools/list":
-        if (!this._serverCapabilities?.tools) {
+        if (!((_d = this._serverCapabilities) == null ? void 0 : _d.tools)) {
           throw new Error(`Server does not support tools (required for ${method})`);
         }
         break;
       case "completion/complete":
-        if (!this._serverCapabilities?.completions) {
+        if (!((_e = this._serverCapabilities) == null ? void 0 : _e.completions)) {
           throw new Error(`Server does not support completions (required for ${method})`);
         }
         break;
@@ -17085,9 +33925,10 @@ var Client = class extends Protocol {
     }
   }
   assertNotificationCapability(method) {
+    var _a4;
     switch (method) {
       case "notifications/roots/list_changed":
-        if (!this._capabilities.roots?.listChanged) {
+        if (!((_a4 = this._capabilities.roots) == null ? void 0 : _a4.listChanged)) {
           throw new Error(`Client does not support roots list changed notifications (required for ${method})`);
         }
         break;
@@ -17132,13 +33973,15 @@ var Client = class extends Protocol {
     }
   }
   assertTaskCapability(method) {
-    assertToolsCallTaskCapability(this._serverCapabilities?.tasks?.requests, method, "Server");
+    var _a4, _b;
+    assertToolsCallTaskCapability((_b = (_a4 = this._serverCapabilities) == null ? void 0 : _a4.tasks) == null ? void 0 : _b.requests, method, "Server");
   }
   assertTaskHandlerCapability(method) {
+    var _a4;
     if (!this._capabilities) {
       return;
     }
-    assertClientRequestTaskCapability(this._capabilities.tasks?.requests, method, "Client");
+    assertClientRequestTaskCapability((_a4 = this._capabilities.tasks) == null ? void 0 : _a4.requests, method, "Client");
   }
   async ping(options) {
     return this.request({ method: "ping" }, EmptyResultSchema, options);
@@ -17202,7 +34045,8 @@ var Client = class extends Protocol {
     return result;
   }
   isToolTask(toolName) {
-    if (!this._serverCapabilities?.tasks?.requests?.tools?.call) {
+    var _a4, _b, _c, _d;
+    if (!((_d = (_c = (_b = (_a4 = this._serverCapabilities) == null ? void 0 : _a4.tasks) == null ? void 0 : _b.requests) == null ? void 0 : _c.tools) == null ? void 0 : _d.call)) {
       return false;
     }
     return this._cachedKnownTaskTools.has(toolName);
@@ -17219,6 +34063,7 @@ var Client = class extends Protocol {
    * Called after listTools() to pre-compile validators for better performance.
    */
   cacheToolMetadata(tools) {
+    var _a4;
     this._cachedToolOutputValidators.clear();
     this._cachedKnownTaskTools.clear();
     this._cachedRequiredTaskTools.clear();
@@ -17227,7 +34072,7 @@ var Client = class extends Protocol {
         const toolValidator = this._jsonSchemaValidator.getValidator(tool.outputSchema);
         this._cachedToolOutputValidators.set(tool.name, toolValidator);
       }
-      const taskSupport = tool.execution?.taskSupport;
+      const taskSupport = (_a4 = tool.execution) == null ? void 0 : _a4.taskSupport;
       if (taskSupport === "required" || taskSupport === "optional") {
         this._cachedKnownTaskTools.add(tool.name);
       }
@@ -17331,7 +34176,7 @@ function createFetchWithInit(baseFetch = fetch, baseInit) {
       ...baseInit,
       ...init,
       // Headers need special handling - merge instead of replace
-      headers: init?.headers ? { ...normalizeHeaders(baseInit.headers), ...normalizeHeaders(init.headers) } : baseInit.headers
+      headers: (init == null ? void 0 : init.headers) ? { ...normalizeHeaders(baseInit.headers), ...normalizeHeaders(init.headers) } : baseInit.headers
     };
     return baseFetch(url2, mergedInit);
   };
@@ -17353,8 +34198,9 @@ function redirectTarget(response, requestUrl) {
   }
 }
 function followWithinOrigin(baseFetch, url2, init, response, followed = 0) {
+  var _a4;
   const target = redirectTarget(response, url2);
-  const keepsMethod = response.status === 307 || response.status === 308 || (init?.method ?? "GET").toUpperCase() === "GET";
+  const keepsMethod = response.status === 307 || response.status === 308 || ((init == null ? void 0 : init.method) ?? "GET").toUpperCase() === "GET";
   if (!target || followed === MAX_REDIRECTS || !keepsMethod) {
     return void 0;
   }
@@ -17363,7 +34209,7 @@ function followWithinOrigin(baseFetch, url2, init, response, followed = 0) {
   if (addsUserinfo || !isWithinOrigin(from, target)) {
     return void 0;
   }
-  return Promise.resolve(response.body?.cancel()).then(() => baseFetch(target, { ...init, redirect: "manual" })).then((next) => followWithinOrigin(baseFetch, target, init, next, followed + 1) ?? next);
+  return Promise.resolve((_a4 = response.body) == null ? void 0 : _a4.cancel()).then(() => baseFetch(target, { ...init, redirect: "manual" })).then((next) => followWithinOrigin(baseFetch, target, init, next, followed + 1) ?? next);
 }
 var followingFetches = /* @__PURE__ */ new WeakSet();
 function fetchLeavingRedirects(baseFetch) {
@@ -17376,7 +34222,7 @@ function fetchWithinOrigin(baseFetch = fetch) {
     return baseFetch;
   }
   return (url2, init) => {
-    if (init?.redirect === "error" || init?.redirect === "manual") {
+    if ((init == null ? void 0 : init.redirect) === "error" || (init == null ? void 0 : init.redirect) === "manual") {
       return baseFetch(url2, init);
     }
     return Promise.resolve(baseFetch(url2, { ...init, redirect: "manual" })).then((response) => followWithinOrigin(baseFetch, url2, init, response) ?? response);
@@ -17401,7 +34247,8 @@ function unfollowedRedirect(response, requestUrl) {
 
 // node_modules/pkce-challenge/dist/index.node.js
 var crypto;
-crypto = globalThis.crypto?.webcrypto ?? // Node.js [18-16] REPL
+var _a3;
+crypto = ((_a3 = globalThis.crypto) == null ? void 0 : _a3.webcrypto) ?? // Node.js [18-16] REPL
 globalThis.crypto ?? // Node.js >18
 import("node:crypto").then((m) => m.webcrypto);
 async function getRandomValues(size) {
@@ -17808,29 +34655,31 @@ function boundElsewhereError(stored, issuer) {
   return new Error(`OAuth client information is bound to authorization server ${stored.issuer} and is not presented to ${issuer}. Clear the stored client information, or correct \`expectedIssuer\`, if the authorization server has moved.`);
 }
 async function auth(provider, options) {
+  var _a4, _b;
   try {
     return await authInternal(provider, options);
   } catch (error2) {
     if (error2 instanceof InvalidClientError || error2 instanceof UnauthorizedClientError) {
-      await provider.invalidateCredentials?.("all");
+      await ((_a4 = provider.invalidateCredentials) == null ? void 0 : _a4.call(provider, "all"));
       return await authInternal(provider, options);
     } else if (error2 instanceof InvalidGrantError) {
-      await provider.invalidateCredentials?.("tokens");
+      await ((_b = provider.invalidateCredentials) == null ? void 0 : _b.call(provider, "tokens"));
       return await authInternal(provider, options);
     }
     throw error2;
   }
 }
 async function authInternal(provider, { serverUrl, authorizationCode, scope, resourceMetadataUrl, fetchFn }) {
-  const cachedState = await provider.discoveryState?.();
+  var _a4, _b, _c, _d, _e;
+  const cachedState = await ((_a4 = provider.discoveryState) == null ? void 0 : _a4.call(provider));
   let resourceMetadata;
   let authorizationServerUrl;
   let metadata;
   let effectiveResourceMetadataUrl = resourceMetadataUrl;
-  if (!effectiveResourceMetadataUrl && cachedState?.resourceMetadataUrl) {
+  if (!effectiveResourceMetadataUrl && (cachedState == null ? void 0 : cachedState.resourceMetadataUrl)) {
     effectiveResourceMetadataUrl = new URL(cachedState.resourceMetadataUrl);
   }
-  if (cachedState?.authorizationServerUrl) {
+  if (cachedState == null ? void 0 : cachedState.authorizationServerUrl) {
     authorizationServerUrl = cachedState.authorizationServerUrl;
     resourceMetadata = cachedState.resourceMetadata;
     metadata = cachedState.authorizationServerMetadata ?? await discoverAuthorizationServerMetadata(authorizationServerUrl, { fetchFn });
@@ -17841,40 +34690,41 @@ async function authInternal(provider, { serverUrl, authorizationCode, scope, res
       }
     }
     if (metadata !== cachedState.authorizationServerMetadata || resourceMetadata !== cachedState.resourceMetadata) {
-      await provider.saveDiscoveryState?.({
+      await ((_b = provider.saveDiscoveryState) == null ? void 0 : _b.call(provider, {
         authorizationServerUrl: String(authorizationServerUrl),
-        resourceMetadataUrl: effectiveResourceMetadataUrl?.toString(),
+        resourceMetadataUrl: effectiveResourceMetadataUrl == null ? void 0 : effectiveResourceMetadataUrl.toString(),
         resourceMetadata,
         authorizationServerMetadata: metadata
-      });
+      }));
     }
   } else {
     const serverInfo = await discoverOAuthServerInfo(serverUrl, { resourceMetadataUrl: effectiveResourceMetadataUrl, fetchFn });
     authorizationServerUrl = serverInfo.authorizationServerUrl;
     metadata = serverInfo.authorizationServerMetadata;
     resourceMetadata = serverInfo.resourceMetadata;
-    await provider.saveDiscoveryState?.({
+    await ((_c = provider.saveDiscoveryState) == null ? void 0 : _c.call(provider, {
       authorizationServerUrl: String(authorizationServerUrl),
-      resourceMetadataUrl: effectiveResourceMetadataUrl?.toString(),
+      resourceMetadataUrl: effectiveResourceMetadataUrl == null ? void 0 : effectiveResourceMetadataUrl.toString(),
       resourceMetadata,
       authorizationServerMetadata: metadata
-    });
+    }));
   }
   const issuer = String(authorizationServerUrl);
   const selectedResource = await selectResourceURL(serverUrl, provider, resourceMetadata);
   const resource = selectedResource && resourceMetadata && !provider.validateResourceURL ? resourceMetadata.resource : selectedResource;
-  const resolvedScope = scope || resourceMetadata?.scopes_supported?.join(" ") || provider.clientMetadata.scope;
+  const resolvedScope = scope || ((_d = resourceMetadata == null ? void 0 : resourceMetadata.scopes_supported) == null ? void 0 : _d.join(" ")) || provider.clientMetadata.scope;
   const storedClientInformation = await Promise.resolve(provider.clientInformation());
   let clientInformation = discardIfIssuerMismatch(storedClientInformation, issuer);
   const canRegisterAgain = provider.saveClientInformation !== void 0 && !!provider.redirectUrl;
   if (storedClientInformation && !clientInformation && !canRegisterAgain) {
     throw boundElsewhereError(storedClientInformation, issuer);
   }
-  const unstampedClientInformation = clientInformation?.issuer == null ? clientInformation : void 0;
+  const unstampedClientInformation = (clientInformation == null ? void 0 : clientInformation.issuer) == null ? clientInformation : void 0;
   const bindClientInformation = async () => {
+    var _a5;
     try {
       if (unstampedClientInformation)
-        await provider.saveClientInformation?.({ ...unstampedClientInformation, issuer });
+        await ((_a5 = provider.saveClientInformation) == null ? void 0 : _a5.call(provider, { ...unstampedClientInformation, issuer }));
     } catch {
     }
   };
@@ -17882,7 +34732,7 @@ async function authInternal(provider, { serverUrl, authorizationCode, scope, res
     if (authorizationCode !== void 0) {
       throw new Error("Existing OAuth client information is required when exchanging an authorization code");
     }
-    const supportsUrlBasedClientId = metadata?.client_id_metadata_document_supported === true;
+    const supportsUrlBasedClientId = (metadata == null ? void 0 : metadata.client_id_metadata_document_supported) === true;
     const clientMetadataUrl = provider.clientMetadataUrl;
     if (clientMetadataUrl && !isHttpsUrl(clientMetadataUrl)) {
       throw new InvalidClientMetadataError(`clientMetadataUrl must be a valid HTTPS URL with a non-root pathname, got: ${clientMetadataUrl}`);
@@ -17890,7 +34740,7 @@ async function authInternal(provider, { serverUrl, authorizationCode, scope, res
     const shouldUseUrlBasedClientId = supportsUrlBasedClientId && clientMetadataUrl;
     if (shouldUseUrlBasedClientId) {
       clientInformation = { client_id: clientMetadataUrl, issuer };
-      await provider.saveClientInformation?.(clientInformation);
+      await ((_e = provider.saveClientInformation) == null ? void 0 : _e.call(provider, clientInformation));
     } else {
       if (!provider.saveClientInformation) {
         throw new Error("OAuth client information must be saveable for dynamic registration");
@@ -17918,10 +34768,10 @@ async function authInternal(provider, { serverUrl, authorizationCode, scope, res
     return "AUTHORIZED";
   }
   const tokens = discardIfIssuerMismatch(await provider.tokens(), issuer);
-  if (tokens?.refresh_token && tokens.issuer == null) {
+  if ((tokens == null ? void 0 : tokens.refresh_token) && tokens.issuer == null) {
     console.warn("[mcp-sdk] stored OAuth tokens have no 'issuer' property (saved by an earlier version, or by a provider that does not keep it) and are used as-is; make sure your OAuthClientProvider stores what saveTokens() and saveClientInformation() receive unchanged.");
   }
-  if (tokens?.refresh_token) {
+  if (tokens == null ? void 0 : tokens.refresh_token) {
     try {
       const newTokens = await refreshAuthorization(authorizationServerUrl, {
         metadata,
@@ -17967,7 +34817,7 @@ function isHttpsUrl(value) {
 async function selectResourceURL(serverUrl, provider, resourceMetadata) {
   const defaultResource = resourceUrlFromServerUrl(serverUrl);
   if (provider.validateResourceURL) {
-    return await provider.validateResourceURL(defaultResource, resourceMetadata?.resource);
+    return await provider.validateResourceURL(defaultResource, resourceMetadata == null ? void 0 : resourceMetadata.resource);
   }
   if (!resourceMetadata) {
     return void 0;
@@ -18015,16 +34865,17 @@ function extractFieldFromWwwAuth(response, fieldName) {
   return null;
 }
 async function discoverOAuthProtectedResourceMetadata(serverUrl, opts, fetchFn = fetch) {
+  var _a4, _b;
   const response = await discoverMetadataWithFallback(serverUrl, "oauth-protected-resource", fetchFn, {
-    protocolVersion: opts?.protocolVersion,
-    metadataUrl: opts?.resourceMetadataUrl
+    protocolVersion: opts == null ? void 0 : opts.protocolVersion,
+    metadataUrl: opts == null ? void 0 : opts.resourceMetadataUrl
   });
   if (!response || response.status === 404) {
-    await response?.body?.cancel();
+    await ((_a4 = response == null ? void 0 : response.body) == null ? void 0 : _a4.cancel());
     throw new Error(`Resource server does not implement OAuth 2.0 Protected Resource Metadata.`);
   }
   if (!response.ok) {
-    await response.body?.cancel();
+    await ((_b = response.body) == null ? void 0 : _b.cancel());
     throw new Error(`HTTP ${response.status} trying to load well-known OAuth protected resource metadata.`);
   }
   return OAuthProtectedResourceMetadataSchema.parse(await response.json());
@@ -18060,17 +34911,17 @@ function shouldAttemptFallback(response, pathname) {
 }
 async function discoverMetadataWithFallback(serverUrl, wellKnownType, fetchFn, opts) {
   const issuer = new URL(serverUrl);
-  const protocolVersion = opts?.protocolVersion ?? LATEST_PROTOCOL_VERSION;
+  const protocolVersion = (opts == null ? void 0 : opts.protocolVersion) ?? LATEST_PROTOCOL_VERSION;
   let url2;
-  if (opts?.metadataUrl) {
+  if (opts == null ? void 0 : opts.metadataUrl) {
     url2 = new URL(opts.metadataUrl);
   } else {
     const wellKnownPath = buildWellKnownPath(wellKnownType, issuer.pathname);
-    url2 = new URL(wellKnownPath, opts?.metadataServerUrl ?? issuer);
+    url2 = new URL(wellKnownPath, (opts == null ? void 0 : opts.metadataServerUrl) ?? issuer);
     url2.search = issuer.search;
   }
   let response = await tryMetadataDiscovery(url2, protocolVersion, fetchFn);
-  if (!opts?.metadataUrl && shouldAttemptFallback(response, issuer.pathname)) {
+  if (!(opts == null ? void 0 : opts.metadataUrl) && shouldAttemptFallback(response, issuer.pathname)) {
     const rootUrl = new URL(`/.well-known/${wellKnownType}`, issuer);
     response = await tryMetadataDiscovery(rootUrl, protocolVersion, fetchFn);
   }
@@ -18110,6 +34961,7 @@ function buildDiscoveryUrls(authorizationServerUrl) {
   return urlsToTry;
 }
 async function discoverAuthorizationServerMetadata(authorizationServerUrl, { fetchFn = fetch, protocolVersion = LATEST_PROTOCOL_VERSION } = {}) {
+  var _a4;
   const headers = {
     "MCP-Protocol-Version": protocolVersion,
     Accept: "application/json"
@@ -18121,7 +34973,7 @@ async function discoverAuthorizationServerMetadata(authorizationServerUrl, { fet
       continue;
     }
     if (!response.ok) {
-      await response.body?.cancel();
+      await ((_a4 = response.body) == null ? void 0 : _a4.cancel());
       if (response.status < 500) {
         continue;
       }
@@ -18139,7 +34991,7 @@ async function discoverOAuthServerInfo(serverUrl, opts) {
   let resourceMetadata;
   let authorizationServerUrl;
   try {
-    resourceMetadata = await discoverOAuthProtectedResourceMetadata(serverUrl, { resourceMetadataUrl: opts?.resourceMetadataUrl }, opts?.fetchFn);
+    resourceMetadata = await discoverOAuthProtectedResourceMetadata(serverUrl, { resourceMetadataUrl: opts == null ? void 0 : opts.resourceMetadataUrl }, opts == null ? void 0 : opts.fetchFn);
     if (resourceMetadata.authorization_servers && resourceMetadata.authorization_servers.length > 0) {
       authorizationServerUrl = resourceMetadata.authorization_servers[0];
     }
@@ -18148,7 +35000,7 @@ async function discoverOAuthServerInfo(serverUrl, opts) {
   if (!authorizationServerUrl) {
     authorizationServerUrl = String(new URL("/", serverUrl));
   }
-  const authorizationServerMetadata = await discoverAuthorizationServerMetadata(authorizationServerUrl, { fetchFn: opts?.fetchFn });
+  const authorizationServerMetadata = await discoverAuthorizationServerMetadata(authorizationServerUrl, { fetchFn: opts == null ? void 0 : opts.fetchFn });
   return {
     authorizationServerUrl,
     authorizationServerMetadata,
@@ -18185,7 +35037,7 @@ async function startAuthorization(authorizationServerUrl, { metadata, clientInfo
   if (scope) {
     authorizationUrl.searchParams.set("scope", scope);
   }
-  if (scope?.includes("offline_access")) {
+  if (scope == null ? void 0 : scope.includes("offline_access")) {
     authorizationUrl.searchParams.append("prompt", "consent");
   }
   if (resource) {
@@ -18202,7 +35054,7 @@ function prepareAuthorizationCodeRequest(authorizationCode, codeVerifier, redire
   });
 }
 async function executeTokenRequest(authorizationServerUrl, { metadata, tokenRequestParams, clientInformation, addClientAuthentication, resource, fetchFn }) {
-  const tokenUrl = metadata?.token_endpoint ? new URL(metadata.token_endpoint) : new URL("/token", authorizationServerUrl);
+  const tokenUrl = (metadata == null ? void 0 : metadata.token_endpoint) ? new URL(metadata.token_endpoint) : new URL("/token", authorizationServerUrl);
   const headers = new Headers({
     "Content-Type": "application/x-www-form-urlencoded",
     Accept: "application/json"
@@ -18213,7 +35065,7 @@ async function executeTokenRequest(authorizationServerUrl, { metadata, tokenRequ
   if (addClientAuthentication) {
     await addClientAuthentication(headers, tokenRequestParams, tokenUrl, metadata);
   } else if (clientInformation) {
-    const supportedMethods = metadata?.token_endpoint_auth_methods_supported ?? [];
+    const supportedMethods = (metadata == null ? void 0 : metadata.token_endpoint_auth_methods_supported) ?? [];
     const authMethod = selectClientAuthMethod(clientInformation, supportedMethods);
     applyClientAuthentication(authMethod, clientInformation, headers, tokenRequestParams);
   }
@@ -18523,17 +35375,17 @@ var StreamableHTTPClientTransport = class {
     this._url = url2;
     this._resourceMetadataUrl = void 0;
     this._scope = void 0;
-    this._requestInit = opts?.requestInit;
-    this._authProvider = opts?.authProvider;
-    this._fetch = opts?.fetch;
-    this._fetchWithInit = createFetchWithInit(opts?.fetch, opts?.requestInit);
-    this._followRedirects = opts?.redirectPolicy === "follow";
+    this._requestInit = opts == null ? void 0 : opts.requestInit;
+    this._authProvider = opts == null ? void 0 : opts.authProvider;
+    this._fetch = opts == null ? void 0 : opts.fetch;
+    this._fetchWithInit = createFetchWithInit(opts == null ? void 0 : opts.fetch, opts == null ? void 0 : opts.requestInit);
+    this._followRedirects = (opts == null ? void 0 : opts.redirectPolicy) === "follow";
     if (this._followRedirects) {
       this._fetch = fetchLeavingRedirects(this._fetch);
       this._fetchWithInit = fetchLeavingRedirects(this._fetchWithInit);
     }
-    this._sessionId = opts?.sessionId;
-    this._reconnectionOptions = opts?.reconnectionOptions ?? DEFAULT_STREAMABLE_HTTP_RECONNECTION_OPTIONS;
+    this._sessionId = opts == null ? void 0 : opts.sessionId;
+    this._reconnectionOptions = (opts == null ? void 0 : opts.reconnectionOptions) ?? DEFAULT_STREAMABLE_HTTP_RECONNECTION_OPTIONS;
   }
   /** Error text for a redirect `response` that was not followed, or `undefined` for any other response. */
   _unfollowedRedirect(response, url2) {
@@ -18541,6 +35393,7 @@ var StreamableHTTPClientTransport = class {
     return text && !this._followRedirects ? `${text} (redirectPolicy: 'same-origin')` : text;
   }
   async _authThenStart() {
+    var _a4;
     if (!this._authProvider) {
       throw new UnauthorizedError("No auth provider");
     }
@@ -18553,7 +35406,7 @@ var StreamableHTTPClientTransport = class {
         fetchFn: this._fetchWithInit
       });
     } catch (error2) {
-      this.onerror?.(error2);
+      (_a4 = this.onerror) == null ? void 0 : _a4.call(this, error2);
       throw error2;
     }
     if (result !== "AUTHORIZED") {
@@ -18562,6 +35415,7 @@ var StreamableHTTPClientTransport = class {
     return await this._startOrAuthSse({ resumptionToken: void 0 });
   }
   async _commonHeaders() {
+    var _a4;
     const headers = {};
     if (this._authProvider) {
       const tokens = await this._authProvider.tokens();
@@ -18575,13 +35429,14 @@ var StreamableHTTPClientTransport = class {
     if (this._protocolVersion) {
       headers["mcp-protocol-version"] = this._protocolVersion;
     }
-    const extraHeaders = normalizeHeaders(this._requestInit?.headers);
+    const extraHeaders = normalizeHeaders((_a4 = this._requestInit) == null ? void 0 : _a4.headers);
     return new Headers({
       ...headers,
       ...extraHeaders
     });
   }
   async _startOrAuthSse(options) {
+    var _a4, _b, _c;
     const { resumptionToken } = options;
     try {
       const headers = await this._commonHeaders();
@@ -18590,14 +35445,14 @@ var StreamableHTTPClientTransport = class {
         headers.set("last-event-id", resumptionToken);
       }
       const fetchFn = this._fetch ?? fetch;
-      const init = { method: "GET", headers, signal: this._abortController?.signal };
+      const init = { method: "GET", headers, signal: (_a4 = this._abortController) == null ? void 0 : _a4.signal };
       let response = await fetchFn(this._url, this._followRedirects ? init : { ...init, redirect: "manual" });
       const followed = this._followRedirects ? void 0 : followWithinOrigin(fetchFn, this._url, init, response);
       if (followed) {
         response = await followed;
       }
       if (!response.ok) {
-        await response.body?.cancel();
+        await ((_b = response.body) == null ? void 0 : _b.cancel());
         if (response.status === 401 && this._authProvider) {
           return await this._authThenStart();
         }
@@ -18608,7 +35463,7 @@ var StreamableHTTPClientTransport = class {
       }
       this._handleSseStream(response.body, options, true);
     } catch (error2) {
-      this.onerror?.(error2);
+      (_c = this.onerror) == null ? void 0 : _c.call(this, error2);
       throw error2;
     }
   }
@@ -18634,15 +35489,17 @@ var StreamableHTTPClientTransport = class {
    * @param attemptCount Current reconnection attempt count for this specific stream
    */
   _scheduleReconnection(options, attemptCount = 0) {
+    var _a4;
     const maxRetries = this._reconnectionOptions.maxRetries;
     if (attemptCount >= maxRetries) {
-      this.onerror?.(new Error(`Maximum reconnection attempts (${maxRetries}) exceeded.`));
+      (_a4 = this.onerror) == null ? void 0 : _a4.call(this, new Error(`Maximum reconnection attempts (${maxRetries}) exceeded.`));
       return;
     }
     const delay = this._getNextReconnectionDelay(attemptCount);
     this._reconnectionTimeout = setTimeout(() => {
       this._startOrAuthSse(options).catch((error2) => {
-        this.onerror?.(new Error(`Failed to reconnect SSE stream: ${error2 instanceof Error ? error2.message : String(error2)}`));
+        var _a5;
+        (_a5 = this.onerror) == null ? void 0 : _a5.call(this, new Error(`Failed to reconnect SSE stream: ${error2 instanceof Error ? error2.message : String(error2)}`));
         this._scheduleReconnection(options, attemptCount + 1);
       });
     }, delay);
@@ -18656,6 +35513,7 @@ var StreamableHTTPClientTransport = class {
     let hasPrimingEvent = false;
     let receivedResponse = false;
     const processStream = async () => {
+      var _a4, _b, _c, _d;
       try {
         const reader = stream.pipeThrough(new TextDecoderStream()).pipeThrough(new EventSourceParserStream({
           onRetry: (retryMs) => {
@@ -18670,7 +35528,7 @@ var StreamableHTTPClientTransport = class {
           if (event.id) {
             lastEventId = event.id;
             hasPrimingEvent = true;
-            onresumptiontoken?.(event.id);
+            onresumptiontoken == null ? void 0 : onresumptiontoken(event.id);
           }
           if (!event.data) {
             continue;
@@ -18684,9 +35542,9 @@ var StreamableHTTPClientTransport = class {
                   message.id = replayMessageId;
                 }
               }
-              this.onmessage?.(message);
+              (_a4 = this.onmessage) == null ? void 0 : _a4.call(this, message);
             } catch (error2) {
-              this.onerror?.(error2);
+              (_b = this.onerror) == null ? void 0 : _b.call(this, error2);
             }
           }
         }
@@ -18700,7 +35558,7 @@ var StreamableHTTPClientTransport = class {
           }, 0);
         }
       } catch (error2) {
-        this.onerror?.(new Error(`SSE stream disconnected: ${error2}`));
+        (_c = this.onerror) == null ? void 0 : _c.call(this, new Error(`SSE stream disconnected: ${error2}`));
         const canResume = isReconnectable || hasPrimingEvent;
         const needsReconnect = canResume && !receivedResponse;
         if (needsReconnect && this._abortController && !this._abortController.signal.aborted) {
@@ -18711,7 +35569,7 @@ var StreamableHTTPClientTransport = class {
               replayMessageId
             }, 0);
           } catch (error3) {
-            this.onerror?.(new Error(`Failed to reconnect: ${error3 instanceof Error ? error3.message : String(error3)}`));
+            (_d = this.onerror) == null ? void 0 : _d.call(this, new Error(`Failed to reconnect: ${error3 instanceof Error ? error3.message : String(error3)}`));
           }
         }
       }
@@ -18743,18 +35601,23 @@ var StreamableHTTPClientTransport = class {
     }
   }
   async close() {
+    var _a4, _b;
     if (this._reconnectionTimeout) {
       clearTimeout(this._reconnectionTimeout);
       this._reconnectionTimeout = void 0;
     }
-    this._abortController?.abort();
-    this.onclose?.();
+    (_a4 = this._abortController) == null ? void 0 : _a4.abort();
+    (_b = this.onclose) == null ? void 0 : _b.call(this);
   }
   async send(message, options) {
+    var _a4, _b, _c, _d, _e, _f;
     try {
       const { resumptionToken, onresumptiontoken } = options || {};
       if (resumptionToken) {
-        this._startOrAuthSse({ resumptionToken, replayMessageId: isJSONRPCRequest(message) ? message.id : void 0 }).catch((err) => this.onerror?.(err));
+        this._startOrAuthSse({ resumptionToken, replayMessageId: isJSONRPCRequest(message) ? message.id : void 0 }).catch((err) => {
+          var _a5;
+          return (_a5 = this.onerror) == null ? void 0 : _a5.call(this, err);
+        });
         return;
       }
       const headers = await this._commonHeaders();
@@ -18765,7 +35628,7 @@ var StreamableHTTPClientTransport = class {
         method: "POST",
         headers,
         body: JSON.stringify(message),
-        signal: this._abortController?.signal
+        signal: (_a4 = this._abortController) == null ? void 0 : _a4.signal
       };
       const response = await fetchWithinOrigin(this._fetch ?? fetch)(this._url, init);
       const sessionId = response.headers.get("mcp-session-id");
@@ -18824,9 +35687,12 @@ var StreamableHTTPClientTransport = class {
       this._hasCompletedAuthFlow = false;
       this._lastUpscopingHeader = void 0;
       if (response.status === 202) {
-        await response.body?.cancel();
+        await ((_b = response.body) == null ? void 0 : _b.cancel());
         if (isInitializedNotification(message)) {
-          this._startOrAuthSse({ resumptionToken: void 0 }).catch((err) => this.onerror?.(err));
+          this._startOrAuthSse({ resumptionToken: void 0 }).catch((err) => {
+            var _a5;
+            return (_a5 = this.onerror) == null ? void 0 : _a5.call(this, err);
+          });
         }
         return;
       }
@@ -18841,17 +35707,17 @@ var StreamableHTTPClientTransport = class {
           const data = await response.json();
           const responseMessages = Array.isArray(data) ? data.map((msg) => JSONRPCMessageSchema.parse(msg)) : [JSONRPCMessageSchema.parse(data)];
           for (const msg of responseMessages) {
-            this.onmessage?.(msg);
+            (_c = this.onmessage) == null ? void 0 : _c.call(this, msg);
           }
         } else {
-          await response.body?.cancel();
+          await ((_d = response.body) == null ? void 0 : _d.cancel());
           throw new StreamableHTTPError(-1, `Unexpected content type: ${contentType2}`);
         }
       } else {
-        await response.body?.cancel();
+        await ((_e = response.body) == null ? void 0 : _e.cancel());
       }
     } catch (error2) {
-      this.onerror?.(error2);
+      (_f = this.onerror) == null ? void 0 : _f.call(this, error2);
       throw error2;
     }
   }
@@ -18870,6 +35736,7 @@ var StreamableHTTPClientTransport = class {
    * the server does not allow clients to terminate sessions.
    */
   async terminateSession() {
+    var _a4, _b, _c;
     if (!this._sessionId) {
       return;
     }
@@ -18879,16 +35746,16 @@ var StreamableHTTPClientTransport = class {
         ...this._requestInit,
         method: "DELETE",
         headers,
-        signal: this._abortController?.signal
+        signal: (_a4 = this._abortController) == null ? void 0 : _a4.signal
       };
       const response = await fetchWithinOrigin(this._fetch ?? fetch)(this._url, init);
-      await response.body?.cancel();
+      await ((_b = response.body) == null ? void 0 : _b.cancel());
       if (!response.ok && response.status !== 405) {
         throw new StreamableHTTPError(response.status, `Failed to terminate session: ${this._unfollowedRedirect(response, this._url) ?? response.statusText}`);
       }
       this._sessionId = void 0;
     } catch (error2) {
-      this.onerror?.(error2);
+      (_c = this.onerror) == null ? void 0 : _c.call(this, error2);
       throw error2;
     }
   }
@@ -18908,7 +35775,7 @@ var StreamableHTTPClientTransport = class {
   async resumeStream(lastEventId, options) {
     await this._startOrAuthSse({
       resumptionToken: lastEventId,
-      onresumptiontoken: options?.onresumptiontoken
+      onresumptiontoken: options == null ? void 0 : options.onresumptiontoken
     });
   }
 };
@@ -19045,13 +35912,14 @@ var RuleBrain = class {
    * instead of going to the house manual, so the hybrid brain can ask the model.
    */
   async handle(raw, io, out) {
+    var _a4, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
     const u = raw.replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"').trim().replace(/^(hey |ok |okay )?alexa[,.!\s]*/i, "").trim();
     if (!u) return;
     if (this.inEmergency) {
       const action = emergencyAction(u);
       if (action) {
         const r = await io.tool("emergency_step", { action });
-        if (r.isError || r.structuredContent?.resolved) this.inEmergency = false;
+        if (r.isError || ((_a4 = r.structuredContent) == null ? void 0 : _a4.resolved)) this.inEmergency = false;
         return io.say(textOf(r));
       }
     }
@@ -19060,22 +35928,22 @@ var RuleBrain = class {
       const e = await this.emergency(io, u);
       return io.say(textOf(e));
     }
-    if (this.pending?.kind === "teachback") {
+    if (((_b = this.pending) == null ? void 0 : _b.kind) === "teachback") {
       const skip = /^(skip|pass|next|i don'?t know|not sure|no idea)[.!]*$/i.test(u);
       if (/^(stop|cancel|later)[.!]*$/i.test(u)) {
         this.pending = null;
         return io.say("Okay, we'll skip the check.");
       }
       const r = await io.tool("teachback", skip ? { skip: true } : { answer: u });
-      if (r.structuredContent?.emergency) {
+      if ((_c = r.structuredContent) == null ? void 0 : _c.emergency) {
         this.pending = null;
         const e = await this.emergency(io, u);
         return io.say(textOf(e));
       }
-      if (r.structuredContent?.kind !== "question") this.pending = null;
+      if (((_d = r.structuredContent) == null ? void 0 : _d.kind) !== "question") this.pending = null;
       return io.say(textOf(r));
     }
-    if (this.pending?.kind === "ask_what") {
+    if (((_e = this.pending) == null ? void 0 : _e.kind) === "ask_what") {
       this.pending = null;
       if (NO.test(u)) return io.say("Okay.");
       return this.askParent(u, io);
@@ -19104,7 +35972,7 @@ var RuleBrain = class {
     this.pending = null;
     const handoff2 = u.match(/\b(?:start (?:a |the )?handoff for|hand(?:ing)? (?:it |things |the house )?over to)\s+([a-z][\w'-]*)/i) ?? u.match(/^([a-z][\w'-]*) (?:is|will be|'s) (?:babysitting|minding|looking after (?:the kids|maya|her|them|things)|watching (?:the kids|maya|her|them)|taking care of (?:the kids|maya|her|them))\b/i);
     if (handoff2 && !NOT_A_NAME.has(handoff2[1].toLowerCase())) {
-      const lang = /\bin (hindi|spanish|tamil|telugu|bengali|marathi|gujarati|kannada|malayalam|punjabi|urdu|tagalog)\b/i.exec(u)?.[1]?.toLowerCase();
+      const lang = (_g = (_f = /\bin (hindi|spanish|tamil|telugu|bengali|marathi|gujarati|kannada|malayalam|punjabi|urdu|tagalog)\b/i.exec(u)) == null ? void 0 : _f[1]) == null ? void 0 : _g.toLowerCase();
       return this.startHandoff(cap(handoff2[1]), io, false, lang ? LANGS[lang] : void 0);
     }
     if (/^(ok(ay)?,? )?(we'?re|we are|i'?m|i am) (heading|going|leaving|off)( out| now)?( for the (night|evening))?[.!]*$/i.test(u)) return this.startHandoff(void 0, io, false);
@@ -19114,7 +35982,7 @@ var RuleBrain = class {
       return io.say(textOf(r));
     }
     if (/\b(order|get|buy)\b[^.?!]*\b(dinner|food|pizza|takeout|take-out|takeaway|something to eat)\b/i.test(u)) {
-      const craving = /\b(pizza|noodles|chicken|mac and cheese|rice)\b/i.exec(u)?.[1];
+      const craving = (_h = /\b(pizza|noodles|chicken|mac and cheese|rice)\b/i.exec(u)) == null ? void 0 : _h[1];
       const r = await io.tool("order_dinner", craving ? { craving } : {});
       return io.say(textOf(r));
     }
@@ -19144,12 +36012,12 @@ var RuleBrain = class {
     const where = u.match(/^(?:where(?:'s| is| are| do i find| can i find| do they keep)|find)\s+(?:the |her |his |my |their |maya'?s )?(.+?)\??$/i);
     if (where && !/^(they|them|mom|dad|mum|parents|the parents|her parents|his parents|you|we|i|everyone|anita|rahul)\b/i.test(where[1])) {
       const r = await io.tool("where_is", { item: where[1] });
-      if (r.structuredContent?.found === false) return this.askHouse(u, io);
+      if (((_i = r.structuredContent) == null ? void 0 : _i.found) === false) return this.askHouse(u, io);
       return io.say(textOf(r));
     }
     const ask = u.match(/^(?:can you |could you |please )?ask (?:mom|dad|mum|the parents|her parents|his parents|them|anita|rahul)\b[\s,:]*(?:if |whether |about )?(.*)$/i);
     if (ask) {
-      const q = ask[1]?.trim();
+      const q = (_j = ask[1]) == null ? void 0 : _j.trim();
       if (!q || /^(something|a question)$/i.test(q)) {
         this.pending = { kind: "ask_what" };
         return io.say("What should I ask them?");
@@ -19159,7 +36027,7 @@ var RuleBrain = class {
     const remember = /^(?:please )?remember(?: that)?[:,]?\s+(.+)$/i.exec(u);
     if (remember && !this.carer) {
       const r = await io.tool("import_note", { text: cap(remember[1]) });
-      if (!r.structuredContent?.handoff_active) return io.say(textOf(r));
+      if (!((_k = r.structuredContent) == null ? void 0 : _k.handoff_active)) return io.say(textOf(r));
     }
     const explicitLog = u.match(/^(?:log|note|write down|remember)(?: that)?[:,]?\s+(.+)$/i);
     if (explicitLog || !QUESTION_START.test(u) && !u.endsWith("?") && LOG_STATUS.test(u)) {
@@ -19189,7 +36057,8 @@ var RuleBrain = class {
   }
   /** Another brain answered: offers made earlier ("Want me to ask?") no longer apply. */
   forgetOffers() {
-    if (this.pending?.kind !== "teachback") this.pending = null;
+    var _a4;
+    if (((_a4 = this.pending) == null ? void 0 : _a4.kind) !== "teachback") this.pending = null;
   }
   async askHouse(u, io) {
     const r = await io.tool("ask_house", { question: u });
@@ -19208,6 +36077,7 @@ var RuleBrain = class {
   }
   /** With no name, the add-on asks on screen who is babysitting (a form). */
   async startHandoff(name, io, replace, language) {
+    var _a4, _b, _c, _d;
     const args = { replace };
     if (name) args.carer_name = name;
     if (language) args.language = language;
@@ -19217,13 +36087,13 @@ var RuleBrain = class {
       if (s2.view === "handoff_conflict") this.pending = { kind: "replace", name: String(name ?? s2.requested ?? "") };
       return io.say(textOf(r) || "Sorry, I couldn't start the handoff.");
     }
-    if (r.structuredContent?.view === "handoff_cancelled") return io.say(textOf(r));
-    this.carer = String(r.structuredContent?.carer ?? name ?? "");
-    const first = r.structuredContent?.first_contact;
+    if (((_a4 = r.structuredContent) == null ? void 0 : _a4.view) === "handoff_cancelled") return io.say(textOf(r));
+    this.carer = String(((_b = r.structuredContent) == null ? void 0 : _b.carer) ?? name ?? "");
+    const first = (_c = r.structuredContent) == null ? void 0 : _c.first_contact;
     if (first) this.firstContact = first.replace(/\s*\(.*\)/, "");
     io.say(textOf(r));
     const tb = await io.tool("teachback", {});
-    if (!tb.isError && tb.structuredContent?.kind === "question") {
+    if (!tb.isError && ((_d = tb.structuredContent) == null ? void 0 : _d.kind) === "question") {
       this.pending = { kind: "teachback" };
       io.say(textOf(tb));
     }
@@ -19259,18 +36129,260 @@ var RuleBrain = class {
 };
 var cap = (s2) => s2.charAt(0).toUpperCase() + s2.slice(1);
 
+// server/src/ai/hostPrompt.ts
+var ADDON_INSTRUCTIONS = [
+  "You are helping a carer (babysitter, grandparent, nanny) who is looking after the family's children while the parents are out.",
+  "Only ever repeat the parents' own words returned by these tools. Never invent rules.",
+  "Never tell the carer that a food or medicine is safe, and never suggest doses. Always say the guard sentence the tools return.",
+  "If anything sounds like an emergency, call the `emergency` tool immediately and read its first line out loud.",
+  "If the manual does not answer a question, offer to ask a parent with `ask_parent`."
+].join(" ");
+var HOST_SYSTEM = `You are Alexa+ on an Echo Show in a family home, running the "While You're Out" add-on.
+The parents may hand the home over to a carer (a babysitter, grandparent or nanny). Everything about the children, pets and house comes ONLY from the add-on's tools. Never invent rules, times, foods, medicines or advice.
+
+How to act:
+- A parent saying someone is babysitting, watching or looking after the kids: call start_handoff with the carer's name. Only pass a language if the parent explicitly said one ("she speaks Hindi" -> hi-IN); never guess a language from a name. The device starts the quick teach-back check itself.
+- While the teach-back check is running, pass the carer's replies to teachback as answer (or skip=true).
+- Questions about food, bedtime, screen time, rules, pets, the house: call ask_house with the carer's words.
+- "Where is ...": call where_is.
+- Things that happened ("she's asleep", "napped till 5", "used the last diaper"): call log_event.
+- "What's next?" or the plan: call tonight_plan.
+- Any question about what the child may do (TV, play, staying up, food...) goes to ask_house FIRST, even if it sounds like a request for a parent. It may include how the parents usually answer.
+- Call ask_parent_and_wait only after ask_house, when the carer then asks you to check with a parent or says yes to your offer.
+- Anything that sounds like an emergency: call emergency immediately.
+- The parents are back / "end the handoff": confirm, then call end_handoff.
+- A parent teaching a standing house rule when nobody is babysitting ("remember: no juice after 7"): call import_note. During a handoff, "remember she napped till 5" is something that happened: log_event.
+- "Call Mom", "phone Anita": call call_contact.
+- Anything about the front door ("someone's knocking", "should I open the door?", "who's at the door?"): call door_check. The device sends the doorbell photo to the parents itself; don't call ask_parent_and_wait for it.
+- "We're heading out" without saying who is babysitting: call start_handoff with no carer_name; the device asks the parent on screen.
+- The parents are back and say "pay Priya" / "pay the sitter": call pay_sitter. The parent approves on their phone.
+- The child misses a parent or is sad ("Maya misses her mom", "she's crying for her dad"), or "play Mom's message": call play_message.
+- "How's it going?", "what's happening tonight?": call home_screen.
+- "Ask the parents" with no question yet: ask what they'd like to ask, then use ask_house / ask_parent_and_wait as usual.
+
+Languages: if the carer speaks another language, call set_carer_language with its BCP-47 code (hi-IN, es-US, ta-IN, ...) once, and always pass an English rendering in question_english / text_english / answer_english / description_english so the add-on's safety rules can read it.
+
+Speaking: keep replies to one or two short sentences, in the language the person spoke. Don't repeat what a tool already said.`;
+
+// simulator/src/brain/gemini.ts
+var HIDDEN_TOOLS = /* @__PURE__ */ new Set(["ask_parent", "check_parent_answer"]);
+var modelCanUse = (t) => {
+  var _a4, _b;
+  const visibility = (_b = (_a4 = t._meta) == null ? void 0 : _a4.ui) == null ? void 0 : _b.visibility;
+  return !HIDDEN_TOOLS.has(t.name) && (!Array.isArray(visibility) || visibility.includes("model"));
+};
+var DEVICE_FUNCTIONS = [
+  {
+    name: "call_contact",
+    description: `Places an Alexa call to one of the family's contacts ("call Mom", "phone Anita"). Use the words they used for the person.`,
+    parametersJsonSchema: { type: "object", properties: { who: { type: "string", description: 'Who to call, e.g. "Mom" or "Anita"' } }, required: ["who"] }
+  }
+];
+var MAX_HISTORY = 24;
+var MAX_ROUNDS = 3;
+var MODEL_TIMEOUT_MS = 7e3;
+var SETUP_TOOLS = /* @__PURE__ */ new Set(["set_carer_language"]);
+function cleanSchema(schema) {
+  if (Array.isArray(schema)) return schema.map(cleanSchema);
+  if (!schema || typeof schema !== "object") return schema;
+  const out = {};
+  for (const [k, v] of Object.entries(schema)) {
+    if (k === "$schema") continue;
+    out[k] = cleanSchema(v);
+  }
+  return out;
+}
+function forModel(r) {
+  const data = { ...r.structuredContent ?? {} };
+  for (const k of ["paramedic_sheet", "action_plan", "timeline", "plan", "items", "since_last_visit", "english"]) {
+    if (k in data) data[k] = Array.isArray(data[k]) ? `(${data[k].length} items shown on screen)` : "(shown on screen)";
+  }
+  const json = JSON.stringify(data);
+  return { text: textOf(r), isError: Boolean(r.isError), data: json.length > 1500 ? `${json.slice(0, 1500)}\u2026` : data };
+}
+var GeminiBrain = class {
+  constructor(opts) {
+    this.opts = opts;
+    this.fetchImpl = opts.fetchImpl ?? fetch.bind(globalThis);
+  }
+  opts;
+  name = "Gemini (via the server)";
+  history = [];
+  inEmergency = false;
+  fetchImpl;
+  functions() {
+    return [
+      ...this.opts.tools().filter(modelCanUse).map((t) => ({ name: t.name, description: (t.description ?? "").slice(0, 1e3), parametersJsonSchema: cleanSchema(t.inputSchema) })),
+      // Things the device does itself, like Alexa calling.
+      ...DEVICE_FUNCTIONS
+    ];
+  }
+  async callModel() {
+    const system = [HOST_SYSTEM, this.opts.instructions()].filter(Boolean).join("\n\nAdd-on instructions: ");
+    const res = await this.fetchImpl(`${this.opts.serverOrigin}/host/llm`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ system, contents: this.history.slice(-MAX_HISTORY), functions: this.functions() }),
+      signal: AbortSignal.timeout(this.opts.timeoutMs ?? MODEL_TIMEOUT_MS)
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `LLM proxy ${res.status}`);
+    return await res.json();
+  }
+  /** A turn another brain answered, so the model knows what was said ("What is Maya allergic to?"). */
+  /** The conversation so far, for a host that keeps no memory between turns (an Alexa skill). */
+  snapshot() {
+    return { history: this.history.slice(-8), inEmergency: this.inEmergency };
+  }
+  restore(s2) {
+    if (!s2) return;
+    this.history = Array.isArray(s2.history) ? s2.history : [];
+    while (this.history[0] && (this.history[0].role !== "user" || this.history[0].parts.some((p) => p.functionResponse))) this.history.shift();
+    this.inEmergency = Boolean(s2.inEmergency);
+  }
+  note(user, said) {
+    const u = user.trim();
+    if (!u) return;
+    this.remember({ role: "user", parts: [{ text: u }] });
+    if (said.length) this.remember({ role: "model", parts: [{ text: said.join(" ") }] });
+  }
+  remember(content) {
+    var _a4;
+    this.history.push(content);
+    while (this.history.length > MAX_HISTORY || this.history[0] && this.history[0].role !== "user" || ((_a4 = this.history[0]) == null ? void 0 : _a4.parts.some((p) => p.functionResponse))) {
+      this.history.shift();
+    }
+  }
+  async handle(raw, io) {
+    var _a4, _b, _c;
+    const u = raw.trim().replace(/^(hey |ok |okay )?alexa[,.!\s]*/i, "").trim();
+    if (!u) return;
+    const step = this.inEmergency ? emergencyAction(u) : null;
+    if (step) {
+      const r = await io.tool("emergency_step", { action: step });
+      if (r.isError || ((_a4 = r.structuredContent) == null ? void 0 : _a4.resolved)) this.inEmergency = false;
+      this.remember({ role: "user", parts: [{ text: u }] });
+      this.remember({ role: "model", parts: [{ text: textOf(r) }] });
+      return io.say(textOf(r));
+    }
+    if (isEmergency(u)) {
+      this.inEmergency = true;
+      const e = await io.tool("emergency", { description: u });
+      this.remember({ role: "user", parts: [{ text: u }] });
+      this.remember({ role: "model", parts: [{ text: textOf(e) }] });
+      return io.say(textOf(e));
+    }
+    const startLength = this.history.length;
+    this.remember({ role: "user", parts: [{ text: u }] });
+    const spoken = [];
+    try {
+      for (let round = 0; round < MAX_ROUNDS; round++) {
+        const { parts } = await this.callModel();
+        this.remember({ role: "model", parts });
+        const calls = parts.filter((p) => p.functionCall);
+        if (!calls.length) {
+          const text = parts.map((p) => p.text ?? "").join(" ").trim();
+          if (!spoken.length && text) spoken.push(text);
+          break;
+        }
+        const responses = [];
+        let handoffStarted = false;
+        for (const c of calls) {
+          const { name, args = {}, id } = c.functionCall;
+          let response;
+          if (name === "call_contact") {
+            const who = String(args.who ?? "a parent");
+            const calling = io.call ? await io.call(who) : null;
+            response = calling ? { calling } : { error: "This device can't make calls." };
+            spoken.push(calling ? `Calling ${calling}.` : "This device can't make calls.");
+          } else if (name === "ask_parent_and_wait") {
+            io.task(name, args, (result) => io.say(textOf(result)));
+            response = { text: "Question sent to the parents. The answer will be announced when it arrives." };
+            spoken.push("Okay, I'm asking now. I'll tell you when they answer.");
+          } else {
+            const r = await io.tool(name, args);
+            response = forModel(r);
+            const s2 = r.structuredContent ?? {};
+            if (name === "door_check" && ((_b = s2.ask_parent) == null ? void 0 : _b.door_event_id)) {
+              io.task("ask_parent_and_wait", { question: s2.ask_parent.question, door_event_id: s2.ask_parent.door_event_id }, (result) => io.say(textOf(result)));
+              response = { ...forModel(r), parents_asked: true };
+            }
+            if (name === "log_event" && ((_c = s2.shopping_ask) == null ? void 0 : _c.shopping_item)) {
+              io.task("ask_parent_and_wait", { question: s2.shopping_ask.question, shopping_item: s2.shopping_ask.shopping_item }, (result) => io.say(textOf(result)));
+              response = { ...forModel(r), parents_asked: true };
+            }
+            if (name === "emergency") this.inEmergency = true;
+            if (name === "start_handoff" && !r.isError && s2.view !== "handoff_cancelled") handoffStarted = true;
+            if (s2.emergency && name !== "emergency") {
+              this.inEmergency = true;
+              const e = await io.tool("emergency", { description: String(args.question ?? args.text ?? u), description_english: args.question_english ?? args.text_english });
+              spoken.push(textOf(e));
+              response = { ...forModel(r), emergency_handled: true };
+            } else if (textOf(r)) {
+              spoken.push(textOf(r));
+            }
+          }
+          responses.push({ functionResponse: { name, ...id ? { id } : {}, response } });
+        }
+        this.remember({ role: "user", parts: responses });
+        if (handoffStarted && !calls.some((c) => c.functionCall.name === "teachback")) {
+          const tb = await io.tool("teachback", {});
+          if (!tb.isError && textOf(tb)) spoken.push(textOf(tb));
+        }
+        if (spoken.length && !calls.every((c) => SETUP_TOOLS.has(c.functionCall.name))) {
+          this.remember({ role: "model", parts: [{ text: spoken.join(" ") }] });
+          break;
+        }
+      }
+    } catch {
+      this.history.length = Math.min(this.history.length, startLength);
+      return this.opts.fallback.handle(raw, io);
+    }
+    io.say(spoken.join(" ") || "Sorry, I didn't catch that.");
+  }
+};
+
+// simulator/src/brain/hybrid.ts
+var OTHER_SCRIPT = /[^\p{Script=Latin}\p{Script=Common}\p{Script=Inherited}]/u;
+var HybridBrain = class {
+  constructor(rules, model) {
+    this.rules = rules;
+    this.model = model;
+  }
+  rules;
+  model;
+  name = "Rules first, Gemini when needed";
+  async handle(raw, io) {
+    if (!OTHER_SCRIPT.test(raw)) {
+      const said = [];
+      const listening = {
+        ...io,
+        say: (t) => {
+          said.push(t);
+          io.say(t);
+        }
+      };
+      const out = {};
+      await this.rules.handle(raw, listening, out);
+      if (!out.declined) return this.model.note(raw, said);
+    }
+    this.rules.forgetOffers();
+    await this.model.handle(raw, io);
+  }
+};
+
 // alexa/src/apl.ts
 var s = (v) => v == null ? "" : String(v);
 var quote = (f) => `\u201C${s(f.text)}\u201D (${s(f.said_by) || "Parent"})`;
 function cardModel(d, spoken) {
+  var _a4, _b, _c, _d, _e, _f, _g;
   const m = { mood: "day", topic: "While You're Out", title: "", notes: [], rows: [], buttons: [] };
-  const view = d?.view ?? "text";
+  const view = (d == null ? void 0 : d.view) ?? "text";
   switch (view) {
     case "home": {
       m.mood = d.night ? "night" : "day";
       m.topic = d.carer ? `${d.carer} is babysitting` : "Tonight";
       const n = d.next;
-      m.title = d.night ? `${(d.members ?? []).find((x) => x.kind === "child")?.name ?? "She"} is asleep` : n ? `Next: ${s(n.title)}` : d.mode === "parent" ? "Tonight" : "A quiet evening";
+      m.title = d.night ? `${((_a4 = (d.members ?? []).find((x) => x.kind === "child")) == null ? void 0 : _a4.name) ?? "She"} is asleep` : n ? `Next: ${s(n.title)}` : d.mode === "parent" ? "Tonight" : "A quiet evening";
       m.sub = n ? s(n.time) : d.mode === "parent" ? "Say \u201CPriya is babysitting tonight\u201D to start." : void 0;
       m.rows = (d.plan ?? []).slice(0, 5).map((p) => ({ title: s(p.title), when: s(p.time), done: p.status === "done" }));
       if (d.last_answer) m.notes.push({ kind: "info", title: `${s(d.last_answer.by)} answered`, text: `\u201C${s(d.last_answer.answer)}\u201D` });
@@ -19280,8 +36392,8 @@ function cardModel(d, spoken) {
     case "briefing": {
       m.topic = "Sitter mode is on";
       m.title = `Tonight with ${s(d.carer)}`;
-      m.sub = [d.sitter?.label, d.sitter?.note].filter(Boolean).join(" \xB7 ") || void 0;
-      if (d.must_know?.[0]) m.notes.push({ kind: "danger", title: "Must know", text: s(d.must_know[0]) });
+      m.sub = [(_b = d.sitter) == null ? void 0 : _b.label, (_c = d.sitter) == null ? void 0 : _c.note].filter(Boolean).join(" \xB7 ") || void 0;
+      if ((_d = d.must_know) == null ? void 0 : _d[0]) m.notes.push({ kind: "danger", title: "Must know", text: s(d.must_know[0]) });
       if (d.epipen) m.rows.push({ title: "EpiPen", sub: s(d.epipen) });
       if (d.first_contact) m.rows.push({ title: "Call first", sub: s(d.first_contact) });
       const next = (d.plan ?? []).find((p) => p.status !== "done");
@@ -19332,8 +36444,8 @@ function cardModel(d, spoken) {
       m.mood = "emergency";
       m.topic = "EMERGENCY";
       const inc = d.incident;
-      const steps = inc?.steps ?? (d.action_plan?.steps ?? []).map((x, i) => ({ text: x.text, state: i === 0 ? "now" : "todo" }));
-      if (inc?.status === "resolved") {
+      const steps = (inc == null ? void 0 : inc.steps) ?? (((_e = d.action_plan) == null ? void 0 : _e.steps) ?? []).map((x, i) => ({ text: x.text, state: i === 0 ? "now" : "todo" }));
+      if ((inc == null ? void 0 : inc.status) === "resolved") {
         m.topic = "EMERGENCY OVER";
         m.title = "Help has taken over";
         m.sub = "The parents have been told. Say \u201Cemergency\u201D again if anything changes.";
@@ -19343,7 +36455,7 @@ function cardModel(d, spoken) {
       m.title = steps[at] ? s(steps[at].text) : "Stay with her and follow the 911 dispatcher until help arrives.";
       m.sub = steps.length ? `Step ${Math.min(at + 1, steps.length)} of ${steps.length}` : void 0;
       if (d.address) m.notes.push({ kind: "danger", title: "Call 911 from your phone. Tell them:", text: s(d.address) });
-      if (inc?.timers?.[0]) m.notes.push({ kind: "warn", title: s(inc.timers[0].label), text: `${Math.ceil(inc.timers[0].remaining_seconds / 60)} min left` });
+      if ((_f = inc == null ? void 0 : inc.timers) == null ? void 0 : _f[0]) m.notes.push({ kind: "warn", title: s(inc.timers[0].label), text: `${Math.ceil(inc.timers[0].remaining_seconds / 60)} min left` });
       if (d.epipen_location) m.rows.push({ title: "EpiPen", sub: s(d.epipen_location) });
       m.rows.push({ title: "Alerted", sub: (d.parents_alerted ?? []).join(", ") || "The parents" });
       m.buttons = steps[at] ? [{ label: "Done", say: "done" }, { label: "Next step", say: "next" }] : [{ label: "Help has arrived", say: "it's over, the paramedics are here" }];
@@ -19399,7 +36511,7 @@ function cardModel(d, spoken) {
       break;
     case "logged":
       m.topic = "Noted for the parents";
-      m.title = s(d.event?.text) || spoken;
+      m.title = s((_g = d.event) == null ? void 0 : _g.text) || spoken;
       if (d.allergy_alert) m.notes.push({ kind: "danger", title: "Allergy alert \xB7 the parents have been told", text: s(d.allergy_alert) });
       if (d.pet_alert) m.notes.push({ kind: "danger", title: "Call a vet now", text: s(d.pet_alert) });
       break;
@@ -19421,25 +36533,25 @@ var DOCUMENT = {
   theme: "dark",
   description: "While You're Out: a card from the add-on",
   mainTemplate: {
-    parameters: ["payload"],
+    // Not "payload": an APL parameter by that name receives every data source at once (a legacy rule).
+    parameters: ["wyo"],
     items: [
       {
         type: "Container",
         width: "100vw",
         height: "100vh",
-        bind: [{ name: "c", value: "${payload.card}" }],
         items: [
-          { type: "Frame", position: "absolute", width: "100vw", height: "100vh", backgroundColor: "${c.colors.bg}" },
+          { type: "Frame", position: "absolute", width: "100vw", height: "100vh", backgroundColor: "${wyo.card.colors.bg}" },
           {
             type: "ScrollView",
             width: "100vw",
             height: "100vh",
             item: {
               type: "Container",
-              paddingLeft: "${c.pad}",
-              paddingRight: "${c.pad}",
-              paddingTop: "${c.pad * 0.6}",
-              paddingBottom: "${c.pad}",
+              paddingLeft: "${wyo.card.pad}",
+              paddingRight: "${wyo.card.pad}",
+              paddingTop: "${wyo.card.pad * 0.6}",
+              paddingBottom: "${wyo.card.pad}",
               items: [
                 {
                   type: "Container",
@@ -19447,33 +36559,34 @@ var DOCUMENT = {
                   justifyContent: "spaceBetween",
                   alignItems: "center",
                   items: [
-                    { type: "Text", text: "While You're Out", fontSize: "${c.f.meta}", fontWeight: "700", color: "${c.colors.text2}" },
-                    { type: "Text", text: "${c.topic}", fontSize: "${c.f.meta}", fontWeight: "700", color: "${c.colors.accent}", maxLines: 1 }
+                    { type: "Text", text: "While You're Out", fontSize: "${wyo.card.f.meta}", fontWeight: "700", color: "${wyo.card.colors.text2}" },
+                    { type: "Text", text: "${wyo.card.topic}", fontSize: "${wyo.card.f.meta}", fontWeight: "700", color: "${wyo.card.colors.accent}", maxLines: 1 }
                   ]
                 },
-                { type: "Text", text: "${c.title}", fontSize: "${c.f.title}", fontWeight: "700", color: "${c.colors.text}", paddingTop: "${c.gap}", lineHeight: 1.15 },
-                { type: "Text", when: "${c.sub}", text: "${c.sub}", fontSize: "${c.f.body}", color: "${c.colors.text2}", paddingTop: "${c.gap * 0.4}" },
+                { type: "Text", text: "${wyo.card.title}", fontSize: "${wyo.card.f.title}", fontWeight: "700", color: "${wyo.card.colors.text}", paddingTop: "${wyo.card.gap}", lineHeight: 1.15 },
+                { type: "Text", when: "${wyo.card.sub}", text: "${wyo.card.sub}", fontSize: "${wyo.card.f.body}", color: "${wyo.card.colors.text2}", paddingTop: "${wyo.card.gap * 0.4}" },
                 {
                   type: "Container",
-                  data: "${c.notes}",
-                  paddingTop: "${c.gap * 0.5}",
+                  when: "${wyo.card.notes.length > 0}",
+                  data: "${wyo.card.notes}",
+                  paddingTop: "${wyo.card.gap * 0.5}",
                   items: [
                     {
                       type: "Frame",
-                      backgroundColor: "${c.colors.card}",
-                      borderRadius: "${c.gap * 0.6}",
+                      backgroundColor: "${wyo.card.colors.card}",
+                      borderRadius: "${wyo.card.gap * 0.6}",
                       borderWidth: 2,
                       borderColor: "${data.color}",
-                      paddingTop: "${c.gap * 0.6}",
-                      paddingBottom: "${c.gap * 0.6}",
-                      paddingLeft: "${c.gap}",
-                      paddingRight: "${c.gap}",
-                      spacing: "${c.gap * 0.5}",
+                      paddingTop: "${wyo.card.gap * 0.6}",
+                      paddingBottom: "${wyo.card.gap * 0.6}",
+                      paddingLeft: "${wyo.card.gap}",
+                      paddingRight: "${wyo.card.gap}",
+                      spacing: "${wyo.card.gap * 0.5}",
                       item: {
                         type: "Container",
                         items: [
-                          { type: "Text", text: "${data.title}", fontSize: "${c.f.meta}", fontWeight: "700", color: "${data.color}" },
-                          { type: "Text", when: "${data.text}", text: "${data.text}", fontSize: "${c.f.body}", color: "${c.colors.text}" }
+                          { type: "Text", text: "${data.title}", fontSize: "${wyo.card.f.meta}", fontWeight: "700", color: "${data.color}" },
+                          { type: "Text", when: "${data.text}", text: "${data.text}", fontSize: "${wyo.card.f.body}", color: "${wyo.card.colors.text}" }
                         ]
                       }
                     }
@@ -19481,28 +36594,29 @@ var DOCUMENT = {
                 },
                 {
                   type: "Container",
-                  data: "${c.rows}",
-                  paddingTop: "${c.gap * 0.5}",
+                  when: "${wyo.card.rows.length > 0}",
+                  data: "${wyo.card.rows}",
+                  paddingTop: "${wyo.card.gap * 0.5}",
                   items: [
                     {
                       type: "Container",
                       direction: "row",
                       alignItems: "center",
-                      spacing: "${c.gap * 0.3}",
-                      paddingTop: "${c.gap * 0.35}",
-                      paddingBottom: "${c.gap * 0.35}",
+                      spacing: "${wyo.card.gap * 0.3}",
+                      paddingTop: "${wyo.card.gap * 0.35}",
+                      paddingBottom: "${wyo.card.gap * 0.35}",
                       items: [
-                        { type: "Text", text: '${data.done ? "\u2713" : "\u2022"}', fontSize: "${c.f.body}", color: '${data.done ? "#4ADE9A" : c.colors.accent}', width: "${c.f.body * 1.4}" },
+                        { type: "Text", text: '${data.done ? "\u2713" : "\u2022"}', fontSize: "${wyo.card.f.body}", color: '${data.done ? "#4ADE9A" : wyo.card.colors.accent}', width: "${wyo.card.f.body * 1.4}" },
                         {
                           type: "Container",
                           grow: 1,
                           shrink: 1,
                           items: [
-                            { type: "Text", text: "${data.title}", fontSize: "${c.f.body}", fontWeight: "600", color: "${c.colors.text}" },
-                            { type: "Text", when: "${data.sub}", text: "${data.sub}", fontSize: "${c.f.meta}", color: "${c.colors.text2}" }
+                            { type: "Text", text: "${data.title}", fontSize: "${wyo.card.f.body}", fontWeight: "600", color: "${wyo.card.colors.text}" },
+                            { type: "Text", when: "${data.sub}", text: "${data.sub}", fontSize: "${wyo.card.f.meta}", color: "${wyo.card.colors.text2}" }
                           ]
                         },
-                        { type: "Text", when: "${data.when}", text: "${data.when}", fontSize: "${c.f.meta}", color: "${c.colors.text2}", paddingLeft: "${c.gap * 0.5}" }
+                        { type: "Text", when: "${data.when}", text: "${data.when}", fontSize: "${wyo.card.f.meta}", color: "${wyo.card.colors.text2}", paddingLeft: "${wyo.card.gap * 0.5}" }
                       ]
                     }
                   ]
@@ -19511,30 +36625,31 @@ var DOCUMENT = {
                   type: "Container",
                   direction: "row",
                   wrap: "wrap",
-                  data: "${c.buttons}",
-                  paddingTop: "${c.gap * 0.6}",
+                  when: "${wyo.card.buttons.length > 0}",
+                  data: "${wyo.card.buttons}",
+                  paddingTop: "${wyo.card.gap * 0.6}",
                   items: [
                     {
                       type: "TouchWrapper",
-                      spacing: "${c.gap * 0.5}",
+                      spacing: "${wyo.card.gap * 0.5}",
                       accessibilityLabel: "${data.label}",
                       onPress: [{ type: "SendEvent", arguments: ["${data.say}"] }],
                       item: {
                         type: "Frame",
                         // Alexa's minimum touch target: 48 dp high.
                         minHeight: 64,
-                        backgroundColor: "${c.colors.accent}",
+                        backgroundColor: "${wyo.card.colors.accent}",
                         borderRadius: 32,
-                        paddingLeft: "${c.gap}",
-                        paddingRight: "${c.gap}",
+                        paddingLeft: "${wyo.card.gap}",
+                        paddingRight: "${wyo.card.gap}",
                         paddingTop: 14,
                         paddingBottom: 14,
-                        item: { type: "Text", text: "${data.label}", fontSize: "${c.f.meta}", fontWeight: "700", color: "${c.colors.bg}" }
+                        item: { type: "Text", text: "${data.label}", fontSize: "${wyo.card.f.meta}", fontWeight: "700", color: "${wyo.card.colors.bg}" }
                       }
                     }
                   ]
                 },
-                { type: "Text", when: "${c.footer}", text: "${c.footer}", fontSize: "${c.f.meta * 0.9}", color: "${c.colors.text2}", paddingTop: "${c.gap}" }
+                { type: "Text", when: "${wyo.card.footer}", text: "${wyo.card.footer}", fontSize: "${wyo.card.f.meta * 0.9}", color: "${wyo.card.colors.text2}", paddingTop: "${wyo.card.gap}" }
               ]
             }
           }
@@ -19551,7 +36666,7 @@ function aplDirective(card, opts = {}) {
     token: "wyo-card",
     document: DOCUMENT,
     datasources: {
-      payload: {
+      wyo: {
         card: {
           ...card,
           sub: card.sub ?? "",
@@ -19575,9 +36690,10 @@ var HELP = `I keep the parents' notes for whoever is looking after the kids. Say
 var xml = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 var textOf2 = (r) => r.content.map((c) => c.text ?? "").join(" ").trim();
 function utteranceOf(req) {
-  if (req.type === "Alexa.Presentation.APL.UserEvent") return typeof req.arguments?.[0] === "string" ? req.arguments[0] : null;
+  var _a4, _b, _c;
+  if (req.type === "Alexa.Presentation.APL.UserEvent") return typeof ((_a4 = req.arguments) == null ? void 0 : _a4[0]) === "string" ? req.arguments[0] : null;
   if (req.type !== "IntentRequest" || !req.intent) return null;
-  const said = req.intent.slots?.utterance?.value;
+  const said = (_c = (_b = req.intent.slots) == null ? void 0 : _b.utterance) == null ? void 0 : _c.value;
   switch (req.intent.name) {
     case "UtteranceIntent":
       return said ?? null;
@@ -19592,24 +36708,29 @@ function utteranceOf(req) {
   }
 }
 async function handle(event, opts = {}) {
+  var _a4, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
   const req = event.request;
   if (req.type === "SessionEndedRequest") return { version: "1.0", response: {} };
-  const name = req.intent?.name;
+  const name = (_a4 = req.intent) == null ? void 0 : _a4.name;
   if (name === "AMAZON.StopIntent" || name === "AMAZON.CancelIntent" || name === "AMAZON.NavigateHomeIntent") {
     return respond(["Okay."], null, event, { end: true });
   }
   const said = utteranceOf(req);
   if (req.type === "IntentRequest" && !said) {
-    return respond([`Sorry, I didn't catch that. Try "where's the EpiPen?" or "what's next?"`], null, event, { attributes: event.session?.attributes });
+    return respond([`Sorry, I didn't catch that. Try "where's the EpiPen?" or "what's next?"`], null, event, { attributes: (_b = event.session) == null ? void 0 : _b.attributes });
   }
-  const userId = event.context?.System?.user?.userId ?? event.session?.user?.userId ?? "anonymous";
+  const userId = ((_e = (_d = (_c = event.context) == null ? void 0 : _c.System) == null ? void 0 : _d.user) == null ? void 0 : _e.userId) ?? ((_g = (_f = event.session) == null ? void 0 : _f.user) == null ? void 0 : _g.userId) ?? "anonymous";
   const house = `${(opts.server ?? SERVER).replace(/\/$/, "")}/h/${(0, import_node_crypto.createHash)("sha256").update(`wyo:${userId}`).digest("hex").slice(0, 32)}`;
-  const brain = new RuleBrain();
-  brain.restore(event.session?.attributes?.brain);
+  const rules = new RuleBrain();
+  rules.restore((_i = (_h = event.session) == null ? void 0 : _h.attributes) == null ? void 0 : _i.brain);
+  let tools = [];
+  const model = new GeminiBrain({ serverOrigin: house, tools: () => tools, instructions: () => client.getInstructions(), fallback: rules, timeoutMs: 4e3 });
+  model.restore((_k = (_j = event.session) == null ? void 0 : _j.attributes) == null ? void 0 : _k.model);
+  const brain = new HybridBrain(rules, model);
   const speech = [];
   let card = null;
   let parentLink = null;
-  let lang = event.session?.attributes?.lang;
+  let lang = (_m = (_l = event.session) == null ? void 0 : _l.attributes) == null ? void 0 : _m.lang;
   const client = new Client({ name: "while-youre-out-alexa-skill", version: "1.0.0" });
   const deadline = AbortSignal.timeout(BUDGET_MS);
   const transport = new StreamableHTTPClientTransport(new URL(`${house}/mcp`), { requestInit: { signal: deadline } });
@@ -19619,8 +36740,9 @@ async function handle(event, opts = {}) {
     const io = {
       say: (t) => void speech.push(t),
       tool: async (tool, args = {}) => {
+        var _a5;
         const r = await client.callTool({ name: tool, arguments: args }, void 0, { signal: deadline });
-        if (r.structuredContent?.view) card = r;
+        if ((_a5 = r.structuredContent) == null ? void 0 : _a5.view) card = r;
         return r;
       },
       // A skill can't wait for a parent between turns: the question is sent, and the answer is
@@ -19638,15 +36760,16 @@ async function handle(event, opts = {}) {
       }
     };
     if (said) {
+      tools = (await client.listTools(void 0, { signal: deadline })).tools;
       await brain.handle(said, io);
     } else {
       const home = await io.tool("home_screen", {});
       const config2 = await (await fetch(`${house}/demo/config`, { signal: deadline })).json().catch(() => ({}));
-      if (config2.parent_url?.startsWith("/")) parentLink = `${house}${config2.parent_url}`;
-      speech.push(home.structuredContent?.carer ? textOf2(home) : `While You're Out is ready. ${HELP}`);
+      if ((_n = config2.parent_url) == null ? void 0 : _n.startsWith("/")) parentLink = `${house}${config2.parent_url}`;
+      speech.push(((_o = home.structuredContent) == null ? void 0 : _o.carer) ? textOf2(home) : `While You're Out is ready. ${HELP}`);
     }
     await Promise.all(pending);
-    if (said && event.request.locale?.startsWith("hi") && lang !== "hi") {
+    if (said && ((_p = event.request.locale) == null ? void 0 : _p.startsWith("hi")) && lang !== "hi") {
       const r = await client.callTool({ name: "set_carer_language", arguments: { language: "hi-IN" } }, void 0, { signal: deadline }).catch(() => null);
       if (r && !r.isError) lang = "hi";
     }
@@ -19659,12 +36782,13 @@ async function handle(event, opts = {}) {
     void client.close().catch(() => {
     });
   }
-  return respond(speech.length ? speech : ["Okay."], card, event, { attributes: { brain: brain.snapshot(), ...lang ? { lang } : {} }, appCard: parentLink });
+  return respond(speech.length ? speech : ["Okay."], card, event, { attributes: { brain: rules.snapshot(), model: model.snapshot(), ...lang ? { lang } : {} }, appCard: parentLink });
 }
 function respond(speech, card, event, opts = {}) {
+  var _a4, _b, _c, _d, _e, _f, _g;
   const text = speech.join(" ").replace(/\s+/g, " ").trim();
-  const apl = Boolean(event.context?.System?.device?.supportedInterfaces?.["Alexa.Presentation.APL"]);
-  const directives = apl && !opts.end ? [aplDirective(cardModel(card?.structuredContent, text), { pixelWidth: event.context?.Viewport?.pixelWidth, large: card?.structuredContent?.text_size === "large" })] : [];
+  const apl = Boolean((_d = (_c = (_b = (_a4 = event.context) == null ? void 0 : _a4.System) == null ? void 0 : _b.device) == null ? void 0 : _c.supportedInterfaces) == null ? void 0 : _d["Alexa.Presentation.APL"]);
+  const directives = apl && !opts.end ? [aplDirective(cardModel(card == null ? void 0 : card.structuredContent, text), { pixelWidth: (_f = (_e = event.context) == null ? void 0 : _e.Viewport) == null ? void 0 : _f.pixelWidth, large: ((_g = card == null ? void 0 : card.structuredContent) == null ? void 0 : _g.text_size) === "large" })] : [];
   return {
     version: "1.0",
     sessionAttributes: opts.attributes ?? {},
@@ -19679,7 +36803,22 @@ function respond(speech, card, event, opts = {}) {
 }
 
 // alexa/src/index.ts
-var handler = async (event) => handle(event);
+var handler = async (event) => {
+  try {
+    return await handle(event);
+  } catch (e) {
+    console.error(e);
+    const why = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    return {
+      version: "1.0",
+      response: {
+        outputSpeech: { type: "PlainText", text: "Sorry, something went wrong on my side. Please try again." },
+        card: { type: "Simple", title: "While You're Out: error", content: why.slice(0, 500) },
+        shouldEndSession: false
+      }
+    };
+  }
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   handler

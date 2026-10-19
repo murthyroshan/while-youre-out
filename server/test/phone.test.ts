@@ -231,7 +231,13 @@ test('then setting up a new family: the teach-back, pets and contacts all use it
       { name: 'Chidi', relation: 'Dad', phone: '+234 803 555 0102' },
     ],
   };
-  assert.equal((await post('/parent/api/family', { family })).status, 200);
+  // A new family: nothing about the children is kept until a parent or guardian agrees.
+  const refused = await post('/parent/api/family', { family, by: 'Ada' });
+  assert.equal(refused.status, 400);
+  assert.match((await refused.json()).error, /parent or guardian/);
+  const ok = await post('/parent/api/family', { family: { ...family, consent: true }, by: 'Ada' });
+  assert.equal(ok.status, 200);
+  assert.equal((await ok.json()).consent.by, 'Ada');
   db.prepare("INSERT INTO facts (category, subject, text, source, author, created_at) VALUES ('pet', 'Biscuit', 'Biscuit gets half a pouch at 6.', 'voice', 'Ada', ?)").run(new Date().toISOString());
   await call('start_handoff', { carer_name: 'Nani' });
   const first = await call('teachback', {});
@@ -279,4 +285,18 @@ test('the service worker and the home-screen manifest are served', async () => {
   assert.equal(m.start_url, `/parent?k=${KEY}`);
   assert.equal(m.display, 'standalone');
   assert.equal((await fetch(`${base}/static/icon-192.png`)).status, 200);
+});
+
+test('evenings are deleted after 90 days; the family\'s own notes stay', async () => {
+  const { pruneOld } = await import('../src/domain/family.js');
+  const longAgo = new Date(Date.now() - 100 * 86_400_000).toISOString();
+  const id = Number(db.prepare("INSERT INTO handoffs (carer_name, language, started_at, ended_at, status) VALUES ('Old sitter', 'en', ?, ?, 'ended')").run(longAgo, longAgo).lastInsertRowid);
+  db.prepare("INSERT INTO log_events (handoff_id, at, kind, text) VALUES (?, ?, 'note', 'An old evening')").run(id, longAgo);
+  db.prepare("INSERT INTO audit (at, actor, via, action) VALUES (?, 'Old sitter', 'x', 'An old action')").run(longAgo);
+  const facts = (db.prepare('SELECT COUNT(*) AS n FROM facts').get() as { n: number }).n;
+  assert.equal(pruneOld(db), 1);
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM handoffs WHERE id = ?').get(id) as { n: number }).n, 0);
+  assert.equal((db.prepare("SELECT COUNT(*) AS n FROM log_events WHERE text = 'An old evening'").get() as { n: number }).n, 0);
+  assert.equal((db.prepare("SELECT COUNT(*) AS n FROM audit WHERE action = 'An old action'").get() as { n: number }).n, 0);
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM facts').get() as { n: number }).n, facts, 'the notes stay');
 });

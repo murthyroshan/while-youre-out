@@ -488,14 +488,16 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       <p class="muted">Questions go to the first person, then the next if nobody answers. Doctors are shown to paramedics but never asked questions.</p>
       <div id="fContacts"></div>
       <div class="pbtns"><button data-add="contact">+ Contact</button></div>
+      <label class="sw-row" id="fConsentRow" hidden><span>I'm the parent or guardian, and I agree to keep my children's first names, ages and allergies here so whoever looks after them can be told. I can delete everything at any time.</span><input type="checkbox" id="fConsent"></label>
+      <p class="muted" id="fConsentNote" hidden></p>
       <p class="ferr" id="fErr" aria-live="polite"></p>
       <button class="ok wide" id="fSave">Save family</button>
       <p class="from">Start over</p>
       <div class="pbtns danger">
         <button data-reset="demo">Reset to the demo family</button>
-        <button data-reset="fresh">Start fresh with my family</button>
+        <button data-reset="fresh">Delete everything and start fresh</button>
       </div>
-      <p class="muted" id="resetNote">Clears tonight, past evenings, messages and saved rules. Tap again to confirm.</p>
+      <p class="muted" id="resetNote">Deletes everything kept about your family: notes, evenings, questions, messages, sitters and receipts. Tap again to confirm. Evenings are deleted by themselves after 90 days.</p>
     </section>
   </div>
 </main>
@@ -1226,6 +1228,15 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     if (!r || !r.ok) return;
     fam = await r.json();
     renderFamily();
+    renderConsent();
+  }
+  // Before anything about a child is kept, a parent or guardian says so, once.
+  function renderConsent() {
+    var c = fam && fam.consent;
+    document.getElementById('fConsentRow').hidden = Boolean(c);
+    var note = document.getElementById('fConsentNote');
+    note.hidden = !c;
+    if (c) note.textContent = c.by === 'Sample data' ? 'This is a sample family, not a real child’s details.' : 'Consent given by ' + c.by + ' on ' + new Date(c.at).toLocaleDateString() + '.';
   }
   function opt(value, label, selected) { return '<option value="' + esc(value) + '"' + (selected ? ' selected' : '') + '>' + esc(label) + '</option>'; }
   function renderFamily() {
@@ -1294,12 +1305,13 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       fErr.style.color = '';
       fErr.textContent = 'Saving…';
       b.disabled = true;
-      var r = await post('/parent/api/family', { family: fam, by: me }).catch(function () { return null; });
+      var r = await post('/parent/api/family', { family: Object.assign({}, fam, { consent: Boolean(fam.consent) || document.getElementById('fConsent').checked }), by: me }).catch(function () { return null; });
       b.disabled = false;
       var out = r ? await r.json().catch(function () { return {}; }) : { error: 'Offline. Try again.' };
       if (!r || !r.ok) { fErr.textContent = out.error || 'Could not save.'; return; }
       fam = out;
       renderFamily();
+      renderConsent();
       fErr.style.color = 'var(--green)';
       fErr.textContent = 'Saved ✓';
       parentsShown = null;

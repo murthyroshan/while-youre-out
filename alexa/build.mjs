@@ -107,7 +107,7 @@ await build({
   outfile: here('./lambda/index.js'),
   bundle: true,
   platform: 'node',
-  target: 'node18',
+  target: 'node16',
   format: 'cjs',
   minify: false,
   legalComments: 'none',

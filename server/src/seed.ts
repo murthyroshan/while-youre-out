@@ -103,6 +103,8 @@ export function seedDemoHousehold(db: DB) {
   }
 
   seedPastEvenings(db);
+  // The demo family is sample data, not a real child's.
+  db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('consent', ?)").run(JSON.stringify({ by: 'Sample data', at: t }));
 
   // A goodnight message for lights out. The demo's is a music-box lullaby with the words as a
   // caption; a real parent records their own voice or video on the parent page.

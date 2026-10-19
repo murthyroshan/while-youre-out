@@ -25,6 +25,8 @@ export interface GeminiBrainOptions {
   /** Used for one turn when the model is unavailable (quota, network). */
   fallback: Brain;
   fetchImpl?: typeof fetch;
+  /** How long to wait for the model before the rules answer (default 7 s). */
+  timeoutMs?: number;
 }
 
 // Tools the model should not use directly: the task version of ask_parent is preferred.
@@ -96,13 +98,25 @@ export class GeminiBrain implements Brain {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ system, contents: this.history.slice(-MAX_HISTORY), functions: this.functions() }),
-      signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
+      signal: AbortSignal.timeout(this.opts.timeoutMs ?? MODEL_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? `LLM proxy ${res.status}`);
     return (await res.json()) as { parts: Part[] };
   }
 
   /** A turn another brain answered, so the model knows what was said ("What is Maya allergic to?"). */
+  /** The conversation so far, for a host that keeps no memory between turns (an Alexa skill). */
+  snapshot() {
+    return { history: this.history.slice(-8), inEmergency: this.inEmergency };
+  }
+  restore(s: { history?: Content[]; inEmergency?: boolean } | undefined) {
+    if (!s) return;
+    this.history = Array.isArray(s.history) ? s.history : [];
+    // The model needs the conversation to open with something the person said.
+    while (this.history[0] && (this.history[0].role !== 'user' || this.history[0].parts.some((p) => p.functionResponse))) this.history.shift();
+    this.inEmergency = Boolean(s.inEmergency);
+  }
+
   note(user: string, said: string[]) {
     const u = user.trim();
     if (!u) return;

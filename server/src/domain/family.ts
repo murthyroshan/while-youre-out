@@ -4,6 +4,7 @@
 import { type DB, nowIso } from '../db.js';
 import { seedDemoHousehold } from '../seed.js';
 import { contacts, events, household } from './house.js';
+import { getSetting, setSetting } from './shadow.js';
 
 export class FamilyError extends Error {}
 
@@ -101,7 +102,40 @@ export function parseFamily(input: any): Family {
 const sentence = (name: string, allergies: string) =>
   /allerg/i.test(allergies) ? allergies.replace(/([^.!])$/, '$1.') : `${name} is allergic to ${allergies.replace(/\.$/, '')}.`;
 
+/** A parent's consent to keep what they enter about their children; the demo family is sample data. */
+export function consent(db: DB): { by: string; at: string } | null {
+  try {
+    return JSON.parse(getSetting(db, 'consent') ?? 'null');
+  } catch {
+    return null;
+  }
+}
+
+/** Evenings, questions, the activity log, door photos, emergencies and orders are kept this long. */
+export const RETENTION_DAYS = 90;
+
+/** Deletes what is older than the retention period (run once an hour). The family's own notes stay. */
+export function pruneOld(db: DB) {
+  const before = new Date(Date.now() - RETENTION_DAYS * 86_400_000).toISOString();
+  const old = (db.prepare("SELECT id FROM handoffs WHERE status = 'ended' AND ended_at < ?").all(before) as Array<{ id: number }>).map((h) => h.id);
+  for (const id of old) {
+    db.prepare('DELETE FROM log_events WHERE handoff_id = ?').run(id);
+    db.prepare('DELETE FROM questions WHERE handoff_id = ?').run(id);
+  }
+  db.prepare("DELETE FROM handoffs WHERE status = 'ended' AND ended_at < ?").run(before);
+  db.prepare('DELETE FROM audit WHERE at < ?').run(before);
+  db.prepare('DELETE FROM door_events WHERE at < ?').run(before);
+  db.prepare("DELETE FROM incidents WHERE started_at < ? AND status <> 'active'").run(before);
+  db.prepare('DELETE FROM orders WHERE created_at < ?').run(before);
+  db.prepare("DELETE FROM payments WHERE created_at < ? AND status <> 'pending'").run(before);
+  return old.length;
+}
+
 export function saveFamily(db: DB, input: unknown, by = 'Parent'): Family {
+  // Before anything about a child is kept, a parent or guardian says so, once.
+  if (!consent(db) && (input as { consent?: unknown } | null)?.consent !== true) {
+    throw new FamilyError("Please confirm you're the parent or guardian and agree to keep these details for whoever looks after your children.");
+  }
   const f = parseFamily(input);
   const t = nowIso();
   db.exec('BEGIN');
@@ -177,10 +211,17 @@ export function resetToDemo(db: DB) {
   return getFamily(db);
 }
 
+/** Records who consented, when (the first time a family is saved). */
+export function recordConsent(db: DB, by: string) {
+  if (!consent(db)) setSetting(db, 'consent', JSON.stringify({ by, at: nowIso() }));
+}
+
 /** An empty house for a family setting up their own. */
 export function startFresh(db: DB, timezone: string) {
   if (!validTimezone(timezone)) throw new FamilyError('Choose your time zone.');
   wipe(db);
+  // A new family: its parent consents again before anything about the children is kept.
+  setSetting(db, 'consent', null);
   db.prepare("INSERT INTO household (id, name, address, language, timezone) VALUES (1, 'Our family', '', 'en', ?)").run(timezone);
   return getFamily(db);
 }

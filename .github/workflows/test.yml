@@ -17,6 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - run: npm ci --prefix alexa
       - run: npx tsc -p alexa
       - run: npx tsx --test alexa/test/*.test.ts
       # The skill Amazon hosts is the built file: it must match its source.
