@@ -40,6 +40,15 @@ test('during a handoff: what\'s next and how long until it', () => {
   assert.equal(s.night, false);
 });
 
+test('a long wait is said in hours, and past three hours only the clock time', () => {
+  const db = fresh();
+  setDemoTime('16:50', TZ, 'Sat');
+  startHandoff(db, 'Priya');
+  assert.equal(homeSentence(homeScreen(db)), 'Next is dinner at 6:30 pm, in an hour and 40 minutes.');
+  setDemoTime('05:00', TZ, 'Sat');
+  assert.equal(homeSentence(homeScreen(db)), 'Next is dinner at 6:30 pm.');
+});
+
 test('the parents\' latest answer, waiting questions and the handover check show up', () => {
   const db = fresh();
   setDemoTime('18:10', TZ, 'Sat');

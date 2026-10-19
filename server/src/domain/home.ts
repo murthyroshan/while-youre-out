@@ -150,12 +150,20 @@ export function homeScreen(db: DB): HomeScreen {
   };
 }
 
-/** One sentence for voice: "Next is bath at 7:15 PM, in 12 minutes." */
+/** "an hour and 20 minutes", "2 hours": a wait too long to say in minutes. */
+function spokenHours(m: number) {
+  const h = Math.floor(m / 60);
+  const r = Math.round((m % 60) / 5) * 5;
+  const hours = h === 1 ? 'an hour' : `${h} hours`;
+  return r ? `${hours} and ${r} minutes` : hours;
+}
+
+/** One sentence for voice: "Next is bath at 7:15 PM, in 12 minutes." (Past 3 hours, only the clock time.) */
 export function homeSentence(s: HomeScreen) {
   if (s.mode === 'parent') return `No one is babysitting right now.`;
   if (s.asleep_since) return `All quiet. Asleep since ${s.asleep_since}.`;
   if (!s.next) return s.plan.length ? "Everything on tonight's plan is done." : `${s.carer} is looking after things.`;
   const m = s.next.minutes_until;
-  const when = m > 1 ? `, in ${m} minutes` : m >= -5 ? ', now' : `, ${-m} minutes ago`;
+  const when = m > 180 ? '' : m > 60 ? `, in ${spokenHours(m)}` : m > 1 ? `, in ${m} minutes` : m >= -5 ? ', now' : `, ${-m} minutes ago`;
   return `Next is ${inSentence(s.next.title, s.members.map((m) => m.name))} at ${s.next.time}${when}.`;
 }

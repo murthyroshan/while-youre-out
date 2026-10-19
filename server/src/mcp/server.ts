@@ -5,8 +5,9 @@ import { InMemoryTaskMessageQueue } from '@modelcontextprotocol/sdk/experimental
 import { ErrorCode, McpError, type CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import * as z from 'zod/v4';
 import type { DB } from '../db.js';
+import { OUTPUTS, STATUS } from './outputs.js';
 import { FOOD_GUARD, FOOD_GUARD_SPOKEN, MEDICINE_GUARD, MEDICINE_GUARD_SPOKEN, SPOKEN_WORDS, firstSentence, fitSpoken, isEmergency, mentionsMedicine, wordCount } from '../domain/safety.js';
-import { activeHandoff, allergenMentions, answerQuestion, attachTask, briefing, contacts, createQuestion, currentContactFor, endHandoff, escalateQuestion, eveningLog, events, expireQuestion, getQuestion, HandoffInProgressError, householdTz, logEvent, parentNames, type Role, sharesWords, startHandoff, visibleFacts, whereIs } from '../domain/house.js';
+import { activeHandoff, allergenMentions, answerQuestion, familyNames, attachTask, briefing, contacts, createQuestion, currentContactFor, endHandoff, escalateQuestion, eveningLog, events, expireQuestion, getQuestion, HandoffInProgressError, householdTz, logEvent, parentNames, type Role, sharesWords, startHandoff, visibleFacts, whereIs } from '../domain/house.js';
 import { startEmergency } from '../domain/emergency.js';
 import { homeScreen, homeSentence } from '../domain/home.js';
 import { doorCheck, getDoorEvent } from '../domain/door.js';
@@ -38,6 +39,8 @@ export interface ServerDeps {
   ai: AiClient;
   /** How long a spoken note may take to read before the device answers anyway (default 8 s). */
   voiceWaitMs?: number;
+  /** The public demo only: this house's parent page, so someone testing over MCP can be Mom too. */
+  parentPage?: string | null;
 }
 
 const ui = { ui: { resourceUri: CARD_URI }, 'ui/resourceUri': CARD_URI };
@@ -51,12 +54,15 @@ function plain(view: string, data: Record<string, unknown>, text: string): CallT
  * always gets the carer's view. Parent-only facts are shown only on the authenticated parent page.
  */
 const VOICE_ROLE: Role = 'carer';
+const CAPABILITIES = /^(what (can|do) you do|what are you (for|able to do)|how (can|do) you help( me)?|what can you help (me )?with|what can i ask( you)?|help)\??!?$/i;
 const INGESTED = /\b(ate|eaten|has eaten|had|has had|swallowed|drank|took a bite|bit into|tasted|licked|chewed)\b/i;
 /** Upper bound for free-text inputs, so one call can't store megabytes. */
 const MAX_TEXT = 1000;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voiceWaitMs = 8_000 }: ServerDeps) {
+export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voiceWaitMs = 8_000, parentPage = null }: ServerDeps) {
+  // The family's own names, for the safety rules ("Leo can't breathe" is an emergency for any family).
+  const names = () => familyNames(db);
   // Alexa+ add-ons can't start speaking on their own. So anything the carer hasn't heard yet (a
   // reminder that came due, a parent's answer) is told at the start of the next reply, when they
   // talk. The simulator also announces these by itself; whatever it said is never said twice.
@@ -130,6 +136,30 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       instructions: ADDON_INSTRUCTIONS,
     },
   );
+
+  // Every tool says what it returns (outputSchema) and what the device shows while it runs and once
+  // it has answered (_meta.ui.invoking / invoked, on the definition and on each successful result).
+  const registerTool = server.registerTool.bind(server) as (...args: any[]) => any;
+  (server as any).registerTool = (name: string, config: Record<string, any>, handler: any) => {
+    const status = STATUS[name];
+    const meta = status ? { ...config._meta, ui: { ...config._meta?.ui, ...status } } : config._meta;
+    const schema = OUTPUTS[name];
+    const withStatus = (r: any) => {
+      // A field of the wrong type must never turn a whole answer into an error for the person
+      // asking: it is logged and left out, and the rest of the answer goes through.
+      if (schema && r?.structuredContent && !r.isError) {
+        const check = schema.safeParse(r.structuredContent);
+        if (!check.success) {
+          const bad = new Set(check.error.issues.map((i) => String(i.path[0])).filter((k) => k !== 'view'));
+          console.error(`outputSchema: ${name} returned unexpected ${[...bad].join(', ')}`);
+          r = { ...r, structuredContent: Object.fromEntries(Object.entries(r.structuredContent).filter(([k]) => !bad.has(k))) };
+        }
+      }
+      return status && r && !r.isError ? { ...r, _meta: { ...r._meta, ui: { ...r._meta?.ui, ...status } } } : r;
+    };
+    const wrapped = typeof handler === 'function' ? async (...args: unknown[]) => withStatus(await handler(...args)) : handler;
+    return registerTool(name, { ...config, ...(OUTPUTS[name] ? { outputSchema: OUTPUTS[name] } : {}), _meta: meta }, wrapped);
+  };
 
   server.registerResource(
     'card',
@@ -209,7 +239,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         b.epipen ? `The EpiPen: ${b.epipen}` : '',
         b.first_contact ? `${b.first_contact} is first to call.` : '',
       ].filter(Boolean)).join(' ');
-      return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since }, text);
+      return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since, ...(parentPage ? { parent_page: parentPage } : {}) }, text);
     },
   );
 
@@ -361,7 +391,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     async ({ answer: spokenAnswer, answer_english, skip, restart }) => {
       const english = spokenAnswer === undefined ? undefined : await inEnglish(spokenAnswer, answer_english);
       const answer = spokenAnswer === undefined ? undefined : [spokenAnswer, english !== spokenAnswer ? english : null].filter(Boolean).join(' ');
-      if (answer && isEmergency(answer)) {
+      if (answer && isEmergency(answer, names())) {
         return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
       const step = teachback(db, { answer, skip, restart });
@@ -510,7 +540,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     withNotices(async ({ question: said, question_english }) => {
       // Safety rules read English; an emergency in either language counts.
       const english = await inEnglish(said, question_english);
-      if (english === null && !isEmergency(said)) {
+      if (english === null && !isEmergency(said, names())) {
         return localized(
           'answer',
           { category: 'general', facts: [], guard: null, suggest_ask_parent: true },
@@ -518,11 +548,20 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         );
       }
       const question = english ?? said;
+      // "What can you do?": what this add-on is for, in one breath (Alexa+ asks every add-on to answer it).
+      if (CAPABILITIES.test(question.trim())) {
+        const child = (db.prepare("SELECT name FROM members WHERE kind = 'child' ORDER BY id LIMIT 1").get() as { name: string } | undefined)?.name;
+        return localized(
+          'answer',
+          { category: 'general', facts: [], guard: null, suggest_ask_parent: false, emergency: false, exact: true, capabilities: true },
+          `I know the parents' notes for tonight. Ask where things are, what ${child ?? 'the kids'} can eat, or what's next. If they haven't said, I'll ask them. Say "emergency" anytime.`,
+        );
+      }
       // "Where's the EpiPen?" in any language: the place, as the parents described it.
       const where = /^(?:where(?:'s| is| are| do i find| can i find| do they keep)|find)\s+(?:the |her |his |my |their |maya'?s )?(.+?)\??$/i.exec(question.trim());
-      const place = where && !isEmergency(question) ? whereIs(db, where[1]) : null;
+      const place = where && !isEmergency(question, names()) ? whereIs(db, where[1]) : null;
       if (place) return localized('location', { ...place, photo_url: abs(place.photo_url) }, `${place.item}: ${place.description}`);
-      if (isEmergency(said) || isEmergency(question)) {
+      if (isEmergency(said, names()) || isEmergency(question, names())) {
         return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
       const a = answerQuestion(db, question, VOICE_ROLE);
@@ -560,7 +599,14 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         offer,
         busy && a.suggest_ask_parent ? `The parents asked for urgent questions only until ${clockTime(busy)}.` : null,
       ].filter((l): l is string => Boolean(l));
-      const pool = a.exact ? facts : close ? [facts[closeAt]] : [];
+      // "What's for dinner?" is answered by the note that names it. The allergy still comes first,
+      // but as its one key sentence, so the actual answer fits in what is said.
+      const named = a.exact && a.category === 'food' ? a.facts.findIndex((f) => f.risk !== 'safety' && sharesWords(f.text, question)) : -1;
+      const safety = a.facts.find((f) => f.risk === 'safety');
+      const pool =
+        named >= 0 && safety
+          ? [firstSentence(safety.text), `${a.facts[named].said_by} said: "${firstSentence(a.facts[named].text)}"`]
+          : a.exact ? facts : close ? [facts[closeAt]] : [];
       const spoken = fitSpoken(pool, SPOKEN_WORDS - wordCount([...tonight, ...lead, ...after].join(' ')));
       return localized('answer', { ...a, shadow, busy_until: busy ? clockTime(busy) : null, tonight_bedtime: moved?.time ?? null }, [...tonight, ...lead, ...spoken, ...after].join(' '));
     }),
@@ -572,11 +618,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       title: 'Where is something',
       description: 'Finds where something is kept in the house (EpiPen, first aid kit, pyjamas, dog food) and shows the parents\' photo if there is one.',
       inputSchema: { item: z.string().trim().min(1).max(100).describe('The thing to find, e.g. "EpiPen", "first aid kit", "dog food"') },
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
       _meta: ui,
     },
     withNotices(async ({ item }) => {
-      if (isEmergency(item)) return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
+      if (isEmergency(item, names())) return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       const loc = whereIs(db, item);
       if (!loc)
         return localized('answer', { category: 'general', facts: [], guard: null, found: false, suggest_ask_parent: true }, `The parents haven't said where the ${item} is. I can ask them.`);
@@ -604,7 +650,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       }
       const ev = logEvent(db, text !== said ? `${said} (${text})` : said, kind);
       // Logging must never bypass the safety checks the carer would get by asking.
-      if (isEmergency(text) || isEmergency(said)) {
+      if (isEmergency(text, names()) || isEmergency(said, names())) {
         return plain('logged', { event: ev, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
       const allergens = allergenMentions(db, text);
@@ -654,7 +700,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     async ({ question, question_english }) => {
       const q = createQuestion(db, question, null, undefined, question_english ?? null);
       const who = currentContactFor(db, q);
-      const emergency = isEmergency(question) || (question_english ? isEmergency(question_english) : false);
+      const emergency = isEmergency(question, names()) || (question_english ? isEmergency(question_english, names()) : false);
       const busy = busyUntil(db);
       const waiting = busy && q.urgency !== 'urgent' && !emergency;
       // Emergencies never wait for a translation.
@@ -708,7 +754,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         shopping_item: z.string().trim().min(1).max(60).optional().describe('From log_event (shopping_ask): the parents answer "add to list" or "not now"'),
       },
       execution: { taskSupport: 'required' },
-      _meta: ui,
+      outputSchema: OUTPUTS.ask_parent_and_wait,
+      _meta: { ...ui, ui: { ...ui.ui, ...STATUS.ask_parent_and_wait } },
     },
     {
       async createTask({ question, question_english, door_event_id, shopping_item }, { taskStore: store, taskRequestedTtl }) {
@@ -855,12 +902,19 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const lang = carerLang();
       const fixed = lang === 'en' ? null : fixedTranslation(e.say_first, lang);
       const address = e.address?.trim() ? e.address : null;
-      const first = e.action_plan.steps[0]?.text ?? '';
+      const steps = e.action_plan.steps;
+      const first = steps[0]?.text ?? '';
+      // The parents' allergy plan puts the EpiPen first and 911 straight after (as allergy action
+      // plans do): then the first thing said is step 1, and the address comes with the 911 step.
+      const planLeads = steps.length > 1 && !/\b911\b/.test(first) && steps.some((s) => /\b911\b/.test(s.text));
       // The general script starts with the same "Call 911" sentence; say it once.
-      const english = [e.say_first, address ? `The address is ${address}.` : '', first === e.say_first ? '' : first].filter(Boolean).join(' ');
-      // Emergencies never wait for an AI: a fixed translation of the first line if we have one, English otherwise.
-      const spoken = fixed ? [fixed, address].filter(Boolean).join(' ') : null;
-      return plain('emergency', { ...e, address, language: lang, spoken }, spoken ? `${spoken}. ${english}` : english);
+      const english = planLeads
+        ? `Step 1 of ${steps.length}: ${first} Say "done" when you have.`
+        : [e.say_first, first === e.say_first ? '' : first].filter(Boolean).join(' ');
+      // Emergencies never wait for an AI: a fixed translation of the first line if we have one, English
+      // otherwise. The address itself is shown big on screen, never said aloud (Alexa+ privacy policy).
+      const spoken = fixed;
+      return plain('emergency', { ...e, address, language: lang, spoken }, spoken ? `${spoken} ${english}` : english);
     },
   );
 
@@ -872,7 +926,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     const lang = carerLang();
     // Only while it lasts: "call 911 now" must not stay on screen once help has taken over.
     const fixed = lang === 'en' || i.status !== 'active' ? null : fixedTranslation(String(s.say_first ?? ''), lang);
-    const relay = fixed ? { language: lang, spoken: [fixed, s.address || null].filter(Boolean).join(' ') } : {};
+    const relay = fixed ? { language: lang, spoken: fixed } : {};
     // Photos as absolute URLs: the card runs in a sandbox with no base address of its own.
     return plain('emergency', { ...s, address: s.address || null, epipen_photo: abs((s.epipen_photo as string | null) ?? null), incident: incidentView(db, i), ...relay, ...extra }, text);
   };
@@ -894,11 +948,16 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       if (i.status === 'resolved') {
         return incidentResult(i, "Okay. I've told the parents the emergency is over. If anything changes, say emergency again.", { resolved: true });
       }
-      const timer = i.current === 1 && i.timers.length && before.current === 0 ? ` I've started a ${Math.round(i.timers[0].seconds / 60)}-minute timer.` : '';
+      // The timer belongs to the step just finished ("5 minutes since the EpiPen"), so it is said first.
+      const timer = i.current === 1 && i.timers.length && before.current === 0 ? `${Math.round(i.timers[0].seconds / 60)}-minute timer started. ` : '';
+      const address = String((i.script as Record<string, unknown>).address ?? '').trim();
+      const step = i.steps[i.current]?.text ?? '';
+      // The address is shown big on the screen, not said aloud (Alexa+ policy: no private details by voice).
+      const where = address && /\b911\b/.test(step) ? ' The address is on the screen.' : '';
       const text =
         i.current >= i.steps.length
-          ? `That was the last step.${timer} Stay with her and follow the 911 dispatcher. Say "it's over" when help has taken over.`
-          : `${action === 'back' ? 'Again' : 'Next'}, step ${i.current + 1} of ${i.steps.length}: ${i.steps[i.current].text}${timer}`;
+          ? `${timer}That was the last step. Stay with her and follow the 911 dispatcher. Say "it's over" when help has taken over.`
+          : `${timer}${action === 'back' ? 'Again' : 'Next'}, step ${i.current + 1} of ${i.steps.length}: ${step}${where}`;
       return incidentResult(i, text);
     },
   );
@@ -989,11 +1048,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       description:
         "Call when the carer asks about the front door (\"someone's knocking, should I open?\", \"who's at the door?\", the doorbell rang). Uses the doorbell camera's latest event, who the parents said to expect tonight, delivery windows and the parents' door rule. Never says a stranger is safe. If the result has ask_parent, call ask_parent_and_wait with that question and door_event_id so the parents see the photo.",
       inputSchema: { question: z.string().trim().max(MAX_TEXT).optional().describe("The carer's words") },
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
       _meta: ui,
     },
     withNotices(async ({ question }) => {
-      if (question && isEmergency(question)) {
+      if (question && isEmergency(question, names())) {
         return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
       const c = doorCheck(db);

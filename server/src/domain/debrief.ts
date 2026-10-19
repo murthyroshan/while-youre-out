@@ -4,7 +4,7 @@
 import type { DB, Fact, Handoff, LogEvent } from '../db.js';
 import { formatTime, localTime, now, nowIso } from '../clock.js';
 import { classifyQuestion } from './safety.js';
-import { householdTz } from './house.js';
+import { familyNames, householdTz } from './house.js';
 import { tonightPlan } from './plan.js';
 import { suppliesMentioned } from './shopping.js';
 
@@ -74,7 +74,7 @@ export function buildDebrief(db: DB, h: Handoff): Debrief {
 
   // Tonight's one-off answers that could become house rules (never food, medicine or safety).
   const rule_suggestions = questions
-    .filter((q) => q.status === 'answered' && q.scope === 'tonight' && q.answer && q.urgency !== 'urgent' && classifyQuestion(q.text) === 'general' && !/^please call me/i.test(q.answer))
+    .filter((q) => q.status === 'answered' && q.scope === 'tonight' && q.answer && q.urgency !== 'urgent' && classifyQuestion(q.text, familyNames(db)) === 'general' && !/^please call me/i.test(q.answer))
     .map((q) => ({ question_id: q.id, text: q.text, answer: q.answer!, by: q.answered_by ?? 'Parent' }));
 
   // Things that ran out.
@@ -104,7 +104,7 @@ export function saveAnswerAsRule(db: DB, questionId: number): boolean {
   const q = db.prepare("SELECT * FROM questions WHERE id = ? AND status = 'answered'").get(questionId) as
     | { id: number; text: string; answer: string; answered_by: string; scope: string; urgency: string; handoff_id: number }
     | undefined;
-  if (!q || q.scope !== 'tonight' || q.urgency === 'urgent' || classifyQuestion(q.text) !== 'general') return false;
+  if (!q || q.scope !== 'tonight' || q.urgency === 'urgent' || classifyQuestion(q.text, familyNames(db)) !== 'general') return false;
   const text = `Q: ${q.text.replace(/\?*$/, '?')} A: ${q.answer}`;
   const updated = db.prepare('UPDATE facts SET expires_at = NULL, handoff_id = NULL WHERE text = ? AND handoff_id = ?').run(text, q.handoff_id);
   if (!updated.changes) {

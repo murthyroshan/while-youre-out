@@ -4,8 +4,8 @@
 // Also busy mode: a parent can say "urgent questions only" for a while.
 import type { DB } from '../db.js';
 import { localTime, now } from '../clock.js';
-import { householdTz } from './house.js';
-import { classifyQuestion, normalise } from './safety.js';
+import { familyNames, householdTz } from './house.js';
+import { classifyQuestion, type FamilyNames, normalise } from './safety.js';
 
 export type ShadowTopic = 'screen' | 'play' | 'bedtime';
 export const SHADOW_TOPICS: ShadowTopic[] = ['screen', 'play', 'bedtime'];
@@ -21,8 +21,8 @@ const STOP = new Set(
 );
 const contentWords = (s: string) => new Set(normalise(s).toLowerCase().match(/[a-z']+/g)?.filter((w) => w.length > 2 && !STOP.has(w)) ?? []);
 
-export function shadowTopic(question: string): ShadowTopic | null {
-  if (classifyQuestion(question) !== 'general') return null; // never food, medicine, safety, secrets
+export function shadowTopic(question: string, names?: FamilyNames): ShadowTopic | null {
+  if (classifyQuestion(question, names) !== 'general') return null; // never food, medicine, safety, secrets
   return TOPIC_RE.find(([, re]) => re.test(question))?.[0] ?? null;
 }
 
@@ -82,7 +82,8 @@ const MIN_DECISIONS = 3;
 const MIN_AGREEMENT = 0.75;
 
 export function shadowSuggestion(db: DB, question: string): ShadowSuggestion | null {
-  const topic = shadowTopic(question);
+  const names = familyNames(db);
+  const topic = shadowTopic(question, names);
   if (!topic || shadowOffTopics(db).includes(topic)) return null;
   const tz = householdTz(db);
   const words = contentWords(question);
@@ -92,7 +93,7 @@ export function shadowSuggestion(db: DB, question: string): ShadowSuggestion | n
     answered_by: string;
     asked_at: string;
   }>)
-    .filter((q) => shadowTopic(q.text) === topic && [...contentWords(q.text)].some((w) => words.has(w)))
+    .filter((q) => shadowTopic(q.text, names) === topic && [...contentWords(q.text)].some((w) => words.has(w)))
     .map((q) => ({ ...q, vote: polarity(q.answer), weekend: localTime(tz, new Date(q.asked_at)).isWeekend }))
     .filter((q): q is typeof q & { vote: 'yes' | 'no' } => q.vote !== null);
 

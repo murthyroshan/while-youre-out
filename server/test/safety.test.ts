@@ -1,7 +1,10 @@
 // Red-team table for the deterministic safety classifier.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyQuestion, containsSecret, emergencyKind, type QuestionCategory } from '../src/domain/safety.js';
+import { classifyQuestion, containsSecret, emergencyKind, type FamilyNames, type QuestionCategory } from '../src/domain/safety.js';
+
+// The demo family. The rules read roles, so every case below also holds for any other family.
+const SHARMAS: FamilyNames = { children: ['Maya'], pets: ['Bruno'], adults: ['Anita', 'Rahul', 'Dr. Lee'] };
 
 const cases: Array<[string, QuestionCategory]> = [
   // Real emergencies
@@ -78,6 +81,12 @@ const cases: Array<[string, QuestionCategory]> = [
   ["Should I cut the grapes so she doesn't choke?", 'safety_info'],
   ['What do I do if she has an allergic reaction?', 'safety_info'],
   ['Her band-aid fell off', 'general'],
+  // "Help me" is a cry for help, not a request for help with something
+  ['Help me!', 'emergency'],
+  ["Help me, she's not moving", 'emergency'],
+  ['What can you help me with?', 'general'],
+  ['Can you help me find her pyjamas?', 'general'],
+  ['Help me with dinner', 'food'],
   ['The button fell off her pyjamas', 'general'],
   ['A book fell from the shelf', 'general'],
   ['Can we light a fire in the fireplace?', 'general'],
@@ -111,7 +120,7 @@ const cases: Array<[string, QuestionCategory]> = [
 ];
 
 for (const [q, expected] of cases) {
-  test(`"${q}" → ${expected}`, () => assert.equal(classifyQuestion(q), expected));
+  test(`"${q}" → ${expected}`, () => assert.equal(classifyQuestion(q, SHARMAS), expected));
 }
 
 test('secrets are detected so they are never stored', () => {
@@ -129,7 +138,27 @@ test('emergency kinds pick the right script', () => {
   assert.equal(emergencyKind('I smell gas'), 'gas');
   assert.equal(emergencyKind('She swallowed a battery'), 'poison');
   assert.equal(emergencyKind('She fell down the stairs and hit her head'), 'injury');
-  assert.equal(emergencyKind("I can't find Maya anywhere"), 'missing');
+  assert.equal(emergencyKind("I can't find Maya anywhere", SHARMAS), 'missing');
   assert.equal(emergencyKind('Someone is trying to break in'), 'intruder');
-  assert.equal(emergencyKind('Maya is choking on a grape'), 'choking');
+  assert.equal(emergencyKind('Maya is choking on a grape', SHARMAS), 'choking');
+});
+
+test('another family: the same rules hold with their names (Leo, Biscuit the dog, Ada and Chidi)', () => {
+  const OKAFORS: FamilyNames = { children: ['Leo'], pets: ['Biscuit'], adults: ['Ada', 'Chidi'] };
+  const cases: Array<[string, QuestionCategory]> = [
+    ["I can't find Leo anywhere", 'emergency'],
+    ['Leo is missing', 'emergency'],
+    ["Leo's lips are swelling", 'emergency'],
+    ['Leo fell down the stairs', 'emergency'],
+    ["I can't wake Leo up", 'emergency'],
+    ["When is Ada coming home?", 'return_time'],
+    ['Is Chidi back yet?', 'return_time'],
+    ["I'll walk Biscuit quietly so Leo won't wake up", 'general'],
+    ["Should I cut Leo's grapes so he doesn't choke?", 'safety_info'],
+    ['Can Leo have a cookie?', 'food'],
+    ["Can I find Leo's pyjamas?", 'general'],
+  ];
+  for (const [q, expected] of cases) assert.equal(classifyQuestion(q, OKAFORS), expected, q);
+  // Without the family's names the child's name means nothing, but "her"/"him" still work.
+  assert.equal(classifyQuestion("I can't find her anywhere"), 'emergency');
 });

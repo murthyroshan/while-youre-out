@@ -11,6 +11,7 @@ import {
   SAFETY_INFO_NOTE,
   containsSecret,
   normalise,
+  type FamilyNames,
   type QuestionCategory,
 } from './safety.js';
 
@@ -109,8 +110,19 @@ export interface HouseAnswer {
   exact: boolean;
 }
 
+/** The family's own names, so the safety rules work for any family (see withRoles). */
+export function familyNames(db: DB): FamilyNames {
+  const members = db.prepare('SELECT name, kind FROM members').all() as Array<{ name: string; kind: string }>;
+  return {
+    children: members.filter((m) => m.kind === 'child').map((m) => m.name),
+    pets: members.filter((m) => m.kind === 'pet').map((m) => m.name),
+    adults: contacts(db).map((c) => c.name),
+  };
+}
+
 export function answerQuestion(db: DB, question: string, role: Role = 'carer'): HouseAnswer {
-  const category = classifyQuestion(question);
+  const names = familyNames(db);
+  const category = classifyQuestion(question, names);
   const base: HouseAnswer = { category, facts: [], guard: null, suggest_ask_parent: false, emergency: false, exact: true };
 
   if (category === 'emergency') return { ...base, emergency: true };
@@ -356,7 +368,8 @@ export function createQuestion(
 ): Question {
   const h = activeHandoff(db);
   // The stricter of the two readings wins (an emergency in either language is an emergency).
-  const readings = [classifyQuestion(text), textEnglish ? classifyQuestion(textEnglish) : 'general'] as const;
+  const names = familyNames(db);
+  const readings = [classifyQuestion(text, names), textEnglish ? classifyQuestion(textEnglish, names) : 'general'] as const;
   const order = ['emergency', 'safety_info', 'medicine', 'food', 'secret', 'return_time', 'general'];
   const category = shoppingItem ? 'general' : [...readings].sort((a, b) => order.indexOf(a) - order.indexOf(b))[0];
   const info = db

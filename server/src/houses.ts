@@ -1,9 +1,12 @@
 // The public demo: every visitor gets their own copy of the demo family, so two judges trying it
 // at once never see each other's evening. A house is picked by a path prefix (/h/<id>/mcp, used by
 // the simulator and by links the server makes) or, for the parent page and its service worker,
-// by a cookie set when that page is opened through its prefixed link. Anything else (an MCP
-// client pointed at /mcp, old links) reaches the shared house.
+// by a cookie set when that page is opened through its prefixed link. A plain MCP client pointed at
+// /mcp (a judge's Inspector, a Claude connector) gets a house of its own for its session. Anything
+// else (old links) reaches the shared house.
 import { EventEmitter } from 'node:events';
+import { randomBytes } from 'node:crypto';
+import type { ServerResponse } from 'node:http';
 import express from 'express';
 import { houseStore, type HouseContext } from './context.js';
 import { newHouseAllowed } from './limits.js';
@@ -46,11 +49,14 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
   const shared = make(opts.publicUrl, true);
   const houses = new Map<string, House<T>>();
   const recentlyMade: number[] = [];
+  /** MCP session id -> house id, for clients that connect to plain /mcp. */
+  const sessionHouses = new Map<string, string>();
 
   const remove = (id: string) => {
     const h = houses.get(id);
     if (!h) return;
     houses.delete(id);
+    for (const [sid, hid] of sessionHouses) if (hid === id) sessionHouses.delete(sid);
     // Its listeners and timers were registered inside the house, so they are removed there too.
     houseStore.run(h.ctx, () => h.close());
   };
@@ -107,6 +113,24 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
       const fromCookie = cookie(req.headers.cookie, COOKIE);
       if (fromCookie && HOUSE_ID.test(fromCookie)) id = fromCookie;
     }
+    // Plain /mcp: each MCP session gets its own fresh demo family, so two people testing at once
+    // never share an evening or reset each other's. The session id the house hands out picks it later.
+    if (!id && /^\/mcp(\/|\?|$)/.test(req.url)) {
+      const sid = req.headers['mcp-session-id'];
+      if (typeof sid === 'string') {
+        id = sessionHouses.get(sid);
+        // An unknown or expired session: the client starts a new one (MCP's "session not found").
+        if (!id) return void res.status(404).json({ jsonrpc: '2.0', error: { code: -32001, message: 'Session not found' }, id: null });
+      } else {
+        const own = randomBytes(18).toString('base64url');
+        id = own;
+        onSessionId(res, (s) => {
+          sessionHouses.set(s, own);
+          // Bounded: the oldest sessions are forgotten first (their houses age out on their own).
+          if (sessionHouses.size > 4 * maxHouses) sessionHouses.delete(sessionHouses.keys().next().value!);
+        });
+      }
+    }
     if (!id) return shared.app(req, res, next);
     const house = get(id, startsVisit(req.url) ? (req.ip ?? 'unknown') : null);
     if (house === undefined) return void res.status(404).json({ error: 'No such demo house.' });
@@ -120,6 +144,32 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
     shared.close();
   };
   return { app, close, houses, shared };
+}
+
+/** Calls `found` with the MCP session id a response hands out, however its headers are written. */
+function onSessionId(res: ServerResponse, found: (sid: string) => void) {
+  let seen = false;
+  const check = (name: unknown, value: unknown) => {
+    if (seen || String(name).toLowerCase() !== 'mcp-session-id' || value == null) return;
+    seen = true;
+    found(String(value));
+  };
+  const setHeader = res.setHeader.bind(res);
+  res.setHeader = ((name: string, value: number | string | readonly string[]) => {
+    check(name, value);
+    return setHeader(name, value);
+  }) as typeof res.setHeader;
+  const writeHead = res.writeHead.bind(res) as (...args: unknown[]) => ServerResponse;
+  res.writeHead = ((...args: unknown[]) => {
+    for (const a of args.slice(1)) {
+      if (Array.isArray(a)) {
+        // [k, v, k, v] or [[k, v], ...]
+        if (a.every((x) => Array.isArray(x))) for (const [k, v] of a as unknown[][]) check(k, v);
+        else for (let i = 0; i + 1 < a.length; i += 2) check(a[i], a[i + 1]);
+      } else if (a && typeof a === 'object') for (const [k, v] of Object.entries(a)) check(k, v);
+    }
+    return writeHead(...args);
+  }) as typeof res.writeHead;
 }
 
 function cookie(header: string | undefined, name: string): string | undefined {

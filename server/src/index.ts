@@ -1,3 +1,4 @@
+import { PRIVACY, TERMS } from './legal.js';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { createHouses } from './houses.js';
 import { addToShoppingList, shoppingList } from './domain/shopping.js';
@@ -191,7 +192,7 @@ export function createApp(opts: AppOptions = {}) {
             lastSeen.delete(t.sessionId);
           }
         };
-        await buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voiceWaitMs: opts.voiceWaitMs }).connect(t);
+        await buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voiceWaitMs: opts.voiceWaitMs, parentPage: demo ? `${publicUrl.replace(/\/$/, '')}/parent?k=${encodeURIComponent(parentKey)}` : null }).connect(t);
         transport = t;
       }
       if (transport.sessionId) lastSeen.set(transport.sessionId, Date.now());
@@ -661,6 +662,9 @@ export function createApp(opts: AppOptions = {}) {
   // The built Echo Show simulator, when present (the hosted demo): one URL for everything.
   const simulatorDist = process.env.WYO_SIMULATOR_DIR ?? fileURLToPath(new URL('../../simulator/dist', import.meta.url));
   if (existsSync(simulatorDist)) app.use('/', express.static(simulatorDist));
+  // The privacy notice and terms an Alexa+ listing links to.
+  app.get('/privacy', (_req, res) => void res.type('html').send(PRIVACY));
+  app.get('/terms', (_req, res) => void res.type('html').send(TERMS));
   app.get('/health', (_req, res) => void res.json({ ok: true }));
   // Which commit is live: Render sets RENDER_GIT_COMMIT on every deploy.
   app.get('/version', (_req, res) =>

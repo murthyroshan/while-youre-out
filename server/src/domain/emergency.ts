@@ -1,5 +1,5 @@
 import { type DB, nowIso } from '../db.js';
-import { actionPlan, activeHandoff, contacts, eveningLog, events, household, visibleFacts, whereIs } from './house.js';
+import { actionPlan, activeHandoff, contacts, eveningLog, events, familyNames, household, visibleFacts, whereIs } from './house.js';
 import { emergencyKind, type EmergencyKind } from './safety.js';
 import { incidentView, openIncident } from './incident.js';
 
@@ -101,7 +101,7 @@ export function startEmergency(db: DB, description: string) {
   const h = activeHandoff(db);
   const log = eveningLog(db);
   const child = (db.prepare("SELECT name FROM members WHERE kind = 'child' ORDER BY id LIMIT 1").get() as { name: string } | undefined)?.name ?? 'the child';
-  const kind = emergencyKind(description) ?? 'general';
+  const kind = emergencyKind(description, familyNames(db)) ?? 'general';
   const script = scriptFor(kind, child, actionPlan(db));
 
   const alert = {
@@ -128,7 +128,8 @@ export function startEmergency(db: DB, description: string) {
       tonight: log.map((e) => ({ at: e.at, text: e.text })),
       reported: { at: alert.at, text: description },
     },
-    note: "This is a fixed safety script from the family's own information and general safety steps. It is not medical advice.",
+    // Alexa+ policy: never claim to call for help or to save a life; medical steps are attributed.
+    note: "This device can't call 911: use your phone. These steps are the family's own plan and general safety steps, not a substitute for professional medical advice.",
   };
   // The guide that walks the carer through it, one step at a time, with the plan's timers.
   const incident = openIncident(db, { kind, description, steps: script.steps.map((s) => ({ text: s.text, timer_seconds: s.timer_seconds })), script: result });

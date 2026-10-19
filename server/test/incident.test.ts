@@ -119,10 +119,12 @@ test('end to end: emergency → "done" → the phones follow → "on my way" rea
   await call('start_handoff', { carer_name: 'Priya' });
   const e = await call('emergency', { description: "Her lips are swelling and she can't breathe" });
   assert.equal(e.structuredContent.incident.current, 0);
+  // The plan's own order: the EpiPen first, then 911 (with the address said at that step).
+  assert.match(e.content[0].text, /^Step 1 of 5: If Maya has trouble breathing.*EpiPen.*Say "done" when you have\.$/);
 
   sent.splice(0);
   const s1 = await call('emergency_step', { action: 'done' });
-  assert.match(s1.content[0].text, /^Next, step 2 of 5: Call 911.*I've started a 5-minute timer\.$/);
+  assert.match(s1.content[0].text, /^5-minute timer started\. Next, step 2 of 5: Call 911.* The address is on the screen\.$/);
   assert.equal(s1.structuredContent.incident.timers[0].remaining_seconds, 300);
   await settle();
   assert.equal(sent.at(-1).title, 'Emergency · step 1 of 5 done');

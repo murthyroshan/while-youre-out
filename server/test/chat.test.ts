@@ -6,6 +6,16 @@ import { geminiChat, resetChatQuota, AiUnavailableError } from '../src/ai/gemini
 const req = { system: 'You are Alexa.', contents: [{ role: 'user', parts: [{ text: 'hi' }] }], functions: [] };
 const quota = (retry: string) =>
   new Response(JSON.stringify({ error: { message: 'You exceeded your current quota', details: [{ '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: retry }] } }), { status: 429 });
+// A model that never answers until it is aborted. It holds a timer while it hangs, as a real
+// request does: AbortSignal.timeout alone doesn't keep Node running, so the test would be cancelled.
+const hanging = (init: RequestInit) =>
+  new Promise((_r, reject) => {
+    const alive = setTimeout(() => {}, 60_000);
+    init.signal!.addEventListener('abort', () => {
+      clearTimeout(alive);
+      reject(new Error('aborted'));
+    });
+  });
 const ok = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Hello!' }] } }] }), { status: 200 });
 
 beforeEach(() => {
@@ -37,8 +47,7 @@ test('"high demand" (503) skips that model for a while; a slow model never holds
   assert.deepEqual(asked, ['model-a', 'model-b'], 'busy models are not asked again straight away');
 
   resetChatQuota();
-  const hang = ((_u: string, init: RequestInit) =>
-    new Promise((_r, reject) => init.signal!.addEventListener('abort', () => reject(new Error('aborted'))))) as unknown as typeof fetch;
+  const hang = ((_u: string, init: RequestInit) => hanging(init)) as unknown as typeof fetch;
   const t0 = Date.now();
   await assert.rejects(geminiChat(req, hang), AiUnavailableError);
   assert.ok(Date.now() - t0 < 6_000, `gave up after ${Date.now() - t0} ms`);
@@ -60,7 +69,7 @@ test('a model that hung is skipped on the next turn too', async () => {
   let calls = 0;
   const hang = ((_u: string, init: RequestInit) => {
     calls++;
-    return new Promise((_r, reject) => init.signal!.addEventListener('abort', () => reject(new Error('aborted'))));
+    return hanging(init);
   }) as unknown as typeof fetch;
   // The first turn spends its budget on model-a; the second tries only model-b; then none.
   await assert.rejects(geminiChat(req, hang));

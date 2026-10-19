@@ -1416,7 +1416,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
         : 'Past bedtime<small>Nobody has said ' + (kid ? esc(kid) + ' is' : 'they are') + ' asleep yet</small>';
     } else if (h.next) {
       var m = h.next.minutes_until;
-      now = esc(h.next.title) + (m > 1 ? chip('in ' + m + ' min') : m >= -5 ? chip('now', 'is-now') : chip(-m + ' min late', 'late'));
+      now = esc(h.next.title) + (m > 180 ? chip('at ' + esc(h.next.time)) : m > 60 ? chip('in ' + Math.floor(m / 60) + ' h ' + (m % 60 ? (m % 60) + ' min' : '')) : m > 1 ? chip('in ' + m + ' min') : m >= -5 ? chip('now', 'is-now') : chip(-m + ' min late', 'late'));
     } else if ((h.plan || []).length) {
       now = 'Tonight\\'s plan is done' + chip('all set', 'is-now');
     } else {

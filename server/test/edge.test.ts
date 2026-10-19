@@ -93,6 +93,11 @@ test('an "always" answer survives into the next handoff', async () => {
   assert.match(text(r), /bubbles are fine/);
 });
 
+test('"What\'s for dinner?" is answered with the dinner note, after the allergy in one sentence', async () => {
+  const r = await call('ask_house', { question: 'What should the kids eat for dinner?' });
+  assert.match(text(r), /^Maya is allergic to peanuts\. Anita said: "Dinner is the dal and rice in the fridge\." /);
+});
+
 test('"Call me" is not saved as a house rule', async () => {
   const asked = await call('ask_parent', { question: 'Can she go to the neighbours house?' });
   await answer({ id: asked.structuredContent.id, answer: 'Please call me.', scope: 'always', by: 'Anita' });

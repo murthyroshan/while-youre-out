@@ -105,6 +105,27 @@ test('houses are bounded: the least recently used goes first, and new ones are r
   assert.equal((await fetch(`${slow.base}/h/${A}/health`)).status, 200, 'existing houses still work');
 });
 
+test('two plain MCP clients at /mcp each get a house of their own, kept for their session', async () => {
+  const { base, houses } = await start();
+  const plain = async () => {
+    const c = new Client({ name: 'judge', version: '0' });
+    await c.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
+    servers.at(-1)!.clients.push(c);
+    return async (name: string, args: Record<string, unknown> = {}) => (await c.callTool({ name, arguments: args })) as any;
+  };
+  const one = await plain();
+  const two = await plain();
+  const a = await one('start_handoff', { carer_name: 'Priya' });
+  const b = await two('start_handoff', { carer_name: 'Sam' });
+  assert.notEqual(a.isError, true);
+  assert.notEqual(b.isError, true, 'the second judge is not told a handoff is already running');
+  assert.equal((await one('home_screen')).structuredContent.carer, 'Priya', 'the session keeps its own house');
+  assert.equal((await two('home_screen')).structuredContent.carer, 'Sam');
+  assert.equal(houses.houses.size, 2);
+  const lost = await fetch(`${base}/mcp`, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', 'mcp-session-id': 'not-a-session' }, body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' });
+  assert.equal(lost.status, 404, 'an unknown session is told to start again');
+});
+
 test('ids that are not house ids fall through to the shared house', async () => {
   const { base } = await start();
   assert.equal((await fetch(`${base}/h/short/health`)).status, 404);

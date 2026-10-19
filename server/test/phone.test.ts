@@ -244,7 +244,9 @@ test('then setting up a new family: the teach-back, pets and contacts all use it
   assert.deepEqual(s.parents, ['Ada', 'Chidi'], 'the doctor is never asked questions');
   assert.equal(s.household.timezone, 'Africa/Lagos');
   const e = await call('emergency', { description: 'He fell and is bleeding a lot' });
-  assert.match(e.content[0].text, /7 Palm Avenue/);
+  // The new family's address is on the emergency screen, never said aloud (Alexa+ privacy policy).
+  assert.match(e.structuredContent.address, /7 Palm Avenue/);
+  assert.doesNotMatch(e.content[0].text, /7 Palm Avenue/);
 });
 
 test('reset to the demo family: clean Sharma house, waiting questions closed, no leftover emergency', async () => {
