@@ -98,15 +98,31 @@ const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta n
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 28px 24px; padding: 24px 32px 48px; }
   figure { margin: 0; } figcaption { font-weight: 650; margin-bottom: 8px; } figcaption small { font-weight: 500; color: #5B6371; margin-left: 6px; }
   .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .dev { position: relative; width: 100%; aspect-ratio: 1280 / 800; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 0 0 6px #1B1D22; }
-  .dev iframe { position: absolute; left: 0; top: 0; width: 1280px; height: 800px; border: 0; transform-origin: 0 0; }
+  .dev { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 0 0 6px #1B1D22; }
+  .dev iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; }
+  nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; } nav a { padding: 8px 14px; border-radius: 999px; background: #fff; color: #14181E; text-decoration: none; font-weight: 600; } nav a.on { background: #14181E; color: #fff; }
 </style></head><body>
-<header><h1>Every screen, in dark and light</h1><p>Real tool results from one scripted evening, rendered by the add-on's own card the way an Alexa+ host does: an Echo Show 8 (1280 × 800, zoom 1.667 from the 768 × 480 canvas), dark on the left and light on the right.</p></header>
+<header><h1>Every screen, in dark and light</h1><p id="lede"></p><nav id="devices"></nav></header>
 <div class="grid" id="grid"></div>
 <script>
 const CARD = ${JSON.stringify(html).replace(/</g, '\\u003c')};
 const SHOTS = ${JSON.stringify(shots).replace(/</g, '\\u003c')};
 const FULL = ${JSON.stringify([...FULL])};
+// Each Echo device as an Alexa+ host describes it: the screen in pixels and its device class.
+const DEVICES = {
+  'echo-show-5': { name: 'Echo Show 5', w: 960, h: 480 },
+  'echo-show-8': { name: 'Echo Show 8', w: 1280, h: 800 },
+  'echo-hub': { name: 'Echo Hub', w: 1280, h: 800 },
+  'echo-show-15': { name: 'Echo Show 15', w: 1920, h: 1080 },
+  'echo-show-21': { name: 'Echo Show 21', w: 1920, h: 1080 },
+  'phone': { name: 'Phone', w: 390, h: 844, mobile: true },
+};
+const DEVICE = DEVICES[location.hash.slice(1)] ? location.hash.slice(1) : 'echo-show-8';
+const D = DEVICES[DEVICE];
+document.getElementById('devices').innerHTML = Object.entries(DEVICES).map(([k, d]) => '<a href="#' + k + '"' + (k === DEVICE ? ' class="on"' : '') + '>' + d.name + '</a>').join('');
+addEventListener('hashchange', () => location.reload());
+document.getElementById('lede').textContent = 'Real tool results from one scripted evening, rendered by the add-on’s own card the way an Alexa+ host does, on an ' + D.name + ' (' + D.w + ' × ' + D.h + '): dark on the left, light on the right.';
+if (D.mobile) document.getElementById('grid').style.gridTemplateColumns = 'repeat(auto-fill, minmax(380px, 1fr))';
 const grid = document.getElementById('grid');
 const frames = new Map();
 SHOTS.forEach((s, i) => {
@@ -115,6 +131,7 @@ SHOTS.forEach((s, i) => {
   ['dark', 'light'].forEach((theme) => {
     const dev = document.createElement('div');
     dev.className = 'dev';
+    dev.style.aspectRatio = D.w + ' / ' + D.h;
     const f = document.createElement('iframe');
     f.setAttribute('sandbox', 'allow-scripts');
     f.title = s.label + ' (' + theme + ')';
@@ -122,7 +139,9 @@ SHOTS.forEach((s, i) => {
     dev.appendChild(f);
     fig.querySelector('.pair').appendChild(dev);
     frames.set(f, { shot: s, theme });
-    new ResizeObserver(() => { f.style.transform = 'scale(' + dev.clientWidth / 1280 + ')'; }).observe(dev);
+    f.style.width = D.w + 'px';
+    f.style.height = D.h + 'px';
+    new ResizeObserver(() => { f.style.transform = 'scale(' + dev.clientWidth / D.w + ')'; }).observe(dev);
   });
   grid.appendChild(fig);
 });
@@ -135,7 +154,7 @@ addEventListener('message', (e) => {
   const reply = (result) => f.contentWindow.postMessage({ jsonrpc: '2.0', id: m.id, result }, '*');
   if (m.method === 'ui/initialize') {
     reply({ protocolVersion: '2026-01-26', hostInfo: { name: 'screens', version: '1' }, hostCapabilities: {},
-      hostContext: { theme, deviceClass: 'echo-show-8', isMobile: false, displayMode: FULL.includes(shot.tool) ? 'fullscreen' : 'inline', maxWidth: 1280, maxHeight: 800 } });
+      hostContext: { theme, deviceClass: D.mobile ? 'mobile' : DEVICE, isMobile: Boolean(D.mobile), displayMode: FULL.includes(shot.tool) ? 'fullscreen' : 'inline', maxWidth: D.w, maxHeight: D.h } });
   } else if (m.method === 'ui/notifications/initialized') {
     f.contentWindow.postMessage({ jsonrpc: '2.0', method: 'ui/notifications/tool-result', params: shot.result }, '*');
   } else if (m.method === 'tools/call') {

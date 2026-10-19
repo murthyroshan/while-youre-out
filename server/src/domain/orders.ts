@@ -13,6 +13,20 @@ import { dollars } from './payments.js';
 import { pushNotice } from './devices.js';
 
 export const RESTAURANT = 'Corner Kitchen (sample restaurant)';
+export const STORE = 'Household delivery (sample store)';
+/** What households run out of, at sample prices (anything else is ordered at an estimate). */
+const SUPPLIES: Array<[RegExp, string, number]> = [
+  [/diaper|nappy|nappies/, 'Diapers', 2499],
+  [/wipe/, 'Baby wipes', 849],
+  [/formula/, 'Baby formula', 3299],
+  [/milk/, 'Milk', 429],
+  [/bread/, 'Bread', 399],
+  [/egg/, 'Eggs', 499],
+  [/banana/, 'Bananas', 199],
+  [/juice/, 'Juice', 449],
+  [/toilet paper|loo roll/, 'Toilet paper', 1199],
+  [/dog food|kibble/, 'Dog food', 2899],
+];
 /** A dish's name inside a sentence: "the mac and cheese". */
 export const inSentence = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
 
@@ -103,6 +117,8 @@ export interface Order {
   eta_to: number | null;
   token: string;
   created_at: string;
+  /** dinner (tonight, from the restaurant) or supplies (tomorrow morning, from the store). */
+  kind?: 'dinner' | 'supplies';
 }
 
 export class OrderError extends Error {}
@@ -132,8 +148,23 @@ export function requestOrder(db: DB, item: MenuItem, requestedBy: string): Order
 }
 
 export const getOrder = (db: DB, id: number) => db.prepare('SELECT * FROM orders WHERE id = ?').get(id) as Order | undefined;
-export const latestOrder = (db: DB) => db.prepare('SELECT * FROM orders ORDER BY id DESC LIMIT 1').get() as Order | undefined;
-export const pendingOrder = (db: DB) => db.prepare("SELECT * FROM orders WHERE status = 'pending' ORDER BY id DESC LIMIT 1").get() as Order | undefined;
+export const latestOrder = (db: DB) => db.prepare("SELECT * FROM orders WHERE kind = 'dinner' ORDER BY id DESC LIMIT 1").get() as Order | undefined;
+export const pendingOrder = (db: DB) => db.prepare("SELECT * FROM orders WHERE status = 'pending' AND kind = 'dinner' ORDER BY id DESC LIMIT 1").get() as Order | undefined;
+
+/**
+ * "We ran out of diapers": a parent taps "Order it" on their phone and it's ordered from the store
+ * for tomorrow morning (not tonight, so it doesn't join tonight's expected visitors). A demo store.
+ */
+export function orderSupplies(db: DB, said: string, by: string): Order {
+  const hit = SUPPLIES.find(([re]) => re.test(said.toLowerCase()));
+  const name = hit?.[1] ?? `${said.charAt(0).toUpperCase()}${said.slice(1)}`;
+  const info = db
+    .prepare("INSERT INTO orders (handoff_id, item_id, item, price_cents, restaurant, status, requested_by, approved_by, eta_from, eta_to, token, created_at, kind) VALUES (?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?, ?, ?, 'supplies')")
+    .run(activeHandoff(db)?.id ?? null, `supplies:${name.toLowerCase().replace(/[^a-z]+/g, '-')}`, name, hit?.[2] ?? 999, STORE, activeHandoff(db)?.carer_name ?? 'The sitter', by, 8 * 60, 10 * 60, randomBytes(16).toString('hex'), nowIso());
+  const o = getOrder(db, Number(info.lastInsertRowid))!;
+  events.emit('order_approved', o);
+  return o;
+}
 
 /** A parent approves on their phone: the order is placed and the delivery is expected at the door. */
 export function approveOrder(db: DB, o: Order, by: string): Order {
@@ -161,13 +192,14 @@ export function declineOrder(db: DB, o: Order, by: string): Order {
 export function orderView(o: Order) {
   return {
     id: o.id,
-    reference: `CK-${String(o.id).padStart(4, '0')}`,
+    reference: `${o.kind === 'supplies' ? 'HD' : 'CK'}-${String(o.id).padStart(4, '0')}`,
+    kind: o.kind ?? 'dinner',
     status: o.status,
     item: o.item,
     price: dollars(o.price_cents),
     restaurant: o.restaurant,
     requested_by: o.requested_by,
     approved_by: o.approved_by,
-    arrives: o.eta_from !== null && o.eta_to !== null ? `${formatTime(o.eta_from)} to ${formatTime(o.eta_to)}` : null,
+    arrives: o.eta_from !== null && o.eta_to !== null ? `${o.kind === 'supplies' ? 'tomorrow, ' : ''}${formatTime(o.eta_from)} to ${formatTime(o.eta_to)}` : null,
   };
 }

@@ -416,6 +416,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <div id="debrief"></div>
     <div id="order"></div>
     <div id="pass"></div>
+    <div id="receipts"></div>
     <section class="card" aria-labelledby="feedTitle"><strong id="feedTitle">Tonight so far</strong><div id="log"><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w60"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div></div></section>
     <section class="card" id="activity" aria-labelledby="activityTitle" hidden><strong id="activityTitle">Activity under the pass</strong><p class="muted">Everything done tonight on the Echo Show and on the sitter’s phone.</p><ul class="alist" id="alist"></ul></section>
     <div class="card" id="busy"><span class="sk w40" aria-hidden="true"></span><span class="sk tall" aria-hidden="true"></span></div>
@@ -607,6 +608,20 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     renderPass(s);
     renderOrder(s);
     renderSitters(s.sitters || []);
+    renderReceipts(s.receipts || []);
+  }
+
+  // ---------- Receipts: dinner, supplies and the sitter, this week ----------
+  var lastReceipts = null;
+  function renderReceipts(list) {
+    var k2 = JSON.stringify(list);
+    if (k2 === lastReceipts) return;
+    lastReceipts = k2;
+    setHtml('receipts', list.length ? '<section class="card"><strong>Receipts</strong><p class="muted">This week. Demo orders and payments: no money moves.</p>' +
+      list.map(function (r) {
+        return '<div class="row"><div><b>' + esc(r.title) + '</b><span class="muted" style="display:block;font-size:13px">' + esc([r.from, r.detail, r.by ? 'by ' + r.by : ''].filter(Boolean).join(' · ')) + '</span></div>' +
+          '<div style="text-align:right;margin-left:auto"><b>' + esc(r.amount) + '</b><span class="muted" style="display:block;font-size:13px">' + esc(r.reference) + ' · ' + esc(r.time) + '</span></div></div>';
+      }).join('') + '</section>' : '');
   }
 
   // ---------- Sitter profiles: what the house remembers about each person, editable here ----------
@@ -894,7 +909,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   }
   // The one-tap answers for a question. The same buttons (and data-a answers) on the card and the sheet.
   function answerButtons(q) {
-    if (q.shopping_item) return '<div class="btns"><button class="ok" data-a="Yes, add it to the list.">Add to list</button><button class="no" data-a="Not now.">Not now</button></div>';
+    if (q.shopping_item) return '<div class="btns"><button class="ok" data-a="Order it for tomorrow morning.">Order it</button><button data-a="Yes, add it to the list.">Add to list</button><button class="no" data-a="Not now.">Not now</button></div>';
     if (q.door_snapshot) return '<div class="btns"><button class="ok" data-a="It\\'s fine, you can let them in.">Let them in</button><button class="no" data-a="Don\\'t open the door. I\\'ll call you.">Don\\'t open</button><button data-a="Please call me.">Call me</button></div>';
     return '<div class="btns"><button class="ok" data-a="Yes, that\\'s fine.">Approve</button><button class="no" data-a="No, please don\\'t.">Deny</button><button data-a="Please call me.">Call me</button></div>';
   }

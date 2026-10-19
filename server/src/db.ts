@@ -323,6 +323,7 @@ export function openDb(path = process.env.WYO_DB ?? ':memory:'): DB {
   addColumn('handoffs', 'teachback', 'TEXT');
   addColumn('questions', 'text_english', 'TEXT');
   addColumn('questions', 'shopping_item', 'TEXT');
+  addColumn('orders', 'kind', "TEXT NOT NULL DEFAULT 'dinner'");
   addColumn('questions', 'heard', 'INTEGER NOT NULL DEFAULT 0');
   addColumn('questions', 'door_event_id', 'INTEGER');
   addColumn('handoffs', 'rate_cents', 'INTEGER');

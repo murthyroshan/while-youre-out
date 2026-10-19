@@ -49,6 +49,8 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 | Your own phone | "Use your own phone" (or the QR code on the welcome card) opens the parent page for your demo house on your phone. Priya's questions arrive there, and "Watch the evening" waits for your answer |
 | Echo Show | The **Tonight** screen (refreshes itself), every answer card, the doorbell, the emergency guide, the goodnight message, the who's-babysitting form, paying the sitter |
 | Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
+| Any MCP host | [/connect](https://while-youre-out-wpj3.onrender.com/connect) gives you a demo house of your own with its MCP address and how to add it to Claude, Claude Code, VS Code or the MCP Inspector, plus that house's parent page. An agent hosting it should follow the [Agent Skill](agent-skill/SKILL.md) |
+| Today's Alexa | The free Alexa-hosted skill in [alexa/](alexa/README.md): the same add-on on an Echo, set up in about five minutes |
 
 ## Features
 
@@ -108,7 +110,9 @@ Resources: `ui://while-youre-out/card-<hash>.html` (the MCP App, its address car
 2. **A parent's approval** (`request_order`): the sitter can't spend money, so the order goes to the parents' phones; a dish that isn't safe is refused even when asked for by name. The order card refreshes itself (`order_status`) and returns what Alexa needs for its own notification: status, dish, price, arrival window and a reference.
 3. **The front door:** once approved, the delivery joins tonight's expected visitors, so when the doorbell rings it's "Dinner from Corner Kitchen, due 6:45 pm to 7:00 pm. No need to open."
 
-A sample restaurant; no money moves. In production this is an Alexa+ food-delivery partner and Amazon Pay.
+**Supplies, too:** "we used the last diaper" asks the parent on their lock screen; on the parent page they can *Order it* (from the store, for tomorrow morning, so it isn't expected at the door tonight), *Add to list*, or *Not now*, and the sitter hears which. **Receipts:** every dinner, supplies order and payment to the sitter this week is on the parent's phone with its reference (CK-, HD-, PAY-), what it was for and who approved it.
+
+A sample restaurant and store; no money moves. In production these are Alexa+ delivery partners and Amazon Pay.
 
 ### The whole house
 
@@ -139,6 +143,7 @@ The house remembers each person who looks after the children, from the evenings 
 ## Measured, not claimed
 
 - **Safety evaluation** ([server/eval/REPORT.md](server/eval/REPORT.md)): 357 things a sitter might say (allergens hidden in dishes, "she already ate it", emergencies in three languages, doses, "the parents said it's fine", the alarm code, a stranger at the door, "is it serious?", the dog and the chocolate) plus ordinary questions it must still answer. Every reply is judged by the same plain rules ([judge.ts](server/eval/judge.ts)), and the same lines go to a chatbot given the family's notes, with and without our rules in its prompt. The add-on passes all of them now; on 55 **held-out** lines written after its fixes, its first run was 50 of 55, and the report says which five it missed. It runs on every push (`test/safety-eval.test.ts`).
+- **Every Alexa+ add-on rule, and what proves we meet it** ([COMPLIANCE.md](COMPLIANCE.md)): Amazon's policy, functional and design rules, each with the test that fails the build if it stops being true, and the three we only partly meet.
 - **Speed, load and fuzz** ([server/eval/SPEED.md](server/eval/SPEED.md), `node scripts/bench.mjs`): every tool over real MCP HTTP, p95 about 20 ms on a laptop against the MCP Toolkit's 500 ms; 2,000 calls from 50 sessions at once with no errors; 1,500 malformed and hostile requests with no server errors. A smaller version runs on every push (`test/speed.test.ts`).
 
 ## The simulator
@@ -214,6 +219,7 @@ Simulator: `VITE_MCP_URL` (default: the server that serves it, or `http://127.0.
 - Emergencies are checked before anything else, including inside logs, "where is", the door and "ask a parent" requests.
 - Each kind of emergency gets a fixed script: the parents' action plan for allergy or breathing, "get everyone out" for fire or gas, Poison Control for poisoning. Medical cases defer to the 911 dispatcher. The step-by-step guide and its timers come from the same plan.
 - A stranger at the door is never called safe; whether to open is the parents' call, with the photo.
+- **If the internet drops mid-emergency, the guide keeps going.** The kitchen screen notices within six seconds: the steps stay on it, *Done* moves them on, the second-EpiPen timer keeps counting, and everything is sent to the parents once the connection is back, with the times it really happened. The sitter's phone keeps the page itself and every guide (the parents' plan; fire, gas, poisoning, choking, a missing child, a break-in), so it opens with no internet at all, and calls don't need the internet. During an emergency the phone shows the same guide as the kitchen, and *Done* on either moves both. What the phone keeps is deleted when the pass ends.
 - Logging an allergen (including brand names such as Snickers or Nutella, and dishes usually made with nuts, such as satay, pad thai or pesto) or medicine alerts the parents immediately; "No. That can have peanuts in it" comes first when one is asked for.
 - "Is it serious?" is never answered: what would make it an emergency, and a parent asked. A pet that ate something poisonous (chocolate, grapes, xylitol, pills) means a vet now, and the parents are alerted.
 - The home address is shown, never read aloud. A parent's rule that says no to exactly this ("nothing scary", "No friends over tonight") is the answer, and is never weighed against how they answered before.

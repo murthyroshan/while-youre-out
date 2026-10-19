@@ -19609,6 +19609,7 @@ async function handle(event, opts = {}) {
   const speech = [];
   let card = null;
   let parentLink = null;
+  let lang = event.session?.attributes?.lang;
   const client = new Client({ name: "while-youre-out-alexa-skill", version: "1.0.0" });
   const deadline = AbortSignal.timeout(BUDGET_MS);
   const transport = new StreamableHTTPClientTransport(new URL(`${house}/mcp`), { requestInit: { signal: deadline } });
@@ -19645,6 +19646,10 @@ async function handle(event, opts = {}) {
       speech.push(home.structuredContent?.carer ? textOf2(home) : `While You're Out is ready. ${HELP}`);
     }
     await Promise.all(pending);
+    if (said && event.request.locale?.startsWith("hi") && lang !== "hi") {
+      const r = await client.callTool({ name: "set_carer_language", arguments: { language: "hi-IN" } }, void 0, { signal: deadline }).catch(() => null);
+      if (r && !r.isError) lang = "hi";
+    }
   } catch {
     speech.splice(0, speech.length, "The house is waking up. Ask me again in a few seconds.");
     card = null;
@@ -19654,7 +19659,7 @@ async function handle(event, opts = {}) {
     void client.close().catch(() => {
     });
   }
-  return respond(speech.length ? speech : ["Okay."], card, event, { attributes: { brain: brain.snapshot() }, appCard: parentLink });
+  return respond(speech.length ? speech : ["Okay."], card, event, { attributes: { brain: brain.snapshot(), ...lang ? { lang } : {} }, appCard: parentLink });
 }
 function respond(speech, card, event, opts = {}) {
   const text = speech.join(" ").replace(/\s+/g, " ").trim();

@@ -275,15 +275,20 @@ button { font: inherit; color: inherit; }
 .emergency .stepcard .actions { margin-top: var(--s-s); }
 .emergency .stepcard .btn { background: #F3F4F6; color: #14181E; }
 .emergency .stepcard .btn.ok { background: #067647; color: #FFFFFF; }
-.emergency .side { display: flex; flex-direction: column; gap: var(--s-xs); min-height: 0; overflow: hidden; }
+.emergency .side { display: flex; flex-direction: column; gap: var(--s-2xs); min-height: 0; overflow: hidden; }
 .emergency .addr { background: #FFFFFF; color: #14181E; border-radius: var(--r-l); padding: var(--s-s) var(--s-m); }
 .emergency .addr small { display: block; font-size: var(--t-b2); font-weight: 800; color: #B42318; }
 .emergency .addr b { display: block; margin-top: var(--s-4xs); font-size: var(--t-h1); line-height: 1.25; }
 .emergency .box { background: rgba(0, 0, 0, 0.26); border-radius: var(--r-m); padding: var(--s-xs) var(--s-s); font-size: var(--t-b1); line-height: 1.35; }
+.emergency .box.alerted { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; }
+/* Offline, the banner says it instead: call 911 from your phone. */
+.emergency.is-offline .warning { display: none; }
 .emergency .box small { display: block; font-size: var(--t-b3); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #FFD7D3; }
 .emergency .timer { display: flex; align-items: center; gap: var(--s-s); }
 .emergency .timer b { font-size: var(--t-d4); font-weight: 800; letter-spacing: -0.01em; }
 .emergency .timer.up b { color: #FFD27A; }
+.emergency .offline { display: flex; align-items: center; gap: var(--s-2xs); margin: 0 0 var(--s-xs); padding: var(--s-2xs) var(--s-s); border-radius: var(--r-s); background: #FFF4D6; color: #6B4300; font-size: var(--t-b2); font-weight: 700; }
+.emergency .offline svg.i { font-size: var(--i-m); flex: none; }
 .emergency .warning { font-size: var(--t-b3); line-height: 1.4; color: #FFE3E0; margin-top: auto; }
 .emergency .spoken { background: rgba(0, 0, 0, 0.26); border-radius: var(--r-m); padding: var(--s-2xs) var(--s-s); font-size: var(--t-b1); }
 .emergency .spoken .pill { background: #FFFFFF; color: #B42318; margin-right: var(--s-xs); }
@@ -326,6 +331,16 @@ button { font: inherit; color: inherit; }
 .compact .cols, .compact .cols.media, .compact .home .grid, .compact .emergency .grid, .compact .goodnight .grid { grid-template-columns: 1fr; }
 .compact .fs { height: auto; min-height: var(--vh); overflow: visible; }
 .compact .home .dock { grid-template-columns: 1fr; }
+/* A phone's top bar has room for what's happening, not the logo as well; chips stay on one line. */
+.compact .fs .bar .brand { display: none; }
+.compact .fs .bar .chip, .compact .fs .bar .flag, .compact .home .clock { white-space: nowrap; }
+
+/* ---------- short screens (Echo Show 5 and 21): only what matters fits ---------- */
+.short .title.xl { font-size: var(--t-d3); }
+.short .home .hero .steps li + li, .short .home .hero > .later { display: none; }
+.short .emergency .box.alerted { display: none; }
+.short .emergency .addr b { font-size: var(--t-b1); }
+.short .emergency.over .list li:nth-last-child(n+3) { display: none; }
 
 /* ---------- motion: calm, no flashing ---------- */
 #root.enter > * { animation: card-in 0.3s var(--ease) backwards; }

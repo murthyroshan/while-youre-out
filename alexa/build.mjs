@@ -48,9 +48,22 @@ const MODEL = {
   },
 };
 
-const LOCALES = ['en-US', 'en-GB', 'en-IN', 'en-CA', 'en-AU'];
+// Hindi, as a grandparent or a nanny in India says it: in Devanagari, in Hinglish, and mixed with
+// English. The add-on catches a Hindi emergency with its own rules; other questions are translated.
+const SAID_HI = [
+  'एपिपेन कहाँ है', 'एपीपेन कहां रखा है', 'क्या माया कुकी खा सकती है', 'क्या वह चॉकलेट खा सकती है', 'खाने में क्या है', 'रात के खाने में क्या है', 'अगला क्या है',
+  'सोने का समय कब है', 'माया सो गई', 'माया ने खाना खा लिया', 'वह कार्टून देख रही है', 'दरवाज़े पर कोई है क्या मैं खोलूँ', 'कोई दरवाज़ा खटखटा रहा है',
+  'आपातकाल', 'इमरजेंसी', 'मदद', 'माया साँस नहीं ले पा रही', 'उसके होंठ सूज रहे हैं', 'माया बेहोश हो गई', 'रसोई में आग लग गई', 'गैस की बदबू आ रही है',
+  'माँ से पूछो', 'अनीता से पूछो कि क्या वह देर तक जाग सकती है', 'मम्मी को फ़ोन करो', 'माया को अपनी माँ की याद आ रही है', 'हो गया', 'अगला', 'फिर से बताओ', 'हाँ', 'नहीं', 'धन्यवाद',
+  'epipen kahan hai', 'maya so gayi', 'kya main darwaza kholun', 'maya saans nahi le pa rahi', 'mummy ko phone karo', 'khane mein kya hai', 'agla kya hai', 'ho gaya',
+];
+const LOCALES = ['en-US', 'en-GB', 'en-IN', 'en-CA', 'en-AU', 'hi-IN'];
+const modelFor = (locale) =>
+  locale === 'hi-IN'
+    ? { interactionModel: { languageModel: { ...MODEL.interactionModel.languageModel, types: [{ name: 'WhatWasSaid', values: [...SAID_HI, ...SAID].map((v) => ({ name: { value: v.replace(/’/g, "'") } })) }] } } }
+    : MODEL;
 mkdirSync(here('./skill-package/interactionModels/custom'), { recursive: true });
-for (const locale of LOCALES) writeFileSync(here(`./skill-package/interactionModels/custom/${locale}.json`), `${JSON.stringify(MODEL, null, 2)}\n`);
+for (const locale of LOCALES) writeFileSync(here(`./skill-package/interactionModels/custom/${locale}.json`), `${JSON.stringify(modelFor(locale), null, 2)}\n`);
 
 const SERVER = 'https://while-youre-out-wpj3.onrender.com';
 const listing = {

@@ -1,0 +1,730 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "while you are out",
+      "intents": [
+        {
+          "name": "UtteranceIntent",
+          "slots": [
+            {
+              "name": "utterance",
+              "type": "WhatWasSaid"
+            }
+          ],
+          "samples": [
+            "{utterance}",
+            "tell it {utterance}",
+            "ask it {utterance}",
+            "say {utterance}",
+            "{utterance} please"
+          ]
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        }
+      ],
+      "types": [
+        {
+          "name": "WhatWasSaid",
+          "values": [
+            {
+              "name": {
+                "value": "एपिपेन कहाँ है"
+              }
+            },
+            {
+              "name": {
+                "value": "एपीपेन कहां रखा है"
+              }
+            },
+            {
+              "name": {
+                "value": "क्या माया कुकी खा सकती है"
+              }
+            },
+            {
+              "name": {
+                "value": "क्या वह चॉकलेट खा सकती है"
+              }
+            },
+            {
+              "name": {
+                "value": "खाने में क्या है"
+              }
+            },
+            {
+              "name": {
+                "value": "रात के खाने में क्या है"
+              }
+            },
+            {
+              "name": {
+                "value": "अगला क्या है"
+              }
+            },
+            {
+              "name": {
+                "value": "सोने का समय कब है"
+              }
+            },
+            {
+              "name": {
+                "value": "माया सो गई"
+              }
+            },
+            {
+              "name": {
+                "value": "माया ने खाना खा लिया"
+              }
+            },
+            {
+              "name": {
+                "value": "वह कार्टून देख रही है"
+              }
+            },
+            {
+              "name": {
+                "value": "दरवाज़े पर कोई है क्या मैं खोलूँ"
+              }
+            },
+            {
+              "name": {
+                "value": "कोई दरवाज़ा खटखटा रहा है"
+              }
+            },
+            {
+              "name": {
+                "value": "आपातकाल"
+              }
+            },
+            {
+              "name": {
+                "value": "इमरजेंसी"
+              }
+            },
+            {
+              "name": {
+                "value": "मदद"
+              }
+            },
+            {
+              "name": {
+                "value": "माया साँस नहीं ले पा रही"
+              }
+            },
+            {
+              "name": {
+                "value": "उसके होंठ सूज रहे हैं"
+              }
+            },
+            {
+              "name": {
+                "value": "माया बेहोश हो गई"
+              }
+            },
+            {
+              "name": {
+                "value": "रसोई में आग लग गई"
+              }
+            },
+            {
+              "name": {
+                "value": "गैस की बदबू आ रही है"
+              }
+            },
+            {
+              "name": {
+                "value": "माँ से पूछो"
+              }
+            },
+            {
+              "name": {
+                "value": "अनीता से पूछो कि क्या वह देर तक जाग सकती है"
+              }
+            },
+            {
+              "name": {
+                "value": "मम्मी को फ़ोन करो"
+              }
+            },
+            {
+              "name": {
+                "value": "माया को अपनी माँ की याद आ रही है"
+              }
+            },
+            {
+              "name": {
+                "value": "हो गया"
+              }
+            },
+            {
+              "name": {
+                "value": "अगला"
+              }
+            },
+            {
+              "name": {
+                "value": "फिर से बताओ"
+              }
+            },
+            {
+              "name": {
+                "value": "हाँ"
+              }
+            },
+            {
+              "name": {
+                "value": "नहीं"
+              }
+            },
+            {
+              "name": {
+                "value": "धन्यवाद"
+              }
+            },
+            {
+              "name": {
+                "value": "epipen kahan hai"
+              }
+            },
+            {
+              "name": {
+                "value": "maya so gayi"
+              }
+            },
+            {
+              "name": {
+                "value": "kya main darwaza kholun"
+              }
+            },
+            {
+              "name": {
+                "value": "maya saans nahi le pa rahi"
+              }
+            },
+            {
+              "name": {
+                "value": "mummy ko phone karo"
+              }
+            },
+            {
+              "name": {
+                "value": "khane mein kya hai"
+              }
+            },
+            {
+              "name": {
+                "value": "agla kya hai"
+              }
+            },
+            {
+              "name": {
+                "value": "ho gaya"
+              }
+            },
+            {
+              "name": {
+                "value": "priya is babysitting tonight"
+              }
+            },
+            {
+              "name": {
+                "value": "dadi is looking after maya tonight"
+              }
+            },
+            {
+              "name": {
+                "value": "we are heading out"
+              }
+            },
+            {
+              "name": {
+                "value": "quiz me"
+              }
+            },
+            {
+              "name": {
+                "value": "skip"
+              }
+            },
+            {
+              "name": {
+                "value": "yes"
+              }
+            },
+            {
+              "name": {
+                "value": "no"
+              }
+            },
+            {
+              "name": {
+                "value": "done"
+              }
+            },
+            {
+              "name": {
+                "value": "next"
+              }
+            },
+            {
+              "name": {
+                "value": "next step"
+              }
+            },
+            {
+              "name": {
+                "value": "repeat that"
+              }
+            },
+            {
+              "name": {
+                "value": "where is the epipen"
+              }
+            },
+            {
+              "name": {
+                "value": "where are her pyjamas"
+              }
+            },
+            {
+              "name": {
+                "value": "where is the first aid kit"
+              }
+            },
+            {
+              "name": {
+                "value": "where is the dog food kept"
+              }
+            },
+            {
+              "name": {
+                "value": "what is next"
+              }
+            },
+            {
+              "name": {
+                "value": "what time is bedtime"
+              }
+            },
+            {
+              "name": {
+                "value": "when is lights out"
+              }
+            },
+            {
+              "name": {
+                "value": "what time is dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "what's for dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "what should the kids eat for dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "can maya have a cookie"
+              }
+            },
+            {
+              "name": {
+                "value": "can she have the cookies on the counter"
+              }
+            },
+            {
+              "name": {
+                "value": "can she have some ice cream"
+              }
+            },
+            {
+              "name": {
+                "value": "is pad thai okay for her"
+              }
+            },
+            {
+              "name": {
+                "value": "can she have a banana"
+              }
+            },
+            {
+              "name": {
+                "value": "she won't eat her dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "can we order dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "order the mac and cheese"
+              }
+            },
+            {
+              "name": {
+                "value": "order the pizza"
+              }
+            },
+            {
+              "name": {
+                "value": "is our dinner here"
+              }
+            },
+            {
+              "name": {
+                "value": "how much tv can she watch"
+              }
+            },
+            {
+              "name": {
+                "value": "can she watch one more episode"
+              }
+            },
+            {
+              "name": {
+                "value": "can she watch a scary movie"
+              }
+            },
+            {
+              "name": {
+                "value": "can her friend come over"
+              }
+            },
+            {
+              "name": {
+                "value": "can she stay up until nine"
+              }
+            },
+            {
+              "name": {
+                "value": "can i give her tylenol for her fever"
+              }
+            },
+            {
+              "name": {
+                "value": "she has a rash is it serious"
+              }
+            },
+            {
+              "name": {
+                "value": "she bumped her head"
+              }
+            },
+            {
+              "name": {
+                "value": "maya is asleep"
+              }
+            },
+            {
+              "name": {
+                "value": "she fell asleep at eight ten"
+              }
+            },
+            {
+              "name": {
+                "value": "maya ate all her dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "she is watching cartoons"
+              }
+            },
+            {
+              "name": {
+                "value": "we ran out of diapers"
+              }
+            },
+            {
+              "name": {
+                "value": "bruno ate a chocolate bar"
+              }
+            },
+            {
+              "name": {
+                "value": "did bruno get his walk"
+              }
+            },
+            {
+              "name": {
+                "value": "someone is knocking should i open the door"
+              }
+            },
+            {
+              "name": {
+                "value": "there is a man at the door"
+              }
+            },
+            {
+              "name": {
+                "value": "who is at the door"
+              }
+            },
+            {
+              "name": {
+                "value": "the doorbell rang"
+              }
+            },
+            {
+              "name": {
+                "value": "emergency"
+              }
+            },
+            {
+              "name": {
+                "value": "help"
+              }
+            },
+            {
+              "name": {
+                "value": "maya can't breathe"
+              }
+            },
+            {
+              "name": {
+                "value": "her lips are swelling"
+              }
+            },
+            {
+              "name": {
+                "value": "she is choking"
+              }
+            },
+            {
+              "name": {
+                "value": "i gave her the epipen"
+              }
+            },
+            {
+              "name": {
+                "value": "the paramedics are here"
+              }
+            },
+            {
+              "name": {
+                "value": "it's over"
+              }
+            },
+            {
+              "name": {
+                "value": "call mom"
+              }
+            },
+            {
+              "name": {
+                "value": "call anita"
+              }
+            },
+            {
+              "name": {
+                "value": "ask the parents"
+              }
+            },
+            {
+              "name": {
+                "value": "ask anita if she can stay up late"
+              }
+            },
+            {
+              "name": {
+                "value": "any answer from the parents"
+              }
+            },
+            {
+              "name": {
+                "value": "maya misses her mom"
+              }
+            },
+            {
+              "name": {
+                "value": "play the goodnight message"
+              }
+            },
+            {
+              "name": {
+                "value": "she won't stop crying"
+              }
+            },
+            {
+              "name": {
+                "value": "how is it going"
+              }
+            },
+            {
+              "name": {
+                "value": "go home"
+              }
+            },
+            {
+              "name": {
+                "value": "show the home screen"
+              }
+            },
+            {
+              "name": {
+                "value": "what can you do"
+              }
+            },
+            {
+              "name": {
+                "value": "thank you"
+              }
+            },
+            {
+              "name": {
+                "value": "pay priya"
+              }
+            },
+            {
+              "name": {
+                "value": "what's the plan for tonight"
+              }
+            },
+            {
+              "name": {
+                "value": "the parents are home"
+              }
+            },
+            {
+              "name": {
+                "value": "end the handoff"
+              }
+            },
+            {
+              "name": {
+                "value": "start over"
+              }
+            },
+            {
+              "name": {
+                "value": "she speaks hindi"
+              }
+            },
+            {
+              "name": {
+                "value": "what is the wifi password"
+              }
+            },
+            {
+              "name": {
+                "value": "when are the parents coming back"
+              }
+            },
+            {
+              "name": {
+                "value": "who do i call first"
+              }
+            },
+            {
+              "name": {
+                "value": "what do i do if she has an allergic reaction"
+              }
+            },
+            {
+              "name": {
+                "value": "how do i use the epipen"
+              }
+            },
+            {
+              "name": {
+                "value": "is it too cold in here"
+              }
+            },
+            {
+              "name": {
+                "value": "what temperature should the thermostat be"
+              }
+            },
+            {
+              "name": {
+                "value": "can she have candy before bed"
+              }
+            },
+            {
+              "name": {
+                "value": "can she skip her bath tonight"
+              }
+            },
+            {
+              "name": {
+                "value": "we are out of milk"
+              }
+            },
+            {
+              "name": {
+                "value": "she took her bath"
+              }
+            },
+            {
+              "name": {
+                "value": "she brushed her teeth"
+              }
+            },
+            {
+              "name": {
+                "value": "read her two stories"
+              }
+            },
+            {
+              "name": {
+                "value": "the smoke alarm is beeping"
+              }
+            },
+            {
+              "name": {
+                "value": "i smell gas"
+              }
+            },
+            {
+              "name": {
+                "value": "there is smoke in the kitchen"
+              }
+            },
+            {
+              "name": {
+                "value": "she swallowed a battery"
+              }
+            },
+            {
+              "name": {
+                "value": "i can't find maya"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

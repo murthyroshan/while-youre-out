@@ -1,14 +1,16 @@
 import { PRIVACY, TERMS } from './legal.js';
-import { GUEST_HTML } from './guest/page.js';
+import { connectPage } from './connect.js';
+import { GUEST_HTML, GUEST_SW_JS } from './guest/page.js';
+import { offlineGuides } from './domain/emergency.js';
 import { beeNote, devices, houseTick, lockDoor, pushNotice, unlockDoor } from './domain/devices.js';
 import { applyLogToPlan } from './domain/plan.js';
-import { approveOrder, declineOrder, getOrder, latestOrder, OrderError, orderView } from './domain/orders.js';
+import { approveOrder, declineOrder, getOrder, latestOrder, type Order, OrderError, orderView } from './domain/orders.js';
 import { SitterError, sitters, updateSitter } from './domain/sitters.js';
 import { activePass, audit, auditLog, endPass, extendPass, latestPass, passByToken, passOpen, passTick, seen, type Pass } from './domain/pass.js';
 import { briefing, createQuestion } from './domain/house.js';
 import { tonightPlan } from './domain/plan.js';
 import { isEmergency } from './domain/safety.js';
-import { randomUUID, timingSafeEqual } from 'node:crypto';
+import { randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { createHouses } from './houses.js';
 import { addToShoppingList, shoppingList } from './domain/shopping.js';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -25,12 +27,12 @@ import { PARENT_HTML, SERVICE_WORKER_JS } from './parent/page.js';
 import { createPush, isValidSubscription, type PushSender } from './domain/push.js';
 import { FamilyError, getFamily, resetToDemo, saveFamily, startFresh } from './domain/family.js';
 import { homeScreen } from './domain/home.js';
-import { approvePayment, createPayment, declinePayment, payableHandoff, PaymentError, paymentByToken } from './domain/payments.js';
+import { approvePayment, createPayment, declinePayment, dollars, duration, payableHandoff, type Payment, PaymentError, paymentByToken } from './domain/payments.js';
 import { payPage } from './parent/pay.js';
 import { DEMO_MESSAGE_BYTES, listMessages, MAX_MESSAGE_BYTES, MessageError, messageMedia, removeMessage, saveMessage } from './domain/messages.js';
 import { aiAllowed, pushTestAllowed, startHeavy } from './limits.js';
 import { HOST_SYSTEM, ADDON_INSTRUCTIONS } from './ai/hostPrompt.js';
-import { activeIncident, incidentView, latestIncident, markDoorUnlocked, markOnTheWay } from './domain/incident.js';
+import { activeIncident, incidentView, latestIncident, markDoorUnlocked, markOnTheWay, stepIncident, type StepAction } from './domain/incident.js';
 import { addVisitor, getDoorEvent, recordDoorEvent, removeVisitor, VisitorError, visitors } from './domain/door.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
 import { geminiChat, geminiFromEnv, AiUnavailableError, type AiClient, type ChatRequest } from './ai/gemini.js';
@@ -319,8 +321,34 @@ export function createApp(opts: AppOptions = {}) {
       })(),
       audit: auditLog(db, 40).map((a) => ({ ...a, time: clock(a.at) })),
       sitters: sitters(db),
+      receipts: receipts(),
     });
   });
+
+  // Everything paid for this week, on the parent's phone: dinner, supplies and the sitter.
+  const receipts = () => {
+    const since = new Date(now().getTime() - 7 * 86_400_000).toISOString();
+    const orders = db.prepare("SELECT * FROM orders WHERE status = 'approved' AND created_at >= ? ORDER BY id DESC LIMIT 10").all(since) as unknown as Order[];
+    const paid = db.prepare("SELECT * FROM payments WHERE status = 'paid' AND paid_at >= ? ORDER BY id DESC LIMIT 10").all(since) as unknown as Payment[];
+    return [
+      ...orders.map((o) => {
+        const v = orderView(o);
+        return { at: o.created_at, kind: v.kind, title: o.item, amount: v.price, reference: v.reference, from: o.restaurant, by: o.approved_by, detail: v.arrives ? `Arrives ${v.arrives}` : null };
+      }),
+      ...paid.map((p) => ({
+        at: p.paid_at!,
+        kind: 'sitter',
+        title: `${p.carer} · ${duration(p.minutes)}`,
+        amount: dollars(p.amount_cents + p.tip_cents),
+        reference: `PAY-${String(p.id).padStart(4, '0')}`,
+        from: 'Paid on your phone',
+        by: null,
+        detail: `${dollars(p.rate_cents)} an hour${p.tip_cents ? ` + ${dollars(p.tip_cents)} tip` : ''}`,
+      })),
+    ]
+      .sort((a, b) => b.at.localeCompare(a.at))
+      .map((r) => ({ ...r, time: clock(r.at) }));
+  };
 
   // What the house remembers about a sitter: a parent changes it, or has it forgotten.
   app.post('/parent/api/sitter', (req, res) => {
@@ -408,6 +436,12 @@ export function createApp(opts: AppOptions = {}) {
 
   // The sitter's page, opened from the QR code on the Echo Show. Its calls carry the pass token.
   app.get('/guest', (_req, res) => void res.set('Cache-Control', 'no-store').type('html').send(GUEST_HTML));
+  // Keeps the sitter's page on her phone, so it opens with no internet. Scope: that page only.
+  app.get('/guest/sw.js', (req, res) => {
+    res.setHeader('Service-Worker-Allowed', req.originalUrl.replace(/\/sw\.js(\?.*)?$/, ''));
+    res.setHeader('Cache-Control', 'no-cache');
+    res.type('application/javascript').send(GUEST_SW_JS);
+  });
   const guestPass = (req: express.Request, res: express.Response): Pass | undefined => {
     const token = /^Bearer ([\w-]{20,100})$/.exec(String(req.headers.authorization ?? ''))?.[1];
     const p = token ? passByToken(db, token) : undefined;
@@ -433,7 +467,25 @@ export function createApp(opts: AppOptions = {}) {
       contacts: contacts(db).map((c) => ({ name: c.name, relation: c.relation, phone: c.phone })),
       next: plan.map((i) => ({ title: i.title, time: i.time })),
       questions: (db.prepare('SELECT id, text, status, answer, answered_by FROM questions WHERE handoff_id = ? ORDER BY id DESC LIMIT 10').all(p.handoff_id) as Array<Record<string, unknown>>),
+      // Kept on the phone: if the internet drops, the plan and the safety steps are still there.
+      guides: offlineGuides(db),
+      // An emergency in progress: the same guide as the kitchen Echo Show, step for step.
+      incident: (() => {
+        const i = activeIncident(db);
+        return i ? { ...incidentView(db, i), source: (i.script as { action_plan?: { source?: string } }).action_plan?.source ?? null } : null;
+      })(),
     });
+  });
+  // "Done" on the sitter's phone moves the kitchen guide on too (and the parents see it).
+  app.post('/guest/api/emergency', (req, res) => {
+    const p = guestPass(req, res);
+    if (!p) return;
+    const action = req.body?.action as StepAction;
+    if (!['done', 'next', 'back', 'resolved'].includes(action)) return void res.status(400).json({ error: 'action must be done, next, back or resolved' });
+    const i = stepIncident(db, action, p.carer);
+    if (!i) return void res.status(404).json({ error: 'No emergency is in progress.' });
+    audit(db, { pass_id: p.id, actor: p.carer, via: `${p.carer}'s phone`, action: action === 'resolved' ? 'Said the emergency is over' : `Emergency guide: ${action}` });
+    res.json(incidentView(db, i));
   });
   app.post('/guest/api/ask', (req, res) => {
     const p = guestPass(req, res);
@@ -822,6 +874,12 @@ export function createApp(opts: AppOptions = {}) {
   const simulatorDist = process.env.WYO_SIMULATOR_DIR ?? fileURLToPath(new URL('../../simulator/dist', import.meta.url));
   if (existsSync(simulatorDist)) app.use('/', express.static(simulatorDist));
   // The privacy notice and terms an Alexa+ listing links to.
+  // Any MCP host, not just Alexa+: this house's address and how to add it. Outside a house, a new one.
+  app.get('/connect', (_req, res) => {
+    if (!/\/h\/[A-Za-z0-9_-]{16,64}$/.test(publicUrl.replace(/\/$/, ''))) return void res.redirect(`h/${randomBytes(16).toString('hex')}/connect`);
+    const here = publicUrl.replace(/\/$/, '');
+    res.type('html').send(connectPage(`${here}/mcp`, `${here}/parent?k=${encodeURIComponent(parentKey)}`));
+  });
   app.get('/privacy', (_req, res) => void res.type('html').send(PRIVACY));
   app.get('/terms', (_req, res) => void res.type('html').send(TERMS));
   app.get('/health', (_req, res) => void res.json({ ok: true }));

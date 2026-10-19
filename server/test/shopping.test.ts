@@ -100,3 +100,34 @@ test('"Not now" leaves the list alone', async () => {
   assert.equal((await result).content[0].text, 'Anita said not now to milk.');
   assert.ok(!(await state()).shopping.includes('milk'));
 });
+
+test('"Order it": the store delivers tomorrow morning, the sitter is told, and it is on the receipts (not tonight\'s door list)', async () => {
+  const logged = await call('log_event', { text: 'We ran out of wipes', kind: 'note' });
+  const shop = logged.structuredContent.shopping_ask;
+  assert.equal(shop.shopping_item, 'wipes');
+  sent.splice(0);
+  const { result, notification: n } = await ask(shop.question, shop.shopping_item);
+  await post('/parent/api/answer', { id: n.question_id, answer: 'Order it for tomorrow morning.', by: 'Anita', scope: 'tonight' });
+  assert.equal((await result).content[0].text, 'Anita ordered wipes: they arrive tomorrow morning.');
+  const s = await state();
+  const r = s.receipts.find((x: any) => x.kind === 'supplies');
+  assert.equal(r.title, 'Baby wipes');
+  assert.equal(r.amount, '$8.49');
+  assert.match(r.reference, /^HD-\d{4}$/);
+  assert.match(r.detail, /^Arrives tomorrow, 8:00 am to 10:00 am$/);
+  assert.equal(r.by, 'Anita');
+  assert.ok(!s.shopping.includes('wipes'), 'ordered, so not also on the list');
+  assert.ok(!s.visitors.some((v: any) => /wipes|Household/i.test(v.name)), 'tomorrow, so not expected at the door tonight');
+  assert.equal(s.order, null, "the dinner card isn't about supplies");
+});
+
+test('paying the sitter leaves a receipt with the hours, the rate and the tip', async () => {
+  await call('end_handoff');
+  const pay = await call('pay_sitter');
+  const token = new URL(pay.structuredContent.url).pathname.split('/').pop();
+  await fetch(`${base}/pay/${token}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'pay', tip: 500 }) });
+  const r = (await state()).receipts.find((x: any) => x.kind === 'sitter');
+  assert.match(r.title, /^Priya · \d+ h/);
+  assert.match(r.reference, /^PAY-\d{4}$/);
+  assert.match(r.detail, /an hour \+ \$5 tip$/);
+});

@@ -131,9 +131,15 @@ const short = (text: string) => (/second epipen/i.test(text) ? 'Second EpiPen' :
 export type StepAction = 'done' | 'next' | 'back' | 'resolved';
 
 /** Moves the guide on. Finishing the first step starts the plan's timers (e.g. the 5 minutes before a second EpiPen). */
-export function stepIncident(db: DB, action: StepAction, by?: string): Incident | undefined {
+/**
+ * Moves the guide. `at` is when it really happened, for a step done on a screen that had lost its
+ * connection: the second-EpiPen timer counts from the moment the first was given, not from when
+ * the screen got back online. It's kept between the emergency's start and now.
+ */
+export function stepIncident(db: DB, action: StepAction, by?: string, at?: string): Incident | undefined {
   const i = activeIncident(db);
   if (!i) return undefined;
+  const when = at && Number.isFinite(Date.parse(at)) ? new Date(Math.min(now().getTime(), Math.max(Date.parse(i.started_at), Date.parse(at)))) : now();
   const who = by ?? activeHandoff(db)?.carer_name ?? 'The sitter';
   if (action === 'resolved') {
     i.status = 'resolved';
@@ -149,11 +155,11 @@ export function stepIncident(db: DB, action: StepAction, by?: string): Incident 
   }
   if (i.current >= i.steps.length) return i;
   const step = i.steps[i.current];
-  i.updates.push({ at: nowIso(), text: `Done: ${step.text}`, by: who });
+  i.updates.push({ at: when.toISOString(), text: `Done: ${step.text}`, by: who });
   if (i.current === 0) {
     i.steps.forEach((s, idx) => {
       if (s.timer_seconds && !i.timers.some((t) => t.step_index === idx)) {
-        i.timers.push({ step_index: idx, label: short(s.text), seconds: s.timer_seconds, ends_at: new Date(now().getTime() + s.timer_seconds * 1000).toISOString(), warned: false, ended: false });
+        i.timers.push({ step_index: idx, label: short(s.text), seconds: s.timer_seconds, ends_at: new Date(when.getTime() + s.timer_seconds * 1000).toISOString(), warned: false, ended: false });
       }
     });
   }
@@ -195,7 +201,8 @@ export function incidentView(db: DB, i: Incident) {
     elapsed_seconds: Math.max(0, Math.round((t - Date.parse(i.started_at)) / 1000)),
     current: i.current,
     total: i.steps.length,
-    steps: i.steps.map((s, idx) => ({ ...s, state: idx < i.current ? 'done' : idx === i.current ? 'now' : 'todo' })),
+    // A step with a timer says what it's called, so a screen that has lost its connection can start it.
+    steps: i.steps.map((s, idx) => ({ ...s, state: idx < i.current ? 'done' : idx === i.current ? 'now' : 'todo', ...(s.timer_seconds ? { timer_label: short(s.text) } : {}) })),
     timers: i.timers.map((tm) => ({
       label: tm.label,
       step_text: i.steps[tm.step_index]?.text ?? '',

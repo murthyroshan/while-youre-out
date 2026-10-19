@@ -117,7 +117,7 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
   app.use(oauth.router);
   // Only what starts a visit makes a house (the simulator connecting, the parent page, the demo
   // controls); anything else for a house that doesn't exist is simply not found.
-  const startsVisit = (url: string) => /^\/(mcp|parent|demo|host)(\/|\?|$)/.test(url);
+  const startsVisit = (url: string) => /^\/(mcp|parent|demo|host|connect)(\/|\?|$)/.test(url);
   app.use((req, res, next) => {
     // /linked/mcp is the add-on as Alexa calls it after account linking: a token, or a bare 401
     // that starts linking. A token on plain /mcp is honoured too; a bad one is refused.

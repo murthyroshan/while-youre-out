@@ -73,6 +73,7 @@ export async function handle(event: AlexaRequest, opts: { server?: string } = {}
   const speech: string[] = [];
   let card: ToolResult | null = null;
   let parentLink: string | null = null;
+  let lang: string | undefined = event.session?.attributes?.lang;
   const client = new Client({ name: 'while-youre-out-alexa-skill', version: '1.0.0' });
   const deadline = AbortSignal.timeout(BUDGET_MS);
   const transport = new StreamableHTTPClientTransport(new URL(`${house}/mcp`), { requestInit: { signal: deadline } });
@@ -111,6 +112,12 @@ export async function handle(event: AlexaRequest, opts: { server?: string } = {}
       speech.push(home.structuredContent?.carer ? textOf(home) : `While You're Out is ready. ${HELP}`);
     }
     await Promise.all(pending);
+    // A Hindi Echo: the sitter speaks Hindi, so from now on the add-on answers in Hindi (once a
+    // handoff is on; until then there's nobody to switch).
+    if (said && event.request.locale?.startsWith('hi') && lang !== 'hi') {
+      const r = await client.callTool({ name: 'set_carer_language', arguments: { language: 'hi-IN' } }, undefined, { signal: deadline }).catch(() => null);
+      if (r && !(r as ToolResult).isError) lang = 'hi';
+    }
   } catch {
     speech.splice(0, speech.length, "The house is waking up. Ask me again in a few seconds.");
     card = null;
@@ -119,7 +126,7 @@ export async function handle(event: AlexaRequest, opts: { server?: string } = {}
     await transport.terminateSession().catch(() => {});
     void client.close().catch(() => {});
   }
-  return respond(speech.length ? speech : ['Okay.'], card, event, { attributes: { brain: brain.snapshot() }, appCard: parentLink });
+  return respond(speech.length ? speech : ['Okay.'], card, event, { attributes: { brain: brain.snapshot(), ...(lang ? { lang } : {}) }, appCard: parentLink });
 }
 
 function respond(

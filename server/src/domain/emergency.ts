@@ -135,3 +135,26 @@ export function startEmergency(db: DB, description: string) {
   const incident = openIncident(db, { kind, description, steps: script.steps.map((s) => ({ text: s.text, timer_seconds: s.timer_seconds })), script: result });
   return { ...result, incident: incidentView(db, incident) };
 }
+
+/**
+ * Every guide at once, for the sitter's phone to keep: if the internet drops, the phone still has
+ * the parents' plan and the safety steps for each kind of emergency (and phone calls still work).
+ */
+export function offlineGuides(db: DB) {
+  const child = (db.prepare("SELECT name FROM members WHERE kind = 'child' ORDER BY id LIMIT 1").get() as { name: string } | undefined)?.name ?? 'the child';
+  const plan = actionPlan(db);
+  const KINDS: Array<[EmergencyKind, string]> = [
+    ['allergy_breathing', 'Allergic reaction or trouble breathing'],
+    ['choking', 'Choking'],
+    ['fire', 'Fire or smoke'],
+    ['gas', 'Smell of gas'],
+    ['poison', 'Swallowed something harmful'],
+    ['missing', `Can't find ${child}`],
+    ['intruder', 'Someone breaking in'],
+    ['general', 'Anything else'],
+  ];
+  return KINDS.map(([kind, label]) => {
+    const s = scriptFor(kind, child, plan);
+    return { kind, label, say_first: s.say_first, source: s.source, steps: s.steps.map((x) => x.text), poison_line: kind === 'poison' ? '1-800-222-1222' : null };
+  });
+}

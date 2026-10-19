@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { currentHouse } from '../context.js';
 import { addToShoppingList, SHOP_ANSWERS } from './shopping.js';
+import { orderSupplies } from './orders.js';
 import { type DB, type Fact, type Contact, type Handoff, type Question, type LogEvent, nowIso } from '../db.js';
 import {
   classifyQuestion,
@@ -466,6 +467,8 @@ export function answerQuestionFromParent(
   );
   // A shopping question just adds to the list (on a yes); it is never a house rule.
   if (q.shopping_item && answer === SHOP_ANSWERS.yes) addToShoppingList(db, q.shopping_item);
+  // "Order it": from the store, for tomorrow morning; on the receipts, not on the list.
+  if (q.shopping_item && answer === SHOP_ANSWERS.order) orderSupplies(db, q.shopping_item, answeredBy);
   // A "call me" reply or an alert acknowledgement is not a house rule.
   const isRule =
     !q.shopping_item &&

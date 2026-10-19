@@ -85,7 +85,9 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         q.shopping_item
           ? q.answer === SHOP_ANSWERS.yes
             ? `${q.answered_by} added ${q.shopping_item} to the shopping list.`
-            : `${q.answered_by} said not now to ${q.shopping_item}.`
+            : q.answer === SHOP_ANSWERS.order
+              ? `${q.answered_by} ordered ${q.shopping_item}: they arrive tomorrow morning.`
+              : `${q.answered_by} said not now to ${q.shopping_item}.`
           : `${q.answered_by} answered "${q.text.length > 60 ? `${q.text.slice(0, 57)}...` : q.text}": "${q.answer}"`,
       );
     }
@@ -1107,7 +1109,9 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
                   text: shopping_item
                     ? answered.answer === SHOP_ANSWERS.yes
                       ? `${answered.answered_by} added ${shopping_item} to the shopping list.`
-                      : `${answered.answered_by} said not now to ${shopping_item}.`
+                      : answered.answer === SHOP_ANSWERS.order
+                        ? `${answered.answered_by} ordered ${shopping_item}: they arrive tomorrow morning.`
+                        : `${answered.answered_by} said not now to ${shopping_item}.`
                     : `${answered.answered_by} said: "${answered.answer}"`,
                 },
               ],
@@ -1191,13 +1195,16 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       annotations: { destructiveHint: false },
       description:
         'During an emergency, moves the step-by-step guide on. Call with action "done" when the carer says they did the step ("done", "I gave the EpiPen", "called 911"), "next" to skip ahead, "back" to repeat, and "resolved" only when the carer says it is over (paramedics have taken over, she is fine). Read the returned text aloud.',
-      inputSchema: { action: z.enum(['done', 'next', 'back', 'resolved']).describe('done (the step is done), next (skip ahead), back (repeat it), or resolved (help has taken over)') },
+      inputSchema: {
+        action: z.enum(['done', 'next', 'back', 'resolved']).describe('done (the step is done), next (skip ahead), back (repeat it), or resolved (help has taken over)'),
+        done_at: z.string().max(40).optional().describe('Only for a step done on a screen that had lost its connection: when it was really done (ISO time)'),
+      },
       _meta: { ...ui, ui: { resourceUri: CARD_URI, preferredDisplayMode: 'fullscreen' } },
     },
-    async ({ action }) => {
+    async ({ action, done_at }) => {
       const before = activeIncident(db);
       if (!before) return { content: [{ type: 'text', text: 'There is no emergency in progress.' }], isError: true };
-      const i = stepIncident(db, action)!;
+      const i = stepIncident(db, action, undefined, done_at)!;
       // Help from home that happened since the last step (the door unlocked) is said first.
       const news = takeUrgentNotices(db).join(' ');
       if (i.status === 'resolved') {

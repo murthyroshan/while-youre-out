@@ -92,6 +92,24 @@
             "nanny",
             "grandparent"
           ]
+        },
+        "hi-IN": {
+          "name": "While You're Out",
+          "summary": "The parents' notes for whoever is looking after the kids, with safety enforced in code.",
+          "description": "While You're Out holds the parents' notes for tonight's babysitter, grandparent or nanny: what she's allergic to, where the EpiPen is, bedtime, the rules. It never says a food or medicine is safe, never reads private details aloud, and in an emergency reads the parents' own plan step by step while alerting them. This skill connects to the While You're Out demo add-on; each Alexa account gets its own demo house.",
+          "examplePhrases": [
+            "Alexa, open while you are out",
+            "Alexa, ask while you are out where the EpiPen is",
+            "Alexa, tell while you are out Priya is babysitting tonight"
+          ],
+          "keywords": [
+            "babysitter",
+            "babysitting",
+            "allergy",
+            "handoff",
+            "nanny",
+            "grandparent"
+          ]
         }
       },
       "isAvailableWorldwide": true,
@@ -123,6 +141,10 @@
           "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
         },
         "en-AU": {
+          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+        },
+        "hi-IN": {
           "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
           "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
         }

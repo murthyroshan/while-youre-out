@@ -6,7 +6,7 @@ import type { DB } from '../db.js';
 import { getSetting, setSetting } from './shadow.js';
 
 /** What the lock-screen buttons answer. */
-export const SHOP_ANSWERS = { yes: 'Yes, add it to the list.', no: 'Not now.' } as const;
+export const SHOP_ANSWERS = { yes: 'Yes, add it to the list.', order: 'Order it for tomorrow morning.', no: 'Not now.' } as const;
 
 // "used the last diaper", "we're out of milk", "running low on wipes", "no more bread".
 const RAN_OUT = /\b(?:last|ran out of|run out of|out of|finished the|no more|running low on|used the last)\s+(?:the\s+)?([a-z][a-z' -]{1,30}?)(?=[.,!;]|$|\s+(?:so|and|but|for|today|tonight|now)\b)/gi;

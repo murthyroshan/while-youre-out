@@ -22,10 +22,12 @@ Alexa+ add-ons aren't open to everyone yet, so this is the same add-on on the Al
 
 Any Echo device signed in to the same Amazon account can use the skill in development too: *"Alexa, open while you are out."*
 
+**In Hindi:** in the console, add the language *Hindi (IN)* (the language menu at the top left), and in its JSON Editor drop `skill-package/interactionModels/custom/hi-IN.json` (Devanagari, Hinglish and English sentences), then build. If the console asks for the invocation name in Devanagari, use *व्हाइल यू आर आउट*. On a Hindi Echo the add-on answers the sitter in Hindi once the handoff is on, and an emergency said in Hindi is caught by the add-on's own rules, with no AI in the way. Other Hindi questions are translated on the server, which needs a Gemini key there.
+
 ## Build it yourself
 
 ```sh
-node alexa/build.mjs            # interaction model (5 English locales) + lambda/index.js, one file, no dependencies
+node alexa/build.mjs            # interaction models (5 English locales and Hindi) + lambda/index.js, one file, no dependencies
 npx tsx --test alexa/test/*.test.ts   # real Alexa request envelopes through the skill to the add-on
 ```
 

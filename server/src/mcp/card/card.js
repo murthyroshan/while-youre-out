@@ -15,12 +15,12 @@
   var tickTimer = null;
 
   function send(msg) { window.parent.postMessage(msg, '*'); }
-  function request(method, params) {
+  function request(method, params, waitMs) {
     var id = nextId++;
     send({ jsonrpc: '2.0', id: id, method: method, params: params || {} });
     return new Promise(function (resolve, reject) {
       pending[id] = { resolve: resolve, reject: reject };
-      setTimeout(function () { if (pending[id]) { delete pending[id]; reject(new Error('timeout')); } }, 15000);
+      setTimeout(function () { if (pending[id]) { delete pending[id]; reject(new Error('timeout')); } }, waitMs || 15000);
     });
   }
   function notify(method, params) { send({ jsonrpc: '2.0', method: method, params: params || {} }); }
@@ -46,7 +46,9 @@
     // The parents set large text for a sitter who needs it (Dadi): everything a fifth bigger.
     if (host.large) s *= 1.2;
     var dark = host.theme ? host.theme !== 'light' : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
-    root.className = (dark ? 'theme-dark' : 'theme-light') + (compact ? ' compact' : '');
+    // A short canvas (Echo Show 5 and 21: under 440 of the 480 base height) keeps only what matters.
+    var short = !compact && H / s < 440;
+    root.className = (dark ? 'theme-dark' : 'theme-light') + (compact ? ' compact' : '') + (short ? ' short' : '');
     root.style.setProperty('--scale', String(s));
     // Full-screen layouts fill the frame exactly: its height on the base canvas.
     root.style.setProperty('--vh', (H / s).toFixed(2) + 'px');
@@ -455,6 +457,11 @@
   var payData = null;
   var emergencyReceived = 0;
   var showSheet = false;
+  // With no connection the guide still works: the steps are on the screen, "Done" moves on here,
+  // and whatever was done is sent once the connection is back.
+  var offline = false;
+  var missed = 0;
+  var doneOffline = [];
   var emergencyTimer = null;
 
   function emergencyView(d) {
@@ -478,16 +485,53 @@
       (d.address ? '<div class="addr"><small>Call 911 from your phone. Tell them:</small><b>' + esc(d.address) + '</b></div>' : '') +
       (timer ? '<div class="box timer" data-timer="' + timer.remaining_seconds + '"><div><small>' + esc(timer.label) + '</small><b class="tab" id="timerText"></b></div></div>' : '') +
       (d.epipen_location ? '<div class="box"><small>EpiPen</small>' + esc(d.epipen_location) + '</div>' : '') +
-      '<div class="box"><small>Alerted</small>' + esc((d.parents_alerted || []).join(', ') || 'The parents') + '</div>' +
+      '<div class="box alerted"><small>Alerted</small>' + esc((d.parents_alerted || []).join(', ') || 'The parents') + '</div>' +
       '<p class="warning">' + esc(d.note) + '</p>';
-    return '<div class="fs emergency" role="alert"><div class="bar"><span class="flag">' + icon('alert') + 'EMERGENCY</span>' + brand() + '<span class="top-right"><span class="chip tab" id="elapsed"></span>' + otw + '</span></div>' + spoken +
+    var cut = offline ? '<div class="offline" role="status">' + icon('alert') + 'No connection. The steps are saved on this screen: tap Done as you go. Call 911 from your phone.</div>' : '';
+    return '<div class="fs emergency' + (offline ? ' is-offline' : '') + '" role="alert"><div class="bar"><span class="flag">' + icon('alert') + 'EMERGENCY</span>' + brand() + '<span class="top-right"><span class="chip tab" id="elapsed"></span>' + otw + '</span></div>' + spoken + cut +
       '<div class="grid"><div class="stepcard' + (fresh ? ' fresh' : '') + '">' +
       (step ? '<small>Step ' + (inc.current + 1) + ' of ' + inc.total + ' · ' + esc(d.action_plan.source) + '</small><p>' + esc(step.text) + '</p>'
         : '<small>All steps done</small><p>Stay with her and follow the 911 dispatcher until help arrives.</p>') +
       '<div class="dots">' + dots + '</div><div class="actions">' +
-      (step ? button('Done', 'Done', 'ok', 'check') + button('Next step', 'Next step') : button('Help has arrived', "It's over, the paramedics are here", 'ok', 'check')) +
+      (offline
+        ? (step ? localButton('Done', 'done', 'ok', 'check') + localButton('Next step', 'next') : localButton('Help has arrived', 'resolved', 'ok', 'check'))
+        : step ? button('Done', 'Done', 'ok', 'check') + button('Next step', 'Next step') : button('Help has arrived', "It's over, the paramedics are here", 'ok', 'check')) +
       '<button class="btn" data-sheet="1">' + icon('list') + '<span>For paramedics</span></button></div></div>' +
       '<div class="side">' + side + '</div></div></div>';
+  }
+  function localButton(label, action, kind, ic) {
+    return '<button class="btn ' + (kind || '') + '" data-local="' + action + '">' + (ic ? icon(ic) : '') + '<span>' + esc(label) + '</span></button>';
+  }
+  /** "Done" with no connection: the guide moves on here, and the step is sent later. */
+  /** The screen's own copy of the guide catches up with the time that has passed, before a redraw. */
+  function catchUp(inc) {
+    var passed = Math.round((Date.now() - emergencyReceived) / 1000);
+    inc.elapsed_seconds += passed;
+    (inc.timers || []).forEach(function (t) { t.remaining_seconds = Math.max(0, t.remaining_seconds - passed); });
+  }
+  function stepHere(action) {
+    var inc = emergencyData && emergencyData.incident;
+    if (!inc) return;
+    catchUp(inc);
+    if (action === 'resolved') inc.status = 'resolved';
+    else {
+      // As the add-on does: once the first step is done, the plan's timers start (the second EpiPen).
+      if (action === 'done' && inc.current === 0 && !(inc.timers || []).length) {
+        inc.timers = inc.steps.filter(function (s) { return s.timer_seconds; }).map(function (s) { return { label: s.timer_label || 'Timer', remaining_seconds: s.timer_seconds }; });
+      }
+      inc.current = Math.min(inc.current + 1, inc.total);
+    }
+    inc.steps = inc.steps.map(function (s, i) { return Object.assign({}, s, { state: i < inc.current ? 'done' : i === inc.current ? 'now' : 'todo' }); });
+    doneOffline.push({ action: action, at: new Date().toISOString() });
+    render(current);
+  }
+  /** Back online: what was done offline goes to the server (the parents see it), then the screen follows the server. */
+  function backOnline() {
+    offline = false;
+    var queue = doneOffline.splice(0);
+    var chain = Promise.resolve(null);
+    queue.forEach(function (a) { chain = chain.then(function () { return request('tools/call', { name: 'emergency_step', arguments: { action: a.action, done_at: a.at } }).catch(function () { return null; }); }); });
+    return chain.then(function () { return request('tools/call', { name: 'emergency_status', arguments: {} }); }).then(function (r) { if (r && r.structuredContent) render(r); else render(current); }).catch(function () { render(current); });
   }
   function paramedicSheet(d) {
     var p = d.paramedic_sheet || {};
@@ -518,10 +562,15 @@
     emergencyTimer = setInterval(tickEmergency, 1000);
     // The parents' phones and the carer's "done" change the guide: keep the screen in step.
     refreshTimer = setInterval(function () {
-      request('tools/call', { name: 'emergency_status', arguments: {} }).then(function (r) {
+      request('tools/call', { name: 'emergency_status', arguments: {} }, 2500).then(function (r) {
+        missed = 0;
+        if (offline) return backOnline();
         var s = r && r.structuredContent;
         if (s && s.view === 'emergency' && JSON.stringify(s.incident) !== JSON.stringify(emergencyData && emergencyData.incident)) render(r);
-      }).catch(function () {});
+      }).catch(function () {
+        // Two refreshes in a row unanswered (about six seconds): carry on without the connection.
+        if (++missed >= 2 && !offline && emergencyData && emergencyData.incident) { offline = true; catchUp(emergencyData.incident); render(current); }
+      });
     }, 3000);
   }
   function stopEmergencyTimers() { clearInterval(emergencyTimer); emergencyTimer = null; }
@@ -599,6 +648,8 @@
   function stopHomeTimers() { clearInterval(tickTimer); clearInterval(refreshTimer); tickTimer = refreshTimer = null; }
 
   document.addEventListener('click', function (e) {
+    var local = e.target.closest && e.target.closest('[data-local]');
+    if (local) return void stepHere(local.getAttribute('data-local'));
     var b = e.target.closest && e.target.closest('[data-say]');
     if (!b) return;
     b.disabled = true;
@@ -622,7 +673,7 @@
     el.style.fontSize = '';
     if (!el.clientHeight) return;
     var size = parseFloat(getComputedStyle(el).fontSize);
-    while (el.scrollHeight - el.clientHeight > size * 0.5 && size > 14) {
+    while (el.scrollHeight - el.clientHeight > 1 && size > 14) {
       size -= 1;
       el.style.fontSize = size + 'px';
     }

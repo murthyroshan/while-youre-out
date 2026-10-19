@@ -130,3 +130,29 @@ test('a server that is asleep or down: a calm answer within Alexa\'s time limit,
   assert.match(speech(r), /waking up/);
   assert.ok(Date.now() - t < 8000);
 });
+
+test('a Hindi Echo: the sitter is answered in Hindi, and an emergency said in Hindi is caught with no AI at all', async () => {
+  const user = 'amzn1.ask.account.HINDIUSER';
+  let attrs: Record<string, any> = {};
+  const hi = async (words: string) => {
+    const r: any = await handle(
+      {
+        version: '1.0',
+        session: { new: false, attributes: attrs, user: { userId: user } },
+        context: { System: { user: { userId: user }, device: { supportedInterfaces: { 'Alexa.Presentation.APL': {} } } }, Viewport: { pixelWidth: 1280 } },
+        request: { type: 'IntentRequest', locale: 'hi-IN', intent: { name: 'UtteranceIntent', slots: { utterance: { value: words } } } },
+      },
+      { server: base },
+    );
+    attrs = r.sessionAttributes;
+    return r;
+  };
+  const hiHouse = `/h/${createHash('sha256').update(`wyo:${user}`).digest('hex').slice(0, 32)}`;
+  await hi('Dadi is babysitting tonight');
+  assert.equal(attrs.lang, 'hi', 'switched to Hindi once the handoff was on');
+  const s = await (await fetch(`${base}${hiHouse}/parent/api/state?k=${KEY}`)).json();
+  assert.equal(s.handoff.language, 'hi-IN');
+  const e = await hi('माया साँस नहीं ले पा रही');
+  assert.equal(card(e).mood, 'emergency');
+  assert.ok(card(e).notes.some((n: any) => /911/.test(n.title)));
+});
