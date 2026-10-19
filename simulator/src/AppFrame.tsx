@@ -22,6 +22,9 @@ export function AppFrame(props: {
   onUserMessage?: (text: string) => void;
   /** Changes when the frame is reused for a different card: its size is measured again. */
   resetKey?: unknown;
+  /** The surface the card is told it runs on (MCP Apps hostContext), as an Alexa host sends it. */
+  theme?: 'light' | 'dark';
+  deviceClass?: string;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(240);
@@ -52,7 +55,11 @@ export function AppFrame(props: {
           hostInfo: { name: 'echo-show-simulator', version: '0.2.0' },
           hostCapabilities: { serverTools: {}, message: {}, displayModes: ['inline', 'fullscreen'] },
           hostContext: {
-            theme: 'dark',
+            theme: p.theme ?? 'dark',
+            deviceClass: p.deviceClass,
+            isMobile: false,
+            maxWidth: frame.clientWidth,
+            maxHeight: frame.clientHeight,
             displayMode: p.displayMode,
             availableDisplayModes: ['inline', 'fullscreen'],
             platform: 'web',
@@ -104,10 +111,13 @@ export function AppFrame(props: {
 
   useEffect(() => setHeight(240), [props.resetKey]);
 
-  // Tell the card when its display mode changes.
+  // Tell the card when its display mode, theme or device changes (it adapts in place).
   useEffect(() => {
-    ref.current?.contentWindow?.postMessage({ jsonrpc: '2.0', method: 'ui/notifications/host-context-changed', params: { displayMode: props.displayMode } }, '*');
-  }, [props.displayMode]);
+    ref.current?.contentWindow?.postMessage(
+      { jsonrpc: '2.0', method: 'ui/notifications/host-context-changed', params: { displayMode: props.displayMode, theme: props.theme ?? 'dark', deviceClass: props.deviceClass } },
+      '*',
+    );
+  }, [props.displayMode, props.theme, props.deviceClass]);
 
   return (
     <iframe

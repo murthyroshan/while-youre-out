@@ -28,7 +28,23 @@ function houseId(): string {
   }
 }
 // ?film=1: only the Echo Show, for recording the video. Space or → says the next tour line.
-const FILM = new URLSearchParams(location.search).has('film');
+// ?embed=1: only the Echo Show's screen, edge to edge, for the website's 3D house. It talks to the
+// page that embeds it (only the project's own site, or a local one) through postMessage.
+const EMBED = new URLSearchParams(location.search).has('embed');
+const FILM = new URLSearchParams(location.search).has('film') || EMBED;
+const EMBEDDER = (() => {
+  if (!EMBED) return null;
+  try {
+    const origin = new URL(document.referrer).origin;
+    return /^https:\/\/murthyroshan\.github\.io$|^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin) ? origin : null;
+  } catch {
+    return null;
+  }
+})();
+/** Tells the embedding page what happened (a tool ran, Alexa said something). */
+const tellEmbedder = (msg: Record<string, unknown>) => {
+  if (EMBEDDER) window.parent.postMessage({ source: 'wyo', ...msg }, EMBEDDER);
+};
 // ?moment=door (or handover, questions, evening, ask, emergency, goodnight, pay): skip ahead to
 // that part of the evening and play from there, for links straight to a highlight.
 const MOMENTS = ['handover', 'questions', 'evening', 'door', 'ask', 'emergency', 'goodnight', 'pay'];
@@ -144,6 +160,8 @@ export function App() {
   const [phoneOn, setPhoneOn] = useState(() => PHONE_PARAM !== '0' && stored('wyo.phone') !== 'off' && window.innerWidth >= 1100);
   const [phoneUrl, setPhoneUrl] = useState<string | null>(null);
   const [phoneRev, setPhoneRev] = useState(0);
+  // Cards are tested in both themes, as the Alexa+ design guide asks.
+  const [cardTheme, setCardTheme] = useState<'light' | 'dark'>(() => (stored('wyo.theme') === 'light' ? 'light' : 'dark'));
   const [deviceSize, setDeviceSize] = useState<DeviceSize>(() => (stored('wyo.size') === '8' || stored('wyo.size') === '10' ? (stored('wyo.size') as DeviceSize) : '15'));
   // "Watch the evening": the whole story plays by itself.
   const [playing, setPlaying] = useState(false);
@@ -391,6 +409,7 @@ export function App() {
         // A late reply to something said before an emergency began is never spoken over the guide.
         if (emergencyRef.current && turn < emergencyTurnRef.current) return;
         addLine('alexa', text);
+        tellEmbedder({ type: 'said', text });
         armCardTimer();
         // Non-English replies are translated by the server; speak them with a voice for that language.
         const lang = /[^ -ɏ]/.test(text) || langRef.current !== 'en-US' ? langRef.current : 'en-US';
@@ -400,6 +419,7 @@ export function App() {
         setLight('thinking');
         try {
           const result = await c.call(name, args);
+          tellEmbedder({ type: 'tool', name, args, isError: Boolean(result.isError), view: result.structuredContent?.view ?? null });
           if (name === 'start_handoff' && !result.isError) langRef.current = typeof args.language === 'string' ? args.language : 'en-US';
           if (name === 'end_handoff' && !result.isError) langRef.current = 'en-US';
           if (name === 'set_carer_language' && !result.isError && typeof args.language === 'string') langRef.current = args.language;
@@ -603,6 +623,23 @@ export function App() {
   };
 
   const parentUrl = serverOrigin ? `${serverOrigin}${demoParentPath ?? `/parent?k=${encodeURIComponent(PARENT_KEY)}`}` : '#';
+  const embedHandle = useRef(handle);
+  embedHandle.current = handle;
+  const embedRing = useRef(ringDoorbell);
+  embedRing.current = ringDoorbell;
+  useEffect(() => {
+    if (!EMBEDDER) return;
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== EMBEDDER || e.data?.target !== 'wyo') return;
+      if (e.data.type === 'say' && typeof e.data.text === 'string') void embedHandle.current(e.data.text.slice(0, 300));
+      if (e.data.type === 'ring' && typeof e.data.who === 'string') void embedRing.current(e.data.who);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+  useEffect(() => {
+    if (connState === 'connected' && parentUrl !== '#') tellEmbedder({ type: 'ready', parentUrl });
+  }, [connState, parentUrl]);
   const clockText = (() => {
     const m = demoTime ? /(\d{2}):(\d{2})$/.exec(demoTime) : null;
     if (!m) return now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -859,6 +896,8 @@ export function App() {
       return cn.call(name, args);
     },
     onUserMessage: (text: string) => void handle(text),
+    theme: cardTheme,
+    deviceClass: `echo-show-${deviceSize}`,
   });
 
   // The room's light follows the device: Alexa's cyan while she listens or speaks, red in an
@@ -868,7 +907,7 @@ export function App() {
   const houseTime = demoTime ? `${demoTime.slice(0, 3)} ${clockText.toLowerCase()}` : clockText;
 
   return (
-    <div className={`page ${FILM ? 'film' : ''} amb-${ambient}`}>
+    <div className={`page ${FILM ? 'film' : ''} ${EMBED ? 'embed' : ''} amb-${ambient}`}>
       <section className={`wall ${showPhone ? 'with-phone' : ''} ${chapter ? 'playing' : ''}`} aria-label="Echo Show simulator">
         <div className="scene" aria-hidden="true">
           <i className="scene-lamp" />
@@ -1221,6 +1260,18 @@ export function App() {
                 onChange={(v) => {
                   setDeviceSize(v);
                   store('wyo.size', v);
+                }}
+              />
+              <Segmented<'light' | 'dark'>
+                label="Theme"
+                value={cardTheme}
+                options={[
+                  ['dark', 'Dark'],
+                  ['light', 'Light'],
+                ]}
+                onChange={(v) => {
+                  setCardTheme(v);
+                  store('wyo.theme', v);
                 }}
               />
               <Segmented<BrainKind>

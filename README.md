@@ -98,7 +98,7 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 | `import_note` | A parent's dictated rule ("remember: no juice after 7") becomes proposed rules they confirm on their phone. Refused during a handoff: a sitter's "remember she napped" is a log entry |
 | `end_handoff` | Ends sitter mode and returns the evening summary |
 
-Resources: `ui://while-youre-out/card.html` (the MCP App; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`.
+Resources: `ui://while-youre-out/card-<hash>.html` (the MCP App, its address carrying a hash of its contents so hosts can cache it; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`.
 
 ## The simulator
 

@@ -43,8 +43,10 @@ test('negotiates the 2025-11-25 protocol and lists the tools', async () => {
     assert.ok(names.includes(n), `missing tool ${n}`);
   }
   const ask = tools.find((t) => t.name === 'ask_house')!;
-  assert.equal((ask._meta as any)?.ui?.resourceUri, 'ui://while-youre-out/card.html');
-  const card = await client.readResource({ uri: 'ui://while-youre-out/card.html' });
+  // The card's address carries a hash of its contents, so hosts can cache it.
+  const uri = (ask._meta as any)?.ui?.resourceUri;
+  assert.match(uri, /^ui:\/\/while-youre-out\/card-[0-9a-f]{10}\.html$/);
+  const card = await client.readResource({ uri });
   assert.equal(card.contents[0].mimeType, 'text/html;profile=mcp-app');
 });
 

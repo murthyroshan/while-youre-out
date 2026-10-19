@@ -396,3 +396,13 @@ button:disabled { cursor: not-allowed; }
   .welcome-card { padding: 26px 22px; }
   .welcome-card h2 { font-size: 24px; }
 }
+
+/* ?embed=1: only the screen, edge to edge (the website's 3D house shows it on its kitchen wall) */
+.page.embed { display: block; }
+.page.embed .wall { min-height: 100vh; height: 100vh; padding: 0; }
+.page.embed .scene, .page.embed .ambient, .page.embed .stage-top, .page.embed .chapter, .page.embed .device-label, .page.embed .phone, .page.embed .panel { display: none !important; }
+.page.embed .stage-row { height: 100vh; }
+.page.embed .device { width: 100vw !important; height: 100vh; }
+.page.embed .bezel { padding: 0; border-radius: 0; background: none; box-shadow: none; width: 100vw; height: 100vh; aspect-ratio: auto; }
+.page.embed .bezel .camera { display: none; }
+.page.embed .screen-fit { width: 100vw; height: 100vh; border-radius: 0; }

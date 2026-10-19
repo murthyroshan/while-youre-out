@@ -149,7 +149,10 @@ export function answerQuestion(db: DB, question: string, role: Role = 'carer'): 
   const byWords = keywordMatch(facts, question, byTopic.length ? 2 : 1);
   const matched = [...new Set([...byWords.filter((f) => f.source === 'parent_answer'), ...byTopic, ...byWords])];
   // Safety facts always lead; then answers parents gave for this exact kind of question.
-  matched.sort((a, b) => rank(a) - rank(b) || Number(b.source === 'parent_answer') - Number(a.source === 'parent_answer'));
+  // Within the same risk, the note about what was asked comes first: "cookies" finds "No sweets after 6 pm".
+  const asked = topicWords(question);
+  const relevance = (f: Fact) => [...topicWords(f.text)].filter((w) => asked.has(w)).length;
+  matched.sort((a, b) => rank(a) - rank(b) || relevance(b) - relevance(a) || Number(b.source === 'parent_answer') - Number(a.source === 'parent_answer'));
 
   const out: HouseAnswer = {
     ...base,
@@ -203,6 +206,23 @@ function wholeWordOverlap(a: string, b: string) {
 
 function topicCategory(text: string): string | undefined {
   return TOPIC_CATEGORIES.find(([re]) => re.test(text))?.[1][0];
+}
+
+/** Content words, with everyday kinds of thing folded together (a cookie is a sweet, a cartoon is screen time). */
+const KINDS: Array<[RegExp, string]> = [
+  [/^(cookies?|biscuits?|cand(y|ies)|chocolates?|sweets?|desserts?|treats?|cakes?|cupcakes?|lollipops?|gummies|sugar|ice ?cream)$/, 'sweets'],
+  [/^(tv|telly|shows?|episodes?|cartoons?|youtube|ipad|tablet|screens?|movies?|films?)$/, 'screen'],
+  [/^(bed|bedtime|sleep|asleep|nap|naps)$/, 'bed'],
+  [/^(bath|baths|shower|bathtime)$/, 'bath'],
+];
+// Words that say nothing about what a note is about ("eat", "kids") don't make it relevant.
+const GENERIC = new Set(['eat', 'eats', 'eating', 'ate', 'give', 'gave', 'kids', 'kid', 'child', 'children', 'some', 'tonight', 'time']);
+function topicWords(text: string) {
+  const out = new Set<string>();
+  for (const w of contentWords(text)) if (!GENERIC.has(w)) out.add(KINDS.find(([re]) => re.test(w))?.[1] ?? w.replace(/s$/, ''));
+  if (/\bice cream\b/i.test(text)) out.add('sweets');
+  if (/\b(lights out|pyjamas|pajamas|bedtime stor(y|ies)|tuck(ed)? in)\b/i.test(text)) out.add('bed');
+  return out;
 }
 
 function rank(f: Fact) {
