@@ -285,6 +285,15 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at TEXT NOT NULL,
   paid_at TEXT
 );
+CREATE TABLE IF NOT EXISTS sitters (
+  key TEXT PRIMARY KEY,          -- the name, lower-cased
+  name TEXT NOT NULL,
+  language TEXT,
+  rate_cents INTEGER,
+  large_text INTEGER NOT NULL DEFAULT 0,
+  note TEXT,                     -- the parents' own note, e.g. "Rahul's mother"
+  updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS log_events (
   id INTEGER PRIMARY KEY,
   handoff_id INTEGER NOT NULL,

@@ -145,11 +145,12 @@ export function doorCheck(db: DB): DoorCheck {
   }
 
   if (!event) {
-    const who = [...expected, ...deliveries].map(describe);
+    // Whoever they say they are, the parents' rule comes first; the notes about each visitor are on the card.
+    const who = [...expected, ...deliveries].map((v) => `${v.name}${v.window ? ` (${v.window})` : ''}`);
     return {
       ...base,
       verdict: 'no_event',
-      say: `I don't see anyone on the doorbell camera right now.${who.length ? ` The parents are expecting ${list(who)}.` : ' The parents are not expecting anyone.'}${ruleLine}`,
+      say: `${ruleLine.trim() || "Don't open the door to anyone you don't know."} I don't see anyone on the doorbell camera right now. ${who.length ? `Expected tonight: ${list(who)}.` : 'Nobody is expected tonight.'}`,
     };
   }
 

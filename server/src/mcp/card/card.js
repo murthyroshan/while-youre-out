@@ -9,7 +9,7 @@
   'use strict';
   var nextId = 1;
   var pending = {};
-  var host = { displayMode: 'inline', theme: null, deviceClass: null, isMobile: false };
+  var host = { displayMode: 'inline', theme: null, deviceClass: null, isMobile: false, large: false };
   var current = null; // the latest tool result
   var refreshTimer = null;
   var tickTimer = null;
@@ -43,6 +43,8 @@
     else if (/show.?21/.test(dc)) s = 2.5;
     else if (/show|hub/.test(dc)) s = 1.667;
     else s = Math.max(0.75, Math.min(3, W / BASE_W));
+    // The parents set large text for a sitter who needs it (Dadi): everything a fifth bigger.
+    if (host.large) s *= 1.2;
     var dark = host.theme ? host.theme !== 'light' : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
     root.className = (dark ? 'theme-dark' : 'theme-light') + (compact ? ' compact' : '');
     root.style.setProperty('--scale', String(s));
@@ -222,8 +224,15 @@
 
     briefing: function (d) {
       var h = topic('users', 'Sitter mode is on') + '<div class="title l">Tonight with ' + esc(d.carer) + '</div>';
+      // The house remembers its sitters: "7th evening here · knew all 3 last time".
+      var sp = d.sitter;
+      if (sp) {
+        var known = sp.last_check && sp.last_check.total ? (sp.last_check.right === sp.last_check.total ? 'knew all ' + sp.last_check.total + ' last time' : sp.last_check.right + ' of ' + sp.last_check.total + ' last time') : '';
+        h += '<p class="meta">' + [sp.label, sp.note, known].filter(Boolean).map(esc).join(' · ') + '</p>';
+      }
       var since = d.since_last_visit;
-      if (since && (since.added.length || since.removed.length)) {
+      // In large text, what's new waits for the parent page: what could save a life must fit.
+      if (since && d.text_size !== 'large' && (since.added.length || since.removed.length)) {
         var changes = since.added.map(function (a) { return a.text; }).concat(since.removed.map(function (r) { return 'No longer: ' + r.text; }));
         h += note('info', 'sparkles', 'Since your last visit', changes.slice(0, 2).join(' · '));
       }
@@ -630,6 +639,8 @@
   function render(result) {
     current = result;
     var d = result && result.structuredContent;
+    var large = !!(d && d.text_size === 'large');
+    if (large !== host.large) { host.large = large; applySurface(); }
     var root = document.getElementById('root');
     var view = (d && d.view) || 'text';
     // A new screen glides in. The live screens (Tonight, the emergency guide) refresh themselves

@@ -46,6 +46,10 @@ function seedPastEvenings(db: DB) {
     log.run(id, new Date(start.getTime() + 3.2 * 3_600_000).toISOString(), 'sleep', 'Asleep');
     if (woke) log.run(id, new Date(start.getTime() + 4.2 * 3_600_000).toISOString(), 'sleep', 'Woke up crying, back asleep after a cuddle');
   }
+  // What the parents told the house about them: Priya's rate; Dadi hears it in Hindi, in large text.
+  const sitter = db.prepare('INSERT INTO sitters (key, name, language, rate_cents, large_text, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  sitter.run('priya', 'Priya', 'en', 1600, 0, null, nowIso());
+  sitter.run('dadi', 'Dadi', 'hi-IN', null, 1, "Rahul's mother", nowIso());
 }
 
 // Demo household used for the video and for judges to try immediately.

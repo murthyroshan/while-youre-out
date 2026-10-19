@@ -79,7 +79,7 @@ test('a "just tonight" answer applies tonight and ends with the handoff', async 
   const during = await call('ask_house', { question: 'Can she stay up to finish the movie?' });
   assert.match(text(during), /just this once/);
   await call('end_handoff');
-  await call('start_handoff', { carer_name: 'Dadi' });
+  await call('start_handoff', { carer_name: 'Dadi', language: 'en' });
   const next = await call('ask_house', { question: 'Can she stay up to finish the movie?' });
   assert.doesNotMatch(text(next), /just this once/);
 });
@@ -169,7 +169,7 @@ test('starting a second handoff does not silently end the first', async () => {
   const r = await call('start_handoff', { carer_name: 'Rahul' });
   assert.equal(r.isError, true);
   assert.match(text(r), /Priya is already looking after things/);
-  const replaced = await call('start_handoff', { carer_name: 'Dadi', replace: true });
+  const replaced = await call('start_handoff', { carer_name: 'Dadi', language: 'en', replace: true });
   assert.equal(replaced.structuredContent.carer, 'Dadi');
 });
 

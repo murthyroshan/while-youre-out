@@ -3,6 +3,7 @@ import { GUEST_HTML } from './guest/page.js';
 import { beeNote, devices, houseTick, lockDoor, pushNotice, unlockDoor } from './domain/devices.js';
 import { applyLogToPlan } from './domain/plan.js';
 import { approveOrder, declineOrder, getOrder, latestOrder, OrderError, orderView } from './domain/orders.js';
+import { SitterError, sitters, updateSitter } from './domain/sitters.js';
 import { activePass, audit, auditLog, endPass, extendPass, latestPass, passByToken, passOpen, passTick, seen, type Pass } from './domain/pass.js';
 import { briefing, createQuestion } from './domain/house.js';
 import { tonightPlan } from './domain/plan.js';
@@ -317,7 +318,20 @@ export function createApp(opts: AppOptions = {}) {
         return o && (o.status === 'pending' || Date.now() - Date.parse(o.created_at) < 6 * 3600_000) ? orderView(o) : null;
       })(),
       audit: auditLog(db, 40).map((a) => ({ ...a, time: clock(a.at) })),
+      sitters: sitters(db),
     });
+  });
+
+  // What the house remembers about a sitter: a parent changes it, or has it forgotten.
+  app.post('/parent/api/sitter', (req, res) => {
+    const { k, name, ...patch } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    try {
+      res.json(updateSitter(db, name, patch));
+    } catch (e) {
+      if (e instanceof SitterError) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
   });
 
   // ---------- Guest Pass ----------

@@ -5,6 +5,7 @@ import { type DB, type Fact, type Contact, type Handoff, type Question, type Log
 import {
   classifyQuestion,
   FOOD_GUARD,
+  HEALTH_GUARD,
   MEDICINE_GUARD,
   SECRET_REFUSAL,
   RETURN_TIME_REFUSAL,
@@ -88,7 +89,7 @@ export function actionPlan(db: DB) {
 // ---------- answering the carer ----------
 
 const TOPIC_CATEGORIES: Array<[RegExp, string[]]> = [
-  [/\b(bed|bedtime|sleep|nap|bath|pyjama|pajama|stories|story|teeth|lights out|night)\b/i, ['routine']],
+  [/\b(bed|bedtime|sleep|nap|bath|pyjama|pajama|stories|story|teeth|lights out|night|stay(ing)? up|up late|late|what time|when is|when's|schedule|routine)\b/i, ['routine']],
   [/\b(tv|screen|watch|show|episode|ipad|tablet|cartoon|bluey|peppa|youtube|game)\b/i, ['screen']],
   [/\b(dog|cat|walk|pet|feed the dog|feed the cat|litter)\b/i, ['pet']],
   [/\b(friend|friends|visit|outside|park|play ?date|neighbou?r)\b/i, ['rules']],
@@ -136,6 +137,8 @@ export function answerQuestion(db: DB, question: string, role: Role = 'carer'): 
 
   const facts = visibleFacts(db, role);
   let wanted: string[] = [];
+  // A rash or a bump on the head is never judged here: what to watch for, and a parent asked.
+  if (category === 'health') return { ...base, guard: HEALTH_GUARD, suggest_ask_parent: true };
   if (category === 'food') wanted = ['allergy', 'food'];
   else if (category === 'medicine') wanted = ['medicine', 'allergy'];
   for (const [re, cats] of TOPIC_CATEGORIES) if (re.test(question)) wanted.push(...cats);
@@ -177,7 +180,7 @@ export function answerQuestion(db: DB, question: string, role: Role = 'carer'): 
     out.suggest_ask_parent = true;
   } else if (matched.length === 0) {
     out.suggest_ask_parent = true;
-  } else if (PERMISSION.test(question) && !matched.some((f) => wholeWordOverlap(f.text, question) >= 2)) {
+  } else if (PERMISSION.test(question) && !INFO.test(normalise(question)) && !matched.some((f) => wholeWordOverlap(f.text, question) >= 2)) {
     // "Can she sleep in your bed?" is about bedtime, but the routine doesn't answer it.
     out.exact = false;
     out.suggest_ask_parent = true;
@@ -192,6 +195,9 @@ const WHO_TO_CALL = /\b(who|whom)\b.{0,30}\b(call|phone|ring|contact|reach)\b|\b
 const PERMISSION =
   /\b(can|could|may|is (she|he|they) allowed|are (they|we) allowed|is it ok(ay)?|is (that|this) (ok|okay|alright|all right|fine)|would it be (ok|okay|fine)|do you think (she|he|they) can|should (i|we)|mind if)\b|\b(ok|okay|alright|fine|allowed)\s*\?\s*$/i;
 
+// "How much…", "What can…", "When does…" ask what the rule is, not whether something is allowed.
+const INFO = /^(how (much|long|many|often)|what|when|which|where|who)\b/i;
+
 function contentWords(text: string) {
   return new Set(text.toLowerCase().match(/[a-z']+/g)?.filter((w) => w.length > 2 && !STOP.has(w)) ?? []);
 }
@@ -199,7 +205,7 @@ function contentWords(text: string) {
 /** Whether a note and a question share a real word ("YouTube"), not just a topic. */
 export const sharesWords = (note: string, question: string) => wholeWordOverlap(note, question) >= 1;
 
-function wholeWordOverlap(a: string, b: string) {
+export function wholeWordOverlap(a: string, b: string) {
   const wa = contentWords(a);
   return [...contentWords(b)].filter((w) => wa.has(w)).length;
 }
@@ -212,16 +218,17 @@ function topicCategory(text: string): string | undefined {
 const KINDS: Array<[RegExp, string]> = [
   [/^(cookies?|biscuits?|cand(y|ies)|chocolates?|sweets?|desserts?|treats?|cakes?|cupcakes?|lollipops?|gummies|sugar|ice ?cream)$/, 'sweets'],
   [/^(tv|telly|shows?|episodes?|cartoons?|youtube|ipad|tablet|screens?|movies?|films?)$/, 'screen'],
-  [/^(bed|bedtime|sleep|asleep|nap|naps)$/, 'bed'],
+  [/^(bed|bedtime|sleep|asleep|nap|naps|late)$/, 'bed'],
   [/^(bath|baths|shower|bathtime)$/, 'bath'],
+  [/^(fruits?|bananas?|apples?|grapes?|berries|strawberr(y|ies)|blueberr(y|ies)|oranges?|pears?|mangos|mangoes|mango|melons?|kiwis?)$/, 'fruit'],
 ];
 // Words that say nothing about what a note is about ("eat", "kids") don't make it relevant.
 const GENERIC = new Set(['eat', 'eats', 'eating', 'ate', 'give', 'gave', 'kids', 'kid', 'child', 'children', 'some', 'tonight', 'time']);
-function topicWords(text: string) {
+export function topicWords(text: string) {
   const out = new Set<string>();
   for (const w of contentWords(text)) if (!GENERIC.has(w)) out.add(KINDS.find(([re]) => re.test(w))?.[1] ?? w.replace(/s$/, ''));
   if (/\bice cream\b/i.test(text)) out.add('sweets');
-  if (/\b(lights out|pyjamas|pajamas|bedtime stor(y|ies)|tuck(ed)? in)\b/i.test(text)) out.add('bed');
+  if (/\b(lights out|pyjamas|pajamas|bedtime stor(y|ies)|tuck(ed)? in|stay(ing)? up|up late)\b/i.test(text)) out.add('bed');
   return out;
 }
 
@@ -230,7 +237,7 @@ function rank(f: Fact) {
 }
 
 const STOP = new Set(
-  'a an the is are can could should may might i we she he it to of in on for and or do does what when where how my her his this that be have has with at me you your our their them they allowed okay ok tonight one more another some any little bit just please really very much also too get got let lets let\'s if so then now still maya won\'t wont don\'t dont can\'t cant isn\'t doesn\'t didn\'t wouldn\'t shouldn\'t will would stop keep keeps going want wants need needs make'.split(' '),
+  'a an the is are can could should may might i we she he it to of in on for and or do does what when where how my her his this that be have has with at me you your our their them they allowed okay ok tonight one more another some any little bit just please really very much also too get got let lets let\'s if so then now still maya won\'t wont don\'t dont can\'t cant isn\'t doesn\'t didn\'t wouldn\'t shouldn\'t will would stop keep keeps going want wants need needs make until'.split(' '),
 );
 
 function keywordMatch(facts: Fact[], q: string, minScore = 1): Fact[] {
@@ -330,8 +337,9 @@ const COMMON_ALLERGENS = ['peanut', 'tree nut', 'nut', 'egg', 'milk', 'dairy', '
 
 // Everyday products that contain an allergen without naming it.
 const ALLERGEN_SYNONYMS: Record<string, string[]> = {
-  peanut: ['snickers', "reese's", 'reeses', 'peanut butter', 'pb&j', 'pbj', 'satay', 'nutter butter'],
-  nut: ['nutella', 'almond', 'almonds', 'cashew', 'cashews', 'hazelnut', 'hazelnuts', 'walnut', 'walnuts', 'pecan', 'pecans', 'pistachio', 'pistachios', 'praline', 'marzipan'],
+  // Dishes usually made with peanuts or nuts count too: "she ate some pad thai" is an exposure.
+  peanut: ['snickers', "reese's", 'reeses', 'peanut butter', 'pb&j', 'pbj', 'satay', 'nutter butter', 'pad thai', 'trail mix', 'kung pao', 'peanut sauce', 'groundnut', 'groundnuts', 'brittle'],
+  nut: ['nutella', 'almond', 'almonds', 'cashew', 'cashews', 'hazelnut', 'hazelnuts', 'walnut', 'walnuts', 'pecan', 'pecans', 'pistachio', 'pistachios', 'praline', 'marzipan', 'pesto', 'baklava', 'nougat', 'macaron', 'macarons', 'frangipane', 'trail mix'],
   'tree nut': ['nutella', 'almond', 'cashew', 'hazelnut', 'walnut', 'pecan', 'pistachio', 'marzipan'],
   egg: ['mayo', 'mayonnaise', 'meringue', 'custard'],
   milk: ['cheese', 'butter', 'yogurt', 'yoghurt', 'ice cream', 'cream'],
@@ -372,7 +380,7 @@ export function eveningLog(db: DB, handoffId?: number): LogEvent[] {
 // ---------- asking a parent ----------
 
 export function urgencyFor(category: QuestionCategory): Question['urgency'] {
-  if (category === 'medicine' || category === 'food' || category === 'emergency' || category === 'safety_info') return 'urgent';
+  if (category === 'medicine' || category === 'food' || category === 'health' || category === 'emergency' || category === 'safety_info') return 'urgent';
   return 'normal';
 }
 

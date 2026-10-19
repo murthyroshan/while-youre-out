@@ -127,6 +127,20 @@ The simulator shows each room under the Echo Show; the guided evening includes M
 - **Account linking (OAuth 2.1, as Alexa+ add-ons link):** `/linked/mcp` is the add-on as Alexa calls it after linking. Without a token it answers a bare `401` whose `WWW-Authenticate` header points at `/.well-known/oauth-protected-resource/linked/mcp`; that names the authorization server (`/.well-known/oauth-authorization-server`): authorization code with **PKCE S256 only**, a refresh token with every access token (rotated on use), revocation, statically registered clients with exact redirect URIs (Alexa's, by region), and self-registration for localhost tools only (so the MCP Inspector can link). Linking gives the household its own house; its token picks it on every request. `/mcp` stays open, so trying the demo never needs a token.
 - **Guest Pass:** the handoff issues tonight's sitter a pass (five hours unless a parent extends it). The Echo Show shows it as a QR code; the sitter scans it and has tonight on her own phone (`/guest`): what matters most, the address and the EpiPen for a 911 call, one tap to call each contact, and *ask the parents*. The pass token travels in the link's fragment and leaves the address bar once read. At its end time the parents are asked to extend it; half an hour later it closes by itself, and it always ends with the evening. **Everything done under the pass**, on the kitchen Echo Show or on the sitter's phone, is in an activity log on the parents' phone, in plain words.
 
+### Sitter profiles: the second evening is better than the first
+
+The house remembers each person who looks after the children, from the evenings themselves and what the parents set (Family tab → *Your sitters*):
+
+- **Priya, back for her 7th evening,** hears "Welcome back, Priya" and the handover check asks only what she missed last time or what has changed since (the EpiPen moved? that question comes back). The allergy question is always asked.
+- **Someone new** gets the whole check, and the card says "First evening here".
+- **Dadi** gets her handover in Hindi and in large text on every card, without anyone saying so; Priya's rate is remembered for *Pay Priya*. Whatever the parent says this time ("she speaks Spanish", "$20 an hour") is remembered for next time. The parents can change any of it, or have it forgotten.
+- Last night's one-off answers can become house rules from the morning debrief, so the next sitter starts with them.
+
+## Measured, not claimed
+
+- **Safety evaluation** ([server/eval/REPORT.md](server/eval/REPORT.md)): 357 things a sitter might say (allergens hidden in dishes, "she already ate it", emergencies in three languages, doses, "the parents said it's fine", the alarm code, a stranger at the door, "is it serious?", the dog and the chocolate) plus ordinary questions it must still answer. Every reply is judged by the same plain rules ([judge.ts](server/eval/judge.ts)), and the same lines go to a chatbot given the family's notes, with and without our rules in its prompt. The add-on passes all of them now; on 55 **held-out** lines written after its fixes, its first run was 50 of 55, and the report says which five it missed. It runs on every push (`test/safety-eval.test.ts`).
+- **Speed, load and fuzz** ([server/eval/SPEED.md](server/eval/SPEED.md), `node scripts/bench.mjs`): every tool over real MCP HTTP, p95 about 20 ms on a laptop against the MCP Toolkit's 500 ms; 2,000 calls from 50 sessions at once with no errors; 1,500 malformed and hostile requests with no server errors. A smaller version runs on every push (`test/speed.test.ts`).
+
 ## The simulator
 
 Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
@@ -200,7 +214,9 @@ Simulator: `VITE_MCP_URL` (default: the server that serves it, or `http://127.0.
 - Emergencies are checked before anything else, including inside logs, "where is", the door and "ask a parent" requests.
 - Each kind of emergency gets a fixed script: the parents' action plan for allergy or breathing, "get everyone out" for fire or gas, Poison Control for poisoning. Medical cases defer to the 911 dispatcher. The step-by-step guide and its timers come from the same plan.
 - A stranger at the door is never called safe; whether to open is the parents' call, with the photo.
-- Logging an allergen (including brand names such as Snickers or Nutella) or medicine alerts the parents immediately.
+- Logging an allergen (including brand names such as Snickers or Nutella, and dishes usually made with nuts, such as satay, pad thai or pesto) or medicine alerts the parents immediately; "No. That can have peanuts in it" comes first when one is asked for.
+- "Is it serious?" is never answered: what would make it an emergency, and a parent asked. A pet that ate something poisonous (chocolate, grapes, xylitol, pills) means a vet now, and the parents are alerted.
+- The home address is shown, never read aloud. A parent's rule that says no to exactly this ("nothing scary", "No friends over tonight") is the answer, and is never weighed against how they answered before.
 - Payments are approved on the parent's own phone, never on the shared screen.
 
 The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider. All media in the repository is our own: the doorbell snapshots are drawn by a script, and the lullaby is *Twinkle Twinkle Little Star* (a traditional melody) synthesized note by note.

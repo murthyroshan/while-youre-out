@@ -4,6 +4,7 @@
 import type { DB } from '../db.js';
 import { activeHandoff, contacts, events, visibleFacts, whereIs } from './house.js';
 import { normalise } from './safety.js';
+import { pastChecks } from './sitters.js';
 
 export interface TeachbackQuestion {
   id: 'allergy' | 'epipen' | 'first_call';
@@ -19,6 +20,8 @@ export interface TeachbackState {
   index: number;
   results: Array<{ id: string; correct: boolean | null; given: string }>;
   done: boolean;
+  /** Questions left out because this sitter answered them right last time and nothing changed. */
+  known?: number;
 }
 
 const ALLERGENS = ['peanut', 'nut', 'egg', 'milk', 'dairy', 'wheat', 'gluten', 'soy', 'sesame', 'fish', 'shellfish', 'shrimp', 'bee', 'penicillin', 'latex'];
@@ -84,7 +87,7 @@ export function summary(s: TeachbackState) {
 }
 
 export type TeachbackStep =
-  | { kind: 'question'; question: string; number: number; total: number; feedback?: Feedback }
+  | { kind: 'question'; question: string; number: number; total: number; known?: number; feedback?: Feedback }
   | { kind: 'done'; feedback?: Feedback; summary: ReturnType<typeof summary> }
   | { kind: 'unavailable'; reason: string };
 type Feedback = { correct: boolean | null; answer: string };
@@ -95,11 +98,20 @@ export function teachback(db: DB, input: { answer?: string; skip?: boolean; rest
   if (!h) return { kind: 'unavailable', reason: 'There is no handoff in progress.' };
   let s = read(h.teachback);
   if (!s || input.restart) {
-    const questions = buildQuestions(db);
-    if (!questions.length) return { kind: 'unavailable', reason: "The house manual doesn't have anything to check yet." };
-    s = { questions, index: 0, results: [], done: false };
+    const all = buildQuestions(db);
+    if (!all.length) return { kind: 'unavailable', reason: "The house manual doesn't have anything to check yet." };
+    // A sitter who got a question right the last time it was asked isn't asked it again, unless
+    // the answer has changed since. The allergy is always asked: it's the one that can't be wrong.
+    const before = input.restart ? [] : pastChecks(db, h.carer_name, h.id);
+    const knew = (q: TeachbackQuestion) => {
+      const last = before.find((b) => b.results.some((r) => r.id === q.id));
+      return Boolean(last?.results.some((r) => r.id === q.id && r.correct) && last.questions.find((b) => b.id === q.id)?.answer === q.answer);
+    };
+    const picked = all.filter((q) => q.id === 'allergy' || !knew(q));
+    const questions = picked.length ? picked : all;
+    s = { questions, index: 0, results: [], done: false, ...(questions.length < all.length ? { known: all.length - questions.length } : {}) };
     save(db, h.id, s);
-    return { kind: 'question', question: questions[0].ask, number: 1, total: questions.length };
+    return { kind: 'question', question: questions[0].ask, number: 1, total: questions.length, ...(s.known ? { known: s.known } : {}) };
   }
   if (s.done) return { kind: 'done', summary: summary(s) };
 

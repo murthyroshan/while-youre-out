@@ -5,3 +5,4 @@ node_modules/
 .env
 dist/
 tmp/
+server/eval/.cache-*.json

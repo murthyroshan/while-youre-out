@@ -77,6 +77,10 @@ await shot('Goodnight message', 'play_message', {});
 await clock('23:00');
 await shot('The evening · summary', 'end_handoff');
 await shot('Pay the sitter', 'pay_sitter');
+// Another evening: Dadi, whom the house remembers as reading better in large text (and in Hindi).
+await clock('18:00');
+await shot('Handover · Dadi, remembered: large text', 'start_handoff', { carer_name: 'Dadi', language: 'en' });
+console.log(`PARENT ${house}/parent?k=${key}`);
 
 // The card itself, fetched the way a host does: the ui:// resource the tools point to.
 const { tools } = await client.listTools();

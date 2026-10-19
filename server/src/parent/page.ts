@@ -144,6 +144,14 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   input.sw:checked::before { transform: translateX(20px); }
   .sw-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 16px; cursor: pointer; }
   .sw-row:first-child { border-top: 0; }
+  .sitter { border-top: 1px solid var(--line); padding: 12px 0 4px; }
+  .sitter:first-child { border-top: 0; }
+  .sitter summary { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; list-style: none; }
+  .sitter summary::-webkit-details-marker { display: none; }
+  .sitter summary b { font-size: 17px; }
+  .sitter summary small { display: block; color: var(--text2); font-size: 13px; font-weight: 500; }
+  .sitter .sv { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 750; color: #fff; flex: none; }
+  .sitter .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
   .switch { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 15px; }
   .switch input { width: 20px; height: 20px; accent-color: var(--mint); }
 
@@ -461,6 +469,11 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     </section>
   </div>
   <div class="tabpane" data-tab="family">
+    <section class="card" id="sitters" hidden>
+      <strong>Your sitters</strong>
+      <p class="muted">Alexa remembers each person who looks after the kids: their language, their rate, and what they already know. Someone back again gets a shorter handover check; someone new gets all of it.</p>
+      <div id="slist"></div>
+    </section>
     <section class="card" id="family">
       <strong>Your family</strong>
       <p class="muted">Who Alexa looks after, who to call and in what order, and the address read out in an emergency. Allergies are saved in your words and checked before every food answer.</p>
@@ -593,7 +606,45 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     renderFeed(s);
     renderPass(s);
     renderOrder(s);
+    renderSitters(s.sitters || []);
   }
+
+  // ---------- Sitter profiles: what the house remembers about each person, editable here ----------
+  var lastSitters = null;
+  var LANGS = [['en', 'English'], ['hi-IN', 'Hindi'], ['es-US', 'Spanish'], ['ta-IN', 'Tamil'], ['te-IN', 'Telugu'], ['bn-IN', 'Bengali']];
+  function renderSitters(list) {
+    var box = document.getElementById('slist');
+    // Never redraw under someone typing.
+    if (box.contains(document.activeElement)) return;
+    var k2 = JSON.stringify(list);
+    if (k2 === lastSitters) return;
+    lastSitters = k2;
+    document.getElementById('sitters').hidden = !list.length;
+    box.innerHTML = list.map(function (p, i) {
+      var facts = [p.evenings ? p.evenings + ' evening' + (p.evenings > 1 ? 's' : '') : 'Not here yet', p.last_visit ? 'last ' + new Date(p.last_visit).toLocaleDateString([], { month: 'short', day: 'numeric' }) : '',
+        p.last_check ? 'handover check ' + p.last_check.right + '/' + p.last_check.total : '', p.asked ? p.asked + ' question' + (p.asked > 1 ? 's' : '') + ' asked' : ''].filter(Boolean).join(' · ');
+      var hueN = 0; for (var c = 0; c < p.name.length; c++) hueN = (hueN * 31 + p.name.charCodeAt(c)) % 360;
+      return '<details class="sitter" data-sitter="' + esc(p.name) + '"><summary><span class="sv" style="background:hsl(' + hueN + ' 45% 42%)">' + esc(p.name.charAt(0)) + '</span><span><b>' + esc(p.name) + '</b>' + (p.note ? ' · ' + esc(p.note) : '') + '<small>' + esc(facts) + '</small></span></summary>' +
+        '<div class="two"><label class="field">Language<select data-f="language">' + LANGS.map(function (l) { return '<option value="' + l[0] + '"' + ((p.language || 'en') === l[0] ? ' selected' : '') + '>' + l[1] + '</option>'; }).join('') + '</select></label>' +
+        '<label class="field">Hourly rate ($)<input data-f="rate" type="number" min="0" max="500" step="0.5" inputmode="decimal" value="' + (p.rate_cents == null ? '' : p.rate_cents / 100) + '" placeholder="16"></label></div>' +
+        '<label class="field">Note<input data-f="note" maxlength="120" value="' + esc(p.note || '') + '" placeholder="e.g. Rahul’s mother"></label>' +
+        '<label class="sw-row"><span>Large text on the Echo Show</span><input type="checkbox" role="switch" class="sw" data-f="large_text"' + (p.large_text ? ' checked' : '') + '></label>' +
+        '<p class="ferr" aria-live="polite"></p><div class="pbtns"><button class="ok" data-sitter-save>Save</button><button data-sitter-forget>Forget these settings</button></div></details>';
+    }).join('');
+  }
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-sitter-save], button[data-sitter-forget]');
+    if (!b) return;
+    var d = b.closest('[data-sitter]');
+    var f = function (n) { return d.querySelector('[data-f="' + n + '"]'); };
+    var body = b.hasAttribute('data-sitter-forget') ? { name: d.dataset.sitter, forget: true }
+      : { name: d.dataset.sitter, language: f('language').value, rate: f('rate').value === '' ? null : Number(f('rate').value), note: f('note').value, large_text: f('large_text').checked };
+    b.disabled = true;
+    var r = await post('/parent/api/sitter', body).catch(function () { return null; });
+    b.disabled = false;
+    if (r && r.ok) { toast(body.forget ? 'Forgotten ✓' : 'Saved. Alexa will remember next time ✓'); lastSitters = null; b.blur(); load(); }
+    else { var j = r ? await r.json().catch(function () { return {}; }) : {}; d.querySelector('.ferr').textContent = j.error || 'Could not save. Try again.'; }
+  });
 
   // ---------- Dinner the sitter wants to order: approve it here ----------
   var lastOrderKey = null;

@@ -10,8 +10,8 @@ import { audit, endPass, issuePass } from '../domain/pass.js';
 import { findSafeItem, getOrder, inSentence as dishInSentence, OrderError, orderView, requestOrder, safeMenu } from '../domain/orders.js';
 import { devices, houseTick, lightsOut, porchLightOn, takeDeviceNotices, takeUrgentNotices, tvStarted, WATCHING, screenLimit } from '../domain/devices.js';
 import { SubscribeRequestSchema, UnsubscribeRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import { FOOD_GUARD, FOOD_GUARD_SPOKEN, MEDICINE_GUARD, MEDICINE_GUARD_SPOKEN, SPOKEN_WORDS, firstSentence, fitSpoken, isEmergency, mentionsMedicine, wordCount } from '../domain/safety.js';
-import { activeHandoff, allergenMentions, answerQuestion, familyNames, attachTask, briefing, contacts, createQuestion, currentContactFor, endHandoff, escalateQuestion, eveningLog, events, expireQuestion, getQuestion, HandoffInProgressError, householdTz, logEvent, parentNames, type Role, sharesWords, startHandoff, visibleFacts, whereIs } from '../domain/house.js';
+import { FOOD_GUARD, FOOD_GUARD_SPOKEN, HEALTH_GUARD, HEALTH_GUARD_SPOKEN, MEDICINE_GUARD, MEDICINE_GUARD_SPOKEN, SPOKEN_WORDS, firstSentence, fitSpoken, isEmergency, mentionsMedicine, petPoison, petToxicAsk, wordCount } from '../domain/safety.js';
+import { activeHandoff, allergenMentions, answerQuestion, familyNames, attachTask, briefing, contacts, createQuestion, currentContactFor, endHandoff, escalateQuestion, eveningLog, events, expireQuestion, getQuestion, HandoffInProgressError, household, householdTz, logEvent, parentNames, type Role, sharesWords, startHandoff, topicWords, visibleFacts, whereIs, wholeWordOverlap } from '../domain/house.js';
 import { startEmergency } from '../domain/emergency.js';
 import { homeScreen, homeSentence } from '../domain/home.js';
 import { doorCheck, getDoorEvent } from '../domain/door.js';
@@ -22,11 +22,12 @@ import { importNote, ImportError } from '../domain/houseBrain.js';
 import { applyLogToPlan, inSentence, nextItem, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
 import { SHOP_ANSWERS, shoppingList, shoppingQuestion, suppliesMentioned } from '../domain/shopping.js';
 import { teachback } from '../domain/teachback.js';
+import { eveningsLabel, largeTextTonight, rememberSitter, sitterProfile } from '../domain/sitters.js';
 import { busyUntil, shadowSuggestion } from '../domain/shadow.js';
 import { buildDebrief, sinceLastVisit } from '../domain/debrief.js';
 import { englishOf, fixedTranslation, sentences, translateAll, languageCode, LANGUAGES, translateOne } from '../domain/translate.js';
 import type { Handoff, Question } from '../db.js';
-import { formatTime, localTime, now } from '../clock.js';
+import { formatTime, localTime, now, nowIso } from '../clock.js';
 import { AiUnavailableError, type AiClient } from '../ai/gemini.js';
 import QRCode from 'qrcode';
 import { cardHtml, CARD_MIME, CARD_URI } from './card.js';
@@ -58,7 +59,8 @@ function plain(view: string, data: Record<string, unknown>, text: string): CallT
  */
 const VOICE_ROLE: Role = 'carer';
 const CAPABILITIES = /^(what (can|do) you do|what are you (for|able to do)|how (can|do) you help( me)?|what can you help (me )?with|what can i ask( you)?|help)\??!?$/i;
-const INGESTED = /\b(ate|eaten|has eaten|had|has had|swallowed|drank|took a bite|bit into|tasted|licked|chewed)\b/i;
+const ADDRESS = /\b(what'?s|what is|tell me|give me|read me|say)\b.{0,20}\baddress\b|\baddress (here|of (this|the) (house|home|place))\b|\bwhere do (we|they|you|the family) live\b/i;
+const INGESTED = /\b(ate|eaten|has eaten|had|has had|swallowed|drank|took a bite|bit into|tasted|licked|chewed|(gave|fed|let) (her|him|them|the kids?|maya)( have)?)\b/i;
 /** Upper bound for free-text inputs, so one call can't store megabytes. */
 const MAX_TEXT = 1000;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
@@ -130,6 +132,15 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     const who = currentContactFor(db, q);
     return `${allergy ? `${allergy.author} said: "${allergy.text}"` : `Allergy on file: ${allergens.join(', ')}.`} Watch for swelling, hives, vomiting or trouble breathing. If you see any of them, say "emergency". I've alerted ${who?.name ?? 'the parents'}.`;
   };
+  /** "Bruno ate a chocolate bar": a vet, now, and the parents alerted. */
+  const petAlert = (what: string, substance: string) => {
+    const pets = (db.prepare("SELECT name FROM members WHERE kind = 'pet' ORDER BY id").all() as Array<{ name: string }>).map((p) => p.name);
+    const pet = pets.find((n) => new RegExp(`\\b${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(what)) ?? pets[0] ?? 'the pet';
+    const carer = activeHandoff(db)?.carer_name ?? 'The carer';
+    const q = createQuestion(db, `Urgent: ${carer} said "${what}"`, null, 'urgent');
+    const who = currentContactFor(db, q);
+    return `${substance.charAt(0).toUpperCase()}${substance.slice(1)} can poison pets. Call a vet or an animal poison line now and say how much ${pet} ate. I've alerted ${who?.name ?? 'the parents'}.`;
+  };
   const server = new McpServer(
     {
       name: 'while-youre-out',
@@ -196,6 +207,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         }
       }
       if (r && !r.isError) recordCall(name, r);
+      // A sitter who reads better with large text (set by the parents) gets it on every card.
+      if (r?.structuredContent && !r.isError && largeTextTonight(db)) r = { ...r, structuredContent: { ...r.structuredContent, text_size: 'large' } };
       return status && r && !r.isError ? { ...r, _meta: { ...r._meta, ui: { ...r._meta?.ui, ...status } } } : r;
     };
     const wrapped =
@@ -281,8 +294,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         'Call when a parent hands the home over to a carer ("Priya is babysitting tonight"). Switches the device into carer mode and returns tonight\'s briefing to read aloud.',
       inputSchema: {
         carer_name: z.string().trim().min(1).max(60).optional().describe("Name of the person taking over. Leave out if the parent didn't say; the device will ask."),
-        language: z.string().max(20).default('en').describe('Language the carer prefers, as a BCP-47 code such as en, hi, es'),
-        hourly_rate: z.number().min(0).max(500).optional().describe("The sitter's hourly rate in dollars, if the parent said it"),
+        language: z.string().max(20).optional().describe("Language the carer prefers, as a BCP-47 code such as en, hi, es. Leave out if the parent didn't say: the house remembers each sitter's language"),
+        hourly_rate: z.number().min(0).max(500).optional().describe("The sitter's hourly rate in dollars, if the parent said it. Leave out otherwise: the house remembers it"),
         replace: z.boolean().default(false).describe('Set only after the parent confirms ending the handoff already in progress'),
       },
       _meta: ui,
@@ -300,9 +313,12 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         language = asked.language ?? language;
         rate = asked.hourly_rate ?? rate;
       }
+      // What the parents said this time is remembered; what they didn't say comes from last time.
+      const known = sitterProfile(db, carer_name);
+      const said = { language: language ?? null, rate_cents: rate === undefined ? null : Math.round(rate * 100) };
       let h;
       try {
-        h = startHandoff(db, carer_name, language, { replace, rateCents: rate === undefined ? null : Math.round(rate * 100) });
+        h = startHandoff(db, carer_name, language ?? known.language ?? 'en', { replace, rateCents: said.rate_cents ?? known.rate_cents });
       } catch (e) {
         if (e instanceof HandoffInProgressError) {
           return {
@@ -313,13 +329,15 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         }
         throw e;
       }
+      rememberSitter(db, h.carer_name, said);
+      const profile = sitterProfile(db, h.carer_name, h.id);
       const b = briefing(db);
       const plan = tonightPlan(db, householdTz(db), h);
       // A carer who has been here before sees what changed since their last visit (on the card).
       const since = sinceLastVisit(db, h.carer_name, h.id);
       // Spoken: only what could save a life. Tonight's plan, what changed and who to call are on screen.
       const text = fitSpoken([
-        since ? `Welcome back, ${h.carer_name}.` : `Handoff started for ${h.carer_name}.`,
+        profile.evenings ? `Welcome back, ${h.carer_name}.` : `Handoff started for ${h.carer_name}.`,
         b.must_know.length ? `Most important: ${b.must_know.slice(0, 2).map(firstSentence).join(' ')}` : '',
         b.epipen ? `The EpiPen: ${b.epipen}` : '',
         b.first_contact ? `${b.first_contact} is first to call.` : '',
@@ -333,7 +351,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         join_url: joinUrl,
         qr_svg: await QRCode.toString(joinUrl, { type: 'svg', margin: 1, color: { dark: '#14181E', light: '#ffffff' } }),
       };
-      return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since, pass, ...(parentPage ? { parent_page: parentPage } : {}) }, text);
+      const sitter = { evenings: profile.evenings, label: eveningsLabel(profile), last_check: profile.last_check, note: profile.note, large_text: profile.large_text };
+      return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since, sitter, pass, ...(parentPage ? { parent_page: parentPage } : {}) }, text);
     },
   );
 
@@ -408,15 +427,17 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       }
       const data = await paymentData(p);
       const message = `Approve paying ${p.carer} ${data.amount} for tonight (${data.hours} at ${data.rate} an hour) on your phone.`;
-      // The device hears when it's done: notifications/elicitation/complete.
-      const done = server.server.createElicitationCompletionNotifier(p.elicitation_id);
+      // A device that can open links hears when it's done (notifications/elicitation/complete).
+      // One that can't still shows the amount; the parent pays from the parent page.
+      const canLink = Boolean(server.server.getClientCapabilities()?.elicitation?.url);
+      const done = canLink ? server.server.createElicitationCompletionNotifier(p.elicitation_id) : async () => {};
       const onPaid = (paid: Payment) => {
         if (paid.id !== p.id) return;
         events.off('payment_paid', onPaid);
         void done().catch(() => {});
       };
-      events.on('payment_paid', onPaid);
-      if (server.server.getClientCapabilities()?.elicitation?.url) {
+      if (canLink) events.on('payment_paid', onPaid);
+      if (canLink) {
         try {
           const r = await server.server.elicitInput({ mode: 'url', message, url: data.url, elicitationId: p.elicitation_id });
           if (r.action !== 'accept') {
@@ -565,7 +586,12 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
               : `You got ${s.right} out of ${s.total} right${s.skipped ? ` and skipped ${s.skipped}` : ''}. I've shown the correct answers, and the parents can see the result.`;
         return localized('teachback', { ...step, carer: activeHandoff(db)?.carer_name }, [said, end].filter(Boolean).join(' '));
       }
-      const intro = step.number === 1 && !fb ? `Quick check before the parents leave, ${step.total} questions. ` : '';
+      const intro =
+        step.number === 1 && !fb
+          ? step.known
+            ? `Quick check, ${plural(step.total, 'question')}: you knew the rest last time. `
+            : `Quick check before the parents leave, ${plural(step.total, 'question')}. `
+          : '';
       return localized('teachback', { ...step, carer: activeHandoff(db)?.carer_name }, `${said} ${intro}${step.question}`.trim());
     },
   );
@@ -718,6 +744,29 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const where = /^(?:where(?:'s| is| are| do i find| can i find| do they keep)|find)\s+(?:the |her |his |my |their |maya'?s )?(.+?)\??$/i.exec(question.trim());
       const place = where && !isEmergency(question, names()) ? whereIs(db, where[1]) : null;
       if (place) return localized('location', { ...place, photo_url: abs(place.photo_url) }, `${place.item}: ${place.description}`);
+      // A pet that got into something poisonous: before the child's rules, which aren't about the pet.
+      const toxic = petPoison(question, names());
+      if (toxic) {
+        const alert = petAlert(question, toxic);
+        return localized('answer', { category: 'pet_safety', facts: [], guard: null, suggest_ask_parent: false, pet_alert: alert }, alert);
+      }
+      const forPet = petToxicAsk(question, names());
+      if (forPet) {
+        return localized(
+          'answer',
+          { category: 'pet_safety', facts: [], guard: null, suggest_ask_parent: true },
+          `No. ${forPet.charAt(0).toUpperCase()}${forPet.slice(1)} can poison pets. I can ask the parents what's okay.`,
+        );
+      }
+      // The home address is shown, never read aloud (Alexa+ policy: no private details by voice).
+      if (ADDRESS.test(question)) {
+        const address = household(db)?.address;
+        return plain(
+          'answer',
+          { category: 'general', guard: null, exact: Boolean(address), suggest_ask_parent: !address, facts: address ? [{ text: address, said_by: 'The family', source: 'household', when: nowIso(), category: 'house', risk: 'normal' }] : [] },
+          address ? "It's on the screen. I don't read the home address out loud." : "The parents haven't added the address. I can ask them.",
+        );
+      }
       if (isEmergency(said, names()) || isEmergency(question, names())) {
         return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
@@ -734,8 +783,18 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const facts = a.facts.map((f) =>
         f.source === 'parent_answer' ? `Earlier ${f.said_by} answered this. ${f.text}` : f.source === 'contacts' ? f.text : `${f.said_by} said: "${f.text}"`,
       );
+      // A note about what was asked, counting kinds of thing ("a cookie" is about "No sweets after 6 pm").
+      const asked = topicWords(question);
+      const about = (text: string) => sharesWords(text, question) || [...topicWords(text)].some((w) => asked.has(w));
+      // A parent's rule that says no to exactly this ("nothing scary", "No friends over tonight") is
+      // the answer, even when it doesn't word the question: it's never weighed against past evenings.
+      const forbids = (text: string) =>
+        [...text.matchAll(/\b(?:no|not|nothing|never|don'?t)\s+([a-z']+)(?:\s+([a-z']+))?/gi)].some((m) =>
+          [m[1], m[2]].some((w) => w && [...topicWords(w)].some((t) => asked.has(t))),
+        );
+      const ruleAt = a.category === 'general' ? a.facts.findIndex((f) => f.source !== 'contacts' && forbids(f.text)) : -1;
       // Shadow Parent: on low-risk questions the manual doesn't settle, say how the parents usually answer.
-      const shadow = a.suggest_ask_parent && !a.guard ? shadowSuggestion(db, question) : null;
+      const shadow = a.suggest_ask_parent && !a.guard && ruleAt < 0 ? shadowSuggestion(db, question) : null;
       const busy = busyUntil(db);
       // Spoken: the best answer in the parents' words, then what must always be said. A note that only
       // comes close is read out if it shares a word with the question ("YouTube"); otherwise ("Can she
@@ -745,26 +804,44 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         ? tonightPlan(db, householdTz(db)).items.find((i) => i.key === 'bedtime')
         : undefined;
       const tonight = moved ? [`Tonight, bedtime is ${moved.time}; the late nap moved it.`] : [];
-      const closeAt = a.exact ? -1 : a.facts.findIndex((f) => sharesWords(f.text, question));
+      const closeAt = a.exact ? -1 : ruleAt >= 0 ? ruleAt : a.facts.findIndex((f) => sharesWords(f.text, question));
       const close = closeAt >= 0;
+      const ruled = ruleAt >= 0;
       // How the parents usually answer says it better than "not exactly".
-      const lead = a.exact || !a.facts.length || (shadow && !close) ? [] : [close ? "The parents haven't said exactly. Closest:" : "The parents haven't said exactly; their closest notes are on screen."];
+      const lead = a.exact || ruled || !a.facts.length || (shadow && !close) ? [] : [close ? "The parents haven't said exactly. Closest:" : "The parents haven't said exactly; their closest notes are on screen."];
       const offer = shadow || a.guard ? null : !a.facts.length ? "The parents haven't covered this. I can ask them." : !a.exact ? 'I can ask them.' : null;
       const after = [
-        a.guard === FOOD_GUARD ? FOOD_GUARD_SPOKEN : a.guard === MEDICINE_GUARD ? MEDICINE_GUARD_SPOKEN : a.guard,
+        a.guard === FOOD_GUARD ? FOOD_GUARD_SPOKEN : a.guard === MEDICINE_GUARD ? MEDICINE_GUARD_SPOKEN : a.guard === HEALTH_GUARD ? HEALTH_GUARD_SPOKEN : a.guard,
         shadow?.message,
         offer,
         busy && a.suggest_ask_parent ? `The parents asked for urgent questions only until ${clockTime(busy)}.` : null,
       ].filter((l): l is string => Boolean(l));
       // "What's for dinner?" is answered by the note that names it. The allergy still comes first,
       // but as its one key sentence, so the actual answer fits in what is said.
-      const named = a.exact && a.category === 'food' ? a.facts.findIndex((f) => f.risk !== 'safety' && sharesWords(f.text, question)) : -1;
+      // "If she won't eat dinner, …" is the answer to a refusal, not to "what's for dinner?".
+      const NOT = /\b(won'?t|doesn'?t|don'?t|isn'?t|not|can'?t|refuses?)\b/i;
+      const condition = (text: string) => /^if\b[^,]*/i.exec(text)?.[0];
+      const fit = (text: string) => {
+        const c = condition(text);
+        // "What time is dinner?" is answered by the note with a time in it.
+        const timed = /\b(what time|when)\b/i.test(question) && /\b\d{1,2}:\d{2}\b|\b\d{1,2}\s*(am|pm)\b|\bat \d{1,2}\b/i.test(text) ? 2 : 0;
+        return [...topicWords(text)].filter((w) => asked.has(w)).length + wholeWordOverlap(text, question) + timed - (c && NOT.test(c) !== NOT.test(question) ? 3 : 0);
+      };
+      const named =
+        a.exact && a.category === 'food'
+          ? a.facts.reduce((best, f, i) => (f.risk !== 'safety' && about(f.text) && (best < 0 || fit(f.text) > fit(a.facts[best].text)) ? i : best), -1)
+          : -1;
       const safety = a.facts.find((f) => f.risk === 'safety');
+      // "Can she have satay?": it can have the very thing she's allergic to, so that's said first, plainly.
+      const inIt = a.category === 'food' ? allergenMentions(db, question) : [];
+      const warn = inIt.length ? [`No. That can have ${inIt.map((x) => (/(nut|egg|peanut)$/.test(x) ? `${x}s` : x)).join(' or ')} in it.`] : [];
       const pool =
-        named >= 0 && safety
-          ? [firstSentence(safety.text), `${a.facts[named].said_by} said: "${firstSentence(a.facts[named].text)}"`]
-          : a.exact ? facts : close ? [facts[closeAt]] : [];
-      const spoken = fitSpoken(pool, SPOKEN_WORDS - wordCount([...tonight, ...lead, ...after].join(' ')));
+        warn.length && safety
+          ? [firstSentence(safety.text)]
+          : named >= 0 && safety
+            ? [firstSentence(safety.text), `${a.facts[named].said_by} said: "${firstSentence(a.facts[named].text)}"`]
+            : a.exact ? facts : close ? [facts[closeAt]] : [];
+      const spoken = [...warn, ...fitSpoken(pool, SPOKEN_WORDS - wordCount([...tonight, ...warn, ...lead, ...after].join(' ')))];
       return localized('answer', { ...a, shadow, busy_until: busy ? clockTime(busy) : null, tonight_bedtime: moved?.time ?? null }, [...tonight, ...lead, ...spoken, ...after].join(' '));
     }),
   );
@@ -807,6 +884,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       }
       const ev = logEvent(db, text !== said ? `${said} (${text})` : said, kind);
       // Logging must never bypass the safety checks the carer would get by asking.
+      const toxic = petPoison(text, names());
+      if (toxic) {
+        const alert = petAlert(text, toxic);
+        return localized('logged', { event: ev, pet_alert: alert }, alert);
+      }
       if (isEmergency(text, names()) || isEmergency(said, names())) {
         return plain('logged', { event: ev, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
       }
