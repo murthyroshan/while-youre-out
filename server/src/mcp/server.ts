@@ -270,8 +270,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     if (subscribed.has(TONIGHT)) void server.server.sendResourceUpdated({ uri: TONIGHT }).catch(() => {});
   };
   for (const e of ['plan_changed', 'devices', 'handoff', 'handoff_ended']) events.on(e, tonightChanged);
+  // Whether the device that opened this session is still here (a skill hangs up after every turn).
+  let connected = true;
   const closeSession = server.server.onclose;
   server.server.onclose = () => {
+    connected = false;
     for (const e of ['plan_changed', 'devices', 'handoff', 'handoff_ended']) events.off(e, tonightChanged);
     closeSession?.();
   };
@@ -1111,8 +1114,9 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
               structuredContent: { view: 'question', ...getQuestion(db, q.id), asked: answered.answered_by, door_snapshot: abs(door?.snapshot_url ?? null) },
             })
             .catch(() => {});
-          // The device was waiting on this task, so it hears the answer now: not repeated later.
-          db.prepare('UPDATE questions SET heard = 1 WHERE id = ?').run(q.id);
+          // A device still waiting on this task hears the answer now, so it isn't repeated later. One
+          // that has hung up (an Alexa skill between turns) hears it at the start of its next reply.
+          if (connected) db.prepare('UPDATE questions SET heard = 1 WHERE id = ?').run(q.id);
         };
         events.on('answered', onAnswered);
         return { task };

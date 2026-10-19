@@ -1,4 +1,4 @@
-# Every push and pull request: type-check and run every test (server and simulator).
+# Every push and pull request: type-check and run every test (server, simulator and the Alexa skill).
 name: Tests
 on:
   push:
@@ -17,3 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - run: npx tsc -p alexa
+      - run: npx tsx --test alexa/test/*.test.ts
+      # The skill Amazon hosts is the built file: it must match its source.
+      - run: node alexa/build.mjs && git diff --exit-code alexa/

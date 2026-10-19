@@ -1,0 +1,141 @@
+{
+  "manifest": {
+    "manifestVersion": "1.0",
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "name": "While You're Out",
+          "summary": "The parents' notes for whoever is looking after the kids, with safety enforced in code.",
+          "description": "While You're Out holds the parents' notes for tonight's babysitter, grandparent or nanny: what she's allergic to, where the EpiPen is, bedtime, the rules. It never says a food or medicine is safe, never reads private details aloud, and in an emergency reads the parents' own plan step by step while alerting them. This skill connects to the While You're Out demo add-on; each Alexa account gets its own demo house.",
+          "examplePhrases": [
+            "Alexa, open while you are out",
+            "Alexa, ask while you are out where the EpiPen is",
+            "Alexa, tell while you are out Priya is babysitting tonight"
+          ],
+          "keywords": [
+            "babysitter",
+            "babysitting",
+            "allergy",
+            "handoff",
+            "nanny",
+            "grandparent"
+          ]
+        },
+        "en-GB": {
+          "name": "While You're Out",
+          "summary": "The parents' notes for whoever is looking after the kids, with safety enforced in code.",
+          "description": "While You're Out holds the parents' notes for tonight's babysitter, grandparent or nanny: what she's allergic to, where the EpiPen is, bedtime, the rules. It never says a food or medicine is safe, never reads private details aloud, and in an emergency reads the parents' own plan step by step while alerting them. This skill connects to the While You're Out demo add-on; each Alexa account gets its own demo house.",
+          "examplePhrases": [
+            "Alexa, open while you are out",
+            "Alexa, ask while you are out where the EpiPen is",
+            "Alexa, tell while you are out Priya is babysitting tonight"
+          ],
+          "keywords": [
+            "babysitter",
+            "babysitting",
+            "allergy",
+            "handoff",
+            "nanny",
+            "grandparent"
+          ]
+        },
+        "en-IN": {
+          "name": "While You're Out",
+          "summary": "The parents' notes for whoever is looking after the kids, with safety enforced in code.",
+          "description": "While You're Out holds the parents' notes for tonight's babysitter, grandparent or nanny: what she's allergic to, where the EpiPen is, bedtime, the rules. It never says a food or medicine is safe, never reads private details aloud, and in an emergency reads the parents' own plan step by step while alerting them. This skill connects to the While You're Out demo add-on; each Alexa account gets its own demo house.",
+          "examplePhrases": [
+            "Alexa, open while you are out",
+            "Alexa, ask while you are out where the EpiPen is",
+            "Alexa, tell while you are out Priya is babysitting tonight"
+          ],
+          "keywords": [
+            "babysitter",
+            "babysitting",
+            "allergy",
+            "handoff",
+            "nanny",
+            "grandparent"
+          ]
+        },
+        "en-CA": {
+          "name": "While You're Out",
+          "summary": "The parents' notes for whoever is looking after the kids, with safety enforced in code.",
+          "description": "While You're Out holds the parents' notes for tonight's babysitter, grandparent or nanny: what she's allergic to, where the EpiPen is, bedtime, the rules. It never says a food or medicine is safe, never reads private details aloud, and in an emergency reads the parents' own plan step by step while alerting them. This skill connects to the While You're Out demo add-on; each Alexa account gets its own demo house.",
+          "examplePhrases": [
+            "Alexa, open while you are out",
+            "Alexa, ask while you are out where the EpiPen is",
+            "Alexa, tell while you are out Priya is babysitting tonight"
+          ],
+          "keywords": [
+            "babysitter",
+            "babysitting",
+            "allergy",
+            "handoff",
+            "nanny",
+            "grandparent"
+          ]
+        },
+        "en-AU": {
+          "name": "While You're Out",
+          "summary": "The parents' notes for whoever is looking after the kids, with safety enforced in code.",
+          "description": "While You're Out holds the parents' notes for tonight's babysitter, grandparent or nanny: what she's allergic to, where the EpiPen is, bedtime, the rules. It never says a food or medicine is safe, never reads private details aloud, and in an emergency reads the parents' own plan step by step while alerting them. This skill connects to the While You're Out demo add-on; each Alexa account gets its own demo house.",
+          "examplePhrases": [
+            "Alexa, open while you are out",
+            "Alexa, ask while you are out where the EpiPen is",
+            "Alexa, tell while you are out Priya is babysitting tonight"
+          ],
+          "keywords": [
+            "babysitter",
+            "babysitting",
+            "allergy",
+            "handoff",
+            "nanny",
+            "grandparent"
+          ]
+        }
+      },
+      "isAvailableWorldwide": true,
+      "testingInstructions": "Say: Alexa, open while you are out. Then: Priya is babysitting tonight. Then: where's the EpiPen? Can Maya have a cookie? Someone is knocking, should I open the door? Emergency, she can't breathe. The Alexa app card links to the parent page for the same demo house.",
+      "category": "ORGANIZERS_AND_ASSISTANTS",
+      "distributionCountries": []
+    },
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "locales": {
+        "en-US": {
+          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+        },
+        "en-GB": {
+          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+        },
+        "en-IN": {
+          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+        },
+        "en-CA": {
+          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+        },
+        "en-AU": {
+          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+        }
+      }
+    },
+    "apis": {
+      "custom": {
+        "interfaces": [
+          {
+            "type": "ALEXA_PRESENTATION_APL"
+          }
+        ]
+      }
+    }
+  }
+}

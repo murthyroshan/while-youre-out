@@ -63,6 +63,19 @@ export class RuleBrain implements Brain {
     this.busyUntil = state.busyUntil ?? null;
   }
 
+  /** Everything the brain remembers between turns, for a host that keeps no memory (an Alexa skill). */
+  snapshot() {
+    return { pending: this.pending, inEmergency: this.inEmergency, firstContact: this.firstContact, carer: this.carer, busyUntil: this.busyUntil };
+  }
+  restore(s: Partial<ReturnType<RuleBrain['snapshot']>> | undefined) {
+    if (!s) return;
+    this.pending = s.pending ?? null;
+    this.inEmergency = Boolean(s.inEmergency);
+    this.firstContact = s.firstContact ?? this.firstContact;
+    this.carer = s.carer ?? null;
+    this.busyUntil = s.busyUntil ?? null;
+  }
+
   /** The server has an emergency in progress (say, after a reload): short replies move its guide on. */
   resumeEmergency() {
     this.inEmergency = true;
