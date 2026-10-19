@@ -63,6 +63,15 @@ test(`every reply in the guided demo is ${SPOKEN_WORDS} words or fewer`, async (
         await post('/demo/ring', { who: a.ring });
         continue;
       }
+      // Mom's side: what she tells her Bee, and the door unlocked from her phone.
+      if ('bee' in a) {
+        await post('/demo/bee', { text: a.bee, by: 'Anita' });
+        continue;
+      }
+      if ('door' in a) {
+        await post('/parent/api/door', { k: 'voice-key', action: a.door, by: 'Anita' });
+        continue;
+      }
       said = a.say;
       tool = '';
       await brain.handle(a.say, io);

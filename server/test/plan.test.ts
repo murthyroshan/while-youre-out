@@ -205,8 +205,9 @@ test('lights out: the house gets ready for bed (simulated smart home), said and 
   setDemoTime('19:58', TZ);
   const r = (await c.callTool({ name: 'tonight_plan', arguments: { announce: true } })) as any;
   assert.ok(r.structuredContent.due.includes('bedtime'));
-  assert.deepEqual(r.structuredContent.smart_home.map((a: any) => a.device), ["Maya's room", 'Night light', 'Front door']);
-  assert.match(r.content[0].text, /dimmed Maya's room and checked the front door is locked/);
+  // The TV wasn't on, so lights out doesn't mention it.
+  assert.deepEqual(r.structuredContent.smart_home.map((a: any) => a.device), ["Maya's room", 'Front door']);
+  assert.match(r.content[0].text, /put on the night light in Maya's room and checked the front door is locked/);
   const again = (await c.callTool({ name: 'tonight_plan', arguments: { announce: true } })) as any;
   assert.equal(again.structuredContent.smart_home ?? null, null, 'once');
   resetClock();
@@ -234,7 +235,7 @@ test("the goodnight message doesn't play twice in a row (she missed her mom, the
   assert.notEqual(lightsOut.structuredContent.view, 'message', 'not played again 3 minutes later');
   assert.ok(lightsOut.structuredContent.smart_home, 'the house still gets ready for bed');
   const home = (await c.callTool({ name: 'home_screen', arguments: {} })) as any;
-  assert.equal(home.structuredContent.smart_home.length, 3, 'and the home screen shows it');
+  assert.equal(home.structuredContent.smart_home.length, 2, 'and the home screen shows it');
   resetClock();
   await c.close();
   close();

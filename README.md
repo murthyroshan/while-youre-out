@@ -100,6 +100,18 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 
 Resources: `ui://while-youre-out/card-<hash>.html` (the MCP App, its address carrying a hash of its contents so hosts can cache it; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`.
 
+### The whole house
+
+The kitchen Echo Show is where the sitter talks, but the evening happens across the home, and each device follows the parents' own rules and what actually happens tonight (simulated devices; in production these are the family's own Fire TV, Echo Dot, Ring and smart home):
+
+- **Living room Fire TV:** when the sitter says the kids are watching, the parents' "one hour of TV at most" starts; the TV pauses at the limit, or when bath or bed comes, with a message from the parent on the screen.
+- **The child's Echo Dot:** at lights out the night light comes on and the parent's goodnight message plays *in the child's room* (white noise if there isn't one); the TV goes off and the front door is checked.
+- **Front door (Ring):** besides the doorbell, in an emergency the porch light comes on for the paramedics, and a parent can unlock the door from their phone; the next emergency step tells the sitter.
+- **The parent's Bee:** "she napped until 4:30" said to Mom's Bee moves tonight's bedtime by the parents' own rule, and the sitter hears it on her next reply.
+- **Live over MCP:** `house://tonight` (the plan and the house) supports `resources/subscribe`; a subscribed host gets `notifications/resources/updated` the moment it changes.
+
+The simulator shows each room under the Echo Show; the guided evening includes Mom's Bee, the TV pausing for bath and the door unlocked for the paramedics.
+
 ### Account linking and the Guest Pass
 
 - **Account linking (OAuth 2.1, as Alexa+ add-ons link):** `/linked/mcp` is the add-on as Alexa calls it after linking. Without a token it answers a bare `401` whose `WWW-Authenticate` header points at `/.well-known/oauth-protected-resource/linked/mcp`; that names the authorization server (`/.well-known/oauth-authorization-server`): authorization code with **PKCE S256 only**, a refresh token with every access token (rotated on use), revocation, statically registered clients with exact redirect URIs (Alexa's, by region), and self-registration for localhost tools only (so the MCP Inspector can link). Linking gives the household its own house; its token picks it on every request. `/mcp` stays open, so trying the demo never needs a token.

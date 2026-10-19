@@ -2,6 +2,7 @@
 // one step at a time ("done", "next"), runs the plan's timers (the second EpiPen after 5 minutes),
 // and keeps the parents' phones in step with what is happening. A parent can say they're on
 // their way, and the carer sees it. All of it is fixed logic over the family's own plan.
+import { takeUrgentNotices } from './devices.js';
 import { type DB, nowIso } from '../db.js';
 import { formatTime, localTime, now } from '../clock.js';
 import { activeHandoff, events, householdTz } from './house.js';
@@ -162,6 +163,15 @@ export function stepIncident(db: DB, action: StepAction, by?: string): Incident 
 }
 
 /** A parent says they're coming home ("I'm on my way, 15 minutes"). */
+/** A parent unlocked the front door from their phone: on the emergency's timeline. */
+export function markDoorUnlocked(db: DB, name: string): Incident | undefined {
+  const i = activeIncident(db);
+  if (!i) return undefined;
+  i.updates.push({ at: nowIso(), text: 'Unlocked the front door for the paramedics', by: name });
+  save(db, i, 'reported');
+  return i;
+}
+
 export function markOnTheWay(db: DB, name: string, minutes: number): Incident | undefined {
   const i = activeIncident(db);
   if (!i) return undefined;
@@ -214,6 +224,8 @@ export function takeIncidentAnnouncements(db: DB): string[] {
       out.push(`One minute left on the ${tm.label.toLowerCase()} timer.`);
     }
   }
+  // Help from home, as it happens: the front door unlocked for the paramedics.
+  out.push(...takeUrgentNotices(db));
   // The carer hears that help from home is coming.
   for (const o of i.on_the_way) {
     if (o.announced) continue;

@@ -94,7 +94,7 @@ test('at lights out the bedtime reminder plays the bedtime message, once', async
   const r = await call('tonight_plan', { announce: true });
   assert.equal(r.structuredContent.view, 'message');
   assert.equal(r.structuredContent.from, 'Anita');
-  assert.match(r.content[0].text, /lights out.*Anita left a goodnight message for Maya\. I've dimmed Maya's room and checked the front door is locked\.$/i);
+  assert.match(r.content[0].text, /lights out.*Anita left a goodnight message for Maya\. I've put on the night light in Maya's room and checked the front door is locked\.$/i);
   const again = await call('tonight_plan', { announce: true });
   assert.notEqual(again.structuredContent.view, 'message');
   const played = (await state()).messages.find((m: any) => m.from_name === 'Anita');

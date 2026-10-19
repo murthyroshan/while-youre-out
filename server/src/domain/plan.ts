@@ -77,7 +77,7 @@ export function timedSteps(f: Pick<Fact, 'text' | 'author'>): Array<{ minutes: n
   return steps;
 }
 
-const RULE = /if (?:her|his|their|the|maya'?s) nap ends after (\d{1,2})(?::(\d{2}))?\s*(am|pm)?,?\s*(?:then )?(?:her |his |the )?bed ?time (?:moves|goes|is) (\d{1,3}) ?(?:minutes|mins) (later|earlier)/i;
+const RULE = /if (?:her|his|their|the|[a-z]+'s) nap ends after (\d{1,2})(?::(\d{2}))?\s*(am|pm)?,?\s*(?:then )?(?:her |his |the )?bed ?time (?:moves|goes|is) (\d{1,3}) ?(?:minutes|mins) (later|earlier)/i;
 
 export function planRules(facts: Fact[]): PlanRule[] {
   return facts.flatMap((f) => {

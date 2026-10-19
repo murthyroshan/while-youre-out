@@ -553,7 +553,8 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     if (vKey !== lastVisitors) { lastVisitors = vKey; renderVisitors(s.visitors || []); }
     setText('badgeTonight', s.questions.length ? String(s.questions.length) : '');
     // Redraw only when something changed (not every second the clock moves), so buttons stay tappable.
-    var incKey = s.incident ? JSON.stringify(Object.assign({}, s.incident, { elapsed_seconds: 0, timers: s.incident.timers.map(function (t) { return Object.assign({}, t, { remaining_seconds: 0 }); }) })) : '';
+    houseDevices = s.devices || null;
+    var incKey = s.incident ? JSON.stringify(Object.assign({}, s.incident, { elapsed_seconds: 0, door: houseDevices && houseDevices.door, timers: s.incident.timers.map(function (t) { return Object.assign({}, t, { remaining_seconds: 0 }); }) })) : '';
     if (incKey !== lastIncident) {
       lastIncident = incKey; incReceived = Date.now();
       var em = document.getElementById('emergency');
@@ -1260,7 +1261,10 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       '<p class="inc-label" id="otwLabel">I’m on my way · home in</p><div class="otw" role="group" aria-labelledby="otwLabel">' +
         [10, 20, 30].map(function (n) { return '<button data-otw="' + n + '" aria-label="I\\'m on my way, home in ' + n + ' minutes">' + n + '<small>min</small></button>'; }).join('') + '</div>' +
       '<ul class="inc-log">' + i.updates.slice(-4).reverse().map(function (u) { return '<li><span>' + esc(u.time) + '</span>' + esc(u.by) + ': ' + esc(u.text) + '</li>'; }).join('') + '</ul>' +
-      (i.address ? '<p class="inc-addr">Home: ' + esc(i.address) + '</p>' : '') + '</div>';
+      (i.address ? '<p class="inc-addr">Home: ' + esc(i.address) + '</p>' : '') +
+      (houseDevices && houseDevices.door && !houseDevices.door.locked
+        ? '<p class="inc-otw">Front door unlocked' + (houseDevices.door.by ? ' by ' + esc(houseDevices.door.by) : '') + ' · porch light on</p>'
+        : '<button class="ok wide" data-door="unlock">Unlock the front door for the paramedics</button>') + '</div>';
   }
   function tickIncident() {
     // Seconds as the server counted them (it may run on a demo clock), plus time since then.
@@ -1273,6 +1277,17 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     });
   }
   setInterval(tickIncident, 1000);
+  var houseDevices = null;
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-door]');
+    if (!b) return;
+    b.disabled = true;
+    var r = await post('/parent/api/door', { action: b.dataset.door, by: me || 'A parent' }).catch(function () { return null; });
+    if (r && r.ok) toast('Front door unlocked. ' + carerName() + ' has been told ✓');
+    else { b.disabled = false; toast('Could not unlock. Try again.', true); }
+    lastIncident = null;
+    load();
+  });
   document.addEventListener('click', async function (e) {
     var b = e.target.closest('button[data-otw]');
     if (!b) return;

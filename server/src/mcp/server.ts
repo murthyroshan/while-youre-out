@@ -7,6 +7,8 @@ import * as z from 'zod/v4';
 import type { DB } from '../db.js';
 import { OUTPUTS, STATUS } from './outputs.js';
 import { audit, endPass, issuePass } from '../domain/pass.js';
+import { devices, houseTick, lightsOut, porchLightOn, takeDeviceNotices, takeUrgentNotices, tvStarted, WATCHING, screenLimit } from '../domain/devices.js';
+import { SubscribeRequestSchema, UnsubscribeRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { FOOD_GUARD, FOOD_GUARD_SPOKEN, MEDICINE_GUARD, MEDICINE_GUARD_SPOKEN, SPOKEN_WORDS, firstSentence, fitSpoken, isEmergency, mentionsMedicine, wordCount } from '../domain/safety.js';
 import { activeHandoff, allergenMentions, answerQuestion, familyNames, attachTask, briefing, contacts, createQuestion, currentContactFor, endHandoff, escalateQuestion, eveningLog, events, expireQuestion, getQuestion, HandoffInProgressError, householdTz, logEvent, parentNames, type Role, sharesWords, startHandoff, visibleFacts, whereIs } from '../domain/house.js';
 import { startEmergency } from '../domain/emergency.js';
@@ -18,7 +20,6 @@ import { activeIncident, incidentView, latestIncident, stepIncident, takeInciden
 import { importNote, ImportError } from '../domain/houseBrain.js';
 import { applyLogToPlan, inSentence, nextItem, takeDueAnnouncements, tonightPlan } from '../domain/plan.js';
 import { SHOP_ANSWERS, shoppingList, shoppingQuestion, suppliesMentioned } from '../domain/shopping.js';
-import { bedtimeScene } from '../domain/smarthome.js';
 import { teachback } from '../domain/teachback.js';
 import { busyUntil, shadowSuggestion } from '../domain/shadow.js';
 import { buildDebrief, sinceLastVisit } from '../domain/debrief.js';
@@ -71,7 +72,10 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     const h = activeHandoff(db);
     if (!h) return [];
     const names = (db.prepare('SELECT name FROM members').all() as Array<{ name: string }>).map((m) => m.name);
+    // The rest of the house first: the TV's limit, bath or bed coming due while it's on.
+    houseTick(db, tonightPlan(db, householdTz(db), h).items.filter((i) => i.status === 'due').map((i) => i.key), parentNames(db)[0] ?? 'the parents');
     const out = takeDueAnnouncements(db, householdTz(db)).map((i) => `Reminder: ${inSentence(i.title, names)} at ${i.time}.`);
+    out.push(...takeDeviceNotices(db));
     const answered = db.prepare("SELECT * FROM questions WHERE handoff_id = ? AND status = 'answered' AND heard = 0 ORDER BY id").all(h.id) as unknown as Question[];
     for (const q of answered) {
       out.push(
@@ -91,9 +95,11 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       // Never in front of an emergency, and not for the device's own reminder checks.
       const announcing = (a[0] as { announce?: boolean } | undefined)?.announce === true;
       if (result.isError || result.structuredContent?.emergency || announcing) return result;
-      const notices = takeNotices();
-      if (!notices.length) return result;
       const [first, ...rest] = result.content;
+      // "Reminder: bath at 7:45 pm" is not said in front of "Next is bath at 7:45 pm".
+      const answer = first?.type === 'text' ? first.text.toLowerCase() : '';
+      const notices = takeNotices().filter((n) => !(n.startsWith('Reminder: ') && answer.includes(n.slice('Reminder: '.length).replace(/\.$/, '').toLowerCase())));
+      if (!notices.length) return result;
       const content = first?.type === 'text' ? [{ ...first, text: `${notices.join(' ')} ${first.text}`.trim() }, ...rest] : [{ type: 'text' as const, text: notices.join(' ') }, ...result.content];
       return { ...result, content, structuredContent: { ...(result.structuredContent ?? {}), notices } };
     };
@@ -131,7 +137,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       description: "Alexa+ add-on for whoever looks after your kids and home while you're out.",
     },
     {
-      capabilities: { tasks: { requests: { tools: { call: {} } } } },
+      capabilities: { tasks: { requests: { tools: { call: {} } } }, resources: { subscribe: true, listChanged: true } },
       taskStore,
       taskMessageQueue: new InMemoryTaskMessageQueue(),
       instructions: ADDON_INSTRUCTIONS,
@@ -215,6 +221,44 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       ],
     }),
   );
+
+  // Tonight, live: the plan (with any change the parents made) and the rest of the house. A host can
+  // subscribe and is told the moment it changes (Mom tells her Bee "she napped until 4:30" and
+  // bedtime moves; the TV pauses for bath), instead of asking again and again.
+  const TONIGHT = 'house://tonight';
+  const tonightNow = () => {
+    const h = activeHandoff(db);
+    const plan = h ? tonightPlan(db, householdTz(db), h) : null;
+    return {
+      carer: h?.carer_name ?? null,
+      plan: plan ? { items: plan.items, shift: plan.shift, shift_reason: plan.shift_reason } : null,
+      devices: devices(db),
+    };
+  };
+  server.registerResource(
+    'tonight',
+    TONIGHT,
+    { title: 'Tonight, live: the plan and the house', mimeType: 'application/json', description: "Tonight's plan (with changes the parents made) and the state of the house's devices. Subscribe to hear when it changes." },
+    async (uri) => ({ contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(tonightNow(), null, 2) }] }),
+  );
+  const subscribed = new Set<string>();
+  server.server.setRequestHandler(SubscribeRequestSchema, async (req) => {
+    subscribed.add(req.params.uri);
+    return {};
+  });
+  server.server.setRequestHandler(UnsubscribeRequestSchema, async (req) => {
+    subscribed.delete(req.params.uri);
+    return {};
+  });
+  const tonightChanged = () => {
+    if (subscribed.has(TONIGHT)) void server.server.sendResourceUpdated({ uri: TONIGHT }).catch(() => {});
+  };
+  for (const e of ['plan_changed', 'devices', 'handoff', 'handoff_ended']) events.on(e, tonightChanged);
+  const closeSession = server.server.onclose;
+  server.server.onclose = () => {
+    for (const e of ['plan_changed', 'devices', 'handoff', 'handoff_ended']) events.off(e, tonightChanged);
+    closeSession?.();
+  };
 
   server.registerResource(
     'house-manual',
@@ -488,10 +532,10 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       // Lights out: the house gets ready for bed (simulated smart home), and the parents'
       // goodnight message plays if they left one for bedtime.
       const bedtime = due.some((i) => i.key === 'bedtime');
-      const scene = bedtime ? bedtimeScene(db) : null;
       const picked = bedtime ? pickMessage(db, 'bedtime') : undefined;
       const justPlayed = picked?.played_at ? now().getTime() - Date.parse(picked.played_at) < 15 * 60_000 : false;
       const goodnight = justPlayed ? undefined : picked;
+      const scene = bedtime ? lightsOut(db, goodnight && goodnight.when_to_play !== 'missing' ? goodnight.from_name : null) : null;
       if (goodnight && goodnight.when_to_play !== 'missing') {
         markPlayed(db, goodnight);
         return localized(
@@ -683,7 +727,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       title: 'Log the evening',
       annotations: { destructiveHint: false },
       description:
-        'Records something that happened during the handoff, in the carer\'s words ("asleep at 8:10", "woke up crying at 9", "remember she napped till 5"). The parents see it in the morning summary. A parent\'s standing house rule is import_note, not this. If the result has `emergency: true`, call the `emergency` tool right away. If it has an `allergy_alert`, read it aloud.',
+        'Records something that happened during the handoff, in the carer\'s words ("asleep at 8:10", "woke up crying at 9", "remember she napped till 5", "she is watching cartoons": the TV then keeps the screen-time limit the parents set). The parents see it in the morning summary. A parent\'s standing house rule is import_note, not this. If the result has `emergency: true`, call the `emergency` tool right away. If it has an `allergy_alert`, read it aloud.',
       inputSchema: {
         text: z.string().min(1).max(MAX_TEXT).describe('What happened, in the carer\'s words, e.g. "she fell asleep at 8:10"'),
         text_english: z.string().trim().max(MAX_TEXT).optional().describe('English rendering if the carer spoke another language'),
@@ -726,6 +770,15 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         const first = parentNames(db)[0] ?? 'the parents';
         const ask = { question: shoppingQuestion(activeHandoff(db)?.carer_name ?? 'The sitter', item), shopping_item: item };
         return localized('logged', { event: ev, shopping_ask: ask }, `Got it. I'm asking ${first} to add ${item} to the shopping list.`);
+      }
+      if (WATCHING.test(text)) {
+        const was = devices(db).tv.status;
+        const d = tvStarted(db);
+        const limit = screenLimit(db);
+        if (was !== 'playing' && limit && d.tv.started_at) {
+          const until = clockTime(new Date(Date.parse(d.tv.started_at) + limit.minutes * 60_000));
+          return { content: [{ type: 'text', text: `${limit.said_by}'s limit is ${limit.minutes >= 60 && limit.minutes % 60 === 0 ? `${limit.minutes / 60} hour${limit.minutes > 60 ? 's' : ''}` : `${limit.minutes} minutes`} of TV, so I'll pause it at ${until}.` }], structuredContent: { view: 'logged', event: ev, tv_until: until } };
+        }
       }
       return { content: [{ type: 'text', text: `Logged: ${ev.text}` }], structuredContent: { view: 'logged', event: ev } };
     }),
@@ -945,6 +998,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     },
     async ({ description, description_english }) => {
       const e = startEmergency(db, [description, description_english].filter(Boolean).join(' / '));
+      porchLightOn(db);
       e.epipen_photo = abs(e.epipen_photo);
       const lang = carerLang();
       const fixed = lang === 'en' ? null : fixedTranslation(e.say_first, lang);
@@ -992,6 +1046,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const before = activeIncident(db);
       if (!before) return { content: [{ type: 'text', text: 'There is no emergency in progress.' }], isError: true };
       const i = stepIncident(db, action)!;
+      // Help from home that happened since the last step (the door unlocked) is said first.
+      const news = takeUrgentNotices(db).join(' ');
       if (i.status === 'resolved') {
         return incidentResult(i, "Okay. I've told the parents the emergency is over. If anything changes, say emergency again.", { resolved: true });
       }
@@ -1004,7 +1060,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const text =
         i.current >= i.steps.length
           ? `${timer}That was the last step. Stay with her and follow the 911 dispatcher. Say "it's over" when help has taken over.`
-          : `${timer}${action === 'back' ? 'Again' : 'Next'}, step ${i.current + 1} of ${i.steps.length}: ${step}${where}`;
+          : `${news ? `${news} ` : ''}${timer}${action === 'back' ? 'Again' : 'Next'}, step ${i.current + 1} of ${i.steps.length}: ${step}${where}`;
       return incidentResult(i, text);
     },
   );

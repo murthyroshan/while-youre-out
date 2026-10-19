@@ -6,7 +6,7 @@ import type { Brain, DeviceIO } from './types';
 
 const QUESTION_START = /^(can|could|is|are|was|were|what|when|where|how|should|does|do|did|may|why|which|who|whose|will|would|has|have)\b/i;
 const LOG_STATUS =
-  /\b(is |was |went |fell )?(asleep|to bed|to sleep|woke( up)?|ate|eaten|had (her|his|their)? ?(dinner|bath|milk|snack)|threw up|brushed|took (her|his) bath|walked|fed (the )?\w+|is crying|was crying|gave (her|him) |napped|nap (ended|ends|was)|up from (her|his) nap|used the last|ran out of|run out of|we'?re out of|is out of|running low on|no more)\b/i;
+  /\b(is |was |went |fell )?(asleep|to bed|to sleep|woke( up)?|ate|eaten|had (her|his|their)? ?(dinner|bath|milk|snack)|threw up|brushed|took (her|his) bath|walked|fed (the )?\w+|is crying|was crying|gave (her|him) |napped|nap (ended|ends|was)|up from (her|his) nap|used the last|ran out of|run out of|we'?re out of|is out of|running low on|no more|(is|are|started|starts) watching|put on (a |the )?(show|cartoon|cartoons|movie|film|episode))\b/i;
 // Words that are never a carer's name ("She is watching TV", "Who is babysitting?").
 const NOT_A_NAME = new Set(
   'who what which she he they it someone somebody nobody everyone mom dad mum daddy mommy maya bruno the a an this that there here i you we my her his our their your anita rahul'.split(' '),

@@ -1,5 +1,7 @@
 import { PRIVACY, TERMS } from './legal.js';
 import { GUEST_HTML } from './guest/page.js';
+import { beeNote, devices, houseTick, lockDoor, pushNotice, unlockDoor } from './domain/devices.js';
+import { applyLogToPlan } from './domain/plan.js';
 import { activePass, audit, auditLog, endPass, extendPass, latestPass, passByToken, passOpen, passTick, seen, type Pass } from './domain/pass.js';
 import { briefing, createQuestion } from './domain/house.js';
 import { tonightPlan } from './domain/plan.js';
@@ -26,7 +28,7 @@ import { payPage } from './parent/pay.js';
 import { DEMO_MESSAGE_BYTES, listMessages, MAX_MESSAGE_BYTES, MessageError, messageMedia, removeMessage, saveMessage } from './domain/messages.js';
 import { aiAllowed, pushTestAllowed, startHeavy } from './limits.js';
 import { HOST_SYSTEM, ADDON_INSTRUCTIONS } from './ai/hostPrompt.js';
-import { activeIncident, incidentView, latestIncident, markOnTheWay } from './domain/incident.js';
+import { activeIncident, incidentView, latestIncident, markDoorUnlocked, markOnTheWay } from './domain/incident.js';
 import { addVisitor, getDoorEvent, recordDoorEvent, removeVisitor, VisitorError, visitors } from './domain/door.js';
 import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, eveningLog, events, getQuestion, pendingQuestions } from './domain/house.js';
 import { geminiChat, geminiFromEnv, AiUnavailableError, type AiClient, type ChatRequest } from './ai/gemini.js';
@@ -308,6 +310,7 @@ export function createApp(opts: AppOptions = {}) {
       household: getFamily(db).household,
       home: homeScreen(db),
       pass: passView(latestPass(db)),
+      devices: devices(db),
       audit: auditLog(db, 40).map((a) => ({ ...a, time: clock(a.at) })),
     });
   });
@@ -345,6 +348,18 @@ export function createApp(opts: AppOptions = {}) {
       return void res.json(passView(p));
     }
     res.status(400).json({ error: 'action must be extend or end' });
+  });
+
+  // The front door, from a parent's phone: unlocked for the paramedics, or locked again.
+  app.post('/parent/api/door', (req, res) => {
+    const { k, action, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    const who = typeof by === 'string' && by.trim() ? by.trim().slice(0, 40) : 'A parent';
+    if (action !== 'unlock' && action !== 'lock') return void res.status(400).json({ error: 'action must be unlock or lock' });
+    const d = action === 'unlock' ? unlockDoor(db, who) : lockDoor(db, who);
+    if (action === 'unlock') markDoorUnlocked(db, who);
+    audit(db, { actor: who, via: `${who}'s phone`, action: action === 'unlock' ? 'Unlocked the front door' : 'Locked the front door' });
+    res.json(d.door);
   });
 
   // The sitter's page, opened from the QR code on the Echo Show. Its calls carry the pass token.
@@ -725,6 +740,20 @@ export function createApp(opts: AppOptions = {}) {
       res.json({ ...ev, time: formatTime(localTime(householdTz(db), new Date(ev.at)).minutes) });
     });
     app.get('/demo/clock', (_req, res) => void res.json({ ...localTime(householdTz(db)), demo: true }));
+    // The rest of the house, for the simulator's room panels (Fire TV, the child's Echo Dot, the door, Bee).
+    app.get('/demo/devices', (_req, res) => void res.set('Cache-Control', 'no-store').json(devices(db)));
+    // Stands in for Bee (the parent's wearable): what a parent said to it, for tonight. The plan reads
+    // it ("she napped until 4:30" moves bedtime by the parents' own rule); the sitter hears it next.
+    app.post('/demo/bee', (req, res) => {
+      const text = typeof req.body?.text === 'string' ? req.body.text.trim().slice(0, 300) : '';
+      if (!text) return void res.status(400).json({ error: 'text required' });
+      const by = typeof req.body?.by === 'string' && req.body.by.trim() ? req.body.by.trim().slice(0, 40) : (contacts(db)[0]?.name ?? 'A parent');
+      beeNote(db, by, text);
+      const change = activeHandoff(db) ? applyLogToPlan(db, householdTz(db), text) : null;
+      if (activeHandoff(db)) pushNotice(db, change?.new_bedtime ? `${by} told her Bee: "${text}". Bedtime is now ${change.new_bedtime}.` : `${by} says: "${text}"`);
+      audit(db, { actor: by, via: `${by}'s Bee`, action: `Said “${text}”`, detail: change?.message ?? null });
+      res.json({ ok: true, plan_change: change?.message ?? null, devices: devices(db) });
+    });
     // The guided demo starts every run from the demo family, even after a reload mid-demo.
     app.post('/demo/reset', (_req, res) => {
       resetClock();
@@ -765,7 +794,11 @@ export function createApp(opts: AppOptions = {}) {
     res.status(status).json({ error: status === 413 ? (req.path.startsWith('/parent/api/import') ? 'That file is larger than 6 MB.' : 'That is too large to send.') : status >= 500 ? 'Internal error' : String(err?.message ?? 'Bad request') });
   });
 
-  const passTimer = setInterval(() => passTick(db), 60_000);
+  const passTimer = setInterval(() => {
+    passTick(db);
+    const h = activeHandoff(db);
+    if (h) houseTick(db, tonightPlan(db, householdTz(db), h).items.filter((i) => i.status === 'due').map((i) => i.key), contacts(db)[0]?.name ?? 'the parents');
+  }, 60_000);
   passTimer.unref();
 
   const close = () => {

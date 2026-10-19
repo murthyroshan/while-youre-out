@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { McpConnection, textOf, type ElicitationHandlers, type ToolResult } from './mcp';
-import { GUIDE } from './guide';
+import { GUIDE, type TourAction } from './guide';
 import { Elicit } from './Elicit';
 import { PhoneFrame } from './PhoneFrame';
+import { House } from './House';
 import { Qr } from './Qr';
 import { Icon, LogoMark, Segmented, Switch } from './ui';
 import type { ElicitRequest, ElicitResult } from '@modelcontextprotocol/sdk/types.js';
@@ -369,6 +370,26 @@ export function App() {
   };
 
   // Ring announces the doorbell on Echo devices by itself; this stands in for that alert.
+  // Mom's side of the evening, from the guided demo: what she tells her Bee, the door from her phone.
+  const tellBee = async (text: string) => {
+    const first = ((home?.result.structuredContent?.parents as Array<{ name: string }> | undefined) ?? [])[0]?.name ?? 'Mom';
+    await fetch(`${serverOrigin}/demo/bee`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, by: first }) }).catch(() => null);
+  };
+  const unlockFromPhone = async () => {
+    const first = ((home?.result.structuredContent?.parents as Array<{ name: string }> | undefined) ?? [])[0]?.name ?? 'Mom';
+    let k = PARENT_KEY;
+    try {
+      k = new URL(parentUrl).searchParams.get('k') ?? k;
+    } catch {}
+    await fetch(`${serverOrigin}/parent/api/door`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, action: 'unlock', by: first }) }).catch(() => null);
+  };
+  const runAction = async (a: TourAction) => {
+    if ('ring' in a) return ringDoorbell(a.ring);
+    if ('bee' in a) return tellBee(a.bee);
+    if ('door' in a) return unlockFromPhone();
+    return handle(a.say);
+  };
+
   const ringDoorbell = async (who: string) => {
     const r = await fetch(`${serverOrigin}/demo/ring`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ who }) }).catch(() => null);
     if (!r?.ok) return;
@@ -670,8 +691,7 @@ export function App() {
     try {
       if (tourStep === 0 && tourAt === 0 && demoTime) await resetDemo();
       if (tourAt === 0 && step.clock && demoTime) await setClock(step.clock[1], step.clock[0]);
-      if ('ring' in nextAction) await ringDoorbell(nextAction.ring);
-      else await handle(nextAction.say);
+      await runAction(nextAction);
       setTour([tourStep, tourAt + 1]);
     } finally {
       setTourBusy(false);
@@ -782,8 +802,7 @@ export function App() {
         for (let ai = 0; ai < g.actions.length && playingRef.current; ai++) {
           const a = g.actions[ai];
           lastSaid.current = '';
-          if ('ring' in a) await ringDoorbell(a.ring);
-          else await handle(a.say);
+          await runAction(a);
           setTour([si, ai + 1]);
           if (fast) setRing(null);
           const words = lastSaid.current.split(/\s+/).filter(Boolean).length;
@@ -1057,6 +1076,14 @@ export function App() {
             />
           )}
         </div>
+        {/* The rest of the house: the TV, the child's room, the front door and Mom's Bee. */}
+        {!EMBED && connState === 'connected' && (
+          <House
+            serverOrigin={serverOrigin}
+            active={connState === 'connected'}
+            parentName={((home?.result.structuredContent?.parents as Array<{ name: string }> | undefined) ?? [])[0]?.name ?? 'Mom'}
+          />
+        )}
 
         {skipping && (
           <div className="skipping" role="status" aria-live="polite">
@@ -1152,6 +1179,14 @@ export function App() {
                               <>
                                 <Icon name="bell" size={14} /> The doorbell rings
                               </>
+                            ) : 'bee' in a ? (
+                              <>
+                                <Icon name="spark" size={14} /> Mom tells her Bee: “{a.bee}”
+                              </>
+                            ) : 'door' in a ? (
+                              <>
+                                <Icon name="phone" size={14} /> Mom unlocks the front door from her phone
+                              </>
                             ) : (
                               `“${a.say}”`
                             )}
@@ -1160,8 +1195,18 @@ export function App() {
                       </ol>
                       {nextAction ? (
                         <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy || playing}>
-                          <Icon name={tourBusy ? 'spark' : 'ring' in nextAction ? 'bell' : 'play'} size={16} />
-                          <span>{tourBusy ? 'Alexa is answering…' : 'ring' in nextAction ? 'Ring the doorbell' : `Say “${nextAction.say}”`}</span>
+                          <Icon name={tourBusy ? 'spark' : 'ring' in nextAction ? 'bell' : 'bee' in nextAction ? 'spark' : 'door' in nextAction ? 'phone' : 'play'} size={16} />
+                          <span>
+                            {tourBusy
+                              ? 'Alexa is answering…'
+                              : 'ring' in nextAction
+                                ? 'Ring the doorbell'
+                                : 'bee' in nextAction
+                                  ? 'Tell Mom’s Bee'
+                                  : 'door' in nextAction
+                                    ? 'Unlock it from Mom’s phone'
+                                    : `Say “${nextAction.say}”`}
+                          </span>
                         </button>
                       ) : (
                         <button className="tour-go next" onClick={() => setTour([tourStep < GUIDE.length - 1 ? tourStep + 1 : 0, 0])} disabled={playing}>

@@ -107,7 +107,7 @@ export const OUTPUTS: Record<string, z.ZodType> = {
     description: text('For "where is": where it is kept, in the parents\' words'),
   }),
   where_is: result('location', { item: text('The thing'), description: text("Where it is kept, in the parents' words"), photo_url: text('A photo of the place') }),
-  log_event: result('log', { event: obj('What was logged: at, kind, text'), allergy_alert: text('Read aloud: the parents have been alerted'), medicine_alert: text('Read aloud') }),
+  log_event: result('log', { event: obj('What was logged: at, kind, text'), allergy_alert: text('Read aloud: the parents have been alerted'), medicine_alert: text('Read aloud'), tv_until: text("When the TV will pause, by the parents' screen-time limit") }),
   ask_parent: result('question', {
     id: num('Question id (for check_parent_answer)'),
     text: text('The question'),
