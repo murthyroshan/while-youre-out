@@ -72,6 +72,11 @@ test(`every reply in the guided demo is ${SPOKEN_WORDS} words or fewer`, async (
         await post('/parent/api/door', { k: 'voice-key', action: a.door, by: 'Anita' });
         continue;
       }
+      if ('approve' in a) {
+        const s = await (await fetch(`${base}/parent/api/state?k=voice-key`)).json();
+        await post('/parent/api/order', { k: 'voice-key', id: s.order.id, action: 'approve', by: 'Anita' });
+        continue;
+      }
       said = a.say;
       tool = '';
       await brain.handle(a.say, io);

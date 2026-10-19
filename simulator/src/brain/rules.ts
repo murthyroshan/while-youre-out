@@ -159,6 +159,18 @@ export class RuleBrain implements Brain {
     // "We're heading out": the add-on asks who's babysitting.
     if (/^(ok(ay)?,? )?(we'?re|we are|i'?m|i am) (heading|going|leaving|off)( out| now)?( for the (night|evening))?[.!]*$/i.test(u)) return this.startHandoff(undefined, io, false);
 
+    // Ordering dinner: "can we order dinner?" shows what's safe; "order the pizza" asks a parent to approve it.
+    const dish = /^(?:please |ok(?:ay)?,? )?(?:order|get us|let'?s get|we'?ll have|i'?ll take) (?:the |a |an |some )?(.+?)(?: please)?[.!]*$/i.exec(u);
+    if (dish && !/^(dinner|food|something|takeout|take-out|a takeaway|in)$/i.test(dish[1])) {
+      const r = await io.tool('request_order', { item: dish[1] });
+      return io.say(textOf(r));
+    }
+    if (/\b(order|get|buy)\b[^.?!]*\b(dinner|food|pizza|takeout|take-out|takeaway|something to eat)\b/i.test(u)) {
+      const craving = /\b(pizza|noodles|chicken|mac and cheese|rice)\b/i.exec(u)?.[1];
+      const r = await io.tool('order_dinner', craving ? { craving } : {});
+      return io.say(textOf(r));
+    }
+
     if (/^(please )?pay (the )?(sitter|babysitter|nanny|[a-z][\w'-]*)( now| please)?[.!]*$/i.test(u) && !/^pay (attention|for)\b/i.test(u)) {
       const r = await io.tool('pay_sitter');
       return io.say(textOf(r));

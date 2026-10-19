@@ -7,6 +7,7 @@ import * as z from 'zod/v4';
 import type { DB } from '../db.js';
 import { OUTPUTS, STATUS } from './outputs.js';
 import { audit, endPass, issuePass } from '../domain/pass.js';
+import { findSafeItem, getOrder, inSentence as dishInSentence, OrderError, orderView, requestOrder, safeMenu } from '../domain/orders.js';
 import { devices, houseTick, lightsOut, porchLightOn, takeDeviceNotices, takeUrgentNotices, tvStarted, WATCHING, screenLimit } from '../domain/devices.js';
 import { SubscribeRequestSchema, UnsubscribeRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { FOOD_GUARD, FOOD_GUARD_SPOKEN, MEDICINE_GUARD, MEDICINE_GUARD_SPOKEN, SPOKEN_WORDS, firstSentence, fitSpoken, isEmergency, mentionsMedicine, wordCount } from '../domain/safety.js';
@@ -170,6 +171,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       start_handoff: `Started tonight with ${h.carer_name}`,
       end_handoff: 'Ended tonight',
       pay_sitter: 'Asked a parent to approve the payment',
+      order_dinner: 'Looked at what dinner could be ordered',
+      request_order: `Asked to order ${String(a.item ?? 'dinner')}`,
     };
     audit(db, { actor: name === 'start_handoff' || name === 'end_handoff' || name === 'pay_sitter' ? 'A parent' : h.carer_name, via: 'the kitchen Echo Show', action: ACTION[name] ?? (STATUS[name]?.invoked ?? name), detail: said.length > 180 ? `${said.slice(0, 180).replace(/\s+\S*$/, '')}…` : said || null });
   };
@@ -425,6 +428,69 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         }
       }
       return plain('pay', data, `${p.carer}'s evening comes to ${data.amount}: ${data.hours} at ${data.rate} an hour. I've sent it to your phone to approve.`);
+    },
+  );
+
+  // ---------- ordering dinner: the safe menu, then a parent's OK ----------
+  server.registerTool(
+    'order_dinner',
+    {
+      title: 'Order dinner',
+      annotations: { readOnlyHint: true, openWorldHint: true },
+      description:
+        "Call when the carer wants to order food (\"she won't eat the dal\", \"can we order dinner?\", \"get a pizza\"). Returns up to three dishes from the delivery partner that are safe for this family: anything with an allergen on file, anything labelled 'may contain' one, and sweets after the parents' cut-off are left out. Nothing is ordered yet: when the carer picks one, call request_order.",
+      inputSchema: { craving: z.string().trim().max(100).optional().describe('What the carer or child would like, if they said ("pizza", "noodles")') },
+      _meta: ui,
+    },
+    withNotices(async ({ craving }) => {
+      const m = safeMenu(db, craving ?? '');
+      const kid = (db.prepare("SELECT name FROM members WHERE kind = 'child' ORDER BY id LIMIT 1").get() as { name: string } | undefined)?.name;
+      if (!m.options.length) return plain('menu', { ...m }, `Nothing on tonight's menu is safe for ${kid ?? 'the kids'}. I can ask the parents what to do.`);
+      const names = m.options.map((o) => o.name);
+      const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} or ${names.at(-1)}` : names[0];
+      return plain('menu', { ...m }, `${m.left_out.length ? `I've left out ${m.left_out.length} dishes that aren't safe for ${kid ?? 'the kids'}. ` : ''}${list}. Which one? A parent approves the order.`);
+    }),
+  );
+
+  server.registerTool(
+    'request_order',
+    {
+      title: 'Ask a parent to approve an order',
+      annotations: { destructiveHint: false, openWorldHint: true },
+      description:
+        "Call when the carer picks a dish from order_dinner (\"the pizza\", \"order the mac and cheese\"). The carer can't spend money: the order goes to a parent's phone to approve, and the carer is told when they decide. A dish that isn't safe tonight is refused.",
+      inputSchema: { item: z.string().trim().min(1).max(100).describe('The dish the carer picked, in their words') },
+      _meta: ui,
+    },
+    withNotices(async ({ item }) => {
+      let dish;
+      try {
+        dish = findSafeItem(db, item);
+      } catch (e) {
+        if (e instanceof OrderError) return plain('menu', { ...safeMenu(db), refused: e.message }, `${e.message} Pick another one?`);
+        throw e;
+      }
+      if (!dish) return plain('menu', { ...safeMenu(db) }, "I couldn't find that on tonight's menu. Pick one from the screen.");
+      const h = activeHandoff(db);
+      const o = requestOrder(db, dish, h?.carer_name ?? 'The sitter');
+      const first = parentNames(db)[0] ?? 'the parents';
+      return plain('order', orderView(o), `I've sent the ${dishInSentence(o.item)}, ${orderView(o).price}, to ${first} to approve. I'll tell you when they answer.`);
+    }),
+  );
+
+  server.registerTool(
+    'order_status',
+    {
+      title: 'Order status',
+      annotations: { readOnlyHint: true },
+      description: 'Whether a parent has approved the order, and when it arrives. The order card refreshes itself with this.',
+      inputSchema: { id: z.number().int().positive().describe('The order id that request_order returned') },
+      _meta: { ...ui, ui: { ...ui.ui, visibility: ['app'] } },
+    },
+    async ({ id }) => {
+      const o = getOrder(db, id);
+      if (!o) return { content: [{ type: 'text', text: 'No such order.' }], isError: true };
+      return plain('order', orderView(o), o.status === 'approved' ? `Ordered. It arrives between ${orderView(o).arrives}.` : o.status === 'declined' ? 'Not tonight.' : 'Waiting for a parent.');
     },
   );
 

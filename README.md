@@ -100,6 +100,16 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 
 Resources: `ui://while-youre-out/card-<hash>.html` (the MCP App, its address carrying a hash of its contents so hosts can cache it; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`.
 
+### Ordering dinner (agentic commerce)
+
+"She won't eat the dal, can we order dinner?" crosses three services in one loop:
+
+1. **A delivery partner's menu, filtered for this family** (`order_dinner`): anything with an allergen on file, anything labelled "may contain" one, and sweets after the parents' cut-off are left out, with the reason ("contains peanut", "may contain nuts", "no sweets after 6:00 pm"). Up to three safe dishes, as Alexa's Carousel pattern asks.
+2. **A parent's approval** (`request_order`): the sitter can't spend money, so the order goes to the parents' phones; a dish that isn't safe is refused even when asked for by name. The order card refreshes itself (`order_status`) and returns what Alexa needs for its own notification: status, dish, price, arrival window and a reference.
+3. **The front door:** once approved, the delivery joins tonight's expected visitors, so when the doorbell rings it's "Dinner from Corner Kitchen, due 6:45 pm to 7:00 pm. No need to open."
+
+A sample restaurant; no money moves. In production this is an Alexa+ food-delivery partner and Amazon Pay.
+
 ### The whole house
 
 The kitchen Echo Show is where the sitter talks, but the evening happens across the home, and each device follows the parents' own rules and what actually happens tonight (simulated devices; in production these are the family's own Fire TV, Echo Dot, Ring and smart home):

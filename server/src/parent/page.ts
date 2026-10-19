@@ -406,6 +406,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <div id="setupBanner"></div>
     <div id="questions"></div>
     <div id="debrief"></div>
+    <div id="order"></div>
     <div id="pass"></div>
     <section class="card" aria-labelledby="feedTitle"><strong id="feedTitle">Tonight so far</strong><div id="log"><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w60"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div></div></section>
     <section class="card" id="activity" aria-labelledby="activityTitle" hidden><strong id="activityTitle">Activity under the pass</strong><p class="muted">Everything done tonight on the Echo Show and on the sitter’s phone.</p><ul class="alist" id="alist"></ul></section>
@@ -591,7 +592,36 @@ export const PARENT_HTML = /* html */ `<!doctype html>
       '<div class="card banner rise"><strong>Set up your family to start</strong><p class="muted">Add who Alexa looks after and who to call. It takes a minute.</p><button class="ok" id="openFamily">Set up now</button></div>');
     renderFeed(s);
     renderPass(s);
+    renderOrder(s);
   }
+
+  // ---------- Dinner the sitter wants to order: approve it here ----------
+  var lastOrderKey = null;
+  function renderOrder(s) {
+    var o = s.order;
+    var k2 = JSON.stringify(o);
+    if (k2 === lastOrderKey) return;
+    lastOrderKey = k2;
+    if (!o) return setHtml('order', '');
+    if (o.status === 'pending') {
+      setHtml('order', '<section class="card rise"><strong>' + esc(o.requested_by) + ' wants to order dinner</strong>' +
+        '<p class="muted">' + esc(o.item) + ' · ' + esc(o.price) + ' from ' + esc(o.restaurant) + '. Checked against the allergies and your rules.</p>' +
+        '<div class="seg" role="group" aria-label="Dinner order"><button data-order="approve" data-id="' + o.id + '">Order it · ' + esc(o.price) + '</button><button data-order="decline" data-id="' + o.id + '">Not tonight</button></div>' +
+        '<p class="muted" style="margin-top:8px">Demo order · no money moves.</p></section>');
+    } else if (o.status === 'approved') {
+      setHtml('order', '<section class="card"><strong>Dinner ordered</strong><p class="muted">' + esc(o.item) + ' · ' + esc(o.price) + ' · ref ' + esc(o.reference) + '. Arrives ' + esc(o.arrives || '') + '; the doorbell knows it’s expected.</p></section>');
+    } else setHtml('order', '');
+  }
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-order]');
+    if (!b) return;
+    b.disabled = true;
+    var r = await post('/parent/api/order', { id: Number(b.dataset.id), action: b.dataset.order, by: me || 'A parent' }).catch(function () { return null; });
+    if (r && r.ok) toast(b.dataset.order === 'approve' ? 'Ordered. ' + carerName() + ' has been told ✓' : 'Okay, not tonight ✓');
+    else { b.disabled = false; toast('Could not send. Try again.', true); }
+    lastOrderKey = null;
+    load();
+  });
 
   // ---------- Guest Pass: who has tonight's pass, until when, and everything done under it ----------
   var lastPassKey = null;

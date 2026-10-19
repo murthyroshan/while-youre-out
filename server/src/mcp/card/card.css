@@ -202,6 +202,14 @@ button { font: inherit; color: inherit; }
 .cols.pass { grid-template-columns: minmax(0, 1fr) 196px; }
 .cols.pass > div:first-child > * + * { margin-top: var(--s-m); }
 
+/* ---------- the Carousel pattern (ordering dinner) ---------- */
+.carousel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-s); }
+.carousel .item { display: flex; flex-direction: column; gap: var(--s-2xs); background: var(--inner); border-radius: var(--r-m); padding: var(--s-s) var(--s-m) var(--s-m); }
+.carousel .item .title { font-size: var(--t-d5); }
+.carousel .item .pill { align-self: flex-start; }
+.carousel .item .actions { margin-top: auto; padding-top: var(--s-xs); }
+.compact .carousel { grid-template-columns: 1fr; }
+
 /* ---------- smart home (simulated) ---------- */
 .scene { display: flex; flex-wrap: wrap; gap: var(--s-2xs); align-items: center; }
 

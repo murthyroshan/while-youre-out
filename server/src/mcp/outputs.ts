@@ -34,6 +34,21 @@ const emergency = {
   resolved: flag('True when help has taken over'),
 };
 
+const order = () => ({
+  id: num('Order id'),
+  reference: text('Order reference, for the confirmation'),
+  status: text('pending (waiting for a parent), approved or declined'),
+  item: text('The dish'),
+  price: text('Price'),
+  restaurant: text('The delivery partner'),
+  requested_by: text('Who asked'),
+  approved_by: text('The parent who decided'),
+  arrives: text('Delivery window, once approved'),
+  options: list('The safe menu, when a dish was refused'),
+  left_out: list('Dishes left out and why'),
+  refused: text('Why a dish was refused'),
+});
+
 const payment = () => ({
   id: num('Payment request id'),
   carer: text('Who is being paid'),
@@ -66,6 +81,14 @@ export const OUTPUTS: Record<string, z.ZodType> = {
     parent_page: text("The public demo only: this house's parent page, to play the parent"),
   }),
   pay_sitter: result('pay', payment()),
+  order_dinner: result('menu', {
+    restaurant: text('The delivery partner'),
+    options: list('Up to three dishes safe for this family: id, name, price, safe'),
+    left_out: list('Dishes left out and why: "contains peanuts", "may contain nuts", "no sweets after 6:00 pm"'),
+    refused: text('Why a dish asked for by name was refused'),
+  }),
+  request_order: result('order or menu', order()),
+  order_status: result('order', order()),
   payment_status: result('pay', payment()),
   set_carer_language: result('language', { language: text('The language now used for the carer') }),
   teachback: result('teachback', {
@@ -164,4 +187,7 @@ export const STATUS: Record<string, { invoking: string; invoked: string }> = {
   end_handoff: { invoking: 'Wrapping up the evening…', invoked: "Tonight's summary" },
   play_message: { invoking: 'Finding the message…', invoked: 'A message from home' },
   door_check: { invoking: "Checking who's expected…", invoked: 'At the door' },
+  order_dinner: { invoking: "Checking tonight's menu…", invoked: 'Safe to order' },
+  request_order: { invoking: 'Sending it to a parent…', invoked: 'Waiting for a parent' },
+  order_status: { invoking: 'Checking the order…', invoked: 'Dinner order' },
 };

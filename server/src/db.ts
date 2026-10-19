@@ -235,6 +235,21 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TEXT NOT NULL,
   played_at TEXT
 );
+CREATE TABLE IF NOT EXISTS orders (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER,
+  item_id TEXT NOT NULL,
+  item TEXT NOT NULL,
+  price_cents INTEGER NOT NULL,
+  restaurant TEXT NOT NULL,
+  status TEXT NOT NULL,          -- pending | approved | declined
+  requested_by TEXT NOT NULL,
+  approved_by TEXT,
+  eta_from INTEGER,              -- minutes after midnight, the house's time
+  eta_to INTEGER,
+  token TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS passes (
   id INTEGER PRIMARY KEY,
   handoff_id INTEGER NOT NULL,

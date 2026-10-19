@@ -55,6 +55,11 @@ await shot('Food · with the allergy first', 'ask_house', { question: 'Can Maya 
 await shot("What's for dinner", 'ask_house', { question: 'What should the kids eat for dinner?' });
 await shot('Where it’s kept', 'where_is', { item: 'EpiPen' });
 await shot('What can you do?', 'ask_house', { question: 'What can you do?' });
+await clock('18:20');
+await shot('Ordering dinner · only what’s safe', 'order_dinner', {});
+const ordered = await shot('Ordering dinner · waiting for Mom', 'request_order', { item: 'the mac and cheese' });
+await post('/parent/api/order', { k: key, id: ordered.structuredContent?.id, action: 'approve', by: 'Anita' });
+await shot('Ordering dinner · on its way', 'order_status', { id: ordered.structuredContent?.id });
 const asked = await shot('Asking a parent · waiting', 'ask_parent', { question: 'Can she stay up until 9 to finish her movie?' });
 await post('/parent/api/answer', { k: key, id: asked.structuredContent?.id, answer: 'Yes, just tonight.', by: 'Anita' });
 await shot('A parent answered', 'check_parent_answer', { question_id: asked.structuredContent?.id });

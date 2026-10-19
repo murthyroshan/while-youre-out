@@ -159,7 +159,7 @@ export function doorCheck(db: DB): DoorCheck {
     return {
       ...base,
       verdict: 'delivery',
-      say: `It's a delivery at ${at}${d ? `: ${d.name}${d.window ? `, due ${d.window}` : ''}` : ''}. You don't need to open the door; the driver leaves it outside. Bring it in once they've gone.`,
+      say: `It's a delivery at ${at}${d ? `: ${d.name}${d.window ? `, due ${d.window}` : ''}` : ''}. No need to open: the driver leaves it outside.`,
     };
   }
 

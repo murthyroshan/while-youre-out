@@ -47,7 +47,7 @@ test('a delivery: no need to open, using the delivery window the parents gave', 
   recordDoorEvent(db, { kind: 'package', snapshot_url: '/static/door/delivery.jpg' });
   const c = doorCheck(db);
   assert.equal(c.verdict, 'delivery');
-  assert.match(c.say, /You don't need to open the door/);
+  assert.match(c.say, /No need to open: the driver leaves it outside\./);
   assert.match(c.say, /Amazon package, due 7-8 pm/);
   assert.equal(c.ask_parent, null);
 });

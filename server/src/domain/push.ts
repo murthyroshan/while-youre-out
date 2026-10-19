@@ -228,8 +228,14 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
     void notify(parentNames(db), { title: `${p.carer}'s pass ends now`, body: 'Extend it from your phone, or it closes in 30 minutes.', tag: 'pass' });
   };
 
+  // The sitter wants to order dinner: only a parent can say yes.
+  const onOrderRequested = (o: { requested_by: string; item: string; price_cents: number; restaurant: string }) => {
+    void notify(parentNames(db), { title: `${o.requested_by} wants to order dinner`, body: `${o.item}, $${(o.price_cents / 100).toFixed(o.price_cents % 100 ? 2 : 0)} from ${o.restaurant}. Allergy-checked. Approve it on your phone.`, tag: 'order', urgent: false });
+  };
+
   const handlers: Array<[string, (...a: any[]) => void]> = [
     ['pass_reminder', onPassReminder],
+    ['order_requested', onOrderRequested],
     ['incident', onIncident],
     ['payment_paid', onPaid],
     ['message_played', onMessagePlayed],

@@ -383,8 +383,19 @@ export function App() {
     } catch {}
     await fetch(`${serverOrigin}/parent/api/door`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, action: 'unlock', by: first }) }).catch(() => null);
   };
+  const approveFromPhone = async () => {
+    const first = ((home?.result.structuredContent?.parents as Array<{ name: string }> | undefined) ?? [])[0]?.name ?? 'Mom';
+    let k = PARENT_KEY;
+    try {
+      k = new URL(parentUrl).searchParams.get('k') ?? k;
+    } catch {}
+    const s = await fetch(`${serverOrigin}/parent/api/state?k=${encodeURIComponent(k)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (!s?.order?.id || s.order.status !== 'pending') return;
+    await fetch(`${serverOrigin}/parent/api/order`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, id: s.order.id, action: 'approve', by: first }) }).catch(() => null);
+  };
   const runAction = async (a: TourAction) => {
     if ('ring' in a) return ringDoorbell(a.ring);
+    if ('approve' in a) return approveFromPhone();
     if ('bee' in a) return tellBee(a.bee);
     if ('door' in a) return unlockFromPhone();
     return handle(a.say);
@@ -1187,6 +1198,10 @@ export function App() {
                               <>
                                 <Icon name="phone" size={14} /> Mom unlocks the front door from her phone
                               </>
+                            ) : 'approve' in a ? (
+                              <>
+                                <Icon name="phone" size={14} /> Mom approves the order on her phone
+                              </>
                             ) : (
                               `“${a.say}”`
                             )}
@@ -1195,7 +1210,7 @@ export function App() {
                       </ol>
                       {nextAction ? (
                         <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy || playing}>
-                          <Icon name={tourBusy ? 'spark' : 'ring' in nextAction ? 'bell' : 'bee' in nextAction ? 'spark' : 'door' in nextAction ? 'phone' : 'play'} size={16} />
+                          <Icon name={tourBusy ? 'spark' : 'ring' in nextAction ? 'bell' : 'bee' in nextAction ? 'spark' : 'door' in nextAction || 'approve' in nextAction ? 'phone' : 'play'} size={16} />
                           <span>
                             {tourBusy
                               ? 'Alexa is answering…'
@@ -1205,7 +1220,9 @@ export function App() {
                                   ? 'Tell Mom’s Bee'
                                   : 'door' in nextAction
                                     ? 'Unlock it from Mom’s phone'
-                                    : `Say “${nextAction.say}”`}
+                                    : 'approve' in nextAction
+                                      ? 'Approve it on Mom’s phone'
+                                      : `Say “${nextAction.say}”`}
                           </span>
                         </button>
                       ) : (

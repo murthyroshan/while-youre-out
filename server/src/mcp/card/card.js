@@ -333,6 +333,36 @@
     },
 
     home: function (d) { return home(d); },
+
+    // The Carousel pattern: up to three dishes that are safe tonight, one tap to ask a parent.
+    menu: function (d) {
+      var h = topic('utensils', 'Safe to order tonight') ;
+      if (d.refused) h += note('danger', 'shield', 'Not tonight', d.refused);
+      if (d.options && d.options.length) {
+        h += '<div class="carousel">' + d.options.map(function (o) {
+          return '<div class="item"><div class="title">' + esc(o.name) + '</div><p class="field s">' + esc(o.price) + '</p>' +
+            '<span class="pill ok">' + icon('shield') + esc(o.safe) + '</span>' +
+            '<div class="actions">' + button('Order this', 'Order the ' + o.name, 'primary') + '</div></div>';
+        }).join('') + '</div>';
+      } else {
+        h += '<div class="title">Nothing on the menu is safe tonight</div><p class="field">I can ask the parents what to do.</p>';
+      }
+      if (d.left_out && d.left_out.length) h += '<p class="fine">Left out: ' + d.left_out.slice(0, 4).map(function (l) { return esc(l.name) + ' (' + esc(l.why) + ')'; }).join(' · ') + '. A parent approves every order.</p>';
+      return card(h);
+    },
+
+    order: function (d) {
+      if (d.status === 'approved') {
+        return card('<div class="confirm"><span class="tick">' + icon('check') + '</span><div><p class="meta">Ordered by ' + esc(d.approved_by || 'a parent') + ' · ref ' + esc(d.reference) + '</p>' +
+          '<div class="title">' + esc(d.item) + ' is on its way</div><p class="field s">Arrives ' + esc(d.arrives) + '. The doorbell knows it’s expected.</p></div></div>' +
+          '<p class="fine">Demo order from ' + esc(d.restaurant) + ' · no money moved.</p>');
+      }
+      if (d.status === 'declined') {
+        return card('<div class="confirm"><span class="tick neutral">' + icon('x') + '</span><div><div class="title">Not tonight</div><p class="field s">' + esc(d.approved_by || 'A parent') + ' said no to the ' + esc(d.item) + '.</p></div></div>');
+      }
+      return card(topic('send', 'Waiting for a parent') + '<div class="title l">' + esc(d.item) + '</div><p class="field">' + esc(d.price) + ' from ' + esc(d.restaurant) + '</p>' +
+        '<div class="waiting"><i></i><i></i><i></i><span>Sent to the parents’ phones to approve</span></div>');
+    },
   };
 
   // "What can you do?": what this add-on is for, as a short list.
@@ -635,6 +665,13 @@
       // Turns into "Paid" by itself once the parent approves on their phone.
       refreshTimer = setInterval(function () {
         request('tools/call', { name: 'payment_status', arguments: { id: d.id } }).then(function (r) {
+          if (r && r.structuredContent && r.structuredContent.status !== 'pending') render(r);
+        }).catch(function () {});
+      }, 3000);
+    }
+    if (d && d.view === 'order' && d.status === 'pending' && d.id) {
+      refreshTimer = setInterval(function () {
+        request('tools/call', { name: 'order_status', arguments: { id: d.id } }).then(function (r) {
           if (r && r.structuredContent && r.structuredContent.status !== 'pending') render(r);
         }).catch(function () {});
       }, 3000);

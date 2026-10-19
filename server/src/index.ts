@@ -2,6 +2,7 @@ import { PRIVACY, TERMS } from './legal.js';
 import { GUEST_HTML } from './guest/page.js';
 import { beeNote, devices, houseTick, lockDoor, pushNotice, unlockDoor } from './domain/devices.js';
 import { applyLogToPlan } from './domain/plan.js';
+import { approveOrder, declineOrder, getOrder, latestOrder, OrderError, orderView } from './domain/orders.js';
 import { activePass, audit, auditLog, endPass, extendPass, latestPass, passByToken, passOpen, passTick, seen, type Pass } from './domain/pass.js';
 import { briefing, createQuestion } from './domain/house.js';
 import { tonightPlan } from './domain/plan.js';
@@ -311,6 +312,10 @@ export function createApp(opts: AppOptions = {}) {
       home: homeScreen(db),
       pass: passView(latestPass(db)),
       devices: devices(db),
+      order: (() => {
+        const o = latestOrder(db);
+        return o && (o.status === 'pending' || Date.now() - Date.parse(o.created_at) < 6 * 3600_000) ? orderView(o) : null;
+      })(),
       audit: auditLog(db, 40).map((a) => ({ ...a, time: clock(a.at) })),
     });
   });
@@ -348,6 +353,31 @@ export function createApp(opts: AppOptions = {}) {
       return void res.json(passView(p));
     }
     res.status(400).json({ error: 'action must be extend or end' });
+  });
+
+  // Dinner the sitter asked for: only a parent can approve it (from their phone).
+  app.post('/parent/api/order', (req, res) => {
+    const { k, id, action, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    const o = Number.isInteger(id) ? getOrder(db, id) : undefined;
+    if (!o) return void res.status(404).json({ error: 'No such order.' });
+    const who = typeof by === 'string' && by.trim() ? by.trim().slice(0, 40) : 'A parent';
+    try {
+      if (action === 'approve') {
+        const done = approveOrder(db, o, who);
+        audit(db, { actor: who, via: `${who}'s phone`, action: `Ordered ${done.item} (${orderView(done).price})`, detail: `Arrives ${orderView(done).arrives}; added to tonight's expected visitors.` });
+        return void res.json(orderView(done));
+      }
+      if (action === 'decline') {
+        const done = declineOrder(db, o, who);
+        audit(db, { actor: who, via: `${who}'s phone`, action: `Said not tonight to ${done.item}` });
+        return void res.json(orderView(done));
+      }
+      res.status(400).json({ error: 'action must be approve or decline' });
+    } catch (e) {
+      if (e instanceof OrderError) return void res.status(409).json({ error: e.message });
+      throw e;
+    }
   });
 
   // The front door, from a parent's phone: unlocked for the paramedics, or locked again.
