@@ -234,6 +234,11 @@
       var next = (d.plan || []).filter(function (p) { return p.status !== 'done'; })[0];
       if (next) r.push({ icon: stepIcon(next.key, next.title), title: 'Next: ' + next.title, when: next.time });
       if (r.length) h += rows(r);
+      // Tonight's Guest Pass: the sitter scans it and has tonight on her own phone.
+      if (d.pass && d.pass.qr_svg) {
+        return card('<div class="cols pass"><div>' + h + '</div><div class="qr">' + d.pass.qr_svg +
+          '<span>' + esc(d.pass.carer) + ', scan for tonight on your phone</span><span class="fine">Guest Pass until ' + esc(d.pass.ends) + '</span></div></div>');
+      }
       return card(h);
     },
 

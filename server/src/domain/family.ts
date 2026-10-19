@@ -157,7 +157,7 @@ function wipe(db: DB) {
   const waiting = db.prepare("SELECT id FROM questions WHERE status = 'pending'").all() as Array<{ id: number }>;
   db.exec('BEGIN');
   try {
-    for (const table of ['household', 'members', 'facts', 'locations', 'contacts', 'action_plan_steps', 'handoffs', 'questions', 'log_events', 'imports', 'proposals', 'door_events', 'visitors', 'incidents', 'messages', 'payments']) {
+    for (const table of ['household', 'members', 'facts', 'locations', 'contacts', 'action_plan_steps', 'handoffs', 'questions', 'log_events', 'imports', 'proposals', 'door_events', 'visitors', 'incidents', 'messages', 'payments', 'passes', 'audit']) {
       db.prepare(`DELETE FROM ${table}`).run();
     }
     db.prepare("DELETE FROM settings WHERE key <> 'vapid_keys'").run();

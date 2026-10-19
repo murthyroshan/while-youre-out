@@ -281,6 +281,8 @@ export function endHandoff(db: DB) {
   if (!h) return undefined;
   const t = nowIso();
   db.prepare("UPDATE handoffs SET status = 'ended', ended_at = ? WHERE id = ?").run(t, h.id);
+  // Tonight's Guest Pass ends with the evening: the sitter's phone page closes.
+  db.prepare("UPDATE passes SET status = 'ended', ended_at = ? WHERE status = 'active'").run(t);
   // "Just tonight" answers end with the handoff they were given in.
   db.prepare('UPDATE facts SET expires_at = ? WHERE handoff_id = ? AND expires_at IS NOT NULL AND expires_at > ?').run(t, h.id, t);
   // Tonight's expected visitors were for tonight.

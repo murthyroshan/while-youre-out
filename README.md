@@ -100,6 +100,11 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 
 Resources: `ui://while-youre-out/card-<hash>.html` (the MCP App, its address carrying a hash of its contents so hosts can cache it; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`.
 
+### Account linking and the Guest Pass
+
+- **Account linking (OAuth 2.1, as Alexa+ add-ons link):** `/linked/mcp` is the add-on as Alexa calls it after linking. Without a token it answers a bare `401` whose `WWW-Authenticate` header points at `/.well-known/oauth-protected-resource/linked/mcp`; that names the authorization server (`/.well-known/oauth-authorization-server`): authorization code with **PKCE S256 only**, a refresh token with every access token (rotated on use), revocation, statically registered clients with exact redirect URIs (Alexa's, by region), and self-registration for localhost tools only (so the MCP Inspector can link). Linking gives the household its own house; its token picks it on every request. `/mcp` stays open, so trying the demo never needs a token.
+- **Guest Pass:** the handoff issues tonight's sitter a pass (five hours unless a parent extends it). The Echo Show shows it as a QR code; the sitter scans it and has tonight on her own phone (`/guest`): what matters most, the address and the EpiPen for a 911 call, one tap to call each contact, and *ask the parents*. The pass token travels in the link's fragment and leaves the address bar once read. At its end time the parents are asked to extend it; half an hour later it closes by itself, and it always ends with the evening. **Everything done under the pass**, on the kitchen Echo Show or on the sitter's phone, is in an activity log on the parents' phone, in plain words.
+
 ## The simulator
 
 Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
@@ -158,6 +163,8 @@ Everything below works in the demo, but some of it is simulated because an add-o
 | `WYO_HOST_LLM` | on | `0` turns off the simulator's Gemini proxy (`/host/llm`) |
 | `WYO_VAPID_PUBLIC_KEY` / `WYO_VAPID_PRIVATE_KEY` | generated | Push keys. Set them when the database isn't kept between restarts |
 | `WYO_CARD_RELOAD` | off | `1` re-reads the card files on every request (for design work) |
+| `WYO_OAUTH_CLIENT_ID` / `WYO_OAUTH_CLIENT_SECRET` | `alexa-addon` / none | The app allowed to link households (Alexa) |
+| `WYO_OAUTH_REDIRECTS` | Alexa's | Extra exact redirect URIs for that app, comma-separated |
 | `WYO_SIMULATOR_DIR` | `simulator/dist` | Where the built simulator is served from |
 | `GEMINI_API_KEY` | (none) | In `server/.env`; for House Brain, translation and the Gemini brain |
 | `WYO_GEMINI_MODELS` / `WYO_GEMINI_CHAT_MODELS` | built-in list | Gemini models for reading notes / for the simulator brain |

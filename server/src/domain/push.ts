@@ -223,7 +223,13 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
     void notify(parentNames(db), { title: `Paid ${p.carer} $${((p.amount_cents + p.tip_cents) / 100).toFixed((p.amount_cents + p.tip_cents) % 100 ? 2 : 0)} ✓`, body: 'Demo payment: no money moved.', tag: 'payment' });
   };
 
+  // The Guest Pass reached its end time: extend it, or it closes in half an hour.
+  const onPassReminder = (p: { carer: string }) => {
+    void notify(parentNames(db), { title: `${p.carer}'s pass ends now`, body: 'Extend it from your phone, or it closes in 30 minutes.', tag: 'pass' });
+  };
+
   const handlers: Array<[string, (...a: any[]) => void]> = [
+    ['pass_reminder', onPassReminder],
     ['incident', onIncident],
     ['payment_paid', onPaid],
     ['message_played', onMessagePlayed],

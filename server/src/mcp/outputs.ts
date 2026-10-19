@@ -62,6 +62,7 @@ export const OUTPUTS: Record<string, z.ZodType> = {
     address: text('The home address (for the screen)'),
     plan: list("Tonight's plan: key, time, title, status"),
     since_last_visit: obj("What changed since this carer's last visit"),
+    pass: obj("Tonight's Guest Pass: carer, ends, join_url and a QR code the sitter scans for her own phone"),
     parent_page: text("The public demo only: this house's parent page, to play the parent"),
   }),
   pay_sitter: result('pay', payment()),

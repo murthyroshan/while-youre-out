@@ -6,6 +6,7 @@ import { ErrorCode, McpError, type CallToolResult } from '@modelcontextprotocol/
 import * as z from 'zod/v4';
 import type { DB } from '../db.js';
 import { OUTPUTS, STATUS } from './outputs.js';
+import { audit, endPass, issuePass } from '../domain/pass.js';
 import { FOOD_GUARD, FOOD_GUARD_SPOKEN, MEDICINE_GUARD, MEDICINE_GUARD_SPOKEN, SPOKEN_WORDS, firstSentence, fitSpoken, isEmergency, mentionsMedicine, wordCount } from '../domain/safety.js';
 import { activeHandoff, allergenMentions, answerQuestion, familyNames, attachTask, briefing, contacts, createQuestion, currentContactFor, endHandoff, escalateQuestion, eveningLog, events, expireQuestion, getQuestion, HandoffInProgressError, householdTz, logEvent, parentNames, type Role, sharesWords, startHandoff, visibleFacts, whereIs } from '../domain/house.js';
 import { startEmergency } from '../domain/emergency.js';
@@ -137,6 +138,36 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     },
   );
 
+  // The audit log: what was done on the kitchen Echo Show while a sitter was in charge, in plain words.
+  // The card refreshing itself (Tonight, the emergency screen, payment status) isn't an action.
+  const QUIET = new Set(['home_screen', 'tonight_plan', 'emergency_status', 'payment_status', 'check_parent_answer']);
+  const lastArgs = new Map<string, Record<string, unknown>>();
+  const recordCall = (name: string, r: any) => {
+    // Ending the evening is the last thing done under the pass: it is logged against that evening.
+    const h = activeHandoff(db) ?? (name === 'end_handoff' ? (db.prepare('SELECT * FROM handoffs ORDER BY id DESC LIMIT 1').get() as { carer_name: string } | undefined) : undefined);
+    if (!h || QUIET.has(name)) return;
+    const a = lastArgs.get(name) ?? {};
+    const said = String(r.content?.find((c: any) => c.type === 'text')?.text ?? '');
+    const q = (v: unknown) => `“${String(v ?? '').slice(0, 120)}”`;
+    const ACTION: Record<string, string> = {
+      ask_house: `Asked ${q(a.question)}`,
+      where_is: `Looked up where the ${String(a.item ?? 'thing')} is`,
+      door_check: 'Checked who was at the front door',
+      ask_parent: `Asked the parents ${q(a.question)}`,
+      log_event: `Logged ${q(a.text)}`,
+      emergency: `Started the emergency guide: ${q(a.description)}`,
+      emergency_step: `Emergency guide: ${String(a.action ?? 'step')}`,
+      teachback: 'Answered the handover check',
+      play_message: 'Played the goodnight message',
+      set_carer_language: `Switched language to ${String(a.language ?? '')}`,
+      import_note: 'Added a note for the parents to confirm',
+      start_handoff: `Started tonight with ${h.carer_name}`,
+      end_handoff: 'Ended tonight',
+      pay_sitter: 'Asked a parent to approve the payment',
+    };
+    audit(db, { actor: name === 'start_handoff' || name === 'end_handoff' || name === 'pay_sitter' ? 'A parent' : h.carer_name, via: 'the kitchen Echo Show', action: ACTION[name] ?? (STATUS[name]?.invoked ?? name), detail: said.length > 180 ? `${said.slice(0, 180).replace(/\s+\S*$/, '')}…` : said || null });
+  };
+
   // Every tool says what it returns (outputSchema) and what the device shows while it runs and once
   // it has answered (_meta.ui.invoking / invoked, on the definition and on each successful result).
   const registerTool = server.registerTool.bind(server) as (...args: any[]) => any;
@@ -155,9 +186,16 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
           r = { ...r, structuredContent: Object.fromEntries(Object.entries(r.structuredContent).filter(([k]) => !bad.has(k))) };
         }
       }
+      if (r && !r.isError) recordCall(name, r);
       return status && r && !r.isError ? { ...r, _meta: { ...r._meta, ui: { ...r._meta?.ui, ...status } } } : r;
     };
-    const wrapped = typeof handler === 'function' ? async (...args: unknown[]) => withStatus(await handler(...args)) : handler;
+    const wrapped =
+      typeof handler === 'function'
+        ? async (...args: unknown[]) => {
+            if (args[0] && typeof args[0] === 'object') lastArgs.set(name, args[0] as Record<string, unknown>);
+            return withStatus(await handler(...args));
+          }
+        : handler;
     return registerTool(name, { ...config, ...(OUTPUTS[name] ? { outputSchema: OUTPUTS[name] } : {}), _meta: meta }, wrapped);
   };
 
@@ -239,7 +277,16 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         b.epipen ? `The EpiPen: ${b.epipen}` : '',
         b.first_contact ? `${b.first_contact} is first to call.` : '',
       ].filter(Boolean)).join(' ');
-      return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since, ...(parentPage ? { parent_page: parentPage } : {}) }, text);
+      // Tonight's Guest Pass: the sitter scans it on the screen and has tonight on her own phone.
+      const { pass: gp, token } = issuePass(db, h.id, h.carer_name);
+      const joinUrl = abs(`/guest#${token}`)!;
+      const pass = {
+        carer: gp.carer,
+        ends: clockTime(new Date(gp.ends_at)),
+        join_url: joinUrl,
+        qr_svg: await QRCode.toString(joinUrl, { type: 'svg', margin: 1, color: { dark: '#14181E', light: '#ffffff' } }),
+      };
+      return localized('briefing', { carer: h.carer_name, language: h.language, ...b, plan: plan.items, since_last_visit: since, pass, ...(parentPage ? { parent_page: parentPage } : {}) }, text);
     },
   );
 

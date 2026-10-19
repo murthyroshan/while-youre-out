@@ -235,6 +235,27 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TEXT NOT NULL,
   played_at TEXT
 );
+CREATE TABLE IF NOT EXISTS passes (
+  id INTEGER PRIMARY KEY,
+  handoff_id INTEGER NOT NULL,
+  carer TEXT NOT NULL,
+  token_hash TEXT NOT NULL,      -- the sitter's link carries the token; only its hash is kept
+  starts_at TEXT NOT NULL,
+  ends_at TEXT NOT NULL,
+  status TEXT NOT NULL,          -- active | ended | revoked
+  reminded INTEGER NOT NULL DEFAULT 0,
+  ended_at TEXT,
+  last_seen_at TEXT
+);
+CREATE TABLE IF NOT EXISTS audit (
+  id INTEGER PRIMARY KEY,
+  at TEXT NOT NULL,
+  pass_id INTEGER,
+  actor TEXT NOT NULL,           -- who acted: "Priya", "Anita"
+  via TEXT NOT NULL,             -- where: "the kitchen Echo Show", "Priya's phone", "Anita's phone"
+  action TEXT NOT NULL,
+  detail TEXT
+);
 CREATE TABLE IF NOT EXISTS payments (
   id INTEGER PRIMARY KEY,
   handoff_id INTEGER NOT NULL,

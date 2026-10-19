@@ -1,4 +1,9 @@
 import { PRIVACY, TERMS } from './legal.js';
+import { GUEST_HTML } from './guest/page.js';
+import { activePass, audit, auditLog, endPass, extendPass, latestPass, passByToken, passOpen, passTick, seen, type Pass } from './domain/pass.js';
+import { briefing, createQuestion } from './domain/house.js';
+import { tonightPlan } from './domain/plan.js';
+import { isEmergency } from './domain/safety.js';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { createHouses } from './houses.js';
 import { addToShoppingList, shoppingList } from './domain/shopping.js';
@@ -27,7 +32,7 @@ import { activeHandoff, answerQuestionFromParent, contacts, currentContactFor, e
 import { geminiChat, geminiFromEnv, AiUnavailableError, type AiClient, type ChatRequest } from './ai/gemini.js';
 import { decideProposal, importInfo, importNote, ImportError, IMAGE_TYPES, MAX_IMPORT_BYTES, pendingProposals, ProposalError } from './domain/houseBrain.js';
 import { householdTz, visibleFacts } from './domain/house.js';
-import { formatTime, localTime, resetClock, setDemoTime } from './clock.js';
+import { formatTime, localTime, now, resetClock, setDemoTime } from './clock.js';
 import { busyUntil, getSetting, setBusy, setSetting, setShadowTopic, shadowOffTopics, SHADOW_TOPICS } from './domain/shadow.js';
 import { latestDebrief, saveAnswerAsRule } from './domain/debrief.js';
 import { summary, teachbackState } from './domain/teachback.js';
@@ -302,7 +307,88 @@ export function createApp(opts: AppOptions = {}) {
       })(),
       household: getFamily(db).household,
       home: homeScreen(db),
+      pass: passView(latestPass(db)),
+      audit: auditLog(db, 40).map((a) => ({ ...a, time: clock(a.at) })),
     });
+  });
+
+  // ---------- Guest Pass ----------
+  const clock = (iso: string) => formatTime(localTime(householdTz(db), new Date(iso)).minutes);
+  const passView = (p: Pass | undefined) =>
+    p
+      ? {
+          carer: p.carer,
+          status: passOpen(p) ? 'active' : p.status === 'revoked' ? 'revoked' : 'ended',
+          starts: clock(p.starts_at),
+          ends: clock(p.ends_at),
+          minutes_left: Math.round((Date.parse(p.ends_at) - now().getTime()) / 60000),
+          opened_on_phone: Boolean(p.last_seen_at),
+        }
+      : null;
+  // A parent extends tonight's pass or takes it back (from their phone).
+  app.post('/parent/api/pass', (req, res) => {
+    const { k, action, minutes, by } = req.body ?? {};
+    if (!authorised(k)) return void res.sendStatus(401);
+    const who = typeof by === 'string' && by.trim() ? by.trim().slice(0, 40) : 'A parent';
+    if (action === 'extend') {
+      const m = Number(minutes);
+      if (!Number.isInteger(m) || m < 15 || m > 240) return void res.status(400).json({ error: 'minutes must be 15 to 240' });
+      const p = extendPass(db, m);
+      if (!p) return void res.status(404).json({ error: 'No pass is active.' });
+      audit(db, { actor: who, via: `${who}'s phone`, action: `Extended ${p.carer}'s pass to ${clock(p.ends_at)}` });
+      return void res.json(passView(p));
+    }
+    if (action === 'end') {
+      const p = endPass(db, 'revoked');
+      if (!p) return void res.status(404).json({ error: 'No pass is active.' });
+      audit(db, { actor: who, via: `${who}'s phone`, action: `Ended ${p.carer}'s pass`, pass_id: p.id });
+      return void res.json(passView(p));
+    }
+    res.status(400).json({ error: 'action must be extend or end' });
+  });
+
+  // The sitter's page, opened from the QR code on the Echo Show. Its calls carry the pass token.
+  app.get('/guest', (_req, res) => void res.set('Cache-Control', 'no-store').type('html').send(GUEST_HTML));
+  const guestPass = (req: express.Request, res: express.Response): Pass | undefined => {
+    const token = /^Bearer ([\w-]{20,100})$/.exec(String(req.headers.authorization ?? ''))?.[1];
+    const p = token ? passByToken(db, token) : undefined;
+    if (!p) return void res.status(401).json({ error: 'pass_unknown' });
+    if (!passOpen(p)) return void res.status(403).json({ error: 'pass_ended', carer: p.carer });
+    seen(db, p);
+    return p;
+  };
+  app.get('/guest/api/state', (req, res) => {
+    const p = guestPass(req, res);
+    if (!p) return;
+    const b = briefing(db);
+    const h = activeHandoff(db);
+    const plan = h ? tonightPlan(db, householdTz(db), h).items.filter((i) => i.status !== 'done').slice(0, 3) : [];
+    res.set('Cache-Control', 'no-store').json({
+      carer: p.carer,
+      household: getFamily(db).household?.name || 'the family',
+      ends: clock(p.ends_at),
+      minutes_left: passView(p)!.minutes_left,
+      must_know: b.must_know,
+      epipen: b.epipen,
+      address: b.address,
+      contacts: contacts(db).map((c) => ({ name: c.name, relation: c.relation, phone: c.phone })),
+      next: plan.map((i) => ({ title: i.title, time: i.time })),
+      questions: (db.prepare('SELECT id, text, status, answer, answered_by FROM questions WHERE handoff_id = ? ORDER BY id DESC LIMIT 10').all(p.handoff_id) as Array<Record<string, unknown>>),
+    });
+  });
+  app.post('/guest/api/ask', (req, res) => {
+    const p = guestPass(req, res);
+    if (!p) return;
+    const question = typeof req.body?.question === 'string' ? req.body.question.trim().slice(0, 300) : '';
+    if (!question) return void res.status(400).json({ error: 'question required' });
+    // An emergency is never a question for later: the page points at 911 and the kitchen guide.
+    if (isEmergency(question)) {
+      audit(db, { pass_id: p.id, actor: p.carer, via: `${p.carer}'s phone`, action: `Reported “${question}”`, detail: 'Shown: call 911, then the emergency guide in the kitchen.' });
+      return void res.json({ emergency: true });
+    }
+    const q = createQuestion(db, question);
+    audit(db, { pass_id: p.id, actor: p.carer, via: `${p.carer}'s phone`, action: `Asked the parents “${question}”` });
+    res.json({ id: q.id, status: q.status });
   });
 
   const messagesView = () => listMessages(db).map(({ token, ...m }) => ({ ...m, url: `/media/messages/${m.id}?t=${token}` }));
@@ -679,7 +765,11 @@ export function createApp(opts: AppOptions = {}) {
     res.status(status).json({ error: status === 413 ? (req.path.startsWith('/parent/api/import') ? 'That file is larger than 6 MB.' : 'That is too large to send.') : status >= 500 ? 'Internal error' : String(err?.message ?? 'Bad request') });
   });
 
+  const passTimer = setInterval(() => passTick(db), 60_000);
+  passTimer.unref();
+
   const close = () => {
+    clearInterval(passTimer);
     clearInterval(sweeper);
     push.close();
     events.off('emergency', onEmergency);

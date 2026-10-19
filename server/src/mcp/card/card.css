@@ -198,6 +198,9 @@ button { font: inherit; color: inherit; }
 .amount { font-size: var(--t-d1); font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
 .qr { background: #FFFFFF; border-radius: var(--r-m); padding: var(--s-s); display: grid; justify-items: center; gap: var(--s-2xs); color: #14181E; font-size: var(--t-b3); font-weight: 700; }
 .qr svg { width: 100%; max-width: 168px; height: auto; }
+.qr span { text-align: center; line-height: 1.3; }
+.cols.pass { grid-template-columns: minmax(0, 1fr) 196px; }
+.cols.pass > div:first-child > * + * { margin-top: var(--s-m); }
 
 /* ---------- smart home (simulated) ---------- */
 .scene { display: flex; flex-wrap: wrap; gap: var(--s-2xs); align-items: center; }

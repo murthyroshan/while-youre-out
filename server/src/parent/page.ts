@@ -109,6 +109,11 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   .card > p.muted:first-of-type { margin-top: 4px; }
   h2.sec { font: 700 13px/1.2 var(--font); text-transform: uppercase; letter-spacing: .08em; color: var(--text2); margin: 32px 4px -4px; }
   .muted { color: var(--text2); font-size: 14px; line-height: 1.45; }
+  .alist { list-style: none; margin: 10px 0 0; padding: 0; }
+  .alist li { display: flex; gap: 12px; padding: 9px 0; border-top: 1px solid rgba(127,127,127,.18); font-size: 14px; line-height: 1.4; }
+  .alist li:first-child { border-top: 0; }
+  .alist .t { color: var(--text2); min-width: 64px; font-variant-numeric: tabular-nums; }
+  .alist small { display: block; color: var(--text2); }
   ul { padding-left: 18px; margin: 8px 0; }
   .rise { animation: rise .32s var(--ease) both; }
   @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
@@ -401,7 +406,9 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     <div id="setupBanner"></div>
     <div id="questions"></div>
     <div id="debrief"></div>
+    <div id="pass"></div>
     <section class="card" aria-labelledby="feedTitle"><strong id="feedTitle">Tonight so far</strong><div id="log"><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w60"></span></div><div class="sk-row" aria-hidden="true"><span class="sk dot"></span><span class="sk w80"></span></div></div></section>
+    <section class="card" id="activity" aria-labelledby="activityTitle" hidden><strong id="activityTitle">Activity under the pass</strong><p class="muted">Everything done tonight on the Echo Show and on the sitter’s phone.</p><ul class="alist" id="alist"></ul></section>
     <div class="card" id="busy"><span class="sk w40" aria-hidden="true"></span><span class="sk tall" aria-hidden="true"></span></div>
     <h2 class="sec">Before you go</h2>
     <section class="card notify" id="notify" hidden></section>
@@ -582,7 +589,35 @@ export const PARENT_HTML = /* html */ `<!doctype html>
     setHtml('setupBanner', s.parents.length ? '' :
       '<div class="card banner rise"><strong>Set up your family to start</strong><p class="muted">Add who Alexa looks after and who to call. It takes a minute.</p><button class="ok" id="openFamily">Set up now</button></div>');
     renderFeed(s);
+    renderPass(s);
   }
+
+  // ---------- Guest Pass: who has tonight's pass, until when, and everything done under it ----------
+  var lastPassKey = null;
+  function renderPass(s) {
+    var k2 = JSON.stringify([s.pass, (s.audit || []).length && s.audit[0].id]);
+    if (k2 === lastPassKey) return;
+    lastPassKey = k2;
+    var p = s.pass;
+    setHtml('pass', p && p.status === 'active'
+      ? '<section class="card rise"><strong>' + esc(p.carer) + '’s Guest Pass</strong><p class="muted">Until ' + esc(p.ends) + ' · ' +
+        (p.opened_on_phone ? 'open on ' + esc(p.carer) + '’s phone' : 'not opened on a phone yet') + '. It ends with the evening.</p>' +
+        '<div class="seg" role="group" aria-label="Guest pass"><button data-pass="extend">Extend 1 hour</button><button data-pass="end">End pass</button></div></section>'
+      : '');
+    var a = (s.audit || []).slice(0, 12);
+    document.getElementById('activity').hidden = !a.length;
+    document.getElementById('alist').innerHTML = a.map(function (x) {
+      return '<li><span class="t">' + esc(x.time) + '</span><span><b>' + esc(x.actor) + '</b> · ' + esc(x.action) + (x.detail ? '<small>' + esc(x.detail) + '</small>' : '') + '<small>' + esc(x.via) + '</small></span></li>';
+    }).join('');
+  }
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-pass]');
+    if (!b) return;
+    b.disabled = true;
+    await post('/parent/api/pass', { action: b.dataset.pass, minutes: 60, by: me || 'A parent' });
+    lastPassKey = null;
+    load();
+  });
 
   // ---------- small icons (inline SVG, no assets) ----------
   var ICONS = {

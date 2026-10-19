@@ -10,6 +10,7 @@ import type { ServerResponse } from 'node:http';
 import express from 'express';
 import { houseStore, type HouseContext } from './context.js';
 import { newHouseAllowed } from './limits.js';
+import { ALEXA_REDIRECTS, createOAuth, type OAuthClient } from './oauth.js';
 
 /** House ids are made by the simulator (random, unguessable); nothing else identifies a house. */
 export const HOUSE_ID = /^[A-Za-z0-9_-]{16,64}$/;
@@ -30,6 +31,8 @@ export interface HousesOptions {
   idleMs?: number;
   /** New houses allowed per minute across the server. Default 30. */
   newPerMinute?: number;
+  /** Apps allowed to link a household (OAuth). Default: Alexa, from WYO_OAUTH_CLIENT_ID / _SECRET. */
+  oauthClients?: OAuthClient[];
 }
 
 type House<T extends HouseApp> = T & {
@@ -96,10 +99,37 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
   const app = express();
   app.disable('x-powered-by');
   if (process.env.RENDER || process.env.WYO_TRUST_PROXY === '1') app.set('trust proxy', 1);
+
+  // Account linking: a household that links gets its own house, and its token says which.
+  const oauth = createOAuth({
+    publicUrl: opts.publicUrl,
+    resourcePath: '/linked/mcp',
+    newHouse: () => randomBytes(18).toString('base64url'),
+    clients: opts.oauthClients ?? [
+      {
+        id: process.env.WYO_OAUTH_CLIENT_ID ?? 'alexa-addon',
+        secret: process.env.WYO_OAUTH_CLIENT_SECRET || undefined,
+        name: 'Alexa',
+        redirects: [...ALEXA_REDIRECTS, ...(process.env.WYO_OAUTH_REDIRECTS?.split(',').map((u) => u.trim()).filter(Boolean) ?? [])],
+      },
+    ],
+  });
+  app.use(oauth.router);
   // Only what starts a visit makes a house (the simulator connecting, the parent page, the demo
   // controls); anything else for a house that doesn't exist is simply not found.
   const startsVisit = (url: string) => /^\/(mcp|parent|demo|host)(\/|\?|$)/.test(url);
   app.use((req, res, next) => {
+    // /linked/mcp is the add-on as Alexa calls it after account linking: a token, or a bare 401
+    // that starts linking. A token on plain /mcp is honoured too; a bad one is refused.
+    const linked = /^\/linked\/mcp(\/|\?|$)/.test(req.url);
+    if (linked || (/^\/mcp(\/|\?|$)/.test(req.url) && req.headers.authorization?.startsWith('Bearer '))) {
+      const grant = oauth.verify(req.headers.authorization);
+      if (!grant) return oauth.challenge(res);
+      if (linked) req.url = req.url.slice('/linked'.length);
+      const house = get(grant.house, req.ip ?? 'unknown');
+      if (!house) return void res.status(429).json({ error: 'The demo is very busy right now. Try again in a minute.' });
+      return houseStore.run(house.ctx, () => house.app(req, res, next));
+    }
     const m = PREFIX.exec(req.url);
     let id = m?.[1];
     if (m) {
