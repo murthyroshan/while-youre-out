@@ -6,28 +6,30 @@ Copy each section into the matching Devpost field.
 While You're Out
 
 ## Tagline
-Your Echo Show knows your house. Tonight it hands that knowledge to whoever is looking after your kids, and keeps you one tap away.
+"Her lips are swelling." The kitchen Echo Show walks the babysitter through your family's own plan, step by step, and keeps you one tap away.
 
 ## Track and mini challenges
 - **Track:** Alexa+ (a self-hosted MCP server, spec 2025-11-25, Streamable HTTP)
 - **Mini challenge:** Open Source (see the end of this file)
 
 ## Inspiration
-Every time parents go out, someone else holds their child's safety: a babysitter, a grandparent, a nanny. What they need to know lives in a WhatsApp thread, a fridge note and a parent's head, and the questions come at the worst moments. About 1 in 20 U.S. children has a food allergy (CDC, 2024 data). More than 40% of them have had a severe reaction, and epinephrine is needed within minutes (FARE). A sitter shouldn't be scrolling WhatsApp when that happens.
+8:14 pm. The parents are at dinner, and the babysitter says it to the kitchen Echo Show: "Her lips are swelling." What should happen next isn't a friendly chat. It's the family's own allergy plan, one step at a time: where the EpiPen is, how to give it, call 911 from your phone, here's the address. A five-minute timer for the second dose. Both parents' phones following live. And if the Wi-Fi drops, the guide keeps going.
+
+Every time parents go out, someone else holds their child's safety: a babysitter, a grandparent, a nanny. What they need to know lives in a WhatsApp thread, a fridge note and a parent's head. About 1 in 20 U.S. children has a food allergy (CDC, 2024 data); more than 40% of them have had a severe reaction, and epinephrine is needed within minutes (FARE). A sitter shouldn't be scrolling WhatsApp when that happens.
 
 ## What it does
 A guest mode for the smart home. When the parents head out, the kitchen Echo Show becomes the sitter's guide for the evening, in the parents' own words.
 
+- **In an emergency it reads the family's own plan, one step at a time.**
+  - It starts the second-EpiPen timer and tells the sitter the parents have been alerted.
+  - It puts "Call Mom" one tap away on the sitter's phone.
+  - It keeps going on the kitchen screen and the sitter's phone if the internet drops.
 - **Setting up is pasting the message you'd send anyway.** Each line becomes a rule the parent confirms on their phone. A three-question check before they leave confirms the sitter knows what matters.
 - **Questions get the parents' words, never a guess.**
   - "Can she have chicken satay?" gets "No. That can have peanuts in it."
   - Doses are never given.
   - A stranger at the door is never called safe.
 - **What the notes don't cover goes to the parents.** It runs as an MCP Task that waits for an answer from the parent's lock screen. The doorbell photo, the dinner order and paying the sitter also run through the parents' phones.
-- **In an emergency it reads the family's own plan, one step at a time.**
-  - It starts the second-EpiPen timer and tells the sitter the parents have been alerted.
-  - It puts "Call Mom" one tap away on the sitter's phone.
-  - It keeps going on the kitchen screen and the sitter's phone if the internet drops.
 - **Afterwards:** "All's well at home" when the child is asleep, Mom's goodnight message at bedtime, and a debrief in the morning.
 
 ## How we built it
@@ -38,14 +40,14 @@ A guest mode for the smart home. When the parents head out, the kitchen Echo Sho
   - OAuth 2.1 account linking;
   - a private demo house per visitor.
 - **Safety is code, not a prompt:** the rules that decide what may be said give the same answer every time, in milliseconds, with no AI or internet. An AI's second look can only add caution.
-- **No Alexa+ host is available to developers yet** (the add-on console says "Coming Soon"), so we built one. An open-source Echo Show simulator plays the Alexa+ host, and an Alexa-hosted skill that is an MCP host runs the same add-on on today's Alexa.
+- **No Alexa+ host is available to developers yet** (the add-on console says "Coming Soon"), so we built a stand-in for it. An open-source Echo Show simulator plays the Alexa+ host, and an Alexa-hosted skill that is an MCP host runs the same add-on on today's Alexa.
 - **The parent's and the sitter's phones are web apps:** Web Push with lock-screen answers for parents, and an offline guide for the sitter.
 
 ## Who we built it with
 We talked to six people in India: three parents, a grandparent and two babysitters. It was a small, informal sample, so we treat it as an early signal rather than proof.
 - **Parents** hand over by talking and WhatsApp and still worry something will be forgotten.
 - **Carers** call the parents most about food, sleep and a crying child, and feel they call too often.
-- **Everyone** said it must be simple and private, and must still let the carer reach the parents directly.
+- **Everyone** said it must be simple and private, and must still let the carer reach the parents directly. All three parents, a mother in Hyderabad among them, said they'd only trust it if the sitter could still reach them.
 
 What we changed because of them:
 1. In an emergency, the parents-alerted line and the one-tap call.
@@ -53,7 +55,7 @@ What we changed because of them:
 3. Setup that works by pasting a message, without any AI.
 
 ## Challenges
-- No Alexa+ access, so we built the host.
+- No Alexa+ access, so we built a stand-in for the host.
 - Alexa-hosted skills run Node.js 16.
 - An APL parameter named "payload" silently receives every data source.
 - Making safety deterministic while still letting an AI help.
@@ -86,6 +88,8 @@ Parents don't want an AI deciding about their child; they want their own words, 
 ## Built with
 TypeScript · Model Context Protocol (TypeScript SDK, MCP Apps) · Alexa Skills Kit (Alexa-hosted skills, APL) · Node.js · Express · SQLite · Web Push · React · Vite · three.js · Gemini API · Render · GitHub Pages
 
+**Devpost "Built with" tags** (type each one; they make the Alexa+ features findable): `alexa-plus` · `mcp` · `mcp-apps` · `mcp-tasks` · `elicitation` · `oauth2` · `alexa-skills-kit` · `apl` · `typescript` · `node.js` · `express.js` · `sqlite` · `web-push` · `react` · `vite` · `three.js` · `gemini` · `render` · `github-actions`
+
 ## If the project existed before the hackathon
 It didn't. Everything here was built during the submission window.
 
@@ -102,8 +106,9 @@ It didn't. Everything here was built during the submission window.
   - the same checks in CI: `npm run check -- <url>` and a GitHub Action (`murthyroshan/alexa-addon-simulator@v0.1.0`) that fails a build below a minimum score. While You're Out's own twice-daily live-demo check uses it.
 - **Release:** https://github.com/murthyroshan/alexa-addon-simulator/releases/tag/v0.1.0 (MIT, 33 tests, CI on every push).
 - **On the GitHub Marketplace:** https://github.com/marketplace/actions/alexa-add-on-readiness
+- **How it differs from similar tools** (addon-sim, alexa-plus-mcp-checks, alexa-skill-mcp-bridge, compared in its README): it is the one that draws MCP Apps cards at the real size of seven Echo screens, measures them from inside the card (text size after CSS zoom, contrast, touch targets, fit) and turns that into a readiness score a CI build can fail on.
 - **Why it matters:** until the Alexa+ add-on console opens, builders have no way to see their add-on on an Echo Show. This gives every MCP server that view today, and it's how While You're Out was built and tested.
 
 ## Images for Devpost
 - **Thumbnail (3:2):** `media/devpost/00-thumbnail-3x2.jpg` (YouTube, 16:9: `media/devpost/thumbnail-youtube-1280x720.jpg`)
-- **Gallery, in order:** `media/devpost/01-title.jpg` to `13-pay-the-sitter.jpg` (frames from the video, 1920 x 1080)
+- **Gallery, in order:** `media/devpost/01-her-lips-are-swelling.jpg` to `13-title.jpg` (frames from the video, 1920 x 1080). It opens on the emergency, like the thumbnail and the video, then real Alexa, then the rest of the evening.

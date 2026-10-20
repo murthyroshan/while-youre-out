@@ -1,7 +1,9 @@
-// Account linking, step by step as Alexa does it: discovery, a bare 401, the authorization request
-// with PKCE S256, consent, the code exchange, the linked MCP endpoint, refresh with rotation and
-// revocation; and what it must refuse (unregistered redirects, no PKCE, a wrong verifier, a code
-// used twice, an old refresh token, remote self-registration).
+// Account linking, step by step as Alexa does it (Alexa+ MCP Authentication and Account Linking for MCP
+// Add-ons, July 2026): discovery, the service-level client_credentials token, a bare 401 with no
+// WWW-Authenticate header when a tool needs a linked account, the authorization request with PKCE S256,
+// consent, the code exchange, the linked MCP endpoint, refresh with rotation and revocation; and what it
+// must refuse (unregistered redirects, no PKCE, a wrong verifier, a code used twice, an old refresh
+// token, remote self-registration, a service token for a family's data).
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, randomBytes } from 'node:crypto';
@@ -60,15 +62,54 @@ test('discovery: the protected resource names its authorization server, which re
   assert.deepEqual(pr.authorization_servers, ['http://127.0.0.1:0']);
   const as = await (await fetch(`${base}/.well-known/oauth-authorization-server`)).json();
   assert.deepEqual(as.code_challenge_methods_supported, ['S256']);
-  assert.deepEqual(as.grant_types_supported, ['authorization_code', 'refresh_token']);
+  assert.deepEqual(as.grant_types_supported, ['authorization_code', 'refresh_token', 'client_credentials']);
+  assert.ok(as.scopes_supported.includes('mcp:service'));
+  // Alexa+ reads the metadata at the root well-known address.
+  assert.equal((await (await fetch(`${base}/.well-known/oauth-protected-resource`)).json()).resource, 'http://127.0.0.1:0/linked/mcp');
 });
 
-test('without a token the linked endpoint answers a bare 401 that points at the metadata', async () => {
-  const r = await fetch(`${base}/linked/mcp`, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' }, body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' });
+const rpc = (body: unknown, auth?: string) =>
+  fetch(`${base}/linked/mcp`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream', ...(auth ? { authorization: auth } : {}) },
+    body: JSON.stringify(body),
+  });
+const INIT = { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-11-25', capabilities: {}, clientInfo: { name: 'alexa', version: '0' } } };
+
+test('without a token: a bare 401 (no WWW-Authenticate) for any request, and a token in the address is refused', async () => {
+  assert.equal((await rpc(INIT)).status, 401, 'the quickstart: 401 for unauthenticated requests');
+  const r = await rpc({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'home_screen', arguments: {} } });
   assert.equal(r.status, 401);
-  assert.match(r.headers.get('www-authenticate')!, /^Bearer resource_metadata=".*\/\.well-known\/oauth-protected-resource\/linked\/mcp"$/);
+  assert.equal(r.headers.get('www-authenticate'), null, 'Alexa+ does not support WWW-Authenticate on the 401');
+  assert.deepEqual(await r.json(), { error: 'unauthorized', message: 'Access token required to use this tool.' });
+  assert.equal((await rpc(INIT, 'Bearer not-a-real-token-at-all-xx')).status, 401, 'a token that is not valid');
+  const q = await fetch(`${base}/linked/mcp?access_token=abcdefghijklmnopqrstuvwxyz`, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' }, body: JSON.stringify(INIT) });
+  assert.equal(q.status, 400, 'never a token in the query string');
   // The open demo endpoint stays open: judges never need a token.
   assert.notEqual((await fetch(`${base}/mcp`, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' }, body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"t","version":"0"}}}' })).status, 401);
+});
+
+test('service tier: client_credentials gives a short token for discovery, never for a family', async () => {
+  const basic = 'Basic ' + Buffer.from(`${CLIENT.id}:${CLIENT.secret}`).toString('base64');
+  const cc = (body: Record<string, string>, auth = basic) =>
+    fetch(`${base}/oauth/token`, { method: 'POST', headers: { authorization: auth, 'content-type': 'application/x-www-form-urlencoded' }, body: form(body) });
+  const ok = await (await cc({ grant_type: 'client_credentials', scope: 'mcp:service', resource: 'http://127.0.0.1:0/linked/mcp' })).json();
+  assert.equal(ok.token_type, 'Bearer');
+  assert.equal(ok.scope, 'mcp:service');
+  assert.ok(ok.expires_in <= 3600);
+  assert.equal(ok.refresh_token, undefined, 'no refresh token for client credentials');
+  // What it refuses: a wrong secret, a user scope, a missing or wrong resource.
+  assert.equal((await cc({ grant_type: 'client_credentials', resource: 'http://127.0.0.1:0/linked/mcp' }, 'Basic ' + Buffer.from(`${CLIENT.id}:nope`).toString('base64'))).status, 401);
+  assert.equal((await (await cc({ grant_type: 'client_credentials', scope: 'household', resource: 'http://127.0.0.1:0/linked/mcp' })).json()).error, 'invalid_scope');
+  assert.equal((await (await cc({ grant_type: 'client_credentials', scope: 'mcp:service' })).json()).error, 'invalid_request');
+  assert.equal((await (await cc({ grant_type: 'client_credentials', scope: 'mcp:service', resource: 'https://evil.example/mcp' })).json()).error, 'invalid_target');
+  // With the service token: initialize and tools/list work; a tool that touches a family starts linking.
+  const auth = `Bearer ${ok.access_token}`;
+  const c = new Client({ name: 'alexa-service', version: '0' });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`${base}/linked/mcp`), { requestInit: { headers: { authorization: auth } } }));
+  clients.push(c);
+  assert.ok((await c.listTools()).tools.some((t) => t.name === 'home_screen'));
+  assert.equal((await rpc({ jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'home_screen', arguments: {} } }, auth)).status, 401);
 });
 
 test('it refuses what it must: an unregistered redirect, no PKCE, a wrong verifier, a code used twice', async () => {

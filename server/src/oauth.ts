@@ -1,9 +1,12 @@
 // Account linking, as Alexa+ add-ons do it: an OAuth 2.1 authorization server (authorization code
 // with PKCE S256 only, a refresh token with every access token, rotated on use), the discovery
 // documents Alexa reads (/.well-known/oauth-protected-resource and oauth-authorization-server),
-// statically registered clients with their exact redirect URIs, and a bare 401 with a pointer to
-// the metadata when a request has no valid token. Linking gives the household its own house: the
-// token says which. Local tools (the MCP Inspector) may register themselves for localhost only.
+// statically registered clients with their exact redirect URIs, and a bare 401 when a request needs
+// a token it doesn't have. Alexa+ doesn't support a WWW-Authenticate header on that 401: it finds the
+// metadata at the well-known address, which MCP allows too. Linking gives the household its own
+// house: the token says which. Alexa+'s service tier (client_credentials, scope mcp:service) gets a
+// short token with no household, for discovery only. Local tools (the MCP Inspector) may register
+// themselves for localhost only.
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import express from 'express';
 
@@ -26,12 +29,15 @@ export interface OAuthOptions {
 
 interface Grant {
   client: string;
-  house: string;
+  /** The linked household; none for a service-level (client_credentials) token. */
+  house?: string;
   scope: string;
   expires: number;
 }
 
 const SCOPES = ['household'];
+/** Alexa+'s service-level scope: discovery (initialize, tools/list), never a family's data. */
+export const SERVICE_SCOPE = 'mcp:service';
 const ACCESS_TTL_S = 3600;
 const REFRESH_TTL_MS = 30 * 24 * 3600_000;
 const CODE_TTL_MS = 10 * 60_000;
@@ -85,12 +91,8 @@ export function createOAuth(opts: OAuthOptions) {
     if (!g || g.expires < Date.now()) return null;
     return g;
   };
-  /** A bare 401 that tells the client where to start linking (RFC 9728). */
-  const challenge = (res: express.Response) =>
-    void res
-      .status(401)
-      .set('WWW-Authenticate', `Bearer resource_metadata="${base}/.well-known/oauth-protected-resource${opts.resourcePath}"`)
-      .json({ error: 'unauthorized', message: 'Access token required to use this tool.' });
+  /** A bare 401: Alexa+ starts account linking from it, and finds the metadata at the well-known address. */
+  const challenge = (res: express.Response) => void res.status(401).json({ error: 'unauthorized', message: 'Access token required to use this tool.' });
 
   const router = express.Router();
   router.use('/oauth', express.urlencoded({ extended: false, limit: '8kb' }), express.json({ limit: '8kb' }));
@@ -107,10 +109,10 @@ export function createOAuth(opts: OAuthOptions) {
       revocation_endpoint: `${base}/oauth/revoke`,
       registration_endpoint: `${base}/oauth/register`,
       response_types_supported: ['code'],
-      grant_types_supported: ['authorization_code', 'refresh_token'],
+      grant_types_supported: ['authorization_code', 'refresh_token', 'client_credentials'],
       code_challenge_methods_supported: ['S256'],
       token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'none'],
-      scopes_supported: SCOPES,
+      scopes_supported: [...SCOPES, SERVICE_SCOPE],
     }),
   );
 
@@ -208,6 +210,19 @@ export function createOAuth(opts: OAuthOptions) {
       refresh.delete(key); // rotated: the old one stops working
       if (!g || g.expires < Date.now() || g.client !== c.id) return fail('invalid_grant');
       return void res.json(issue({ client: c.id, house: g.house, scope: g.scope }));
+    }
+    if (b.grant_type === 'client_credentials') {
+      // Machine to machine: only a client with a secret, only the service scope, only this server,
+      // a short token and no refresh token (the client asks again when it expires).
+      if (!c.secret) return fail('unauthorized_client');
+      const scopes = String(b.scope ?? SERVICE_SCOPE).split(' ').filter(Boolean);
+      if (!scopes.length || scopes.some((s) => s !== SERVICE_SCOPE)) return fail('invalid_scope');
+      if (!b.resource) return fail('invalid_request');
+      if (b.resource !== resource) return fail('invalid_target');
+      const a = random();
+      access.set(hashKey(a), { client: c.id, scope: SERVICE_SCOPE, expires: Date.now() + ACCESS_TTL_S * 1000 });
+      bounded(access);
+      return void res.json({ access_token: a, token_type: 'Bearer', expires_in: ACCESS_TTL_S, scope: SERVICE_SCOPE });
     }
     fail('unsupported_grant_type');
   });

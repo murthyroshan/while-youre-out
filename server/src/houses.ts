@@ -115,6 +115,16 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
     ],
   });
   app.use(oauth.router);
+  // /linked/mcp with Alexa+'s service-level token (no household) may only discover the add-on; a
+  // neutral house answers that, and anything that touches a family needs a linked account.
+  const DISCOVERY = new Set(['initialize', 'ping', 'tools/list', 'prompts/list', 'resources/list', 'resources/templates/list', 'notifications/initialized', 'notifications/cancelled']);
+  const CATALOG = 'linked-catalog-house';
+  const discoveryOnly = (req: express.Request) => {
+    if (req.method === 'GET' || req.method === 'DELETE') return true;
+    const msgs = Array.isArray(req.body) ? req.body : [req.body];
+    return msgs.length > 0 && msgs.every((m) => m && typeof m === 'object' && typeof m.method === 'string' && DISCOVERY.has(m.method));
+  };
+  const linkedJson = express.json({ limit: '1mb' });
   // Only what starts a visit makes a house (the simulator connecting, the parent page, the demo
   // controls); anything else for a house that doesn't exist is simply not found.
   const startsVisit = (url: string) => /^\/(mcp|parent|demo|host|connect)(\/|\?|$)/.test(url);
@@ -123,12 +133,24 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
     // that starts linking. A token on plain /mcp is honoured too; a bad one is refused.
     const linked = /^\/linked\/mcp(\/|\?|$)/.test(req.url);
     if (linked || (/^\/mcp(\/|\?|$)/.test(req.url) && req.headers.authorization?.startsWith('Bearer '))) {
-      const grant = oauth.verify(req.headers.authorization);
-      if (!grant) return oauth.challenge(res);
-      if (linked) req.url = req.url.slice('/linked'.length);
-      const house = get(grant.house, req.ip ?? 'unknown');
-      if (!house) return void res.status(429).json({ error: 'The demo is very busy right now. Try again in a minute.' });
-      return houseStore.run(house.ctx, () => house.app(req, res, next));
+      return void linkedJson(req, res, (err?: unknown) => {
+        if (err) return next(err);
+        // A token in the address can leak into logs: Alexa+ sends it only in the Authorization header.
+        if ('access_token' in req.query) return void res.status(400).json({ error: 'invalid_request', message: 'Send the token in the Authorization header.' });
+        // No token, or one that isn't (or is no longer) valid: a bare 401, and Alexa starts linking.
+        const grant = oauth.verify(req.headers.authorization);
+        if (!grant) return oauth.challenge(res);
+        let id = grant.house;
+        if (!id) {
+          // Alexa+'s service-level token: discovery only, from a house with no family in it.
+          if (!linked || !discoveryOnly(req)) return oauth.challenge(res);
+          id = CATALOG;
+        }
+        if (linked) req.url = req.url.slice('/linked'.length);
+        const house = get(id, req.ip ?? 'unknown');
+        if (!house) return void res.status(429).json({ error: 'The demo is very busy right now. Try again in a minute.' });
+        houseStore.run(house.ctx, () => house.app(req, res, next));
+      });
     }
     const m = PREFIX.exec(req.url);
     let id = m?.[1];

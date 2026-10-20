@@ -63,6 +63,8 @@ body.ready .scrim { opacity: 0.94; }
 @media (max-width: 760px) { .scrim { background: linear-gradient(0deg, color-mix(in srgb, var(--paper) calc((1 - var(--night)) * 100%), #070b18) 25%, transparent 70%); } }
 .beat { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 96px 0 48px clamp(24px, 6vw, 96px); max-width: min(560px, 46vw); opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
 body.ready .beat.on { opacity: 1; transform: none; }
+/* The opening words are there from the first paint, while the house draws and rises behind them. */
+body:not(.ready) .beat.hero { opacity: 1; transform: none; }
 /* a keyboard user reaching the ask buttons sees them, wherever the scroll is */
 body.ready .beat:focus-within { opacity: 1; transform: none; }
 /* no 3D (WebGL off or failed) or no scripts: the story is still there to read */

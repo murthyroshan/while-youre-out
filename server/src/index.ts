@@ -178,6 +178,8 @@ export function createApp(opts: AppOptions = {}) {
   sweeper.unref();
 
   app.post('/mcp', async (req, res) => {
+    // MCP 2025-11-25: a POST carries one JSON-RPC message; batches were removed.
+    if (Array.isArray(req.body)) return void res.status(400).json({ jsonrpc: '2.0', error: { code: -32600, message: 'Batches are not supported: send one message per request.' }, id: null });
     const sid = req.headers['mcp-session-id'] as string | undefined;
     try {
       let transport = sid ? sessions.get(sid) : undefined;

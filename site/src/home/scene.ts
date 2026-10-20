@@ -47,7 +47,8 @@ export function lightsAt(h: number) {
 
 export function createScene(canvas: HTMLCanvasElement) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+  // A phone draws fewer pixels: the house still looks sharp, and the page stays responsive.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 800 ? 1.25 : 1.75));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false; // redrawn only when the sun or the house moves

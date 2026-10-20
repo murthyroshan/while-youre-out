@@ -197,7 +197,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
   };
 
   // Every tool says what it returns (outputSchema) and what the device shows while it runs and once
-  // it has answered (_meta.ui.invoking / invoked, on the definition and on each successful result).
+  // it has answered (_meta.ui.invoking / invoked, on the definition and on each successful result);
+  // a tool with a card names it on each successful result as well as on its definition.
   const registerTool = server.registerTool.bind(server) as (...args: any[]) => any;
   (server as any).registerTool = (name: string, config: Record<string, any>, handler: any) => {
     const status = STATUS[name];
@@ -217,7 +218,9 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       if (r && !r.isError) recordCall(name, r);
       // A sitter who reads better with large text (set by the parents) gets it on every card.
       if (r?.structuredContent && !r.isError && largeTextTonight(db)) r = { ...r, structuredContent: { ...r.structuredContent, text_size: 'large' } };
-      return status && r && !r.isError ? { ...r, _meta: { ...r._meta, ui: { ...r._meta?.ui, ...status } } } : r;
+      // The card goes on the result too: MCP Apps names it on the tool, Alexa+ looks for it on the response.
+      const view = config._meta?.ui?.resourceUri;
+      return (status || view) && r && !r.isError ? { ...r, _meta: { ...r._meta, ui: { ...r._meta?.ui, ...(view ? { resourceUri: view } : {}), ...status } } } : r;
     };
     const wrapped =
       typeof handler === 'function'

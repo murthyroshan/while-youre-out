@@ -41,7 +41,7 @@ Every tool, API and SDK we used: what for, what worked, what needs work, how onb
 **MCP Apps**
 - **Used for:** one card (`ui://`) for every screen.
 - **What worked:** sandboxed HTML cards and host context (theme, device class).
-- **What needs work:** there's no Echo host to preview them on, which is why we built one.
+- **What needs work:** there's no Echo host to preview them on, which is why we built a stand-in.
 
 **Gemini API**
 - **Used for:**

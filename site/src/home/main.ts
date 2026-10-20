@@ -9,6 +9,8 @@ const canvas = document.querySelector<HTMLCanvasElement>('#scene')!;
 const planSvg = document.querySelector<SVGSVGElement>('#plan')!;
 // No WebGL (switched off, or an old device): the story is still there to read, without the house.
 let made: ReturnType<typeof createScene> | null = null;
+// Let the page paint its words first: building the house is the heaviest thing it does.
+await new Promise<void>((r) => requestAnimationFrame(() => setTimeout(r, 0)));
 try {
   made = createScene(canvas);
 } catch (e) {

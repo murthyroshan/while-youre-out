@@ -11,7 +11,7 @@ Severity: **Blocker** (couldn't do it at all), **Major** (cost hours, or fails s
 - **Expected:** a way to register an MCP endpoint (Streamable HTTP URL, auth) and test it.
 - **Actual:** the console shows "Coming Soon". There is no way to run an add-on on Alexa+.
 - **Severity:** Blocker for testing on the real host.
-- **Workaround:** we built the host ourselves: an [open-source Echo Show simulator](https://github.com/murthyroshan/alexa-addon-simulator) that talks to any MCP add-on the Alexa+ way (voice, MCP Apps cards, tasks, elicitation). We also built an Alexa-hosted custom skill that is an MCP host, so the same add-on runs on today's Alexa.
+- **Workaround:** we built a stand-in for the host: an [open-source Echo Show simulator](https://github.com/murthyroshan/alexa-addon-simulator) that talks to any MCP add-on the Alexa+ way (voice, MCP Apps cards, tasks, elicitation). We also built an Alexa-hosted custom skill that is an MCP host, so the same add-on runs on today's Alexa.
 - **Suggestion:** a developer sandbox before general availability. Register an MCP URL, then test it in the existing developer console simulator with MCP Apps cards rendered on the Echo Show display. Even text-only would let builders find host problems early.
 
 ## 2. Alexa-hosted skills run Node.js 16
@@ -100,3 +100,13 @@ Severity: **Blocker** (couldn't do it at all), **Major** (cost hours, or fails s
 - **Severity:** Minor.
 - **Workaround:** in the browser's developer tools, pinned the renderer at 1:1 and took the screenshot in two halves.
 - **Suggestion:** a "save screenshot" button on the device display that exports at native resolution, or a pop-out full-size view.
+
+## 11. The 401 that starts account linking: the MCP spec and Alexa+ disagree
+
+- **Task:** make account linking work the way an Alexa+ add-on is meant to, for `/linked/mcp`.
+- **Steps:** followed the MCP authorization spec (2025-11-25): a `401` with `WWW-Authenticate: Bearer resource_metadata="..."` so the client can find the protected-resource metadata.
+- **Expected:** the MCP spec's way works with Alexa+.
+- **Actual:** Amazon's [Alexa+ MCP Authentication](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-authentication) page lists "WWW-Authenticate headers in 401 responses" under *What isn't supported*, and the [account-linking](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-account-linking) page shows a 401 with only a JSON body. The same two pages also differ on grants: one says add-ons "support only the Authorization Code Grant", the other says a private server must first support `client_credentials` (scope `mcp:service`) for discovery. We found this late, from another builder's open-source checker, because neither the MCP spec nor the quickstart mentions it.
+- **Severity:** Major. A server that follows the MCP spec to the letter may not link on Alexa+, and nothing can be tested until the add-on console opens.
+- **Workaround:** a bare `401` with a JSON body, the metadata at the root well-known address (which the MCP spec also allows), the `client_credentials` service tier, and discovery that works before linking while tool calls return the 401 ([server/src/oauth.ts](server/src/oauth.ts), [server/test/oauth.test.ts](server/test/oauth.test.ts)).
+- **Suggestion:** a short "Alexa+ vs the MCP authorization spec" table on the authentication page (what's the same, what's different, what's not supported yet), one consistent statement of the supported grants, and a link to it from the MCP Toolkit quickstart.
