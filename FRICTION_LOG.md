@@ -80,3 +80,23 @@ Severity: **Blocker** (couldn't do it at all), **Major** (cost hours, or fails s
 - **Severity:** Minor.
 - **Workaround:** call `listTools()` first ([alexa/src/skill.ts](alexa/src/skill.ts)).
 - **Suggestion:** a clearer error ("list tools first") or a per-call option to send as a task.
+
+## 9. Saying the skill's name the way people say it
+
+- **Task:** open the skill in the developer console's Test tab, the way a parent would say it.
+- **Steps:** the invocation name is "while you are out" (the rules allow an apostrophe only in a possessive, like "sam's", so "you're" can't be used). Typed "open while you're out".
+- **Expected:** Alexa matches the contraction everyone actually says to the invocation name.
+- **Actual:** "I'm not quite sure how to help you with that." Only "open while you are out" works, and nothing in the Test tab says the name didn't match.
+- **Severity:** Major for real families: almost nobody says "you are out" out loud.
+- **Workaround:** the README and the video use the exact phrase "open while you are out".
+- **Suggestion:** match common contractions to invocation names (you're, it's, don't), or let developers list a few spoken variants; and in the Test tab, show the invocation Alexa heard when nothing matched.
+
+## 10. Getting a sharp picture of the Echo Show display
+
+- **Task:** a clear screenshot of the skill's APL card on the console's simulated Echo Show, for the README and the video.
+- **Steps:** Test tab, Device Display, "Hub Landscape Medium".
+- **Expected:** a way to see or save the display at the device's own resolution.
+- **Actual:** the display is drawn scaled down to fit the panel (about 880 pixels wide for a 1280 x 800 screen), with no full-size view or export. A screenshot of it is too small to show.
+- **Severity:** Minor.
+- **Workaround:** in the browser's developer tools, pinned the renderer at 1:1 and took the screenshot in two halves.
+- **Suggestion:** a "save screenshot" button on the device display that exports at native resolution, or a pop-out full-size view.

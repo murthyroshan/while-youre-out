@@ -19,3 +19,8 @@ jobs:
           node-version: 22
       - name: Use the demo like a judge
         run: node scripts/smoke.mjs "${{ vars.DEMO_URL }}"
+      - name: Alexa+ readiness (our open-source simulator's check)
+        uses: murthyroshan/alexa-addon-simulator@v0.1.0
+        with:
+          url: ${{ vars.DEMO_URL }}/mcp
+          min-score: 90

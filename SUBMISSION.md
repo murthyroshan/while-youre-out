@@ -98,5 +98,12 @@ It didn't. Everything here was built during the submission window.
   - tasks and elicitation;
   - a card audit (text size, contrast, tap targets, fit);
   - a readiness score in six parts with exactly what to fix;
-  - robustness tests and a Markdown report.
+  - robustness tests and a Markdown report;
+  - the same checks in CI: `npm run check -- <url>` and a GitHub Action (`murthyroshan/alexa-addon-simulator@v0.1.0`) that fails a build below a minimum score. While You're Out's own twice-daily live-demo check uses it.
+- **Release:** https://github.com/murthyroshan/alexa-addon-simulator/releases/tag/v0.1.0 (MIT, 33 tests, CI on every push).
+- **On the GitHub Marketplace:** https://github.com/marketplace/actions/alexa-add-on-readiness
 - **Why it matters:** until the Alexa+ add-on console opens, builders have no way to see their add-on on an Echo Show. This gives every MCP server that view today, and it's how While You're Out was built and tested.
+
+## Images for Devpost
+- **Thumbnail (3:2):** `media/devpost/00-thumbnail-3x2.jpg` (YouTube, 16:9: `media/devpost/thumbnail-youtube-1280x720.jpg`)
+- **Gallery, in order:** `media/devpost/01-title.jpg` to `13-pay-the-sitter.jpg` (frames from the video, 1920 x 1080)

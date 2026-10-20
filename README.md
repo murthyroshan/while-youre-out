@@ -113,7 +113,7 @@ The rules that decide what may be said give the same answer every time, in under
 | Automated tests on every push | 440+ (server, simulator, Alexa skill), plus a twice-daily check of the live demo |
 | [Every Alexa+ add-on rule](COMPLIANCE.md) | Each with the test that fails the build if it stops being true, and the three we only partly meet |
 
-We wrote the traps and fixed what they found, so the 100% on them says little. That's why we quote the set another AI wrote ([independent.json](server/eval/independent.json)): its first run is frozen in the file, misses and all. A chatbot given the same notes and our ten rules in its prompt scored 270 of 273, which is close. What a prompt can't give is the rest: the same answer every time, a few milliseconds with no AI and no internet (so it works when the model is busy or the connection drops), and actions (the parents alerted, the guide, the timer). The chatbot missed 911 three times, and twice offered to "call Mom", which it can't.
+We wrote the traps and fixed what they found, so the 100% on them says little. That's why we quote the set another AI wrote ([independent.json](server/eval/independent.json)): its first run is frozen in the file, misses and all. A chatbot given the same notes and our ten rules in its prompt scored 384 of 393 (Gemini Flash-Lite, Oct 20), which is close. What a prompt can't give is the rest: the same answer every time, a few milliseconds with no AI and no internet (so it works when the model is busy or the connection drops), and actions (the parents alerted, the guide, the timer). The chatbot missed 911 three times, offered to "call Mom", which it can't, and on four worries about a scrape or a bump either gave no next step or said it was fine. With the AI's second look switched on, the add-on passes 474 of 477: in three lines ("Maya just ate a cashew") the AI turned an exposure into a full emergency, more caution than the rules ask for.
 
 ## How it fits together
 
@@ -131,7 +131,7 @@ flowchart LR
 
 **What's real and what's a stand-in.** Real: the MCP server and its 23 tools, the cards, the safety rules, the parent's phone (Web Push), the sitter's phone, and the add-on on real Alexa through the [Alexa-hosted skill](alexa/README.md). Stand-ins, labelled as such everywhere: the Alexa+ host itself (the Alexa+ add-on console says "Coming Soon", so our simulator plays it), the Ring doorbell, Amazon Pay, the delivery partner and store, the Fire TV and Bee. Each is built against the interface the real one would use.
 
-<p align="center"><img src="media/alexa-real-emergency.png" alt="The Alexa developer console's Echo Hub display: Get Maya and everyone else out now. Step 1 of 4. Call 911 from your phone, with the address. Alerted: Anita, Rahul, Mrs. Lee." width="70%"><br><sub>On today's Alexa, through the Alexa-hosted skill: "the curtains by the stove are engulfed in flames", in the Alexa developer console's Echo Hub display.</sub></p>
+<p align="center"><img src="media/alexa-real-display.png" alt="The Alexa developer console's Echo Hub display: Get Maya and everyone else out now. Step 1 of 4. Call 911 from your phone, with the address. Alerted: Anita, Rahul, Mrs. Lee." width="70%"><br><sub>On today's Alexa, through the Alexa-hosted skill: "the curtains by the stove are engulfed in flames", in the Alexa developer console's Echo Hub display.</sub></p>
 
 ## Run it
 
