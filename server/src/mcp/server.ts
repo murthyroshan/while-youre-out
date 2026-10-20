@@ -61,7 +61,7 @@ function plain(view: string, data: Record<string, unknown>, text: string): CallT
 const VOICE_ROLE: Role = 'carer';
 const CAPABILITIES = /^(what (can|do) you do|what are you (for|able to do)|how (can|do) you help( me)?|what can you help (me )?with|what can i ask( you)?|help)\??!?$/i;
 const ADDRESS = /\b(what'?s|what is|tell me|give me|read me|say)\b.{0,20}\baddress\b|\baddress (here|of (this|the) (house|home|place))\b|\bwhere do (we|they|you|the family) live\b/i;
-const INGESTED = /\b(ate|eaten|has eaten|had|has had|swallowed|drank|took a bite|bit into|tasted|licked|chewed|(gave|fed|let) (her|him|them|the kids?|maya)( have)?)\b/i;
+const INGESTED = /\b(ate|eaten|has eaten|had|has had|swallowed|drank|took a bite|bit into|tasted|sampled|licked|chewed|finished|munched|nibbled|gobbled|snack(ing|ed) on|(was|were|been) eating|(gave|fed|let) (her|him|them|the kids?|maya)( have)?)\b/i;
 /** Upper bound for free-text inputs, so one call can't store megabytes. */
 const MAX_TEXT = 1000;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;

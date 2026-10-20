@@ -339,8 +339,8 @@ const COMMON_ALLERGENS = ['peanut', 'tree nut', 'nut', 'egg', 'milk', 'dairy', '
 // Everyday products that contain an allergen without naming it.
 const ALLERGEN_SYNONYMS: Record<string, string[]> = {
   // Dishes usually made with peanuts or nuts count too: "she ate some pad thai" is an exposure.
-  peanut: ['snickers', "reese's", 'reeses', 'peanut butter', 'pb&j', 'pbj', 'satay', 'nutter butter', 'pad thai', 'trail mix', 'kung pao', 'peanut sauce', 'groundnut', 'groundnuts', 'brittle'],
-  nut: ['nutella', 'almond', 'almonds', 'cashew', 'cashews', 'hazelnut', 'hazelnuts', 'walnut', 'walnuts', 'pecan', 'pecans', 'pistachio', 'pistachios', 'praline', 'marzipan', 'pesto', 'baklava', 'nougat', 'macaron', 'macarons', 'frangipane', 'trail mix'],
+  peanut: ['snickers', "reese's", 'reeses', 'peanut butter', 'pb&j', 'pbj', 'satay', 'nutter butter', 'pad thai', 'trail mix', 'kung pao', 'peanut sauce', 'groundnut', 'groundnuts', 'brittle', 'peenut', 'penut', 'pnut'],
+  nut: ['nutty', 'nutella', 'almond', 'almonds', 'cashew', 'cashews', 'hazelnut', 'hazelnuts', 'walnut', 'walnuts', 'pecan', 'pecans', 'pistachio', 'pistachios', 'praline', 'marzipan', 'pesto', 'baklava', 'nougat', 'macaron', 'macarons', 'frangipane', 'trail mix'],
   'tree nut': ['nutella', 'almond', 'cashew', 'hazelnut', 'walnut', 'pecan', 'pistachio', 'marzipan'],
   egg: ['mayo', 'mayonnaise', 'meringue', 'custard'],
   milk: ['cheese', 'butter', 'yogurt', 'yoghurt', 'ice cream', 'cream'],

@@ -8,7 +8,7 @@ import { withRoles, normalise, type FamilyNames } from './safety.js';
 
 /** Words that might mean danger. Deliberately broad: a false hint only costs a quick AI check. */
 const HINT =
-  /\b(spark\w*|smok\w*|burn\w*|fire|flame\w*|gas|smell\w*|leak\w*|flood\w*|water|electric\w*|shock\w*|wire\w*|outlet|socket|blood\w*|bleed\w*|cut|hurt\w*|injur\w*|fell|fall\w*|fallen|head|breath\w*|chok\w*|gag\w*|cough\w*|blue|pale|grey|gray|limp|floppy|faint\w*|dizzy|confus\w*|seiz\w*|shak\w*|fit|unconscious|unresponsive|wake|waking|asleep|swallow\w*|ate|drank|drink\w*|pill\w*|tablet\w*|bleach|chemical\w*|poison\w*|battery|batteries|magnet\w*|swell\w*|swollen|rash|hives|itch\w*|vomit\w*|threw up|throwing up|fever|hot|cold|stuck|trapped|missing|lost|gone|find|inside|broke\w*|break\w*|window|stranger|someone|man|men|door|scream\w*|crying|help|scared|panic\w*|weird|wrong|strange|can'?t|won'?t|not)\b/i;
+  /\b(spark\w*|smok\w*|burn\w*|fire|flame\w*|gas|smell\w*|leak\w*|flood\w*|water|electric\w*|shock\w*|wire\w*|outlet|socket|blood\w*|bleed\w*|cut|hurt\w*|injur\w*|fell|fall\w*|fallen|head|breath\w*|chok\w*|gag\w*|cough\w*|blue|pale|grey|gray|limp|floppy|faint\w*|dizzy|confus\w*|seiz\w*|convuls\w*|jerk\w*|twitch\w*|stiff|rolled|shak\w*|fit|unconscious|unresponsive|wake|waking|asleep|swallow\w*|ate|drank|drink\w*|pill\w*|tablet\w*|bleach|chemical\w*|poison\w*|battery|batteries|magnet\w*|swell\w*|swollen|rash|hives|itch\w*|vomit\w*|threw up|throwing up|fever|hot|cold|stuck|trapped|missing|lost|gone|find|inside|broke\w*|break\w*|window|stranger|someone|man|men|door|scream\w*|crying|help|scared|panic\w*|weird|wrong|strange|can'?t|won'?t|not)\b/i;
 
 export const mightBeDanger = (text: string) => HINT.test(normalise(text));
 

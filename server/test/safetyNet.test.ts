@@ -42,13 +42,13 @@ async function house(ai: AiClient) {
 }
 
 test('the rules missed it, the words hint at danger, the AI sees an emergency: it becomes one', async () => {
-  const ai = fakeAi(/limp and floppy/);
+  const ai = fakeAi(/floppy and pale/);
   const h = await house(ai);
-  const r = await h.call('ask_house', { question: 'Maya has gone limp and floppy on the sofa' });
+  const r = await h.call('ask_house', { question: 'Maya is all floppy and pale on the sofa' });
   assert.equal(r.structuredContent.emergency, true);
   assert.equal(r.structuredContent.escalated_by, 'ai');
-  assert.match(ai.asked[0], /the child has gone limp/, 'the model gets roles, not the family\'s names');
-  const logged = await h.call('log_event', { text: 'Maya went limp and floppy' });
+  assert.match(ai.asked[0], /the child is all floppy/, 'the model gets roles, not the family\'s names');
+  const logged = await h.call('log_event', { text: 'Maya seems floppy and pale' });
   assert.equal(logged.structuredContent.emergency, true);
   await h.close();
   resetClock();

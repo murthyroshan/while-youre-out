@@ -35,7 +35,7 @@ const SCRIPTS: Record<string, Line[]> = {
     { heard: 'Maya misses her mom.', topic: 'Goodnight', said: `${A.misses.said}\n"Goodnight, my love. Sweet dreams."`, kind: 'message' },
   ],
   judges: [
-    { topic: 'Measured', said: '91% on 55 held-out safety lines, written after the fixes and run once.' },
+    { topic: 'Measured', said: '85% on 120 safety lines another AI wrote, on the first run, before any fix.' },
     { topic: 'Measured', said: '49 of 49 emergencies recognised by the rules alone. No false alarms on 308 other lines.' },
     { topic: 'Measured', said: '19 ms p95 per tool call, against a 500 ms budget. over 440 tests on every push.' },
     { topic: 'Honestly', said: 'The Alexa+ host is our open-source simulator until add-on registration opens. Everything else is real or labelled.', kind: 'offline' },

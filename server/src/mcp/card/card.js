@@ -43,6 +43,8 @@
     else if (/show.?21/.test(dc)) s = 2.5;
     else if (/show|hub/.test(dc)) s = 1.667;
     else s = Math.max(0.75, Math.min(3, W / BASE_W));
+    // A screen hung in portrait (Echo Show 15 on its side) gets the stacked layout, zoomed to its width.
+    if (!host.isMobile && W >= 600 && H > W * 1.2) { compact = true; s = Math.min(3, W / 480); }
     // The parents set large text for a sitter who needs it (Dadi): everything a fifth bigger.
     if (host.large) s *= 1.2;
     var dark = host.theme ? host.theme !== 'light' : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);

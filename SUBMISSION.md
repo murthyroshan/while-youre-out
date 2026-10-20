@@ -62,8 +62,8 @@ The full [friction log](FRICTION_LOG.md) has the details.
 
 ## Accomplishments
 - **Safety, measured:**
-  - 357 things a sitter might say, with 49 of 49 emergencies recognised and no false alarms on the other 308;
-  - 55 held-out lines written after the fixes, scoring 50 of 55 (91%) on their only run. That's the honest number.
+  - 120 lines another AI wrote without seeing our tests: 102 of 120 (85%) on the first run, before any fix. That's the honest number. The rules alone missed 8 of its 12 emergencies; the AI's second look caught 7 of them, and the rules were fixed the same day;
+  - 357 things a sitter might say that we wrote, with 49 of 49 emergencies recognised and no false alarms on the other 308, and 55 held-out lines scoring 50 of 55 (91%) on their only run.
 - **Speed and robustness:** 19 ms p95 per tool call, against a 500 ms budget, and over 440 automated tests on every push.
 - **Runs on real Alexa** today.
 

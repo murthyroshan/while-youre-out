@@ -6,7 +6,7 @@
     <title>Safety · While You're Out</title>
     <meta name="description" content="Safety enforced in code, measured on 357 things a sitter might say, and still working when the internet drops." />
 
-    <script type="module" crossorigin src="/while-youre-out/assets/page-Dhv3iHY9.js"></script>
+    <script type="module" crossorigin src="/while-youre-out/assets/page-BhvzGmtX.js"></script>
     <link rel="stylesheet" crossorigin href="/while-youre-out/assets/page-BJIlswXz.css">
   </head>
   <body class="page" data-page="safety">
@@ -61,13 +61,15 @@
         </header>
         <div>
           <div class="stats">
-            <div class="stat"><b>91%</b><span>on 55 held-out lines, written after the fixes and run once: 50 of 55. The fairest number here.</span><small>eval/REPORT.md</small></div>
+            <div class="stat"><b>85%</b><span>on 120 lines another AI wrote without seeing ours, run once before any fix: 102 of 120. The fairest number here.</span><small>eval/independent.json</small></div>
+            <div class="stat"><b>7 / 8</b><span>emergencies the rules missed there that the AI's second look caught. The eighth, a seizure, after a one-word fix; the rules now catch all of them.</span><small>eval/second-look.ts</small></div>
+            <div class="stat"><b>91%</b><span>on 55 held-out lines we wrote after the fixes, run once: 50 of 55</span><small>eval/REPORT.md</small></div>
             <div class="stat"><b>49 / 49</b><span>emergencies recognised by the rules alone, with no false alarms on the 308 other lines</span><small>English · Hindi · Spanish</small></div>
             <div class="stat"><b>270 / 273</b><span>for a chatbot given the same notes and our rules in its prompt. Close; it missed 911 three times.</span><small>Gemini Flash-Lite, temperature 0</small></div>
             <div class="stat"><b>&lt;10 ms</b><span>per answer through the add-on's own rules, with no AI and no internet</span><small>p95, in-process, on a laptop · each run's timing in eval/REPORT.md</small></div>
           </div>
           <div class="honest">
-            <p><b>Read it honestly.</b> We wrote the traps and fixed what the first run found, so the add-on's 100% on them says little; that's why the held-out lines are reported on their own, and why an independent set written by a model that never saw ours is next. A well-prompted chatbot gets close on words. What a prompt can't give is the same answer every time, an answer when the model is busy or the connection drops, and actions: the parents alerted, the guide, the timer. Every reply is in <a href="https://github.com/murthyroshan/while-youre-out/blob/main/server/eval/REPORT.md">the report</a> to check.</p>
+            <p><b>Read it honestly.</b> We wrote the traps and fixed what the first run found, so the add-on's 100% on them says little; that's why we report two sets we didn't tune for. 55 held-out lines we wrote after the fixes scored 91%. 120 lines another AI wrote without seeing ours scored 85% on the first run, and the rules alone missed 8 of its 12 emergencies (fire, smoke, gas, a break-in, choking, a child who won't wake, a seizure, heavy bleeding). The AI's second look caught 7 of those 8, and the rules were fixed the same day. A well-prompted chatbot gets close on words. What a prompt can't give is the same answer every time, an answer when the model is busy or the connection drops, and actions: the parents alerted, the guide, the timer. Every reply is in <a href="https://github.com/murthyroshan/while-youre-out/blob/main/server/eval/REPORT.md">the report</a> to check.</p>
           </div>
         </div>
       </section>

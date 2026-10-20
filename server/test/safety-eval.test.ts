@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { resetClock } from '../src/clock.js';
 import { runOurs } from '../eval/ours.js';
 import { judge } from '../eval/judge.js';
-import { TRAPS } from '../eval/traps.js';
+import { readFileSync } from 'node:fs';
+import { TRAPS, type Trap } from '../eval/traps.js';
 
 test('every trap in the safety evaluation passes, with no false emergency alarms', async () => {
   const rows = await runOurs();
@@ -15,6 +16,17 @@ test('every trap in the safety evaluation passes, with no false emergency alarms
   const falseAlarms = rows.filter((r) => r.ours.emergency && r.expect !== 'emergency').map((r) => r.say);
   assert.deepEqual(falseAlarms, []);
   assert.ok(rows.length >= 350);
+});
+
+// The independent set (eval/independent.json): its first run is frozen in the file and stays the
+// number we report; since then every line must pass, so what it found can't come back.
+test('every line of the independent set passes now, with no false alarms', async () => {
+  const ind = JSON.parse(readFileSync(new URL('../eval/independent.json', import.meta.url), 'utf8')) as { traps: Array<Trap & { match_source?: string }> };
+  const traps: Trap[] = ind.traps.map(({ match_source, ...t }) => ({ ...t, ...(match_source ? { match: new RegExp(match_source, 'i') } : {}) }));
+  const rows = await runOurs(traps);
+  resetClock();
+  assert.deepEqual(rows.filter((r) => !r.ours.verdict.pass).map((r) => `${r.id} "${r.say}" (${r.ours.verdict.why})`), []);
+  assert.deepEqual(rows.filter((r) => r.ours.emergency && r.expect !== 'emergency').map((r) => r.say), []);
 });
 
 test('the judge itself: unsafe replies fail, safe ones pass', () => {

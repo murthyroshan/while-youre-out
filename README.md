@@ -1,56 +1,137 @@
+<div align="center">
+
+<a href="https://murthyroshan.github.io/while-youre-out/"><img src="media/site-home.jpg" alt="While You're Out: a cutaway of the family's home at dusk, with 'Tonight, Priya is looking after Maya.'" width="100%"></a>
+
 # While You're Out
 
 **Your Echo Show knows your house. Tonight it hands that knowledge to whoever is looking after your kids, and keeps you one tap away.**
 
-A guest mode for the smart home, built as an Alexa+ add-on (an MCP server, spec 2025-11-25, Streamable HTTP). The babysitter, grandparent or nanny asks the kitchen Echo Show anything; it answers in the parents' own words, asks the parents when their notes don't cover it, and in an emergency walks the sitter through the family's own plan, step by step, even when the internet drops.
+[![Tests](https://github.com/murthyroshan/while-youre-out/actions/workflows/test.yml/badge.svg)](https://github.com/murthyroshan/while-youre-out/actions/workflows/test.yml)
+[![Live demo check](https://github.com/murthyroshan/while-youre-out/actions/workflows/smoke.yml/badge.svg)](https://github.com/murthyroshan/while-youre-out/actions/workflows/smoke.yml)
+![MCP 2025-11-25](https://img.shields.io/badge/MCP-2025--11--25-1ac3eb)
+![p95 19 ms](https://img.shields.io/badge/p95-19%20ms-blue)
+[![MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
-**Try it:** [the highlights, 2½ minutes hands-free](https://while-youre-out-wpj3.onrender.com/?moment=highlights) (scan the QR code and be Mom on your own phone) · [the website](https://murthyroshan.github.io/while-youre-out/) · [the 3-minute video](#) · MCP endpoint `https://while-youre-out-wpj3.onrender.com/mcp`. Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track.
+**[▶ Watch the highlights live](https://while-youre-out-wpj3.onrender.com/?moment=highlights)** · [Website](https://murthyroshan.github.io/while-youre-out/) · [The 3-minute video](#) · [Echo Show simulator (open source)](https://github.com/murthyroshan/alexa-addon-simulator) · [Run it on today's Alexa](alexa/README.md)
+
+<sub>An Alexa+ add-on: a self-hosted MCP server (spec 2025-11-25, Streamable HTTP). Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track.</sub>
+
+<br>
+
+<img src="media/highlights.gif" alt="The highlights: Mom pastes her WhatsApp message, a stranger knocks and the photo goes to her phone, a question waits for her answer, an emergency is walked through step by step, and Mom's goodnight message plays at lights out." width="100%">
+
+</div>
+
+## In 20 seconds
+
+The babysitter, grandparent or nanny asks the kitchen Echo Show anything. It answers in the parents' own words, asks the parents when their notes don't cover it, and in an emergency walks the sitter through the family's own plan, one step at a time, even when the internet drops.
+
+- **Setup is the message you'd send anyway.** Paste the WhatsApp message; each line becomes a rule the parent confirms. Works without any AI.
+- **"Can she have chicken satay?"** gets *"No. That can have peanuts in it."* Never "it's safe", never a dose, never a stranger called safe.
+- **What the notes don't cover goes to the parents**, as an MCP Task that waits for an answer from their lock screen.
+- **"Her lips are swelling."** The family's own plan, step by step, the second-EpiPen timer, "Anita and Rahul have been alerted", and "Call Anita" one tap away on the sitter's phone.
+- **Lights out:** Mom's goodnight message plays for Maya; the parents get "All's well at home".
+
+**Try it in a minute:** [the highlights](https://while-youre-out-wpj3.onrender.com/?moment=highlights) play hands-free in 2½ minutes. Scan the QR code and be Mom on your own phone. Or jump straight to [the door](https://while-youre-out-wpj3.onrender.com/?moment=door), [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) or [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight). MCP endpoint: `https://while-youre-out-wpj3.onrender.com/mcp`.
+
+<sub>It runs on a free host: after a quiet spell the first load can take up to a minute. Every visitor gets their own copy of the demo house, and `/version` shows which commit is live.</sub>
 
 ## Why
 
-Every time parents go out, someone else holds their child's safety, and what they need to know lives in a WhatsApp thread, a fridge note and a parent's head. About 1 in 20 U.S. children has a food allergy ([CDC, 2024 data](https://www.cdc.gov/nchs/pressroom/releases/20260108.html)); more than 40% of them have had a severe reaction, and epinephrine is needed within minutes ([FARE, 2024](https://www.foodallergy.org/sites/default/files/2024-07/FARE%20Food%20Allergy%20Facts%20and%20Statistics_April2024.pdf)).
+Every time parents go out, someone else holds their child's safety, and what they need to know lives in a WhatsApp thread, a fridge note and a parent's head. About 1 in 20 U.S. children has a food allergy ([CDC, 2024 data](https://www.cdc.gov/nchs/pressroom/releases/20260108.html)); more than 40% of them have had a severe reaction, and epinephrine is needed within minutes ([FARE, 2024](https://www.foodallergy.org/sites/default/files/2024-07/FARE%20Food%20Allergy%20Facts%20and%20Statistics_April2024.pdf)). A sitter shouldn't be scrolling WhatsApp when that happens.
 
-**What parents and carers told us.** We talked to six people in India (three parents, a grandparent and two babysitters; a small, informal sample, an early signal rather than proof). Parents hand over by talking and WhatsApp and still worry something will be forgotten; carers call the parents most about food, sleep and a crying child, and feel they call too often; everyone said it must be simple, private and still let the carer reach the parents directly. What we changed because of it:
+**What parents and carers told us.** We talked to six people in India: three parents, a grandparent and two babysitters. It's a small, informal sample, so read it as an early signal rather than proof.
+
+- **Parents** hand over by talking and WhatsApp, and still worry something will be forgotten.
+- **Carers** call the parents most about food, sleep and a crying child, and feel they call too often.
+- **Everyone** said it must be simple and private, and must still let the carer reach the parents directly.
+
+What we changed because of it:
 
 1. In an emergency the Echo Show says at once that the parents have been alerted, and the sitter's phone puts a one-tap "Call Anita" under the step (911 stays first).
 2. When the sitter notes the child is asleep, the parents get one quiet "All's well at home".
-3. Setting up is pasting the WhatsApp message you'd send anyway: each line becomes a rule you confirm, and it works without any AI.
+3. Setting up is pasting the WhatsApp message you'd send anyway, and it works without any AI.
+
+## See it
+
+<table>
+<tr>
+<td width="50%"><img src="media/echo-setup.jpg" alt="Echo Show answering from Mom's pasted note, the parent's phone beside it"><br><b>6:00 pm, setup.</b> Mom pasted her WhatsApp message. "Can Maya have a yogurt?" is answered in her words.</td>
+<td width="50%"><img src="media/echo-satay.jpg" alt="Echo Show: No. That can have peanuts in it."><br><b>A question.</b> "Can Maya have chicken satay?" Satay is usually made with peanuts, so the answer is no, with the parents' own allergy note.</td>
+</tr>
+<tr>
+<td><img src="media/echo-door.jpg" alt="Echo Show: Don't open the door. The parent's phone shows the doorbell photo with Let them in / Don't open."><br><b>8:10 pm, a knock.</b> Not on tonight's list: "Don't open the door." The doorbell photo goes to Mom, who answers from her lock screen.</td>
+<td><img src="media/echo-emergency.jpg" alt="Echo Show: Help has taken over. The parent's phone shows the emergency log."><br><b>8:11 pm, the emergency.</b> The family's plan, step by step, with every parent phone following live, until help takes over.</td>
+</tr>
+<tr>
+<td><img src="media/echo-goodnight.jpg" alt="Echo Show: Mom left a message for Maya."><br><b>8:30 pm, lights out.</b> Mom's goodnight message plays for Maya, then the screen dims to warm amber.</td>
+<td><img src="media/game-emergency.jpg" alt="The website's playable evening: Maya says My lips feel big, and the real add-on's words show on the kitchen Echo Show."><br><b>Play the evening.</b> On <a href="https://murthyroshan.github.io/while-youre-out/game.html">the website</a> you're the sitter. The kitchen Echo Show's words are the add-on's own, recorded from it.</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td width="34%" valign="top"><img src="media/sitter-phone.png" alt="The sitter's phone: Emergency step 1 of 5, and a blue Call Anita button."></td>
+<td valign="top">
+
+**The sitter's phone.** The Echo Show shows a Guest Pass QR code; the sitter scans it and has tonight on their own phone. In an emergency it shows the same step as the kitchen screen, and *Done* on either moves both. "Call Anita" is one tap away, and the whole guide works with no internet at all.
+
+**The parent's phone** is a web app with Web Push: questions with one-tap answers on the lock screen, the doorbell photo, a live view of the emergency with "I'm on my way", the goodnight recorder, and "All's well at home".
+
+**The Echo Show** gets one MCP Apps card for every screen, sized per Echo device, light and dark. The Tonight screen refreshes itself by calling a tool through the host.
+
+<img src="media/site-safety.jpg" alt="The website's Safety page" width="100%">
+
+</td>
+</tr>
+</table>
 
 ## Not a Q&A bot
 
-The track's own list of what makes an Alexa+ add-on creative, and where each is here:
+The track's own list of what makes an Alexa+ add-on creative, and where each one is here:
 
 | The rules say | While You're Out |
 | --- | --- |
-| Agentic workflow across services | A question the notes don't cover becomes an **MCP Task** that waits for a parent's answer from their lock screen; the doorbell, dinner order and payment each run through the parents' phones. |
+| Agentic workflow across services | A question the notes don't cover becomes an **MCP Task** that waits for a parent's answer from their lock screen. The doorbell, the dinner order and the payment each run through the parents' phones. |
 | Context-aware, state across sessions | Each evening is remembered: sitter profiles (a grandparent gets large text, known answers aren't re-checked), "since last time" changes, the parents' rules kept between evenings. |
 | Purchasing | Dinner from an allergy-checked menu, approved by a parent; "Pay Priya" through URL elicitation on the parent's own phone. |
 | Media support, cards | One MCP Apps card for every screen (Tonight, the emergency guide, the doorbell photo, the goodnight message), sized per Echo device, light and dark. |
 | MCP Apps, Agent Skills | MCP Apps cards; an [Agent Skill](agent-skill/SKILL.md) for any agent hosting it; form and URL elicitation; resources with subscriptions. |
 
-And safety is code, not a prompt: never "it's safe", never a dose, emergencies first, the address shown and never spoken. Measured on [357 things a sitter might say](server/eval/REPORT.md), with the held-out score reported as the honest one.
+## Safety is code, not a prompt
 
-**Live demo notes.** Every visitor gets their own copy of the demo house; `/h/<any 16+ letters>/mcp` gives you a private MCP house; `/version` shows which commit is live. It's on a free host: after a quiet spell the first load can take up to a minute.
+The rules that decide what may be said give the same answer every time, in under 10 ms, with no AI and no internet. An AI's second look can only add caution, never remove it.
 
-## An evening with While You're Out
-
-1. **6:00 pm.** "Priya is babysitting tonight" (or "We're heading out", and the Echo Show asks who in a form). The screen turns into **Tonight**: what's next with a countdown, Maya and Bruno with an allergy badge, big buttons. A three-question **handover check** before the parents leave; their phones see "Handover 3/3 ✓".
-2. **Questions** are answered in the parents' exact words: "Can she have the cookies?" gets the peanut allergy and a guard, never "it's safe". Small questions get **Shadow Parent**: "the parents said yes 4 out of 5 times on weekends".
-3. **Someone knocks.** The Ring doorbell rings; "Should I open the door?" checks who the parents said to expect, delivery windows and the parents' door rule. Unknown visitor: "Don't open", and the doorbell photo goes to the parents' lock screen with **Let them in / Don't open** buttons.
-4. **"Her lips are swelling and she can't breathe."** The **Emergency Copilot** runs the doctor's plan one step at a time ("done", "next"), starts the 5-minute timer for the second EpiPen, and every parent phone follows live. Mom taps "I'm on my way"; the Echo Show says "Anita is on the way home". **If the internet drops right then, the guide keeps going** on the kitchen screen and on the sitter's phone.
-5. **8:00 pm, lights out.** **Mom's goodnight message** plays on the Echo Show ("Mom left a message for Maya"), then the screen goes dim and warm. The parents get "Maya heard your goodnight message 💛".
-6. **Morning.** The **debrief**: night wakes, asleep time against the plan, what ran out (to the shopping list). "Pay Priya": hours times her rate, approved on the parent's phone (never on the shared screen), and the Echo Show confirms.
-
-That evening is the product. Everything else below (the Guest Pass, ordering dinner, receipts, the whole house, sitter profiles, Hindi, the Alexa skill) is there to make that one evening work for more families.
-
-**What's real and what's a stand-in.** Real: the MCP server and its 23 tools, the cards, the safety rules, the parent's phone (Web Push), the sitter's phone, and the add-on on real Alexa through the [Alexa-hosted skill](alexa/README.md). Stand-ins, labelled as such everywhere: the Alexa+ host itself (the Alexa+ add-on console says "Coming Soon"; our simulator plays it), the Ring doorbell, Amazon Pay, the delivery partner and store, the Fire TV and Bee. Each is built against the interface the real one would use.
-
-## What's here
-
-| Folder | What it is |
+| Measured | Result |
 | --- | --- |
-| `server/` | The MCP server (spec 2025-11-25, Streamable HTTP, MCP Apps, Tasks, elicitation), the parent's phone page, and the payment approval page |
-| `simulator/` | An Echo Show 15 simulator that stands in for Alexa+: voice, MCP Apps cards, tasks, elicitation, a guided demo |
+| [357 things a sitter might say](server/eval/REPORT.md): hidden allergens, "she already ate it", emergencies in three languages, doses, the alarm code, a stranger at the door | 357 of 357 |
+| Emergencies in our own set | 49 of 49 by the rules alone, with no false alarms on the other 308 |
+| **120 lines another AI wrote without seeing ours (the honest number)** | **102 of 120 (85%)** on the first run, before any fix. The rules alone missed 8 of its 12 emergencies; the AI's second look caught 7 of them. All 120 pass now and run on every push |
+| Held-out lines we wrote after the fixes | 50 of 55 (91%) on their only run; the report names the five it missed |
+| Speed, every tool over real MCP HTTP ([SPEED.md](server/eval/SPEED.md)) | p95 19 ms, against the MCP Toolkit's 500 ms |
+| Load and fuzz | 2,000 calls from 50 sessions at once, 1,500 hostile requests: no errors |
+| Automated tests on every push | 440+ (server, simulator, Alexa skill), plus a twice-daily check of the live demo |
+| [Every Alexa+ add-on rule](COMPLIANCE.md) | Each with the test that fails the build if it stops being true, and the three we only partly meet |
+
+We wrote the traps and fixed what they found, so the 100% on them says little. That's why we quote the set another AI wrote ([independent.json](server/eval/independent.json)): its first run is frozen in the file, misses and all. A chatbot given the same notes and our ten rules in its prompt scored 270 of 273, which is close. What a prompt can't give is the rest: the same answer every time, a few milliseconds with no AI and no internet (so it works when the model is busy or the connection drops), and actions (the parents alerted, the guide, the timer). The chatbot missed 911 three times, and twice offered to "call Mom", which it can't.
+
+## How it fits together
+
+```mermaid
+flowchart LR
+  S(("Sitter<br/>(voice)")) --> H["Alexa+ host<br/>our Echo Show simulator,<br/>or the Alexa skill on today's Alexa"]
+  H -- "MCP · Streamable HTTP<br/>tools, MCP Apps cards, Tasks, elicitation" --> M["While You're Out<br/>MCP server"]
+  M --> R["Safety rules<br/>deterministic, no AI, under 10 ms"]
+  M --> D[("SQLite<br/>one house per family")]
+  M -- "Web Push, lock-screen answers" --> P["Parents' phones"]
+  P -- "answers" --> M
+  M -- "Guest Pass" --> G["Sitter's phone<br/>works offline"]
+  M -. "second look: can only add caution" .-> A["Gemini"]
+```
+
+**What's real and what's a stand-in.** Real: the MCP server and its 23 tools, the cards, the safety rules, the parent's phone (Web Push), the sitter's phone, and the add-on on real Alexa through the [Alexa-hosted skill](alexa/README.md). Stand-ins, labelled as such everywhere: the Alexa+ host itself (the Alexa+ add-on console says "Coming Soon", so our simulator plays it), the Ring doorbell, Amazon Pay, the delivery partner and store, the Fire TV and Bee. Each is built against the interface the real one would use.
+
+<p align="center"><img src="media/alexa-real-emergency.png" alt="The Alexa developer console's Echo Hub display: Get Maya and everyone else out now. Step 1 of 4. Call 911 from your phone, with the address. Alerted: Anita, Rahul, Mrs. Lee." width="70%"><br><sub>On today's Alexa, through the Alexa-hosted skill: "the curtains by the stove are engulfed in flames", in the Alexa developer console's Echo Hub display.</sub></p>
 
 ## Run it
 
@@ -63,160 +144,16 @@ npm run dev:sim      # Echo Show simulator on http://127.0.0.1:5173 (second term
 npm test             # the server and simulator suites (the Alexa skill: npx tsx --test alexa/test/*.test.ts)
 ```
 
-For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator's **guided demo** then walks through the whole evening one step at a time: one button says the next line, and it moves the house clock and rings the doorbell for you. Its first step resets the demo family, so a reload mid-demo starts clean (`POST /demo/reset`, demo mode only). The house clock is under Settings. "Open the parent's phone" opens the parent page.
+For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator's **guided demo** then walks through the whole evening one step at a time: one button says the next line, and it moves the house clock and rings the doorbell for you. Its first step resets the demo family, so a reload mid-demo starts clean (`POST /demo/reset`, demo mode only).
+
+Any MCP host works too: [/connect](https://while-youre-out-wpj3.onrender.com/connect) gives you a demo house of your own with its MCP address and how to add it to Claude, Claude Code, VS Code or the MCP Inspector, plus that house's parent page.
+
+<details>
+<summary><b>Hosting, notifications and settings</b></summary>
 
 **One URL for everything (hosting):** `npm run build -w simulator`, then the server also serves the simulator at `/`. The `Dockerfile` builds that into one container. The live demo runs it on Render's free plan (Docker, health check `/health`, `HOST=0.0.0.0`, `WYO_DEMO=1`, `WYO_PUBLIC_URL`, `ALLOWED_HOSTS`, plus the `WYO_PARENT_KEY` and `GEMINI_API_KEY` secrets). UptimeRobot checks `/health` every 5 minutes so the free instance doesn't sleep; `.github/workflows/keepalive.yml` is a backup ping (set the repository variable `DEMO_URL`). Twice a day `.github/workflows/smoke.yml` uses the live demo the way a judge does (`node scripts/smoke.mjs <url>`: a fresh house over MCP, a house-manual answer, an emergency, the parent page) and fails loudly if anything is broken.
 
 **Notifications on the parent's phone:** tap "Turn on" on the parent page. Android Chrome and desktop browsers work straight away; on an iPhone, first use Share → Add to Home Screen and open it from there (iOS 16.4+). Push needs https, or `localhost` on the same computer.
-
-## What judges can try
-
-| Where | What to try |
-| --- | --- |
-| Straight to a moment | [The highlights, 2½ minutes](https://while-youre-out-wpj3.onrender.com/?moment=highlights) · [The knock at the door](https://while-youre-out-wpj3.onrender.com/?moment=door) · [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) · [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight) · [paying the sitter](https://while-youre-out-wpj3.onrender.com/?moment=pay). Also `handover`, `questions`, `evening`, `ask`. The evening skips ahead silently, then plays from there |
-| Your own phone | "Use your own phone" (or the QR code on the welcome card) opens the parent page for your demo house on your phone. Priya's questions arrive there, and "Watch the evening" waits for your answer |
-| Echo Show | The **Tonight** screen (refreshes itself), every answer card, the doorbell, the emergency guide, the goodnight message, the who's-babysitting form, paying the sitter |
-| Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
-| Any MCP host | [/connect](https://while-youre-out-wpj3.onrender.com/connect) gives you a demo house of your own with its MCP address and how to add it to Claude, Claude Code, VS Code or the MCP Inspector, plus that house's parent page. An agent hosting it should follow the [Agent Skill](agent-skill/SKILL.md) |
-| Today's Alexa | The free Alexa-hosted skill in [alexa/](alexa/README.md): the same add-on on an Echo, set up in about five minutes |
-
-## Features
-
-| Feature | What it does |
-| --- | --- |
-| Tonight screen | The Echo Show's home screen during a handoff: what's next with a countdown ring, the plan as tiles, children and pets with allergy badges, the parents' latest answer, and big buttons (Ask a parent, What's next?, Call Mom, Emergency). Dims to warm amber after lights out. An MCP App that calls `home_screen` through the host to stay current |
-| Front Door Guard | Doorbell (Ring) + who the parents expect tonight + delivery windows + the parents' door rule. Deliveries: no need to open. Expected: check first, the parents confirm. Anyone else: don't open, and the doorbell photo goes to the parents as an urgent question they can answer from the lock screen. Never calls a stranger safe |
-| Emergency Copilot | The fixed script one step at a time ("done", "next", "it's over"), the plan's timers with spoken warnings, a paramedic sheet, and the parents' phones following live; a parent's "I'm on my way" shows and is spoken on the Echo Show |
-| Goodnight message | A parent records voice or video before leaving; it plays at lights out or when the child misses them, and the parent hears that it played |
-| Pay the sitter | Hours (house clock, rounded up to the quarter hour) times the rate from the handoff form, plus a tip, approved on the parent's phone through MCP URL elicitation; the Echo Show hears it's done (`notifications/elicitation/complete`). Demo only: no money moves |
-| Ask on screen | "We're heading out" with no name: an MCP form on the Echo Show asks who, their language and their rate |
-| Shopping list agent | "We ran out of diapers": the parents are asked at once, on their lock screen, "Add diapers to the shopping list?" (Add to list / Not now). A yes puts it on the list (the family's Alexa shopping list in production; simulated here) and the Echo Show says so. Never a house rule |
-| Lights out for the house | At bedtime the device dims the child's room, turns on the night light and checks the front door is locked. Simulated, and labelled so on screen: in production Alexa+ does this with the family's own smart home |
-| Sitter first | Alexa+ add-ons can't start talking on their own. So whatever the sitter hasn't heard yet (a parent's answer, a reminder that came due) is told at the start of their next reply. Answers the device already announced are never repeated |
-| Live Tonight Plan | Tonight's timeline from the parents' routine, day-specific rules, the parents' own timing rules ("napped till 5" moves bedtime), reminders as steps come due |
-| Teach-back | Three questions before the parents leave, checked without AI; wrong answers get the parents' words |
-| Shadow Parent | How the parents usually answer small questions, by weekday or weekend; never decides, never for food, medicine or safety |
-| Busy mode | "Urgent only" for 1–3 hours: small questions wait, urgent ones still come through |
-| Morning debrief | Night wakes across evenings, asleep time vs the plan, teach-back result, supplies to the shopping list, "save as a house rule", Pay |
-| Phone notifications | Web Push to the parents' phones with the page closed, routed by call order and escalation, with one-tap answers on the lock screen |
-| Family setup | Children and pets with allergies in the parent's words, call order, doctors kept out of the question chain, address, time zone; reset to the demo family or start fresh |
-| House Brain | Photo of the fridge note, the doctor's PDF or a WhatsApp message becomes proposed rules the parent confirms; codes and passwords are left out |
-| Bilingual relay | Replies in the sitter's language, the parents' words kept on screen; emergency lines use fixed translations |
-| Since your last visit | A returning sitter hears only what changed |
-
-## MCP tools
-
-| Tool | Purpose |
-| --- | --- |
-| `start_handoff` | Sitter mode and tonight's briefing; with no name, asks on screen (form elicitation) |
-| `home_screen` | The Tonight screen (`visibility: ["model", "app"]`; the card refreshes itself with it) |
-| `teachback` | The handover check |
-| `tonight_plan` | Tonight's timeline; announces steps as they come due, and the goodnight message at lights out |
-| `ask_house` | Answers in the parents' exact words; food and medicine always carry a guard; Shadow Parent |
-| `where_is` | Where something is kept, with the parents' photo |
-| `log_event` | The evening's log; allergen and medicine alerts; plan changes |
-| `ask_parent` / `check_parent_answer` | Ask a parent without blocking |
-| `ask_parent_and_wait` | MCP task: completes when a parent answers, escalates down the call order; door questions carry the photo; shopping questions (`shopping_item`) put the item on the list on a yes |
-| `door_check` | Front Door Guard |
-| `emergency` | Fixed safety script from the family's own data; alerts every contact; opens the guide |
-| `emergency_step` | Move the guide on: done, next, back, resolved |
-| `emergency_status` | Card and device only (MCP Apps visibility `app`): the screen's live state, timers and spoken warnings |
-| `play_message` | The parents' goodnight message |
-| `pay_sitter` | Pay the sitter through URL elicitation |
-| `payment_status` | Card and device only (visibility `app`): whether the payment went through |
-| `set_carer_language` | Replies in the carer's language |
-| `import_note` | A parent's dictated rule ("remember: no juice after 7") becomes proposed rules they confirm on their phone. Refused during a handoff: a sitter's "remember she napped" is a log entry |
-| `end_handoff` | Ends sitter mode and returns the evening summary |
-
-Resources: `ui://while-youre-out/card-<hash>.html` (the MCP App, its address carrying a hash of its contents so hosts can cache it; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`.
-
-### Ordering dinner (agentic commerce)
-
-"She won't eat the dal, can we order dinner?" crosses three services in one loop:
-
-1. **A delivery partner's menu, filtered for this family** (`order_dinner`): anything with an allergen on file, anything labelled "may contain" one, and sweets after the parents' cut-off are left out, with the reason ("contains peanut", "may contain nuts", "no sweets after 6:00 pm"). Up to three safe dishes, as Alexa's Carousel pattern asks.
-2. **A parent's approval** (`request_order`): the sitter can't spend money, so the order goes to the parents' phones; a dish that isn't safe is refused even when asked for by name. The order card refreshes itself (`order_status`) and returns what Alexa needs for its own notification: status, dish, price, arrival window and a reference.
-3. **The front door:** once approved, the delivery joins tonight's expected visitors, so when the doorbell rings it's "Dinner from Corner Kitchen, due 6:45 pm to 7:00 pm. No need to open."
-
-**Supplies, too:** "we used the last diaper" asks the parent on their lock screen; on the parent page they can *Order it* (from the store, for tomorrow morning, so it isn't expected at the door tonight), *Add to list*, or *Not now*, and the sitter hears which. **Receipts:** every dinner, supplies order and payment to the sitter this week is on the parent's phone with its reference (CK-, HD-, PAY-), what it was for and who approved it.
-
-A sample restaurant and store; no money moves. In production these are Alexa+ delivery partners and Amazon Pay.
-
-### The whole house
-
-The kitchen Echo Show is where the sitter talks, but the evening happens across the home, and each device follows the parents' own rules and what actually happens tonight (simulated devices; in production these are the family's own Fire TV, Echo Dot, Ring and smart home):
-
-- **Living room Fire TV:** when the sitter says the kids are watching, the parents' "one hour of TV at most" starts; the TV pauses at the limit, or when bath or bed comes, with a message from the parent on the screen.
-- **The child's Echo Dot:** at lights out the night light comes on and the parent's goodnight message plays *in the child's room* (white noise if there isn't one); the TV goes off and the front door is checked.
-- **Front door (Ring):** besides the doorbell, in an emergency the porch light comes on for the paramedics, and a parent can unlock the door from their phone; the next emergency step tells the sitter.
-- **The parent's Bee:** "she napped until 4:30" said to Mom's Bee moves tonight's bedtime by the parents' own rule, and the sitter hears it on her next reply.
-- **Live over MCP:** `house://tonight` (the plan and the house) supports `resources/subscribe`; a subscribed host gets `notifications/resources/updated` the moment it changes.
-
-The simulator shows each room under the Echo Show; the guided evening includes Mom's Bee, the TV pausing for bath and the door unlocked for the paramedics.
-
-### Account linking and the Guest Pass
-
-- **Account linking (OAuth 2.1, as Alexa+ add-ons link):** `/linked/mcp` is the add-on as Alexa calls it after linking. Without a token it answers a bare `401` whose `WWW-Authenticate` header points at `/.well-known/oauth-protected-resource/linked/mcp`; that names the authorization server (`/.well-known/oauth-authorization-server`): authorization code with **PKCE S256 only**, a refresh token with every access token (rotated on use), revocation, statically registered clients with exact redirect URIs (Alexa's, by region), and self-registration for localhost tools only (so the MCP Inspector can link). Linking gives the household its own house; its token picks it on every request. `/mcp` stays open, so trying the demo never needs a token.
-- **Guest Pass:** the handoff issues tonight's sitter a pass (five hours unless a parent extends it). The Echo Show shows it as a QR code; the sitter scans it and has tonight on her own phone (`/guest`): what matters most, the address and the EpiPen for a 911 call, one tap to call each contact, and *ask the parents*. The pass token travels in the link's fragment and leaves the address bar once read. At its end time the parents are asked to extend it; half an hour later it closes by itself, and it always ends with the evening. **Everything done under the pass**, on the kitchen Echo Show or on the sitter's phone, is in an activity log on the parents' phone, in plain words.
-
-### Sitter profiles: the second evening is better than the first
-
-The house remembers each person who looks after the children, from the evenings themselves and what the parents set (Family tab → *Your sitters*):
-
-- **Priya, back for her 7th evening,** hears "Welcome back, Priya" and the handover check asks only what she missed last time or what has changed since (the EpiPen moved? that question comes back). The allergy question is always asked.
-- **Someone new** gets the whole check, and the card says "First evening here".
-- **Dadi** gets her handover in Hindi and in large text on every card, without anyone saying so; Priya's rate is remembered for *Pay Priya*. Whatever the parent says this time ("she speaks Spanish", "$20 an hour") is remembered for next time. The parents can change any of it, or have it forgotten.
-- Last night's one-off answers can become house rules from the morning debrief, so the next sitter starts with them.
-
-## Measured, not claimed
-
-- **Safety evaluation** ([server/eval/REPORT.md](server/eval/REPORT.md)): 357 things a sitter might say (allergens hidden in dishes, "she already ate it", emergencies in three languages, doses, "the parents said it's fine", the alarm code, a stranger at the door, "is it serious?", the dog and the chocolate) plus ordinary questions it must still answer, each reply judged by the same plain rules ([judge.ts](server/eval/judge.ts)). Read it honestly: we wrote the traps and fixed what they found, so the add-on's 100% on them says little; **the fairer number is the held-out run, 50 of 55 (91%)**, on lines written after the fixes, and the report names the five it missed. A chatbot given the same notes and our ten rules in its prompt scored 270 of 273, close. What a prompt can't give is the rest: the same answer every time, a few milliseconds with no AI and no internet (so it works when the model is busy or the connection drops), and actions (the parents alerted, the guide, the timer). The chatbot missed 911 three times, and twice offered to "call Mom", which it can't. Since then, emergencies have a second look: when the rules find nothing but the words hint at danger, an AI model is asked too, and **it can only add caution, never remove it** ([safetyNet.ts](server/src/domain/safetyNet.ts)). It runs on every push (`test/safety-eval.test.ts`).
-- **Every Alexa+ add-on rule, and what proves we meet it** ([COMPLIANCE.md](COMPLIANCE.md)): Amazon's policy, functional and design rules, each with the test that fails the build if it stops being true, and the three we only partly meet.
-- **Speed, load and fuzz** ([server/eval/SPEED.md](server/eval/SPEED.md), `node scripts/bench.mjs`): every tool over real MCP HTTP, p95 about 20 ms on a laptop against the MCP Toolkit's 500 ms; 2,000 calls from 50 sessions at once with no errors; 1,500 malformed and hostile requests with no server errors. A smaller version runs on every push (`test/speed.test.ts`).
-
-## The simulator
-
-Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
-
-- Connects with the official MCP client over Streamable HTTP and declares elicitation (form and URL), like Alexa+.
-- An MCP Apps host: sandboxed `ui://` cards, `ui/initialize` with host context, `tools/call` from cards (only for tools whose visibility includes `app`), `ui/message` from card buttons, display modes.
-- Runs `ask_parent_and_wait` as an MCP task, shows its status, and announces the answer.
-- Voice in and out (Chrome or Edge), or type. "Brains" stand in for the Alexa+ language model:
-  - **Rules first, Gemini when needed** (the default): the built-in rules answer everything they recognise at once (every guided demo line, "where's the EpiPen", "she's asleep", the door) with no model call. Other languages and phrasings they don't know go to Gemini, and both share the conversation.
-  - **Rules only**: pattern matching, instant, English, no key needed.
-  - **Gemini for everything**: free speech in any language, function calling, one model call per turn.
-  - The key stays on the server behind `/host/llm` (local pages only, 30 requests a minute). A model that is out of quota, busy or hanging is skipped for a while, and a turn never waits more than about 5 seconds before the rules answer.
-- The server reads the carer's words in English for its safety rules and the handover check, translating them itself if the device didn't. If it can't, a question is never guessed at: "I can ask a parent".
-- Each browser gets its own demo house (`/h/<id>` on the server: its own database, events and clock), so judges never see each other's evening. The guided demo's first step resets it.
-- `?film=1` shows only the Echo Show, for recording; Space or → says the next guided demo line.
-- Either way the device speaks the server's own text, never a model paraphrase, and emergencies, the emergency guide and the door photo are handled by fixed rules before any model call.
-- Spoken replies stay within 30 words (a test plays the whole guided demo and checks every reply); the card shows the rest. The fixed emergency script is the one exception: it is always read in full.
-- Simulated device features: Alexa calling and the Ring doorbell alert.
-
-Checks against a running server (not unit tests): `npx tsx simulator/test/e2e-houses.ts http://127.0.0.1:8787` (two judges at once), `simulator/test/e2e-hybrid.ts` (timing), `simulator/test/e2e-language.ts` (a Hindi-speaking sitter, real Gemini).
-
-## Built alongside: the Alexa+ add-on simulator
-
-[alexa-addon-simulator](https://github.com/murthyroshan/alexa-addon-simulator) is a separate open-source tool we made from this project's simulator: point it at any MCP server to talk to it like Alexa+, see its MCP Apps cards on seven Echo screens, and get a readiness score (protocol, tools, cards, voice, speed, robustness). Running it on While You're Out found tool parameters without descriptions, tools without safety hints, and card text that shrank on the smallest Echo Show; all three are fixed here.
-
-## What Alexa+ would need
-
-Everything below works in the demo, but some of it is simulated because an add-on can't do it today. This is the list we would bring to the Alexa+ team, in the order it matters to families.
-
-| Gap | What we did instead | What would make it real |
-| --- | --- | --- |
-| An add-on can't speak first | "Sitter first": a parent's answer or a due reminder is told at the start of the sitter's next reply; MCP Tasks for answers that take minutes | A proactive announcement API for add-ons (rate-limited, per household), so "Anita says yes" is heard when it arrives |
-| Who is speaking | Voice always gets the sitter's view: anyone in the room can talk to the device | Speaker roles for guests, so a sitter can't change the parents' rules and a parent can (Voice ID with a guest role) |
-| Reaching the parents | Web Push to the parent page, with lock-screen buttons | Alexa app notifications to household members, with actions, from an add-on |
-| Emergencies | A fixed script from the family's own plan, timers, every parent phone live; the sitter calls 911 | A hand-off to Alexa Emergency Assist (agent call with the address and the plan), triggered by the add-on |
-| The doorbell | Sample snapshots and a simulated Ring chime | Ring doorbell events and the latest snapshot, for add-ons the household allows |
-| Lights out for the house | Simulated and labelled so on screen | Scoped smart-home actions from an add-on (dim a room, check a lock) |
-| The shopping list | Our own list | Write access to the family's Alexa shopping list |
-| Paying the sitter | MCP URL elicitation to a demo approval page on the parent's phone; no money moves | Amazon Pay for a person-to-person payment, approved by the parent |
-| Timers | The card counts down and the device speaks the warnings | Device timers an add-on can start ("5 minutes to the second EpiPen") |
-| The screen | MCP Apps cards that refresh themselves and ask for full screen | Echo Show support for MCP Apps display modes and cards calling tools, as in our simulator |
-
-## Settings (environment variables)
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
@@ -240,12 +177,210 @@ Everything below works in the demo, but some of it is simulated because an add-o
 
 Simulator: `VITE_MCP_URL` (default: the server that serves it, or `http://127.0.0.1:8787/mcp` in development), `VITE_PARENT_KEY`.
 
-## Safety rules (enforced in code, not by the AI)
+</details>
+
+## What's here
+
+| Folder | What it is |
+| --- | --- |
+| [`server/`](server) | The MCP server (spec 2025-11-25, Streamable HTTP, MCP Apps, Tasks, elicitation), the parent's phone page, the sitter's phone and the payment approval page |
+| [`server/eval/`](server/eval) | The safety evaluation, its judge and report, and the speed benchmark |
+| [`simulator/`](simulator) | An Echo Show 15 simulator that stands in for Alexa+: voice, MCP Apps cards, tasks, elicitation, the highlights and a guided demo |
+| [`alexa/`](alexa) | An Alexa-hosted skill that is an MCP host, so the same add-on runs on today's Alexa |
+| [`site/`](site) | The website: the evening, safety, how it works, and the playable evening |
+| [`agent-skill/`](agent-skill) | An Agent Skill for any agent hosting the add-on |
+| [`scripts/`](scripts) | The live-demo smoke test, the benchmark and the website's screen recorder |
+
+## What Alexa+ would need
+
+Everything below works in the demo, but some of it is simulated because an add-on can't do it today. This is the list we would bring to the Alexa+ team, in the order it matters to families. The full [friction log](FRICTION_LOG.md) and [product feedback](FEEDBACK.md) have the rest.
+
+| Gap | What we did instead | What would make it real |
+| --- | --- | --- |
+| An add-on can't speak first | "Sitter first": a parent's answer or a due reminder is told at the start of the sitter's next reply; MCP Tasks for answers that take minutes | A proactive announcement API for add-ons (rate-limited, per household), so "Anita says yes" is heard when it arrives |
+| Who is speaking | Voice always gets the sitter's view: anyone in the room can talk to the device | Speaker roles for guests, so a sitter can't change the parents' rules and a parent can (Voice ID with a guest role) |
+| Reaching the parents | Web Push to the parent page, with lock-screen buttons | Alexa app notifications to household members, with actions, from an add-on |
+| Emergencies | A fixed script from the family's own plan, timers, every parent phone live; the sitter calls 911 | A hand-off to Alexa Emergency Assist (agent call with the address and the plan), triggered by the add-on |
+| The doorbell | Sample snapshots and a simulated Ring chime | Ring doorbell events and the latest snapshot, for add-ons the household allows |
+| Lights out for the house | Simulated and labelled so on screen | Scoped smart-home actions from an add-on (dim a room, check a lock) |
+| The shopping list | Our own list | Write access to the family's Alexa shopping list |
+| Paying the sitter | MCP URL elicitation to a demo approval page on the parent's phone; no money moves | Amazon Pay for a person-to-person payment, approved by the parent |
+| Timers | The card counts down and the device speaks the warnings | Device timers an add-on can start ("5 minutes to the second EpiPen") |
+| The screen | MCP Apps cards that refresh themselves and ask for full screen | Echo Show support for MCP Apps display modes and cards calling tools, as in our simulator |
+
+## Built alongside: the Alexa+ add-on simulator
+
+<a href="https://github.com/murthyroshan/alexa-addon-simulator"><img src="media/addon-simulator.png" alt="The Alexa+ add-on simulator: test your Alexa+ add-on on an Echo Show" width="100%"></a>
+
+No Alexa+ host is open to developers yet, so we built one. [alexa-addon-simulator](https://github.com/murthyroshan/alexa-addon-simulator) is a separate open-source tool made from this project's simulator: point it at any MCP server to talk to it like Alexa+, see its MCP Apps cards on seven Echo screens, and get a readiness score (protocol, tools, cards, voice, speed, robustness). Running it on While You're Out found tool parameters without descriptions, tools without safety hints, and card text that shrank on the smallest Echo Show. All three are fixed here.
+
+## Everything else
+
+<details>
+<summary><b>An evening with While You're Out, step by step</b></summary>
+
+1. **6:00 pm.** "Priya is babysitting tonight" (or "We're heading out", and the Echo Show asks who in a form). The screen turns into **Tonight**: what's next with a countdown, Maya and Bruno with an allergy badge, big buttons. A three-question **handover check** before the parents leave; their phones see "Handover 3/3 ✓".
+2. **Questions** are answered in the parents' exact words: "Can she have the cookies?" gets the peanut allergy and a guard, never "it's safe". Small questions get **Shadow Parent**: "the parents said yes 4 out of 5 times on weekends".
+3. **Someone knocks.** The Ring doorbell rings; "Should I open the door?" checks who the parents said to expect, delivery windows and the parents' door rule. Unknown visitor: "Don't open", and the doorbell photo goes to the parents' lock screen with **Let them in / Don't open** buttons.
+4. **"Her lips are swelling and she can't breathe."** The **Emergency Copilot** runs the doctor's plan one step at a time ("done", "next"), starts the 5-minute timer for the second EpiPen, and every parent phone follows live. Mom taps "I'm on my way"; the Echo Show says "Anita is on the way home". **If the internet drops right then, the guide keeps going** on the kitchen screen and on the sitter's phone.
+5. **8:00 pm, lights out.** **Mom's goodnight message** plays on the Echo Show ("Mom left a message for Maya"), then the screen goes dim and warm. The parents get "Maya heard your goodnight message 💛".
+6. **Morning.** The **debrief**: night wakes, asleep time against the plan, what ran out (to the shopping list). "Pay Priya": hours times her rate, approved on the parent's phone (never on the shared screen), and the Echo Show confirms.
+
+That evening is the product. Everything else (the Guest Pass, ordering dinner, receipts, the whole house, sitter profiles, Hindi, the Alexa skill) is there to make that one evening work for more families.
+
+</details>
+
+<details>
+<summary><b>What judges can try</b></summary>
+
+| Where | What to try |
+| --- | --- |
+| Straight to a moment | [The highlights, 2½ minutes](https://while-youre-out-wpj3.onrender.com/?moment=highlights) · [Mom sets it up](https://while-youre-out-wpj3.onrender.com/?moment=setup) · [the knock at the door](https://while-youre-out-wpj3.onrender.com/?moment=door) · [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) · [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight) · [paying the sitter](https://while-youre-out-wpj3.onrender.com/?moment=pay). Also `handover`, `questions`, `evening`, `ask`. The evening skips ahead silently, then plays from there |
+| Your own phone | "Use your own phone" (or the QR code on the welcome card) opens the parent page for your demo house on your phone. Priya's questions arrive there, and "Watch the evening" waits for your answer |
+| Echo Show | The **Tonight** screen (refreshes itself), every answer card, the doorbell, the emergency guide, the goodnight message, the who's-babysitting form, paying the sitter |
+| Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
+| Any MCP host | [/connect](https://while-youre-out-wpj3.onrender.com/connect) gives you a demo house of your own; `/h/<any 16+ letters>/mcp` is a private MCP house. An agent hosting it should follow the [Agent Skill](agent-skill/SKILL.md) |
+| Today's Alexa | The free Alexa-hosted skill in [alexa/](alexa/README.md): the same add-on on an Echo, set up in about five minutes |
+
+</details>
+
+<details>
+<summary><b>Features</b></summary>
+
+| Feature | What it does |
+| --- | --- |
+| Tonight screen | The Echo Show's home screen during a handoff: what's next with a countdown ring, the plan as tiles, children and pets with allergy badges, the parents' latest answer, and big buttons (Ask a parent, What's next?, Call Mom, Emergency). Dims to warm amber after lights out. An MCP App that calls `home_screen` through the host to stay current |
+| Front Door Guard | Doorbell (Ring) + who the parents expect tonight + delivery windows + the parents' door rule. Deliveries: no need to open. Expected: check first, the parents confirm. Anyone else: don't open, and the doorbell photo goes to the parents as an urgent question they can answer from the lock screen. Never calls a stranger safe |
+| Emergency Copilot | The fixed script one step at a time ("done", "next", "it's over"), the plan's timers with spoken warnings, a paramedic sheet, and the parents' phones following live; a parent's "I'm on my way" shows and is spoken on the Echo Show |
+| Goodnight message | A parent records voice or video before leaving; it plays at lights out or when the child misses them, and the parent hears that it played |
+| Pay the sitter | Hours (house clock, rounded up to the quarter hour) times the rate from the handoff form, plus a tip, approved on the parent's phone through MCP URL elicitation; the Echo Show hears it's done (`notifications/elicitation/complete`). Demo only: no money moves |
+| Ask on screen | "We're heading out" with no name: an MCP form on the Echo Show asks who, their language and their rate |
+| Shopping list agent | "We ran out of diapers": the parents are asked at once, on their lock screen, "Add diapers to the shopping list?" (Add to list / Not now). A yes puts it on the list (the family's Alexa shopping list in production; simulated here) and the Echo Show says so. Never a house rule |
+| Lights out for the house | At bedtime the device dims the child's room, turns on the night light and checks the front door is locked. Simulated, and labelled so on screen: in production Alexa+ does this with the family's own smart home |
+| Sitter first | Alexa+ add-ons can't start talking on their own. So whatever the sitter hasn't heard yet (a parent's answer, a reminder that came due) is told at the start of their next reply. Answers the device already announced are never repeated |
+| Live Tonight Plan | Tonight's timeline from the parents' routine, day-specific rules, the parents' own timing rules ("napped till 5" moves bedtime), reminders as steps come due |
+| Teach-back | Three questions before the parents leave, checked without AI; wrong answers get the parents' words |
+| Shadow Parent | How the parents usually answer small questions, by weekday or weekend; never decides, never for food, medicine or safety |
+| Busy mode | "Urgent only" for 1–3 hours: small questions wait, urgent ones still come through |
+| Morning debrief | Night wakes across evenings, asleep time vs the plan, teach-back result, supplies to the shopping list, "save as a house rule", Pay |
+| Phone notifications | Web Push to the parents' phones with the page closed, routed by call order and escalation, with one-tap answers on the lock screen |
+| Family setup | Children and pets with allergies in the parent's words, call order, doctors kept out of the question chain, address, time zone; reset to the demo family or start fresh |
+| House Brain | A WhatsApp message, a photo of the fridge note or the doctor's PDF becomes proposed rules the parent confirms; codes and passwords are left out. Pasted text works without AI too (photos need it) |
+| Bilingual relay | Replies in the sitter's language, the parents' words kept on screen; emergency lines use fixed translations |
+| Since your last visit | A returning sitter hears only what changed |
+
+</details>
+
+<details>
+<summary><b>MCP tools and resources</b></summary>
+
+| Tool | Purpose |
+| --- | --- |
+| `start_handoff` | Sitter mode and tonight's briefing; with no name, asks on screen (form elicitation) |
+| `home_screen` | The Tonight screen (`visibility: ["model", "app"]`; the card refreshes itself with it) |
+| `teachback` | The handover check |
+| `tonight_plan` | Tonight's timeline; announces steps as they come due, and the goodnight message at lights out |
+| `ask_house` | Answers in the parents' exact words; food and medicine always carry a guard; Shadow Parent |
+| `where_is` | Where something is kept, with the parents' photo |
+| `log_event` | The evening's log; allergen and medicine alerts; plan changes |
+| `ask_parent` / `check_parent_answer` | Ask a parent without blocking |
+| `ask_parent_and_wait` | MCP task: completes when a parent answers, escalates down the call order; door questions carry the photo; shopping questions (`shopping_item`) put the item on the list on a yes |
+| `door_check` | Front Door Guard |
+| `emergency` | Fixed safety script from the family's own data; alerts every contact; opens the guide |
+| `emergency_step` | Move the guide on: done, next, back, resolved |
+| `emergency_status` | Card and device only (MCP Apps visibility `app`): the screen's live state, timers and spoken warnings |
+| `play_message` | The parents' goodnight message |
+| `pay_sitter` | Pay the sitter through URL elicitation |
+| `payment_status` | Card and device only (visibility `app`): whether the payment went through |
+| `set_carer_language` | Replies in the carer's language |
+| `import_note` | A parent's dictated rule ("remember: no juice after 7") becomes proposed rules they confirm on their phone. Refused during a handoff: a sitter's "remember she napped" is a log entry |
+| `end_handoff` | Ends sitter mode and returns the evening summary |
+
+Resources: `ui://while-youre-out/card-<hash>.html` (the MCP App, its address carrying a hash of its contents so hosts can cache it; its CSS and JavaScript live in `server/src/mcp/card/`), `house://manual`, and `house://tonight` (supports `resources/subscribe`).
+
+</details>
+
+<details>
+<summary><b>Ordering dinner (agentic commerce)</b></summary>
+
+"She won't eat the dal, can we order dinner?" crosses three services in one loop:
+
+1. **A delivery partner's menu, filtered for this family** (`order_dinner`): anything with an allergen on file, anything labelled "may contain" one, and sweets after the parents' cut-off are left out, with the reason ("contains peanut", "may contain nuts", "no sweets after 6:00 pm"). Up to three safe dishes, as Alexa's Carousel pattern asks.
+2. **A parent's approval** (`request_order`): the sitter can't spend money, so the order goes to the parents' phones; a dish that isn't safe is refused even when asked for by name. The order card refreshes itself (`order_status`) and returns what Alexa needs for its own notification: status, dish, price, arrival window and a reference.
+3. **The front door:** once approved, the delivery joins tonight's expected visitors, so when the doorbell rings it's "Dinner from Corner Kitchen, due 6:45 pm to 7:00 pm. No need to open."
+
+**Supplies, too:** "we used the last diaper" asks the parent on their lock screen; on the parent page they can *Order it* (from the store, for tomorrow morning, so it isn't expected at the door tonight), *Add to list*, or *Not now*, and the sitter hears which. **Receipts:** every dinner, supplies order and payment to the sitter this week is on the parent's phone with its reference (CK-, HD-, PAY-), what it was for and who approved it.
+
+A sample restaurant and store; no money moves. In production these are Alexa+ delivery partners and Amazon Pay.
+
+</details>
+
+<details>
+<summary><b>The whole house</b></summary>
+
+The kitchen Echo Show is where the sitter talks, but the evening happens across the home, and each device follows the parents' own rules and what actually happens tonight (simulated devices; in production these are the family's own Fire TV, Echo Dot, Ring and smart home):
+
+- **Living room Fire TV:** when the sitter says the kids are watching, the parents' "one hour of TV at most" starts; the TV pauses at the limit, or when bath or bed comes, with a message from the parent on the screen.
+- **The child's Echo Dot:** at lights out the night light comes on and the parent's goodnight message plays *in the child's room* (white noise if there isn't one); the TV goes off and the front door is checked.
+- **Front door (Ring):** besides the doorbell, in an emergency the porch light comes on for the paramedics, and a parent can unlock the door from their phone; the next emergency step tells the sitter.
+- **The parent's Bee:** "she napped until 4:30" said to Mom's Bee moves tonight's bedtime by the parents' own rule, and the sitter hears it on their next reply.
+- **Live over MCP:** `house://tonight` (the plan and the house) supports `resources/subscribe`; a subscribed host gets `notifications/resources/updated` the moment it changes.
+
+The simulator shows each room under the Echo Show; the guided evening includes Mom's Bee, the TV pausing for bath and the door unlocked for the paramedics.
+
+</details>
+
+<details>
+<summary><b>Account linking and the Guest Pass</b></summary>
+
+- **Account linking (OAuth 2.1, as Alexa+ add-ons link):** `/linked/mcp` is the add-on as Alexa calls it after linking. Without a token it answers a bare `401` whose `WWW-Authenticate` header points at `/.well-known/oauth-protected-resource/linked/mcp`; that names the authorization server (`/.well-known/oauth-authorization-server`): authorization code with **PKCE S256 only**, a refresh token with every access token (rotated on use), revocation, statically registered clients with exact redirect URIs (Alexa's, by region), and self-registration for localhost tools only (so the MCP Inspector can link). Linking gives the household its own house; its token picks it on every request. `/mcp` stays open, so trying the demo never needs a token.
+- **Guest Pass:** the handoff issues tonight's sitter a pass (five hours unless a parent extends it). The Echo Show shows it as a QR code; the sitter scans it and has tonight on their own phone (`/guest`): what matters most, the address and the EpiPen for a 911 call, one tap to call each contact, and *ask the parents*. The pass token travels in the link's fragment and leaves the address bar once read. At its end time the parents are asked to extend it; half an hour later it closes by itself, and it always ends with the evening. **Everything done under the pass**, on the kitchen Echo Show or on the sitter's phone, is in an activity log on the parents' phone, in plain words.
+
+</details>
+
+<details>
+<summary><b>Sitter profiles: the second evening is better than the first</b></summary>
+
+The house remembers each person who looks after the children, from the evenings themselves and what the parents set (Family tab → *Your sitters*):
+
+- **Priya, back for her 7th evening,** hears "Welcome back, Priya" and the handover check asks only what she missed last time or what has changed since (the EpiPen moved? that question comes back). The allergy question is always asked.
+- **Someone new** gets the whole check, and the card says "First evening here".
+- **Dadi** gets her handover in Hindi and in large text on every card, without anyone saying so; Priya's rate is remembered for *Pay Priya*. Whatever the parent says this time ("she speaks Spanish", "$20 an hour") is remembered for next time. The parents can change any of it, or have it forgotten.
+- Last night's one-off answers can become house rules from the morning debrief, so the next sitter starts with them.
+
+</details>
+
+<details>
+<summary><b>The simulator in this repo</b></summary>
+
+Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
+
+- Connects with the official MCP client over Streamable HTTP and declares elicitation (form and URL), like Alexa+.
+- An MCP Apps host: sandboxed `ui://` cards, `ui/initialize` with host context, `tools/call` from cards (only for tools whose visibility includes `app`), `ui/message` from card buttons, display modes.
+- Runs `ask_parent_and_wait` as an MCP task, shows its status, and announces the answer.
+- Voice in and out (Chrome or Edge), or type. "Brains" stand in for the Alexa+ language model:
+  - **Rules first, Gemini when needed** (the default): the built-in rules answer everything they recognise at once (every guided demo line, "where's the EpiPen", "she's asleep", the door) with no model call. Other languages and phrasings they don't know go to Gemini, and both share the conversation.
+  - **Rules only**: pattern matching, instant, English, no key needed.
+  - **Gemini for everything**: free speech in any language, function calling, one model call per turn.
+  - The key stays on the server behind `/host/llm` (local pages only, 30 requests a minute). A model that is out of quota, busy or hanging is skipped for a while, and a turn never waits more than about 5 seconds before the rules answer.
+- The server reads the carer's words in English for its safety rules and the handover check, translating them itself if the device didn't. If it can't, a question is never guessed at: "I can ask a parent".
+- Each browser gets its own demo house (`/h/<id>` on the server: its own database, events and clock), so judges never see each other's evening. The guided demo's first step resets it.
+- `?film=1` shows only the Echo Show, for recording; Space or → says the next guided demo line.
+- Either way the device speaks the server's own text, never a model paraphrase, and emergencies, the emergency guide and the door photo are handled by fixed rules before any model call.
+- Spoken replies stay within 30 words (a test plays the whole guided demo and checks every reply); the card shows the rest. The fixed emergency script is the one exception: it is always read in full.
+- Simulated device features: Alexa calling and the Ring doorbell alert.
+
+Checks against a running server (not unit tests): `npx tsx simulator/test/e2e-houses.ts http://127.0.0.1:8787` (two judges at once), `simulator/test/e2e-hybrid.ts` (timing), `simulator/test/e2e-language.ts` (a Hindi-speaking sitter, real Gemini).
+
+</details>
+
+<details>
+<summary><b>The full safety rules (enforced in code, not by the AI)</b></summary>
 
 - Never says a food or medicine is safe, never gives doses. Food and medicine answers from a parent apply to tonight only.
 - Never reveals codes, keys or when the parents will be back, and never stores codes a parent sends. Voice always gets the carer's view, because anyone in the room can talk to the device.
 - Emergencies are checked before anything else, including inside logs, "where is", the door and "ask a parent" requests.
-- A second look at emergencies: when the rules find nothing but the words hint at danger, an AI model is asked too. It can turn "not an emergency" into "emergency", never the other way, is never asked about what the rules caught, and can't hold up an answer for more than two seconds.
+- A second look at emergencies: when the rules find nothing but the words hint at danger, an AI model is asked too ([safetyNet.ts](server/src/domain/safetyNet.ts)). It can turn "not an emergency" into "emergency", never the other way, is never asked about what the rules caught, and can't hold up an answer for more than two seconds.
 - Children's details (a first name, an age, allergies) are kept only after a parent or guardian agrees, and who agreed is recorded. Evenings are deleted by themselves after 90 days, and "Delete everything" is one tap (two, to be sure) on the parent's phone. Each demo house has a parent link of its own.
 - Each kind of emergency gets a fixed script: the parents' action plan for allergy or breathing, "get everyone out" for fire or gas, Poison Control for poisoning. Medical cases defer to the 911 dispatcher. The step-by-step guide and its timers come from the same plan.
 - A stranger at the door is never called safe; whether to open is the parents' call, with the photo.
@@ -255,7 +390,9 @@ Simulator: `VITE_MCP_URL` (default: the server that serves it, or `http://127.0.
 - The home address is shown, never read aloud. A parent's rule that says no to exactly this ("nothing scary", "No friends over tonight") is the answer, and is never weighed against how they answered before.
 - Payments are approved on the parent's own phone, never on the shared screen.
 
-The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider. All media in the repository is our own: the doorbell snapshots are drawn by a script, and the lullaby is *Twinkle Twinkle Little Star* (a traditional melody) synthesized note by note.
+The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider. All media in the repository is our own: the doorbell snapshots are drawn by a script, the lullaby is *Twinkle Twinkle Little Star* (a traditional melody) synthesized note by note, and the screenshots and GIF in `media/` are taken from this code.
+
+</details>
 
 ## License
 

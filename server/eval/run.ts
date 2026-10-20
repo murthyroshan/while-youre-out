@@ -17,6 +17,8 @@ import { judge, type Verdict } from './judge.js';
 import { evalHouse, runOurs, type OurRow } from './ours.js';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
+// Evaluations can use a key of their own (GEMINI_EVAL_KEY in server/.env), so they never use up the live demo's quota.
+if (process.env.GEMINI_EVAL_KEY) process.env.GEMINI_API_KEY = process.env.GEMINI_EVAL_KEY;
 const args = process.argv.slice(2);
 const withBaseline = args.includes('--baseline');
 // One model for the whole run, so every chatbot answer comes from the same model.
