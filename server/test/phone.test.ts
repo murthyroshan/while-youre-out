@@ -108,6 +108,28 @@ test('busy mode: small questions stay quiet, urgent ones still come through', as
   await post('/parent/api/busy', { minutes: 0 });
 });
 
+test('"all\'s well": the parents hear when the child is asleep (a parent asked for it), and only that', async () => {
+  reset();
+  await call('log_event', { text: 'Maya woke up and had some water', kind: 'sleep' });
+  await call('log_event', { text: 'Maya is asleep', kind: 'sleep' });
+  await settle();
+  const quiet = sent.filter((s) => s.msg.tag === 'asleep');
+  assert.equal(quiet.length, sent.filter((s) => s.msg.tag === 'asleep' && /asleep/.test(s.msg.body)).length, 'only "asleep" sends one');
+  assert.ok(quiet.length >= 1 && quiet.every((s) => s.msg.title === "All's well at home" && /Maya is asleep/.test(s.msg.body)));
+  // busy mode holds it, like small questions
+  await post('/parent/api/busy', { minutes: 60 });
+  reset();
+  await call('log_event', { text: 'Maya is asleep again', kind: 'sleep' });
+  await settle();
+  assert.equal(sent.filter((s) => s.msg.tag === 'asleep').length, 0);
+  await post('/parent/api/busy', { minutes: 0 });
+});
+
+test('a crying child gets the parents\' own words, not "they haven\'t covered this" (sitters told us)', async () => {
+  const r = await call('ask_house', { question: "She won't stop crying, what do I do?" });
+  assert.match(r.content[0].text, /cuddle and her bunny/);
+});
+
 test('when the first contact does not answer, the next one gets the notification', async () => {
   reset();
   await client.listTools();
@@ -201,8 +223,11 @@ test('editing the family: renames keep the rules, allergies are saved in the par
 });
 
 test('start fresh: an empty house still works end to end, and nothing says "null"', async () => {
+  await post('/parent/api/push/subscribe', { subscription: { endpoint: 'https://push.example.com/old-family', keys: { p256dh: 'x'.repeat(87), auth: 'auth-secret-16b' } }, member: 'Anita' });
   const r = await post('/parent/api/reset', { mode: 'fresh', timezone: 'Asia/Kolkata' });
   assert.equal(r.status, 200);
+  // "Delete everything" includes the old family's phones: they stop getting this house's alerts.
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM push_subscriptions').get() as { n: number }).n, 0);
   const fam = await r.json();
   assert.deepEqual([fam.household.timezone, fam.members.length, fam.contacts.length], ['Asia/Kolkata', 0, 0]);
   const s = await state();
@@ -263,6 +288,7 @@ test('reset to the demo family: clean Sharma house, waiting questions closed, no
   })();
   await settle();
   assert.ok((await state()).emergency);
+  await post('/parent/api/push/subscribe', { subscription: { endpoint: 'https://push.example.com/demo-phone', keys: { p256dh: 'x'.repeat(87), auth: 'auth-secret-16b' } }, member: 'Anita' });
   const r = await post('/parent/api/reset', { mode: 'demo' });
   assert.equal((await r.json()).household.name, 'The Sharma family');
   const final = await result;

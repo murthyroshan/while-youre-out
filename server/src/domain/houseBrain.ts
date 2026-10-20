@@ -1,7 +1,8 @@
 // House Brain: turns the notes parents already have (a fridge-note photo, a WhatsApp message,
 // the doctor's PDF) into proposed house-manual cards. Nothing goes live until a parent confirms it.
 import { type DB, type Fact, nowIso } from '../db.js';
-import type { AiClient, Part } from '../ai/gemini.js';
+import { AiUnavailableError, type AiClient, type Part } from '../ai/gemini.js';
+import { extractWithoutAi } from './noteRules.js';
 import { containsSecret, normalise } from './safety.js';
 import { events, visibleFacts } from './house.js';
 
@@ -167,12 +168,21 @@ export async function importNote(db: DB, ai: AiClient, input: ImportInput) {
   }
 
   const existing = visibleFacts(db, 'parent');
+  // A pasted message never waits for an AI: with none set up, or out of quota, the rules read it
+  // sentence by sentence (photos and PDFs still need the AI to read them).
+  const byRules = () => saveProposals(db, input, extractWithoutAi(input.text ?? ''), 'rules (no AI)', existing);
+  if (input.kind === 'text' && !ai.available) return byRules();
   parts.push({
     text: `Existing house rules (id: text):\n${existing.map((f) => `${f.id}: [${f.category}] ${f.text}`).join('\n') || '(none)'}`,
   });
 
-  const { data, model } = await ai.generateJson<Extracted>({ system: SYSTEM, parts, schema: SCHEMA });
-  return saveProposals(db, input, data, model, existing);
+  try {
+    const { data, model } = await ai.generateJson<Extracted>({ system: SYSTEM, parts, schema: SCHEMA });
+    return saveProposals(db, input, data, model, existing);
+  } catch (e) {
+    if (input.kind === 'text' && e instanceof AiUnavailableError) return byRules();
+    throw e;
+  }
 }
 
 /** Validates the model's output and stores it as pending proposals. Exported for tests. */

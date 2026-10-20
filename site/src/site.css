@@ -9,7 +9,7 @@
   --paper: #f4f1ea;
   --ink: #16171b;
   --ink-2: #3d3f45;
-  --muted: #6e6f74;
+  --muted: #67686d;
   --line: rgba(22, 23, 27, 0.14);
   --live: #1ac3eb;
   --night: 0; /* 0 in daylight, 1 at night; the page follows the evening */
@@ -63,6 +63,13 @@ body.ready .scrim { opacity: 0.94; }
 @media (max-width: 760px) { .scrim { background: linear-gradient(0deg, color-mix(in srgb, var(--paper) calc((1 - var(--night)) * 100%), #070b18) 25%, transparent 70%); } }
 .beat { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 96px 0 48px clamp(24px, 6vw, 96px); max-width: min(560px, 46vw); opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
 body.ready .beat.on { opacity: 1; transform: none; }
+/* a keyboard user reaching the ask buttons sees them, wherever the scroll is */
+body.ready .beat:focus-within { opacity: 1; transform: none; }
+/* no 3D (WebGL off or failed) or no scripts: the story is still there to read */
+.no-gl .beat { opacity: 1; transform: none; }
+.no-gl #scene, .no-gl #plan, .no-gl .clock-chip { display: none; }
+/* the cyan ring is too faint on the paper: a deeper one on the light home page */
+body.home main :focus-visible, body.home .ask input:focus { outline-color: #08708a; }
 .beat > * { pointer-events: auto; }
 .beat .time { font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; margin: 0 0 14px; color: color-mix(in srgb, var(--muted) calc((1 - var(--night)) * 100%), #b9bfd0); }
 .beat h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 4.6vw, 66px); line-height: 1.02; letter-spacing: -0.015em; margin: 0 0 18px; color: color-mix(in srgb, var(--ink) calc((1 - var(--night)) * 100%), #f3efe6); }

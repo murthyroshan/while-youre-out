@@ -225,6 +225,8 @@ test("the goodnight message doesn't play twice in a row (she missed her mom, the
   const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
   const c = new Client({ name: 't', version: '0' });
   await c.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${(http.address() as any).port}/mcp`)));
+  // The evening starts before the times below, whatever the real time is when the test runs.
+  setDemoTime('18:00', TZ);
   await c.callTool({ name: 'start_handoff', arguments: { carer_name: 'Priya' } });
   setDemoTime('19:55', TZ);
   const missing = (await c.callTool({ name: 'play_message', arguments: { when: 'missing' } })) as any;

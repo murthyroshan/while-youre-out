@@ -63,7 +63,7 @@ const HYPOTHETICAL =
   /\b(what (do|should) i do if|what if|in case|is (a |an )?\w+ (a )?choking hazard|choking hazard|so (she|he|they|it|the child|the pet) (doesn'?t|won'?t|don'?t)|how (do|would) i (know|tell) if|what are the signs|signs of|how to use|how do i use|what happens if)\b/i;
 // Phrases that look alarming but are not.
 const NOT_EMERGENCY =
-  /\bfireplace|camp ?fire|fire (truck|engine|station|fighter|man|men)|fireman|firework|\bfire tv\b|fire tablet|\bpassed out (on|in) (the )?(couch|sofa|bed|car|chair)\b.*\b(tired|watching|tv|movie|asleep)|\b(eyes?|face) (is |are )?puffy from (crying|sleep|her nap|his nap|the nap)|band-?aid fell|button fell|book fell|\bso (he|she|they|it|the pet|the dog|the child|the baby) (won'?t|doesn'?t|don'?t) wake\b|swallowed (her |his |the |some )?medicine (fine|without|okay|ok|no problem)/i;
+  /\b(chok(e|es|ed|ing)|dying|died) (with|of|from) laugh(ter|ing)?\b|\b(light|lighting|build|building|make|making) (a|the) fire\b|\bfireplace|camp ?fire|fire (truck|engine|station|fighter|man|men)|fireman|firework|\bfire tv\b|fire tablet|\bpassed out (on|in) (the )?(couch|sofa|bed|car|chair)\b.*\b(tired|watching|tv|movie|asleep)|\b(eyes?|face) (is |are )?puffy from (crying|sleep|her nap|his nap|the nap)|band-?aid fell|button fell|book fell|\bso (he|she|they|it|the pet|the dog|the child|the baby) (won'?t|doesn'?t|don'?t) wake\b|swallowed (her |his |the |some )?medicine (fine|without|okay|ok|no problem)/i;
 
 const FOOD_WORDS =
   /\b(eat|eats|ate|eating|eaten|food|snacks?|cookies?|biscuits?|cand(y|ies)|chocolates?|sweets?|desserts?|ice cream|cakes?|cupcakes?|juice|milk|drinks?|dinner|lunch|breakfast|nuts?|peanuts?|peanut butter|almonds?|cashews?|hazelnuts?|walnuts?|pecans?|pistachios?|treats?|fruits?|chips|crisps|meals?|hungry|dip|bread|toast|cereal|yogh?urt|cheese|eggs?|pizza|popcorn|gum|lollipops?|smoothies?|granola|bars?|snickers|nutella|reese'?s|m&ms?|kit ?kat|oreos?|goldfish|crackers?|pb ?& ?j|popsicles?|ice pops?|lollies|marshmallows?|jelly beans?|gummy bears?|gummies|brownies?|muffins?|donuts?|doughnuts?|pancakes?|waffles?|sandwich(es)?|noodles|pasta|rice|fries|nuggets|apples?|bananas?|grapes?|berries|strawberr(y|ies)|soda|lemonade|hot chocolate|cocoa|leftovers|biscuits?|sweeties|chips|nuts|satay|pad thai|trail mix|pesto|curry|stir[- ]?fry|kung pao|brittle|nougat|baklava|macarons?|praline|marzipan|dumplings?|tacos?|burgers?|hot ?dogs?|soup|salad|dal|sushi|takeout|takeaway|snack bars?)\b/i;
@@ -85,12 +85,18 @@ const SECRET_PATTERNS =
 const RETURN_TIME =
   /\bwhen(?:'s| is| are| will| do| does) (they|mom|dad|mum|you|the parents|the parent|her parents|his parents|their parents)\b|\bwhat time (are|will|is|do|does) .*\b(home|back)\b|\bwhen\b.*\b(get|be|come|coming|getting) (home|back)\b|\bhow long (will|are|is|until) .*\b(out|gone|away|back|home)\b|\b(are|is) (they|mom|dad|the parents|the parent) (back|home) (soon|yet)\b|\bwhere (are|is|did) (they|mom|dad|mum|the parents|the parent|her parents|his parents)\b/i;
 
+const NOT_EMERGENCY_ALL = new RegExp(NOT_EMERGENCY.source, 'gi');
+
 export type QuestionCategory = 'emergency' | 'safety_info' | 'medicine' | 'health' | 'food' | 'return_time' | 'secret' | 'general';
 
 export function emergencyKind(raw: string, names: FamilyNames = NO_NAMES): EmergencyKind | null {
   const text = withRoles(normalise(raw), names);
-  if (HYPOTHETICAL.test(text) || NOT_EMERGENCY.test(text)) return null;
-  for (const [kind, re] of EMERGENCY_PATTERNS) if (re.test(text)) return kind;
+  if (HYPOTHETICAL.test(text)) return null;
+  // Harmless phrases ("Fire TV", "the fireplace", "choking with laughter") are taken out of the
+  // message, not used to wave all of it through: "we're watching Fire TV and now she can't
+  // breathe" is still an emergency.
+  const rest = text.replace(NOT_EMERGENCY_ALL, ' ');
+  for (const [kind, re] of EMERGENCY_PATTERNS) if (re.test(rest)) return kind;
   return null;
 }
 

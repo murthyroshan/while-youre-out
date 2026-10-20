@@ -895,7 +895,7 @@ export function createApp(opts: AppOptions = {}) {
     if (res.headersSent) return next(err);
     const status = typeof err?.status === 'number' ? err.status : 500;
     if (status >= 500) console.error('Unhandled error', err);
-    res.status(status).json({ error: status === 413 ? (req.path.startsWith('/parent/api/import') ? 'That file is larger than 6 MB.' : 'That is too large to send.') : status >= 500 ? 'Internal error' : String(err?.message ?? 'Bad request') });
+    res.status(status).json({ error: status === 413 ? (req.path.startsWith('/parent/api/import') ? 'That file is larger than 6 MB.' : 'That is too large to send.') : status >= 500 ? 'Internal error' : err?.type === 'entity.parse.failed' ? 'Invalid JSON' : String(err?.message ?? 'Bad request') });
   });
 
   const passTimer = setInterval(() => {

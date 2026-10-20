@@ -516,7 +516,7 @@ export const PARENT_HTML = /* html */ `<!doctype html>
   var key = params.get('k') || '';
   var me = params.get('as') || '';
   try { me = me || localStorage.getItem('wyo.me') || ''; } catch (e) {}
-  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
   var houseTz = undefined; // set from the server: times are shown in the household's time zone
   function time(iso){
     var d = new Date(iso);

@@ -48,7 +48,7 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, reduced ? Math.min
 
 // ---------- the page ----------
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-const el = { clock: $('g-clock'), when: $('g-when'), title: $('g-title'), story: $('g-story'), choices: $('g-choices'), note: $('g-note'), timer: $('g-timer'), panel: $('g-panel'), device: $('g-device'), said: $('g-said'), sound: $<HTMLButtonElement>('g-sound') };
+const el = { status: $('g-status'), clock: $('g-clock'), when: $('g-when'), title: $('g-title'), story: $('g-story'), choices: $('g-choices'), note: $('g-note'), timer: $('g-timer'), panel: $('g-panel'), device: $('g-device'), said: $('g-said'), sound: $<HTMLButtonElement>('g-sound') };
 
 const echo = createEcho();
 el.device.append(echo.canvas);
@@ -129,6 +129,7 @@ function scene(when: string, title: string, story: string) {
   el.panel.classList.remove('in');
   void el.panel.offsetWidth;
   el.panel.classList.add('in');
+  el.status.textContent = `${when}. ${title} ${story}`;
 }
 
 function button(label: string, onPick: () => void, cls = '', key?: string) {
@@ -136,8 +137,9 @@ function button(label: string, onPick: () => void, cls = '', key?: string) {
   b.type = 'button';
   b.className = `choice ${cls}`;
   const n = el.choices.querySelectorAll('button.choice:not(.ask)').length + 1;
-  b.innerHTML = `<kbd></kbd><span></span>`;
+  b.innerHTML = `<kbd aria-hidden="true"></kbd><span></span>`;
   b.querySelector('kbd')!.textContent = key ?? String(n);
+  if (/^[1-9A]$/.test(key ?? String(n))) b.setAttribute('aria-keyshortcuts', key ?? String(n));
   b.querySelector('span')!.textContent = label;
   b.addEventListener('click', onPick);
   el.choices.append(b);
@@ -149,7 +151,7 @@ function nextButton(label = 'Carry on') {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'next';
-    b.innerHTML = `<span></span><kbd>↵</kbd>`;
+    b.innerHTML = `<span></span><kbd aria-hidden="true">↵</kbd>`;
     b.querySelector('span')!.textContent = label;
     b.addEventListener('click', () => {
       sfx.whoosh();
@@ -157,7 +159,7 @@ function nextButton(label = 'Carry on') {
     });
     el.panel.append(b);
     b.focus({ preventScroll: true });
-    el.panel.scrollTo({ top: el.panel.scrollHeight, behavior: 'smooth' });
+    el.panel.scrollTo({ top: el.panel.scrollHeight, behavior: reduced ? 'auto' : 'smooth' });
   });
 }
 
@@ -166,6 +168,7 @@ addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const target = e.target as HTMLElement;
   if (target instanceof HTMLInputElement) return;
+  if (!(el.panel.contains(target) || target === document.body)) return;
   if (/^[1-9]$/.test(e.key)) {
     const b = [...el.choices.querySelectorAll<HTMLButtonElement>('button.choice:not(.ask):not(:disabled)')].find((x) => x.querySelector('kbd')?.textContent === e.key);
     b?.click();
@@ -174,8 +177,10 @@ addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && target.tagName !== 'BUTTON') el.panel.querySelector<HTMLButtonElement>('.next, .start')?.click();
 });
 
+let relaxed = new URLSearchParams(location.search).get('timer') === 'off';
 /** A countdown on the panel; calls `done` if it runs out. Returns a stop function. */
 function countdown(seconds: number, done: () => void) {
+  if (relaxed) return () => {};
   el.timer.hidden = false;
   const bar = el.timer.querySelector('b')!;
   const label = el.timer.querySelector('span')!;
@@ -504,7 +509,9 @@ async function play(m: Moment) {
   el.note.hidden = false;
   el.note.className = `note ${picked.best ? 'good' : bad ? 'bad' : 'meh'}`;
   el.note.textContent = picked.then;
-  el.panel.scrollTo({ top: el.panel.scrollHeight, behavior: 'smooth' });
+  el.status.textContent = picked.then;
+  el.note.focus({ preventScroll: true });
+  el.panel.scrollTo({ top: el.panel.scrollHeight, behavior: reduced ? 'auto' : 'smooth' });
   if (W && picked.act) await Promise.race([picked.act(W), wait(2600)]);
   await nextButton();
   if (W) m.cleanup?.(W);
@@ -734,9 +741,17 @@ el.sound.addEventListener('click', () => {
   unlock();
   setMuted(!isMuted());
   el.sound.setAttribute('aria-pressed', String(isMuted()));
-  el.sound.textContent = isMuted() ? 'Sound off' : 'Sound on';
 });
 el.story.textContent = "Maya is 6 and allergic to peanuts. Bruno the dog is asleep in his bed. You have the parents' notes, and a kitchen Echo Show that knows them too. Get through the evening.";
+const relax = document.createElement('button');
+relax.type = 'button';
+relax.className = 'relax';
+relax.setAttribute('aria-pressed', String(relaxed));
+relax.textContent = 'No timers';
+relax.addEventListener('click', () => {
+  relaxed = !relaxed;
+  relax.setAttribute('aria-pressed', String(relaxed));
+});
 const start = button(
   'Start the evening',
   async () => {
@@ -744,7 +759,7 @@ const start = button(
     unlock();
     sfx.whoosh();
     document.body.classList.remove('intro');
-    scrollTo({ top: 0, behavior: 'smooth' });
+    scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
     // ?from=door (or cookies, tv, ate, emergency, bedtime, end) starts there: for filming
     const evening: Array<[string, () => Promise<void>]> = [
       ['handover', handover],
@@ -762,4 +777,5 @@ const start = button(
   'start',
   '↵',
 );
+el.choices.append(relax);
 start.focus({ preventScroll: true });

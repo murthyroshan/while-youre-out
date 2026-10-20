@@ -29,6 +29,8 @@ export const GUEST_HTML = `<!doctype html>
   .pass.ending i { background: var(--accent); }
   section { background: var(--card); border-radius: 16px; padding: 16px; margin: 0 0 12px; }
   section h2 { font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin: 0 0 8px; }
+  .sos.call-parent { background: #1f6feb; margin-top: 6px; }
+  .parent-call p { margin: 0 0 8px; }
   .sos { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; border-radius: 14px; background: var(--sos); color: #fff; font-weight: 800; font-size: 18px; text-decoration: none; }
   .addr { margin: 10px 0 0; font-weight: 700; }
   .must { border-left: 4px solid var(--danger); background: var(--danger-soft); padding: 10px 12px; border-radius: 10px; margin: 0 0 8px; font-weight: 600; }
@@ -93,7 +95,7 @@ export const GUEST_HTML = `<!doctype html>
     var i = Math.min(guide.i, g.steps.length);
     var list = g.steps.map(function (t, n) { return '<li class="' + (n < i ? 'done' : n === i ? 'now' : '') + '">' + esc(t) + '</li>'; }).join('');
     return '<section class="live"><h2>' + esc(g.label) + (i < g.steps.length ? ' · step ' + (i + 1) + ' of ' + g.steps.length : '') + '</h2>' +
-      '<p class="step">' + esc(i < g.steps.length ? g.steps[i] : 'Stay with her and follow the 911 dispatcher until help arrives.') + '</p>' +
+      '<p class="step">' + esc(i < g.steps.length ? g.steps[i] : 'Stay with them and follow the 911 dispatcher until help arrives.') + '</p>' +
       (g.source ? '<p class="muted">' + esc(g.source) + '</p>' : '') +
       (g.poison ? '<a class="call" style="margin-top:10px" href="tel:' + esc(g.poison.replace(/[^0-9]/g, '')) + '">Call Poison Control</a>' : '') +
       '<ol class="steps">' + list + '</ol>' +
@@ -109,12 +111,16 @@ export const GUEST_HTML = `<!doctype html>
     // Offline in an emergency: the guide carries on from the step the kitchen was on.
     if (offline && s.incident && s.incident.status === 'active' && !guide) guide = { kind: 'now', i: s.incident.current };
     var inc = !offline && s.incident && s.incident.status === 'active' ? s.incident : null;
+    var callFirst = (s.contacts || []).find(function (c) { return c.phone; }) || null;
+    var alerted = (s.contacts || []).slice(0, 2).map(function (c) { return c.name; }).join(' and ');
     var live = inc
       ? '<section class="live"><h2>Emergency · step ' + Math.min(inc.current + 1, inc.total) + ' of ' + inc.total + '</h2>' +
-        '<p class="step">' + esc(inc.steps[inc.current] ? inc.steps[inc.current].text : 'Stay with her and follow the 911 dispatcher until help arrives.') + '</p>' +
+        '<p class="step">' + esc(inc.steps[inc.current] ? inc.steps[inc.current].text : 'Stay with them and follow the 911 dispatcher until help arrives.') + '</p>' +
         (inc.source ? '<p class="muted">' + esc(inc.source) + '</p>' : '') +
         '<div class="two"><button data-inc="back" class="alt"' + (inc.current === 0 ? ' disabled' : '') + '>Back</button><button data-inc="done">Done</button></div>' +
-        '<button data-inc="resolved" class="alt">Help has arrived</button><p class="note">The kitchen screen and the parents’ phones follow along.</p></section>'
+        '<button data-inc="resolved" class="alt">Help has arrived</button><p class="note">The kitchen screen and the parents’ phones follow along.</p></section>' +
+        // A parent asked for this: in an emergency, reaching them is one tap (911 stays first, above).
+        (callFirst ? '<section class="parent-call"><p class="muted">' + esc(alerted) + ' already know. Call when you can:</p><a class="sos call-parent" href="tel:' + esc(callFirst.phone.replace(/[^+0-9]/g, '')) + '">Call ' + esc(callFirst.name) + '</a></section>' : '')
       : guideCard(s);
     var guides = (s.guides || []).map(function (g) { return '<button data-guide="' + esc(g.kind) + '">' + esc(g.label) + '</button>'; }).join('');
     var ta = document.getElementById('ask');

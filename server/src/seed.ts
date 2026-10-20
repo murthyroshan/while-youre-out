@@ -89,6 +89,8 @@ export function seedDemoHousehold(db: DB) {
     ['routine', 'Maya', 'Dinner at 6:30.', 'voice', 'Anita', 'carer', 'normal', 60],
     ['routine', 'Maya', 'Bath at 7:15, pyjamas, brush teeth, two stories, lights out at 8.', 'photo', 'Anita', 'carer', 'normal', 60],
     ['routine', 'Maya', 'If her nap ends after 4 pm, bedtime moves 30 minutes later.', 'voice', 'Rahul', 'carer', 'normal', 6],
+    // What sitters most often call about (they told us): a crying child.
+    ['routine', 'Maya', "If she's upset or crying: a cuddle and her bunny, Hops, usually work. If she misses us, play my goodnight message on the Echo Show.", 'voice', 'Anita', 'carer', 'normal', 30],
     ['screen', 'Maya', 'One hour of TV at most. Gentle cartoons only, nothing scary.', 'whatsapp', 'Anita', 'carer', 'low', 60],
     ['rules', 'Maya', 'No friends over tonight.', 'voice', 'Rahul', 'carer', 'normal', 0],
     ['pet', 'Bruno', 'Bruno gets one cup of dry food at 7 pm, then a short walk around the block.', 'voice', 'Rahul', 'carer', 'normal', 60],

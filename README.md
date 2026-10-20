@@ -1,12 +1,36 @@
 # While You're Out
 
-Alexa+ add-on for whoever looks after your kids and home while you're out: a babysitter, a grandparent, a nanny, or a partner on the night shift.
+**Your Echo Show knows your house. Tonight it hands that knowledge to whoever is looking after your kids, and keeps you one tap away.**
 
-The Echo Show in the kitchen becomes the sitter's guide for the evening, in the parents' own words, while the parents' phones stay in the loop.
+A guest mode for the smart home, built as an Alexa+ add-on (an MCP server, spec 2025-11-25, Streamable HTTP). The babysitter, grandparent or nanny asks the kitchen Echo Show anything; it answers in the parents' own words, asks the parents when their notes don't cover it, and in an emergency walks the sitter through the family's own plan, step by step, even when the internet drops.
 
-Built for the Build, Ship, Shape: Amazon Developer Hackathon (Alexa+ track).
+**Try it:** [the highlights, 2½ minutes hands-free](https://while-youre-out-wpj3.onrender.com/?moment=highlights) (scan the QR code and be Mom on your own phone) · [the website](https://murthyroshan.github.io/while-youre-out/) · [the 3-minute video](#) · MCP endpoint `https://while-youre-out-wpj3.onrender.com/mcp`. Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track.
 
-**Live demo:** [while-youre-out-wpj3.onrender.com](https://while-youre-out-wpj3.onrender.com) (the Echo Show simulator: press **Watch the whole evening**, 3 minutes, hands-free; or scan the QR code and be Mom on your own phone; every visitor gets their own copy of the demo house) · **MCP endpoint:** `https://while-youre-out-wpj3.onrender.com/mcp` (Streamable HTTP, MCP 2025-11-25; a shared house; `/h/<any 16+ letters>/mcp` gives you a private one) · **Which version is live:** `/version`. It's on a free host: if nobody has visited for a while, the first load can take up to a minute.
+## Why
+
+Every time parents go out, someone else holds their child's safety, and what they need to know lives in a WhatsApp thread, a fridge note and a parent's head. About 1 in 20 U.S. children has a food allergy ([CDC, 2024 data](https://www.cdc.gov/nchs/pressroom/releases/20260108.html)); more than 40% of them have had a severe reaction, and epinephrine is needed within minutes ([FARE, 2024](https://www.foodallergy.org/sites/default/files/2024-07/FARE%20Food%20Allergy%20Facts%20and%20Statistics_April2024.pdf)).
+
+**What parents and carers told us.** We talked to six people in India (three parents, a grandparent and two babysitters; a small, informal sample, an early signal rather than proof). Parents hand over by talking and WhatsApp and still worry something will be forgotten; carers call the parents most about food, sleep and a crying child, and feel they call too often; everyone said it must be simple, private and still let the carer reach the parents directly. What we changed because of it:
+
+1. In an emergency the Echo Show says at once that the parents have been alerted, and the sitter's phone puts a one-tap "Call Anita" under the step (911 stays first).
+2. When the sitter notes the child is asleep, the parents get one quiet "All's well at home".
+3. Setting up is pasting the WhatsApp message you'd send anyway: each line becomes a rule you confirm, and it works without any AI.
+
+## Not a Q&A bot
+
+The track's own list of what makes an Alexa+ add-on creative, and where each is here:
+
+| The rules say | While You're Out |
+| --- | --- |
+| Agentic workflow across services | A question the notes don't cover becomes an **MCP Task** that waits for a parent's answer from their lock screen; the doorbell, dinner order and payment each run through the parents' phones. |
+| Context-aware, state across sessions | Each evening is remembered: sitter profiles (a grandparent gets large text, known answers aren't re-checked), "since last time" changes, the parents' rules kept between evenings. |
+| Purchasing | Dinner from an allergy-checked menu, approved by a parent; "Pay Priya" through URL elicitation on the parent's own phone. |
+| Media support, cards | One MCP Apps card for every screen (Tonight, the emergency guide, the doorbell photo, the goodnight message), sized per Echo device, light and dark. |
+| MCP Apps, Agent Skills | MCP Apps cards; an [Agent Skill](agent-skill/SKILL.md) for any agent hosting it; form and URL elicitation; resources with subscriptions. |
+
+And safety is code, not a prompt: never "it's safe", never a dose, emergencies first, the address shown and never spoken. Measured on [357 things a sitter might say](server/eval/REPORT.md), with the held-out score reported as the honest one.
+
+**Live demo notes.** Every visitor gets their own copy of the demo house; `/h/<any 16+ letters>/mcp` gives you a private MCP house; `/version` shows which commit is live. It's on a free host: after a quiet spell the first load can take up to a minute.
 
 ## An evening with While You're Out
 
@@ -36,7 +60,7 @@ Requires Node.js 22.13 or newer (the server uses the built-in `node:sqlite`; tes
 npm install
 npm run dev          # MCP server on http://127.0.0.1:8787/mcp
 npm run dev:sim      # Echo Show simulator on http://127.0.0.1:5173 (second terminal)
-npm test             # 286 server tests and 76 simulator tests
+npm test             # the server and simulator suites (the Alexa skill: npx tsx --test alexa/test/*.test.ts)
 ```
 
 For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator's **guided demo** then walks through the whole evening one step at a time: one button says the next line, and it moves the house clock and rings the doorbell for you. Its first step resets the demo family, so a reload mid-demo starts clean (`POST /demo/reset`, demo mode only). The house clock is under Settings. "Open the parent's phone" opens the parent page.
@@ -49,7 +73,7 @@ For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `serv
 
 | Where | What to try |
 | --- | --- |
-| Straight to a moment | [The knock at the door](https://while-youre-out-wpj3.onrender.com/?moment=door) · [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) · [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight) · [paying the sitter](https://while-youre-out-wpj3.onrender.com/?moment=pay). Also `handover`, `questions`, `evening`, `ask`. The evening skips ahead silently, then plays from there |
+| Straight to a moment | [The highlights, 2½ minutes](https://while-youre-out-wpj3.onrender.com/?moment=highlights) · [The knock at the door](https://while-youre-out-wpj3.onrender.com/?moment=door) · [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) · [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight) · [paying the sitter](https://while-youre-out-wpj3.onrender.com/?moment=pay). Also `handover`, `questions`, `evening`, `ask`. The evening skips ahead silently, then plays from there |
 | Your own phone | "Use your own phone" (or the QR code on the welcome card) opens the parent page for your demo house on your phone. Priya's questions arrive there, and "Watch the evening" waits for your answer |
 | Echo Show | The **Tonight** screen (refreshes itself), every answer card, the doorbell, the emergency guide, the goodnight message, the who's-babysitting form, paying the sitter |
 | Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
@@ -169,7 +193,7 @@ Real Alexa+ add-on access is partner-only, so the simulator plays Alexa's part:
 - Spoken replies stay within 30 words (a test plays the whole guided demo and checks every reply); the card shows the rest. The fixed emergency script is the one exception: it is always read in full.
 - Simulated device features: Alexa calling and the Ring doorbell alert.
 
-Checks against a running server (not unit tests): `npx tsx test/e2e-houses.ts http://127.0.0.1:8787` (two judges at once), `test/e2e-hybrid.ts` (timing), `test/e2e-language.ts` (a Hindi-speaking sitter, real Gemini).
+Checks against a running server (not unit tests): `npx tsx simulator/test/e2e-houses.ts http://127.0.0.1:8787` (two judges at once), `simulator/test/e2e-hybrid.ts` (timing), `simulator/test/e2e-language.ts` (a Hindi-speaking sitter, real Gemini).
 
 ## Built alongside: the Alexa+ add-on simulator
 

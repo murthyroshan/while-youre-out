@@ -233,7 +233,15 @@ export function createPush(db: DB, opts: { sender?: PushSender; publicUrl: strin
     void notify(parentNames(db), { title: `${o.requested_by} wants to order dinner`, body: `${o.item}, $${(o.price_cents / 100).toFixed(o.price_cents % 100 ? 2 : 0)} from ${o.restaurant}. Allergy-checked. Approve it on your phone.`, tag: 'order', urgent: false });
   };
 
+  // A parent told us no news for hours is its own worry: the moment the sitter notes the child is
+  // asleep, the parents hear "all's well" (once; busy mode holds it, like small questions).
+  const onLog = (ev: { kind: string; text: string }) => {
+    if (ev.kind !== 'sleep' || !/\b(asleep|sleeping|in bed|went to bed|down for the night)\b/i.test(ev.text) || busyUntil(db)) return;
+    void notify(parentNames(db), { title: "All's well at home", body: `${carer()}: ${ev.text}`, tag: 'asleep' });
+  };
+
   const handlers: Array<[string, (...a: any[]) => void]> = [
+    ['log', onLog],
     ['pass_reminder', onPassReminder],
     ['order_requested', onOrderRequested],
     ['incident', onIncident],

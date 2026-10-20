@@ -35829,11 +35829,13 @@ var EMERGENCY_PATTERNS = [
   ["missing", /(माया|बच्ची|बच्चा) (नहीं मिल|गायब)|no encuentro a|se perdi[oó]/i]
 ];
 var HYPOTHETICAL = /\b(what (do|should) i do if|what if|in case|is (a |an )?\w+ (a )?choking hazard|choking hazard|so (she|he|they|it|the child|the pet) (doesn'?t|won'?t|don'?t)|how (do|would) i (know|tell) if|what are the signs|signs of|how to use|how do i use|what happens if)\b/i;
-var NOT_EMERGENCY = /\bfireplace|camp ?fire|fire (truck|engine|station|fighter|man|men)|fireman|firework|\bfire tv\b|fire tablet|\bpassed out (on|in) (the )?(couch|sofa|bed|car|chair)\b.*\b(tired|watching|tv|movie|asleep)|\b(eyes?|face) (is |are )?puffy from (crying|sleep|her nap|his nap|the nap)|band-?aid fell|button fell|book fell|\bso (he|she|they|it|the pet|the dog|the child|the baby) (won'?t|doesn'?t|don'?t) wake\b|swallowed (her |his |the |some )?medicine (fine|without|okay|ok|no problem)/i;
+var NOT_EMERGENCY = /\b(chok(e|es|ed|ing)|dying|died) (with|of|from) laugh(ter|ing)?\b|\b(light|lighting|build|building|make|making) (a|the) fire\b|\bfireplace|camp ?fire|fire (truck|engine|station|fighter|man|men)|fireman|firework|\bfire tv\b|fire tablet|\bpassed out (on|in) (the )?(couch|sofa|bed|car|chair)\b.*\b(tired|watching|tv|movie|asleep)|\b(eyes?|face) (is |are )?puffy from (crying|sleep|her nap|his nap|the nap)|band-?aid fell|button fell|book fell|\bso (he|she|they|it|the pet|the dog|the child|the baby) (won'?t|doesn'?t|don'?t) wake\b|swallowed (her |his |the |some )?medicine (fine|without|okay|ok|no problem)/i;
+var NOT_EMERGENCY_ALL = new RegExp(NOT_EMERGENCY.source, "gi");
 function emergencyKind(raw, names = NO_NAMES) {
   const text = withRoles(normalise(raw), names);
-  if (HYPOTHETICAL.test(text) || NOT_EMERGENCY.test(text)) return null;
-  for (const [kind, re] of EMERGENCY_PATTERNS) if (re.test(text)) return kind;
+  if (HYPOTHETICAL.test(text)) return null;
+  const rest = text.replace(NOT_EMERGENCY_ALL, " ");
+  for (const [kind, re] of EMERGENCY_PATTERNS) if (re.test(rest)) return kind;
   return null;
 }
 function isEmergency(text, names = NO_NAMES) {
@@ -35937,7 +35939,7 @@ var RuleBrain = class {
       const r = await io.tool("teachback", skip ? { skip: true } : { answer: u });
       if ((_c = r.structuredContent) == null ? void 0 : _c.emergency) {
         this.pending = null;
-        const e = await this.emergency(io, u);
+        const e = await this.emergency(io, u, r);
         return io.say(textOf(e));
       }
       if (((_d = r.structuredContent) == null ? void 0 : _d.kind) !== "question") this.pending = null;
@@ -36036,7 +36038,7 @@ var RuleBrain = class {
       const r = await io.tool("log_event", { text: cap(text), kind });
       const s2 = r.structuredContent ?? {};
       if (s2.emergency) {
-        const e = await this.emergency(io, text);
+        const e = await this.emergency(io, text, r);
         return io.say(textOf(e));
       }
       if (s2.allergy_alert) return io.say(String(s2.allergy_alert));
@@ -36065,7 +36067,7 @@ var RuleBrain = class {
     if (r.isError) return io.say("Sorry, I couldn't check that.");
     const s2 = r.structuredContent ?? {};
     if (s2.emergency) {
-      const e = await this.emergency(io, u);
+      const e = await this.emergency(io, u, r);
       return io.say(textOf(e));
     }
     if (s2.busy_until !== void 0) this.busyUntil = s2.busy_until ?? null;
@@ -36104,16 +36106,19 @@ var RuleBrain = class {
     return io.say(textOf(r));
   }
   /** Starts the emergency script; from then on "done" and "next" move its guide on. */
-  async emergency(io, description) {
+  /** Starts the guide, unless the tool that heard the emergency already did (emergency_started). */
+  async emergency(io, description, heard) {
+    var _a4;
     this.pending = null;
     this.inEmergency = true;
+    if ((_a4 = heard == null ? void 0 : heard.structuredContent) == null ? void 0 : _a4.emergency_started) return heard;
     return io.tool("emergency", { description });
   }
   async door(u, io) {
     const r = await io.tool("door_check", { question: u });
     const s2 = r.structuredContent ?? {};
     if (s2.emergency) {
-      const e = await this.emergency(io, u);
+      const e = await this.emergency(io, u, r);
       return io.say(textOf(e));
     }
     io.say(textOf(r));
@@ -36314,7 +36319,7 @@ var GeminiBrain = class {
             if (name === "start_handoff" && !r.isError && s2.view !== "handoff_cancelled") handoffStarted = true;
             if (s2.emergency && name !== "emergency") {
               this.inEmergency = true;
-              const e = await io.tool("emergency", { description: String(args.question ?? args.text ?? u), description_english: args.question_english ?? args.text_english });
+              const e = s2.emergency_started ? r : await io.tool("emergency", { description: String(args.question ?? args.text ?? u), description_english: args.question_english ?? args.text_english });
               spoken.push(textOf(e));
               response = { ...forModel(r), emergency_handled: true };
             } else if (textOf(r)) {

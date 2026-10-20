@@ -82,6 +82,19 @@ test('the parent page, opened through its house link, finds the same house by co
   assert.equal((await (await fetch(`${base}/parent/api/state?k=${KEY}`)).json()).handoff, null);
 });
 
+test('a remembered house that has gone (a restart, or aged out) is forgotten, not an error', async () => {
+  const { base } = await start();
+  // This browser opened a parent page before the demo restarted: its house no longer exists.
+  const cookie = `wyo_house=${'d'.repeat(24)}`;
+  // (/health stands for any page: CI doesn't build the simulator the root would serve.)
+  const page = await fetch(`${base}/health`, { headers: { cookie } });
+  assert.equal(page.status, 200, 'the page loads, not "No such demo house"');
+  assert.match(page.headers.get('set-cookie') ?? '', /wyo_house=;.*Max-Age=0/, 'the stale cookie is cleared');
+  // The same browser's next visit starts afresh.
+  const again = await fetch(`${base}/parent/api/state?k=${KEY}`, { headers: { cookie } });
+  assert.notEqual(again.status, 404);
+});
+
 test('links the server makes for a house point back into that house', async () => {
   const { connect } = await start();
   const a = await connect(A);

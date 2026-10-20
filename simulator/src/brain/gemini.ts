@@ -201,7 +201,8 @@ export class GeminiBrain implements Brain {
             if (name === 'start_handoff' && !r.isError && s.view !== 'handoff_cancelled') handoffStarted = true;
             if (s.emergency && name !== 'emergency') {
               this.inEmergency = true;
-              const e = await io.tool('emergency', { description: String(args.question ?? args.text ?? u), description_english: args.question_english ?? args.text_english });
+              // The tool may have started the guide itself (emergency_started): then it isn't started twice.
+              const e = s.emergency_started ? r : await io.tool('emergency', { description: String(args.question ?? args.text ?? u), description_english: args.question_english ?? args.text_english });
               spoken.push(textOf(e));
               response = { ...forModel(r), emergency_handled: true };
             } else if (textOf(r)) {

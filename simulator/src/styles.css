@@ -258,6 +258,12 @@ button:disabled { cursor: not-allowed; }
 .watch.on .watch-icon { background: var(--coral); color: #fff; }
 .watch-text b { display: block; font-size: 16px; letter-spacing: -0.01em; }
 .watch-text small { display: block; font-size: 12.5px; opacity: 0.8; margin-top: 2px; }
+/* While the welcome card is open, the demo controls step back: one thing to look at, one button to press. */
+.panel.behind { opacity: 0.35; pointer-events: none; filter: saturate(0.6); transition: opacity 0.4s, filter 0.4s; }
+.watch-short { width: 100%; margin-top: 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line-2); background: rgba(255, 255, 255, 0.04); color: var(--text, #f3efe6); font-weight: 700; font-size: 14px; text-align: left; transition: background 0.15s; }
+.watch-short:hover { background: rgba(255, 255, 255, 0.08); }
+.watch-short:disabled { opacity: 0.55; }
+.watch-short small { flex-basis: 100%; font-weight: 500; font-size: 12px; opacity: 0.75; }
 .watch-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--orange)); transform-origin: 0 50%; transition: transform 0.6s var(--ease); }
 
 /* The evening, step by step */

@@ -132,6 +132,7 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
     }
     const m = PREFIX.exec(req.url);
     let id = m?.[1];
+    let viaCookie = false;
     if (m) {
       const rest = req.url.slice(m[0].length);
       req.url = rest.startsWith('/') ? rest : `/${rest}`;
@@ -141,7 +142,10 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
       }
     } else {
       const fromCookie = cookie(req.headers.cookie, COOKIE);
-      if (fromCookie && HOUSE_ID.test(fromCookie)) id = fromCookie;
+      if (fromCookie && HOUSE_ID.test(fromCookie)) {
+        id = fromCookie;
+        viaCookie = true;
+      }
     }
     // Plain /mcp: each MCP session gets its own fresh demo family, so two people testing at once
     // never share an evening or reset each other's. The session id the house hands out picks it later.
@@ -163,6 +167,12 @@ export function createHouses<T extends HouseApp>(make: (publicUrl: string, share
     }
     if (!id) return shared.app(req, res, next);
     const house = get(id, startsVisit(req.url) ? (req.ip ?? 'unknown') : null);
+    // A house this browser remembers but that has gone (the demo restarted, or it aged out): forget
+    // it and carry on as a new visitor, rather than greeting a returning judge with an error.
+    if (house === undefined && viaCookie) {
+      res.append('Set-Cookie', `${COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? '; Secure' : ''}`);
+      return shared.app(req, res, next);
+    }
     if (house === undefined) return void res.status(404).json({ error: 'No such demo house.' });
     if (!house) return void res.status(429).json({ error: 'The demo is very busy right now. Try again in a minute.' });
     houseStore.run(house.ctx, () => house.app(req, res, next));

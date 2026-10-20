@@ -56,10 +56,10 @@ function scriptFor(kind: EmergencyKind, child: string, plan: ReturnType<typeof a
       };
     case 'poison':
       return {
-        say_first: "Call Poison Control now at 1-800-222-1222. If she isn't breathing or won't wake up, call 911 instead.",
+        say_first: "Call Poison Control now at 1-800-222-1222. If the child isn't breathing or won't wake up, call 911 instead.",
         source: 'General safety steps',
         steps: steps([
-          "If she isn't breathing, won't wake up or is having a seizure, call 911.",
+          `If ${child} isn't breathing, won't wake up or is having a seizure, call 911.`,
           'Otherwise call Poison Control now: 1-800-222-1222.',
           'Keep the container or packet so you can tell them what it was.',
         ]),
@@ -74,10 +74,11 @@ function scriptFor(kind: EmergencyKind, child: string, plan: ReturnType<typeof a
       };
     case 'missing':
       return {
-        say_first: `Call 911 now and tell them ${child} is missing.`,
+        // the same words as step 1, so the guide says them once
+        say_first: `Call 911 now. Say ${child} is missing and describe what ${child} is wearing.`,
         source: 'General safety steps',
         steps: steps([
-          `Call 911 now. Say ${child} is missing and describe what she is wearing.`,
+          `Call 911 now. Say ${child} is missing and describe what ${child} is wearing.`,
           'Check the house and the yard while you wait, including small spaces.',
           DISPATCHER,
         ]),

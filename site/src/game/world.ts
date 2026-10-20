@@ -4,7 +4,6 @@
 // Wi-Fi dropping, an ambulance's lights on the path).
 import * as THREE from 'three';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { createScene, v, type View } from '../home/scene';
 import type { Echo } from './echo';
@@ -206,15 +205,18 @@ const glow = (color: string, size: number, opacity = 0) => {
 // The final grade: vignette, the red of an emergency, a chromatic hit when something goes wrong,
 // and a little film grain so the model house reads as a picture.
 const GradeShader = {
-  uniforms: { tDiffuse: { value: null }, red: { value: 0 }, hit: { value: 0 }, time: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, red: { value: 0 }, hit: { value: 0 }, time: { value: 0 }, lost: { value: 0 } },
   vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float red; uniform float hit; uniform float time; varying vec2 vUv;
+    uniform sampler2D tDiffuse; uniform float red; uniform float hit; uniform float time; uniform float lost; varying vec2 vUv;
     void main() {
       vec2 c = vUv - 0.5;
       float d = length(c);
       vec2 off = c * (hit * 0.022 + 0.0015);
-      vec3 col = vec3(texture2D(tDiffuse, vUv + off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - off).b);
+      float band = smoothstep(0.0, 0.02, vUv.y - 0.44) * smoothstep(0.0, 0.02, 0.56 - vUv.y);
+      vec2 uv = vUv + vec2(band * lost * 0.03, 0.0);
+      vec3 col = vec3(texture2D(tDiffuse, uv + off).r, texture2D(tDiffuse, uv).g, texture2D(tDiffuse, uv - off).b);
+      col = mix(col, vec3(dot(col, vec3(0.3, 0.59, 0.11))) * vec3(1.0, 0.92, 0.75), lost * 0.55);
       float vig = smoothstep(0.92, 0.28, d);
       col *= mix(1.0, vig, 0.42 + 0.3 * red + 0.3 * hit);
       float pulse = 0.55 + 0.45 * sin(time * 5.5);
@@ -386,15 +388,13 @@ export function createWorld(canvas: HTMLCanvasElement, echo: Echo) {
   const motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({ size: 0.05, map: DOT, color: new THREE.Color('#ffc98a').multiplyScalar(2.5), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
   scene.add(motes);
 
-  // ---------- post: bloom, the Wi-Fi glitch, the grade ----------
+  // ---------- post: bloom and the grade (which also draws the Wi-Fi dropping) ----------
   const size = renderer.getSize(new THREE.Vector2());
   const bloom = new UnrealBloomPass(size, 0.75, 0.6, 0.9);
-  const glitch = new GlitchPass();
-  glitch.enabled = false;
-  glitch.goWild = true;
+  let lost = 0;
+  let lostTo = 0;
   const grade = new ShaderPass(GradeShader);
   s.composer.insertPass(bloom, 2);
-  s.composer.addPass(glitch);
   s.composer.addPass(grade);
   // compile every shader now (the torch, the TV, the cookies...), not in the middle of a moment
   {
@@ -621,6 +621,8 @@ export function createWorld(canvas: HTMLCanvasElement, echo: Echo) {
     grade.uniforms.red.value = red;
     grade.uniforms.hit.value = hit;
     grade.uniforms.time.value = t;
+    lost += (lostTo - lost) * Math.min(1, dt * 6);
+    grade.uniforms.lost.value = lost;
 
     // shadows: only when something that casts one moved
     const moving = Object.values(cast).some((f) => f.group.visible && f.busy) || Math.abs(doorTo - doorAngle) > 0.002 || Math.abs(drawerTo - drawerK) > 0.002 || torch.intensity > 0.5 || bell > 0;
@@ -670,6 +672,7 @@ export function createWorld(canvas: HTMLCanvasElement, echo: Echo) {
     },
     /** Something went wrong: a jolt, a red edge, a chromatic split. */
     bad(amount = 1) {
+      if (reduced) return;
       trauma = Math.min(1, trauma + 0.6 * amount);
       hit = Math.min(1.2, hit + amount);
     },
@@ -680,10 +683,11 @@ export function createWorld(canvas: HTMLCanvasElement, echo: Echo) {
       bell = 1;
       trauma = Math.min(1, trauma + 0.35);
     },
+    /** The Wi-Fi drops: the picture loses its signal for a moment (eased in and out, never flashing). */
     glitch(ms = 900) {
       if (reduced) return;
-      glitch.enabled = true;
-      setTimeout(() => (glitch.enabled = false), ms);
+      lostTo = 1;
+      setTimeout(() => (lostTo = 0), ms);
     },
     setMode(m: typeof mode) {
       mode = m;

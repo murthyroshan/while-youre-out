@@ -11,11 +11,26 @@ export function siteChrome(current: string) {
   document.querySelectorAll<HTMLAnchorElement>(`.site-head nav a[data-page="${current}"]`).forEach((a) => a.setAttribute('aria-current', 'page'));
   const menu = document.querySelector<HTMLButtonElement>('.site-head .menu');
   const nav = document.getElementById('site-nav');
-  menu?.addEventListener('click', () => {
-    const open = !nav?.classList.contains('open');
+  const setOpen = (open: boolean) => {
     nav?.classList.toggle('open', open);
-    menu.setAttribute('aria-expanded', String(open));
+    menu?.setAttribute('aria-expanded', String(open));
+  };
+  menu?.addEventListener('click', () => setOpen(!nav?.classList.contains('open')));
+  // Escape closes the phone menu and gives focus back to its button
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && nav?.classList.contains('open')) {
+      setOpen(false);
+      menu?.focus();
+    }
   });
+  // Links that open a new tab say so to screen readers; a whole-card link is named by its heading.
+  document.querySelectorAll<HTMLAnchorElement>('a[target="_blank"]').forEach((a) => {
+    const note = document.createElement('span');
+    note.className = 'sr-only';
+    note.textContent = ' (opens in a new tab)';
+    a.append(note);
+  });
+  document.querySelectorAll('a.card .go, a.card .label').forEach((el) => el.setAttribute('aria-hidden', 'true'));
   const read = () => {
     const max = document.documentElement.scrollHeight - innerHeight;
     document.documentElement.style.setProperty('--read', String(max > 0 ? Math.min(1, scrollY / max) : 0));
@@ -128,7 +143,7 @@ if (document.body.classList.contains('page') && !document.body.classList.contain
     reveal(document);
     packets();
   }
-  countUp(document);
+  if (!reduced) countUp(document);
   spotlight(document);
 }
 const after = document.querySelector<HTMLElement>('.after');
@@ -139,6 +154,6 @@ if (after) {
   addEventListener('scroll', past, { passive: true });
   past();
   if (!reduced) reveal(after);
-  countUp(after);
+  if (!reduced) countUp(after);
   spotlight(after);
 }

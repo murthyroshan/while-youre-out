@@ -120,7 +120,8 @@ test('end to end: emergency → "done" → the phones follow → "on my way" rea
   const e = await call('emergency', { description: "Her lips are swelling and she can't breathe" });
   assert.equal(e.structuredContent.incident.current, 0);
   // The plan's own order: the EpiPen first, then 911 (with the address said at that step).
-  assert.match(e.content[0].text, /^Step 1 of 5: If Maya has trouble breathing.*EpiPen.*Say "done" when you have\.$/);
+  // ...and, as a parent asked, the sitter hears at once that the parents already know.
+  assert.match(e.content[0].text, /^Step 1 of 5: If Maya has trouble breathing.*EpiPen.*Say "done" when you have\. Anita and Rahul have been alerted\.$/);
 
   sent.splice(0);
   const s1 = await call('emergency_step', { action: 'done' });

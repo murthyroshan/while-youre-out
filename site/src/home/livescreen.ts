@@ -75,6 +75,8 @@ export function mountLiveScreen(screen: THREE.Mesh, width: number, height: numbe
       // fully hidden, the layer is not painted at all
       css.domElement.style.visibility = shown > 0 ? 'visible' : 'hidden';
       holder.style.pointerEvents = shown > 0.95 ? 'auto' : 'none';
+      // nor can it be tabbed into while it's faded out
+      frame.tabIndex = shown > 0.95 ? 0 : -1;
     },
     say: (text: string) => frame.contentWindow?.postMessage({ target: 'wyo', type: 'say', text }, LIVE_ORIGIN),
     ring: (who: string) => frame.contentWindow?.postMessage({ target: 'wyo', type: 'ring', who }, LIVE_ORIGIN),

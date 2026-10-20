@@ -5,14 +5,10 @@
 .skip:focus { left: 12px; }
 :focus-visible { outline: 2px solid var(--live); outline-offset: 2px; }
 
-/* ---------- moving between pages: the header stays, the page cross-fades ---------- */
-@view-transition { navigation: auto; }
-.site-head { view-transition-name: site-head; }
-::view-transition-old(root) { animation: vt-out 0.28s ease both; }
-::view-transition-new(root) { animation: vt-in 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-@keyframes vt-out { to { opacity: 0; filter: blur(6px); } }
-@keyframes vt-in { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } }
-@media (prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none; } }
+/* ---------- arriving on a page: a short fade (CSS only: nothing that can fail or wait) ---------- */
+body.page main, body.page .site-foot, .after { animation: page-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes page-in { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { body.page main, body.page .site-foot, .after { animation: none; } }
 
 /* ---------- the night palette ---------- */
 body.page, .after, .site-foot {
@@ -63,8 +59,8 @@ body.page .site-head { background: rgba(6, 9, 20, 0.55); backdrop-filter: blur(1
 /* the opening of each page: the words, and the Echo Show saying something real */
 .hero-doc { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 40px; align-items: center; min-height: calc(100vh - 160px); padding-bottom: 40px; }
 .hero-copy { position: relative; z-index: 2; }
-.hero-device { position: relative; perspective: 1400px; min-height: 360px; display: grid; place-items: center; }
-@media (max-width: 960px) { .hero-doc { grid-template-columns: 1fr; min-height: 0; } .hero-device { min-height: 300px; } }
+.hero-device { position: relative; perspective: 1400px; min-height: 360px; display: grid; place-items: center; overflow-x: clip; } /* the glow never widens the page on a phone */
+@media (max-width: 960px) { .hero-doc { grid-template-columns: 1fr; min-height: 0; } .hero-device { min-height: 300px; } .hero-device .heard { max-width: 92%; } }
 
 /* sections: the heading stays in view while its contents scroll by */
 .sect { position: relative; padding: 88px 0 8px; margin-top: 40px; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.6fr); gap: 28px 64px; }
@@ -156,9 +152,9 @@ body.page .btn.primary:hover, .after .btn.primary:hover { box-shadow: 0 0 60px r
 .echo3d[data-kind='offline'] .halo { background: radial-gradient(closest-side, rgba(255, 176, 32, 0.35), transparent 70%); }
 .echo3d[data-kind='message'] .halo { background: radial-gradient(closest-side, rgba(255, 143, 177, 0.35), transparent 70%); }
 .echo3d .stand { position: absolute; left: 30%; right: 30%; bottom: -56px; height: 40px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, 0.7), transparent); filter: blur(6px); transform: translateZ(-40px); }
-.hero-device .heard { margin: 0; position: absolute; z-index: 3; top: 6%; left: -6%; max-width: 78%; padding: 12px 16px; border-radius: 16px 16px 16px 4px; background: rgba(243, 239, 230, 0.95); color: #16171b; font: 500 15px/1.4 var(--sans); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4); transform: translateZ(60px) translateY(-70%); opacity: 0; transition: opacity 0.4s, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.hero-device .heard { margin: 0; position: absolute; z-index: 3; top: 6%; left: 0; max-width: 78%; padding: 12px 16px; border-radius: 16px 16px 16px 4px; background: rgba(243, 239, 230, 0.95); color: #16171b; font: 500 15px/1.4 var(--sans); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4); transform: translateZ(60px) translateY(-70%); opacity: 0; transition: opacity 0.4s, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .hero-device .heard.on { opacity: 1; transform: translateZ(60px) translateY(-70%) translateY(-6px); }
-.hero-device .heard small { display: block; font: 500 10px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6e6f74; margin-bottom: 3px; }
+.hero-device .heard small { display: block; font: 500 10px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: #5d5e63; margin-bottom: 3px; }
 .hero-device .heard.mono { font-family: var(--mono); font-size: 13.5px; }
 @media (prefers-reduced-motion: reduce) { .echo3d { animation: none; } }
 
@@ -183,3 +179,12 @@ body.past-story .clock-chip { opacity: 0 !important; pointer-events: none; }
 .after { position: relative; z-index: 12; background: #060914; color: var(--text); overflow: hidden; }
 .after::before { content: ''; position: absolute; left: 0; right: 0; top: -1px; height: 180px; z-index: 1; pointer-events: none; background: linear-gradient(180deg, #070b18, transparent); }
 .after .doc { position: relative; z-index: 2; padding-top: 140px; padding-bottom: 100px; }
+
+/* text for screen readers only */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* less motion, when the reader asks for it: nothing pulses, flows or sweeps */
+@media (prefers-reduced-motion: reduce) {
+  .doc .kicker::before, .diagram .wire.dash, .site-foot::before { animation: none; }
+  .diagram .packet { display: none; }
+}

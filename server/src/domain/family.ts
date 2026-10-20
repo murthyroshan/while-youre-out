@@ -185,7 +185,7 @@ export function saveFamily(db: DB, input: unknown, by = 'Parent'): Family {
   return getFamily(db);
 }
 
-/** Everything about the household. Phone subscriptions and server keys stay. */
+/** Everything about the household. Server keys stay; phones stay for a demo reset (startFresh removes them). */
 function wipe(db: DB) {
   // Anyone still waiting on a question is told it closed.
   const waiting = db.prepare("SELECT id FROM questions WHERE status = 'pending'").all() as Array<{ id: number }>;
@@ -220,6 +220,8 @@ export function recordConsent(db: DB, by: string) {
 export function startFresh(db: DB, timezone: string) {
   if (!validTimezone(timezone)) throw new FamilyError('Choose your time zone.');
   wipe(db);
+  // "Delete everything" means the phones too: the old family's phones stop getting this house's alerts.
+  db.prepare('DELETE FROM push_subscriptions').run();
   // A new family: its parent consents again before anything about the children is kept.
   setSetting(db, 'consent', null);
   db.prepare("INSERT INTO household (id, name, address, language, timezone) VALUES (1, 'Our family', '', 'en', ?)").run(timezone);

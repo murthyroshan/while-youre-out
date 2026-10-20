@@ -106,7 +106,12 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const answer = first?.type === 'text' ? first.text.toLowerCase() : '';
       const notices = takeNotices().filter((n) => !(n.startsWith('Reminder: ') && answer.includes(n.slice('Reminder: '.length).replace(/\.$/, '').toLowerCase())));
       if (!notices.length) return result;
-      const content = first?.type === 'text' ? [{ ...first, text: `${notices.join(' ')} ${first.text}`.trim() }, ...rest] : [{ type: 'text' as const, text: notices.join(' ') }, ...result.content];
+      // A safety answer comes first ("No. That can have peanuts in it.", "Don't open the door."):
+      // reminders and news wait until after it.
+      const sc = (result.structuredContent ?? {}) as Record<string, unknown>;
+      const urgent = /^(no\b|don'?t\b|do not\b)/i.test(answer) || Boolean(sc.watch || sc.pet_alert || sc.allergy_alert) || sc.verdict === 'unknown';
+      const joined = first?.type === 'text' ? (urgent ? `${first.text} ${notices.join(' ')}` : `${notices.join(' ')} ${first.text}`).trim() : '';
+      const content = first?.type === 'text' ? [{ ...first, text: joined }, ...rest] : [{ type: 'text' as const, text: notices.join(' ') }, ...result.content];
       return { ...result, content, structuredContent: { ...(result.structuredContent ?? {}), notices } };
     };
 
@@ -221,7 +226,9 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
             return withStatus(await handler(...args));
           }
         : handler;
-    return registerTool(name, { ...config, ...(OUTPUTS[name] ? { outputSchema: OUTPUTS[name] } : {}), _meta: meta }, wrapped);
+    // Hints said outright, so a host never has to assume: a tool is read-only only if it says so.
+    const annotations = { readOnlyHint: false, ...config.annotations, ...(config.title && !config.annotations?.title ? { title: config.title } : {}) };
+    return registerTool(name, { ...config, annotations, ...(OUTPUTS[name] ? { outputSchema: OUTPUTS[name] } : {}), _meta: meta }, wrapped);
   };
 
   server.registerResource(
@@ -459,6 +466,13 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
   );
 
   // ---------- ordering dinner: the safe menu, then a parent's OK ----------
+  /** During an emergency, dinner waits: the answer is the step the carer is on. */
+  const emergencyFirst = (what: string) => {
+    const i = activeIncident(db);
+    if (!i || i.status !== 'active') return null;
+    const n = Math.min(i.current, i.steps.length - 1);
+    return incidentResult(i, `${what} can wait: the emergency comes first. Step ${n + 1} of ${i.steps.length}: ${i.steps[n]?.text ?? ''}`, { emergency_started: true });
+  };
   server.registerTool(
     'order_dinner',
     {
@@ -470,6 +484,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       _meta: ui,
     },
     withNotices(async ({ craving }) => {
+      const first = emergencyFirst('Dinner');
+      if (first) return first;
       const m = safeMenu(db, craving ?? '');
       const kid = (db.prepare("SELECT name FROM members WHERE kind = 'child' ORDER BY id LIMIT 1").get() as { name: string } | undefined)?.name;
       if (!m.options.length) return plain('menu', { ...m }, `Nothing on tonight's menu is safe for ${kid ?? 'the kids'}. I can ask the parents what to do.`);
@@ -490,6 +506,8 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       _meta: ui,
     },
     withNotices(async ({ item }) => {
+      const waiting = emergencyFirst('The order');
+      if (waiting) return waiting;
       let dish;
       try {
         dish = findSafeItem(db, item);
@@ -576,7 +594,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const english = spokenAnswer === undefined ? undefined : await inEnglish(spokenAnswer, answer_english);
       const answer = spokenAnswer === undefined ? undefined : [spokenAnswer, english !== spokenAnswer ? english : null].filter(Boolean).join(' ');
       if (answer && isEmergency(answer, names())) {
-        return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
+        return emergencyFrom(spokenAnswer ?? answer, english ?? undefined);
       }
       const step = teachback(db, { answer, skip, restart });
       if (step.kind === 'unavailable') return { content: [{ type: 'text', text: step.reason }], isError: true };
@@ -774,16 +792,16 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         );
       }
       if (isEmergency(said, names()) || isEmergency(question, names())) {
-        return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
+        return emergencyFrom(said, question);
       }
       const a = answerQuestion(db, question, VOICE_ROLE);
       if (a.emergency) {
-        return plain('answer', { ...a }, 'This sounds like an emergency. Call the emergency tool now.');
+        return emergencyFrom(said, question);
       }
       // The rules found nothing, but the words hint at danger: a second look, which can only add caution.
       if (a.category !== 'safety_info') {
         const second = await aiSeesEmergency(ai, question, names());
-        if (second) return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true, escalated_by: 'ai', why: second.why }, 'This sounds like an emergency. Call the emergency tool now.');
+        if (second) return emergencyFrom(said, question, { escalated_by: 'ai', why: second.why });
       }
       // "She already ate a peanut butter cookie, is she ok?" is an exposure, not a question about food.
       const allergens = INGESTED.test(question) ? allergenMentions(db, question) : [];
@@ -874,7 +892,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       _meta: ui,
     },
     withNotices(async ({ item }) => {
-      if (isEmergency(item, names())) return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
+      if (isEmergency(item, names())) return emergencyFrom(item);
       const loc = whereIs(db, item);
       if (!loc)
         return localized('answer', { category: 'general', facts: [], guard: null, found: false, suggest_ask_parent: true }, `The parents haven't said where the ${item} is. I can ask them.`);
@@ -908,10 +926,10 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
         return localized('logged', { event: ev, pet_alert: alert }, alert);
       }
       if (isEmergency(text, names()) || isEmergency(said, names())) {
-        return plain('logged', { event: ev, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
+        return emergencyFrom(said, text, { event: ev });
       }
       const second = await aiSeesEmergency(ai, text, names());
-      if (second) return plain('logged', { event: ev, emergency: true, escalated_by: 'ai', why: second.why }, 'This sounds like an emergency. Call the emergency tool now.');
+      if (second) return emergencyFrom(said, text, { event: ev, escalated_by: 'ai', why: second.why });
       const allergens = allergenMentions(db, text);
       if (allergens.length) {
         const alert = allergyAlert(text, allergens);
@@ -1012,7 +1030,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     'ask_parent_and_wait',
     {
       title: 'Ask a parent and wait for the answer',
-      annotations: { destructiveHint: false, openWorldHint: true },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true, title: 'Ask a parent and wait for the answer' },
       description:
         "Sends the carer's question to the parents and runs as a task until someone answers. If the first contact doesn't answer in time, the next contact is asked.",
       inputSchema: {
@@ -1154,6 +1172,38 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     },
   );
 
+  /** Starts the emergency guide: the fixed script, the parents alerted. Also what any tool does the
+   *  moment it hears an emergency, so the guide never waits for the host to call the right tool. */
+  const runEmergency = async ({ description, description_english }: { description: string; description_english?: string }): Promise<CallToolResult> => {
+    const e = startEmergency(db, [description, description_english].filter(Boolean).join(' / '));
+    porchLightOn(db);
+    e.epipen_photo = abs(e.epipen_photo);
+    const lang = carerLang();
+    const fixed = lang === 'en' ? null : fixedTranslation(e.say_first, lang);
+    const address = e.address?.trim() ? e.address : null;
+    const steps = e.action_plan.steps;
+    const first = steps[0]?.text ?? '';
+    // The parents' allergy plan puts the EpiPen first and 911 straight after (as allergy action
+    // plans do): then the first thing said is step 1, and the address comes with the 911 step.
+    const planLeads = steps.length > 1 && !/\b911\b/.test(first) && steps.some((s) => /\b911\b/.test(s.text));
+    // The general script starts with the same "Call 911" sentence; say it once.
+    // A parent asked for this: the sitter hears straight away that the parents already know.
+    const told = (e.parents_alerted as string[]).map((x) => x.replace(/ \(.*\)$/, '')).slice(0, 2);
+    const alerted = told.length ? ` ${told.join(' and ')} ${told.length > 1 ? 'have' : 'has'} been alerted.` : '';
+    const english = planLeads
+      ? `Step 1 of ${steps.length}: ${first} Say "done" when you have.${alerted}`
+      : `${[e.say_first, first === e.say_first ? '' : first].filter(Boolean).join(' ')}${alerted}`;
+    // Emergencies never wait for an AI: a fixed translation of the first line if we have one, English
+    // otherwise. The address itself is shown big on screen, never said aloud (Alexa+ privacy policy).
+    const spoken = fixed;
+    return plain('emergency', { ...e, address, language: lang, spoken }, spoken ? `${spoken} ${english}` : english);
+  };
+  /** A tool that heard an emergency answers with the guide itself (emergency_started: hosts don't start it again). */
+  const emergencyFrom = async (said: string, english?: string, extra: Record<string, unknown> = {}): Promise<CallToolResult> => {
+    const r = await runEmergency({ description: said, description_english: english && english !== said ? english : undefined });
+    return { ...r, structuredContent: { ...(r.structuredContent ?? {}), category: 'emergency', emergency: true, emergency_started: true, ...extra } };
+  };
+
   server.registerTool(
     'emergency',
     {
@@ -1167,27 +1217,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       },
       _meta: { ...ui, ui: { resourceUri: CARD_URI, preferredDisplayMode: 'fullscreen' } },
     },
-    async ({ description, description_english }) => {
-      const e = startEmergency(db, [description, description_english].filter(Boolean).join(' / '));
-      porchLightOn(db);
-      e.epipen_photo = abs(e.epipen_photo);
-      const lang = carerLang();
-      const fixed = lang === 'en' ? null : fixedTranslation(e.say_first, lang);
-      const address = e.address?.trim() ? e.address : null;
-      const steps = e.action_plan.steps;
-      const first = steps[0]?.text ?? '';
-      // The parents' allergy plan puts the EpiPen first and 911 straight after (as allergy action
-      // plans do): then the first thing said is step 1, and the address comes with the 911 step.
-      const planLeads = steps.length > 1 && !/\b911\b/.test(first) && steps.some((s) => /\b911\b/.test(s.text));
-      // The general script starts with the same "Call 911" sentence; say it once.
-      const english = planLeads
-        ? `Step 1 of ${steps.length}: ${first} Say "done" when you have.`
-        : [e.say_first, first === e.say_first ? '' : first].filter(Boolean).join(' ');
-      // Emergencies never wait for an AI: a fixed translation of the first line if we have one, English
-      // otherwise. The address itself is shown big on screen, never said aloud (Alexa+ privacy policy).
-      const spoken = fixed;
-      return plain('emergency', { ...e, address, language: lang, spoken }, spoken ? `${spoken} ${english}` : english);
-    },
+    runEmergency,
   );
 
   /** The emergency screen's data: the fixed script plus where the carer is in it. */
@@ -1231,9 +1261,10 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
       const step = i.steps[i.current]?.text ?? '';
       // The address is shown big on the screen, not said aloud (Alexa+ policy: no private details by voice).
       const where = address && /\b911\b/.test(step) ? ' The address is on the screen.' : '';
+      const child = (db.prepare("SELECT name FROM members WHERE kind = 'child' ORDER BY id LIMIT 1").get() as { name: string } | undefined)?.name ?? 'the child';
       const text =
         i.current >= i.steps.length
-          ? `${timer}That was the last step. Stay with her and follow the 911 dispatcher. Say "it's over" when help has taken over.`
+          ? `${timer}That was the last step. Stay with ${child} and follow the 911 dispatcher. Say "it's over" when help has taken over.`
           : `${news ? `${news} ` : ''}${timer}${action === 'back' ? 'Again' : 'Next'}, step ${i.current + 1} of ${i.steps.length}: ${step}${where}`;
       return incidentResult(i, text);
     },
@@ -1272,7 +1303,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     },
     async () => {
       const ended = endHandoff(db);
-      if (!ended) return { content: [{ type: 'text', text: 'There is no handoff in progress.' }] };
+      if (!ended) return plain('summary', { ended: false }, 'There is no handoff in progress.');
       const h = db.prepare('SELECT * FROM handoffs WHERE id = ?').get(ended.id) as unknown as Handoff;
       const d = buildDebrief(db, h);
       // Raw timestamps: the card formats them in the viewer's own time zone.
@@ -1330,7 +1361,7 @@ export function buildServer({ db, taskStore, escalateAfterMs, publicUrl, ai, voi
     },
     withNotices(async ({ question }) => {
       if (question && isEmergency(question, names())) {
-        return plain('answer', { category: 'emergency', facts: [], guard: null, emergency: true }, 'This sounds like an emergency. Call the emergency tool now.');
+        return emergencyFrom(question);
       }
       const c = doorCheck(db);
       const data = { ...c, event: c.event ? { ...c.event, snapshot_url: abs(c.event.snapshot_url), time: clockTime(new Date(c.event.at)) } : null };

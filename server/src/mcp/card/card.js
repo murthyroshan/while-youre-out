@@ -491,7 +491,7 @@
     return '<div class="fs emergency' + (offline ? ' is-offline' : '') + '" role="alert"><div class="bar"><span class="flag">' + icon('alert') + 'EMERGENCY</span>' + brand() + '<span class="top-right"><span class="chip tab" id="elapsed"></span>' + otw + '</span></div>' + spoken + cut +
       '<div class="grid"><div class="stepcard' + (fresh ? ' fresh' : '') + '">' +
       (step ? '<small>Step ' + (inc.current + 1) + ' of ' + inc.total + ' · ' + esc(d.action_plan.source) + '</small><p>' + esc(step.text) + '</p>'
-        : '<small>All steps done</small><p>Stay with her and follow the 911 dispatcher until help arrives.</p>') +
+        : '<small>All steps done</small><p>Stay with them and follow the 911 dispatcher until help arrives.</p>') +
       '<div class="dots">' + dots + '</div><div class="actions">' +
       (offline
         ? (step ? localButton('Done', 'done', 'ok', 'check') + localButton('Next step', 'next') : localButton('Help has arrived', 'resolved', 'ok', 'check'))

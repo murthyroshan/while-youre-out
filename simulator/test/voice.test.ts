@@ -77,6 +77,12 @@ test(`every reply in the guided demo is ${SPOKEN_WORDS} words or fewer`, async (
         await post('/parent/api/order', { k: 'voice-key', id: s.order.id, action: 'approve', by: 'Anita' });
         continue;
       }
+      // Mom pastes her message and confirms the rules it found
+      if ('paste' in a) {
+        const out = await (await post('/parent/api/import/text', { k: 'voice-key', text: a.paste, label: 'WhatsApp message', by: 'Anita' })).json();
+        for (const p of out.proposals.filter((x: { import_id: number }) => x.import_id === out.import_id)) await post(`/parent/api/proposals/${p.id}`, { k: 'voice-key', action: 'accept', resolution: 'keep_both', by: 'Anita' });
+        continue;
+      }
       said = a.say;
       tool = '';
       await brain.handle(a.say, io);

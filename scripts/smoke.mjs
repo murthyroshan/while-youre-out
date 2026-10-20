@@ -71,10 +71,19 @@ await check('MCP: the house manual answers', async () => {
   const text = r.content.map((c) => c.text ?? '').join(' ');
   expect(/drawer/i.test(text), `unexpected answer: ${text.slice(0, 120)}`);
 });
+await check('MCP: hidden peanuts get a clear no', async () => {
+  const r = await rpc('tools/call', { name: 'ask_house', arguments: { question: 'Can Maya have chicken satay?' } });
+  const text = r.content.map((c) => c.text ?? '').join(' ');
+  expect(/^\s*No\b/.test(text.replace(/^(Reminder: [^.]*\.\s*)+/, '')) && /peanut/i.test(text), `satay was not a clear no: ${text.slice(0, 120)}`);
+});
 await check('MCP: an emergency gets the fixed script', async () => {
   const r = await rpc('tools/call', { name: 'emergency', arguments: { description: "Her lips are swelling and she can't breathe" } });
   const text = r.content.map((c) => c.text ?? '').join(' ');
-  expect(/911/.test(text), `no 911 in: ${text.slice(0, 120)}`);
+  // An allergic reaction leads with the parents' own plan (the EpiPen first, 911 straight after, as
+  // allergy action plans do), so 911 can be step 2 rather than the first sentence.
+  const steps = (r.structuredContent?.action_plan?.steps ?? []).map((s) => s.text).join(' ');
+  expect(/911/.test(text) || (/EpiPen/i.test(text) && /911/.test(steps)), `no 911 in the script: ${text.slice(0, 120)}`);
+  expect(!/\d+ [A-Z][a-z]+ (Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr)\b/.test(text), 'the address is in what is said aloud');
 });
 await check('parent page for that house', async () => {
   const cfg = await (await get(`${house}/demo/config`)).json();

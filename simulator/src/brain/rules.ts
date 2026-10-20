@@ -121,7 +121,7 @@ export class RuleBrain implements Brain {
       const r = await io.tool('teachback', skip ? { skip: true } : { answer: u });
       if (r.structuredContent?.emergency) {
         this.pending = null;
-        const e = await this.emergency(io, u);
+        const e = await this.emergency(io, u, r);
         return io.say(textOf(e));
       }
       if (r.structuredContent?.kind !== 'question') this.pending = null;
@@ -246,7 +246,7 @@ export class RuleBrain implements Brain {
       const s = r.structuredContent ?? {};
       // Logging never bypasses safety: the server flags emergencies, allergens and medicine.
       if (s.emergency) {
-        const e = await this.emergency(io, text);
+        const e = await this.emergency(io, text, r);
         return io.say(textOf(e));
       }
       if (s.allergy_alert) return io.say(String(s.allergy_alert));
@@ -278,7 +278,7 @@ export class RuleBrain implements Brain {
     if (r.isError) return io.say("Sorry, I couldn't check that.");
     const s = r.structuredContent ?? {};
     if (s.emergency) {
-      const e = await this.emergency(io, u);
+      const e = await this.emergency(io, u, r);
       return io.say(textOf(e));
     }
     if (s.busy_until !== undefined) this.busyUntil = (s.busy_until as string | null) ?? null;
@@ -321,9 +321,11 @@ export class RuleBrain implements Brain {
   }
 
   /** Starts the emergency script; from then on "done" and "next" move its guide on. */
-  private async emergency(io: DeviceIO, description: string) {
+  /** Starts the guide, unless the tool that heard the emergency already did (emergency_started). */
+  private async emergency(io: DeviceIO, description: string, heard?: Awaited<ReturnType<DeviceIO['tool']>>) {
     this.pending = null;
     this.inEmergency = true;
+    if (heard?.structuredContent?.emergency_started) return heard;
     return io.tool('emergency', { description });
   }
 
@@ -331,7 +333,7 @@ export class RuleBrain implements Brain {
     const r = await io.tool('door_check', { question: u });
     const s = r.structuredContent ?? {};
     if (s.emergency) {
-      const e = await this.emergency(io, u);
+      const e = await this.emergency(io, u, r);
       return io.say(textOf(e));
     }
     io.say(textOf(r));

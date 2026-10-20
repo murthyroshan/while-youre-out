@@ -41,8 +41,8 @@ const FIXED: Record<string, Record<string, string>> = {
     hi: 'सभी को अभी घर से बाहर निकालें, फिर बाहर से 911 पर कॉल करें।',
     es: 'Saque a todos de la casa ahora y luego llame al 911 desde afuera.',
   },
-  "Call Poison Control now at 1-800-222-1222. If she isn't breathing or won't wake up, call 911 instead.": {
-    hi: 'अभी पॉइज़न कंट्रोल को 1-800-222-1222 पर कॉल करें। अगर वह साँस नहीं ले रही या जाग नहीं रही, तो 911 पर कॉल करें।',
+  "Call Poison Control now at 1-800-222-1222. If the child isn't breathing or won't wake up, call 911 instead.": {
+    hi: 'अभी पॉइज़न कंट्रोल को 1-800-222-1222 पर कॉल करें। अगर बच्चा साँस नहीं ले रहा या जाग नहीं रहा, तो 911 पर कॉल करें।',
     es: 'Llame ahora a Control de Envenenamientos al 1-800-222-1222. Si no respira o no despierta, llame al 911.',
   },
 };

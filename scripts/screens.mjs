@@ -95,15 +95,15 @@ const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta n
 <style>
   body { margin: 0; background: #E9E7EC; color: #14181E; font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }
   header { padding: 28px 32px 8px; } h1 { margin: 0; font-size: 26px; } header p { margin: 4px 0 0; color: #4A5361; max-width: 70ch; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 28px 24px; padding: 24px 32px 48px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(560px, 100%), 1fr)); gap: 28px 24px; padding: 24px 32px 48px; }
   figure { margin: 0; } figcaption { font-weight: 650; margin-bottom: 8px; } figcaption small { font-weight: 500; color: #5B6371; margin-left: 6px; }
   .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .dev { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #000; box-shadow: 0 0 0 6px #1B1D22; }
   .dev iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; }
   nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; } nav a { padding: 8px 14px; border-radius: 999px; background: #fff; color: #14181E; text-decoration: none; font-weight: 600; } nav a.on { background: #14181E; color: #fff; }
 </style></head><body>
-<header><h1>Every screen, in dark and light</h1><p id="lede"></p><nav id="devices"></nav></header>
-<div class="grid" id="grid"></div>
+<header><h1>Every screen, in dark and light</h1><p id="lede"></p><nav id="devices" aria-label="Device"></nav></header>
+<main class="grid" id="grid"></main>
 <script>
 const CARD = ${JSON.stringify(html).replace(/</g, '\\u003c')};
 const SHOTS = ${JSON.stringify(shots).replace(/</g, '\\u003c')};
@@ -119,10 +119,10 @@ const DEVICES = {
 };
 const DEVICE = DEVICES[location.hash.slice(1)] ? location.hash.slice(1) : 'echo-show-8';
 const D = DEVICES[DEVICE];
-document.getElementById('devices').innerHTML = Object.entries(DEVICES).map(([k, d]) => '<a href="#' + k + '"' + (k === DEVICE ? ' class="on"' : '') + '>' + d.name + '</a>').join('');
+document.getElementById('devices').innerHTML = Object.entries(DEVICES).map(([k, d]) => '<a href="#' + k + '"' + (k === DEVICE ? ' class="on" aria-current="page"' : '') + '>' + d.name + '</a>').join('');
 addEventListener('hashchange', () => location.reload());
 document.getElementById('lede').textContent = 'Real tool results from one scripted evening, rendered by the add-on’s own card the way an Alexa+ host does, on an ' + D.name + ' (' + D.w + ' × ' + D.h + '): dark on the left, light on the right.';
-if (D.mobile) document.getElementById('grid').style.gridTemplateColumns = 'repeat(auto-fill, minmax(380px, 1fr))';
+if (D.mobile) document.getElementById('grid').style.gridTemplateColumns = 'repeat(auto-fill, minmax(min(380px, 100%), 1fr))';
 const grid = document.getElementById('grid');
 const frames = new Map();
 SHOTS.forEach((s, i) => {
@@ -135,6 +135,7 @@ SHOTS.forEach((s, i) => {
     const f = document.createElement('iframe');
     f.setAttribute('sandbox', 'allow-scripts');
     f.title = s.label + ' (' + theme + ')';
+    f.tabIndex = -1; // previews to look at, not to tab through
     f.srcdoc = CARD;
     dev.appendChild(f);
     fig.querySelector('.pair').appendChild(dev);
@@ -165,6 +166,14 @@ addEventListener('message', (e) => {
 });
 </script></body></html>`;
 mkdirSync(dirname(out), { recursive: true });
-writeFileSync(out, page);
+// The gallery is published: links and photos point at the public demo, never at the machine that
+// made it (photos are served from the demo's shared /static; the rest open the demo itself).
+const PUBLIC = (process.env.SCREENS_PUBLIC_URL ?? 'https://while-youre-out-wpj3.onrender.com').replace(/\/$/, '');
+const local = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const published = page
+  .replace(new RegExp(`${local}/h/[0-9a-f]+/static/`, 'g'), `${PUBLIC}/static/`)
+  .replace(new RegExp(`${local}/h/[0-9a-f]+[^"'\\s]*`, 'g'), `${PUBLIC}/`)
+  .replace(new RegExp(local, 'g'), PUBLIC);
+writeFileSync(out, published);
 console.log(`\n${shots.length} screens -> ${out}`);
 process.exit(0);

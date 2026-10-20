@@ -162,3 +162,12 @@ test('another family: the same rules hold with their names (Leo, Biscuit the dog
   // Without the family's names the child's name means nothing, but "her"/"him" still work.
   assert.equal(classifyQuestion("I can't find her anywhere"), 'emergency');
 });
+
+test('a harmless phrase never hides a real emergency in the same message', () => {
+  // "Fire TV", "the fireplace", "choking with laughter" are taken out of the message, not used to wave it through.
+  assert.notEqual(emergencyKind('We are watching Fire TV and now she cannot breathe'), null);
+  assert.notEqual(emergencyKind('The fireplace is lit and her lips are swelling'), null);
+  assert.notEqual(emergencyKind('She was choking with laughter and now she is choking on a grape'), null);
+  assert.equal(emergencyKind('She is choking with laughter at the dog'), null);
+  assert.equal(emergencyKind('Can we use the fireplace tonight?'), null);
+});

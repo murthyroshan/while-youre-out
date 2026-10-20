@@ -7,7 +7,17 @@ import '../pages/page';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#scene')!;
 const planSvg = document.querySelector<SVGSVGElement>('#plan')!;
-const stage = createScene(canvas);
+// No WebGL (switched off, or an old device): the story is still there to read, without the house.
+let made: ReturnType<typeof createScene> | null = null;
+try {
+  made = createScene(canvas);
+} catch (e) {
+  console.warn('No 3D here: showing the story without the house.', e);
+  document.body.classList.add('ready', 'no-gl');
+  document.querySelectorAll('[data-beat]').forEach((s) => s.classList.add('on'));
+  await new Promise(() => {}); // nothing below runs
+}
+const stage = made!;
 
 // ---------- 1. the ink drawing ----------
 function drawPlan() {
@@ -188,7 +198,8 @@ function frame(now: number) {
   const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
   if (!storyOn) {
-    if (stage.stepOpening(now)) {
+    // less motion asked for: the house is simply there, no rise
+    if (stage.stepOpening(reduced ? now + 60_000 : now)) {
       storyOn = true;
       stage.settle();
       document.body.classList.remove('rising');

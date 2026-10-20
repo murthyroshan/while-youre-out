@@ -272,16 +272,27 @@ test('during a handoff, import_note refuses: the carer cannot propose house rule
   await client.callTool({ name: 'end_handoff', arguments: {} });
 });
 
-test('without an AI key, imports fail clearly instead of crashing', async () => {
+test('without an AI, a pasted message is still read (by rules, to confirm); a photo fails clearly', async () => {
   const noAi = createApp({ parentKey: KEY, ai: { available: false, generateJson: async () => { throw new (await import('../src/ai/gemini.js')).AiUnavailableError('no key'); } } });
   const s = noAi.app.listen(0, '127.0.0.1');
   await new Promise((r) => s.once('listening', r));
-  const res = await fetch(`http://127.0.0.1:${(s.address() as AddressInfo).port}/parent/api/import/text`, {
+  const base = `http://127.0.0.1:${(s.address() as AddressInfo).port}`;
+  const res = await fetch(`${base}/parent/api/import/text`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ k: KEY, text: 'Bath at 7' }),
+    body: JSON.stringify({ k: KEY, text: 'Hi Priya!\nMaya can have one small yogurt after dinner.\nBath at 7.\nThe wifi password is hunter22.\nThanks!' }),
   });
-  assert.equal(res.status, 503);
+  assert.equal(res.status, 200);
+  const out = await res.json();
+  const texts = out.proposals.map((p: any) => p.text);
+  assert.ok(texts.includes('Maya can have one small yogurt after dinner.'), 'each sentence becomes a proposal, in her words');
+  assert.ok(texts.includes('Bath at 7.'));
+  assert.ok(!texts.some((t: string) => /Hi Priya|Thanks/.test(t)), 'greetings are not rules');
+  assert.ok(!texts.some((t: string) => /hunter22|password/i.test(t)), 'codes and passwords are still never stored');
+  assert.equal(out.proposals.find((p: any) => /yogurt/.test(p.text)).category, 'food');
+  // a photo can't be read without the AI: a clear answer, not a crash
+  const photo = await fetch(`${base}/parent/api/import/file?k=${KEY}`, { method: 'POST', headers: { 'content-type': 'image/png' }, body: Buffer.from('iVBORw0KGgo=', 'base64') });
+  assert.equal(photo.status, 503);
   noAi.close();
   s.closeAllConnections();
   s.close();

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { McpConnection, textOf, type ElicitationHandlers, type ToolResult } from './mcp';
-import { GUIDE, type TourAction } from './guide';
+import { GUIDE, HIGHLIGHTS, MOMENTS, type TourAction } from './guide';
 import { Elicit } from './Elicit';
 import { PhoneFrame } from './PhoneFrame';
 import { House } from './House';
@@ -46,10 +46,11 @@ const EMBEDDER = (() => {
 const tellEmbedder = (msg: Record<string, unknown>) => {
   if (EMBEDDER) window.parent.postMessage({ source: 'wyo', ...msg }, EMBEDDER);
 };
-// ?moment=door (or handover, questions, evening, ask, emergency, goodnight, pay): skip ahead to
-// that part of the evening and play from there, for links straight to a highlight.
-const MOMENTS = ['handover', 'questions', 'evening', 'door', 'ask', 'emergency', 'goodnight', 'pay'];
-const MOMENT = MOMENTS.indexOf(new URLSearchParams(location.search).get('moment') ?? '');
+// ?moment=door (see MOMENTS in guide.ts): skip ahead to that part of the evening and play from
+// there, for links straight to a highlight; ?moment=highlights plays just the highlights.
+const momentAsked = new URLSearchParams(location.search).get('moment') ?? '';
+const MOMENT = momentAsked === 'highlights' ? 0 : GUIDE.findIndex((g) => g.title === MOMENTS[momentAsked]);
+const MOMENT_ONLY = momentAsked === 'highlights' ? HIGHLIGHTS : undefined;
 // ?phone=0 hides Mom's phone (it shows beside the Echo Show on wide screens).
 const PHONE_PARAM = new URLSearchParams(location.search).get('phone');
 const stored = (key: string) => {
@@ -393,7 +394,22 @@ export function App() {
     if (!s?.order?.id || s.order.status !== 'pending') return;
     await fetch(`${serverOrigin}/parent/api/order`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, id: s.order.id, action: 'approve', by: first }) }).catch(() => null);
   };
+  /** Mom pastes her message on her phone, then confirms each rule it found (the phone beside the Echo Show shows it). */
+  const pasteFromPhone = async (text: string) => {
+    const first = ((home?.result.structuredContent?.parents as Array<{ name: string }> | undefined) ?? [])[0]?.name ?? 'Mom';
+    let k = PARENT_KEY;
+    try {
+      k = new URL(parentUrl).searchParams.get('k') ?? k;
+    } catch {}
+    const post = (path: string, body: Record<string, unknown>) =>
+      fetch(`${serverOrigin}${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k, by: first, ...body }) }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const out = await post('/parent/api/import/text', { text, label: 'WhatsApp message' });
+    const found = ((out?.proposals as Array<{ id: number; import_id: number }> | undefined) ?? []).filter((p) => p.import_id === out?.import_id || out?.import_id === undefined);
+    await wait(playingRef.current ? 2500 : 300); // long enough to see the rules arrive on her phone
+    for (const p of found) await post(`/parent/api/proposals/${p.id}`, { action: 'accept', resolution: 'keep_both' });
+  };
   const runAction = async (a: TourAction) => {
+    if ('paste' in a) return pasteFromPhone(a.paste);
     if ('ring' in a) return ringDoorbell(a.ring);
     if ('approve' in a) return approveFromPhone();
     if ('bee' in a) return tellBee(a.bee);
@@ -754,10 +770,11 @@ export function App() {
     }
   };
   const directions: Record<string, (fast: boolean) => Promise<unknown>> = {
-    '2:We ran out of diapers': (fast) => answerAsMom(/shopping list/i, 'Yes, add it to the list.', fast),
-    "3:Someone's knocking, should I open the door?": (fast) => answerAsMom(/front door/i, "Don't open the door. I'll call you.", fast),
-    '4:Yes': (fast) => answerAsMom(/sleep in your bed/i, "Yes, that's fine.", fast),
-    '5:I gave the EpiPen': async (fast) => {
+    // Keyed by the step's title, not its number: steps can be added without breaking these.
+    'The evening goes on:We ran out of diapers': (fast) => answerAsMom(/shopping list/i, 'Yes, add it to the list.', fast),
+    "A knock at the door:Someone's knocking, should I open the door?": (fast) => answerAsMom(/front door/i, "Don't open the door. I'll call you.", fast),
+    'Ask a parent:Yes': (fast) => answerAsMom(/sleep in your bed/i, "Yes, that's fine.", fast),
+    'Emergency:I gave the EpiPen': async (fast) => {
       if (!fast) await wait(1500);
       await fetch(`${serverOrigin}/parent/api/incident`, {
         method: 'POST',
@@ -766,7 +783,7 @@ export function App() {
       }).catch(() => null);
       if (!fast) await quiet(2500);
     },
-    '6:Maya misses her mom': async (fast) => {
+    'Lights out:Maya misses her mom': async (fast) => {
       if (!fast) await wait(6000); // the message plays
       await checkReminders.current(); // lights out: the house gets ready for bed
       if (!fast) await quiet(1500);
@@ -778,21 +795,28 @@ export function App() {
     setChapter(null);
     stopSpeaking();
   };
-  /** Plays the evening from chapter `from`; the chapters before it happen first, silently and fast. */
-  const playEvening = async (from = 0) => {
+  /** Plays the evening from chapter `from`; the chapters before it happen first, silently and fast.
+   *  With `only` (the highlights), just those chapters play; the rest happen silently, and it ends
+   *  after the last of them. */
+  const playEvening = async (from = 0, only?: string[]) => {
     if (playingRef.current || !conn) return;
+    const pick = only ? new Set(only) : null;
+    const first = pick ? Math.max(0, GUIDE.findIndex((g) => pick.has(g.title))) : from;
+    const last = pick ? Math.max(...GUIDE.map((g, i) => (pick.has(g.title) ? i : -1))) : GUIDE.length - 1;
     playingRef.current = true;
     setPlaying(true);
     setWelcome(false);
     store('wyo.welcomed', '1');
     try {
-      for (let si = 0; si < GUIDE.length && playingRef.current; si++) {
+      for (let si = 0; si <= last && playingRef.current; si++) {
         const g = GUIDE[si];
-        const fast = si < from;
+        const fast = si < first || (pick !== null && !pick.has(g.title));
         setTour([si, 0]);
         if (fast) {
-          const target = GUIDE.slice(0, from + 1).reverse().find((x) => x.clock);
-          setSkipping({ time: target?.clock ? clockLabel(target.clock[1]) : null, title: GUIDE[from].title });
+          const next = GUIDE.findIndex((x, i) => i > si && (!pick || pick.has(x.title)));
+          const upto = next < 0 ? first : next;
+          const target = GUIDE.slice(0, upto + 1).reverse().find((x) => x.clock);
+          setSkipping({ time: target?.clock ? clockLabel(target.clock[1]) : null, title: GUIDE[upto].title });
           hushRef.current = true;
         } else if (hushRef.current) {
           // Late replies from the skipped part land behind the curtain, then the stage is cleared.
@@ -818,7 +842,7 @@ export function App() {
           if (fast) setRing(null);
           const words = lastSaid.current.split(/\s+/).filter(Boolean).length;
           if (!fast) await quiet(Math.min(9000, Math.max(2200, words * 330)));
-          if ('say' in a) await directions[`${si}:${a.say}`]?.(fast);
+          if ('say' in a) await directions[`${g.title}:${a.say}`]?.(fast);
         }
         if (!fast) await wait(1200);
       }
@@ -836,7 +860,7 @@ export function App() {
   useEffect(() => {
     if (MOMENT < 0 || momentStarted.current || connState !== 'connected' || !conn || demoTime === null) return;
     momentStarted.current = true;
-    void playEvening(MOMENT);
+    void playEvening(MOMENT, MOMENT_ONLY);
   });
 
   // The keyboard drives the tour too (Space or →), unless someone is typing.
@@ -1114,7 +1138,7 @@ export function App() {
               <h2>Tonight, Priya is babysitting Maya.</h2>
               <p>
                 The Echo Show in the kitchen becomes her guide.{' '}
-                {showPhone ? 'Mom’s phone, on the right, is how the parents stay in the loop.' : 'Mom’s phone stays in the loop (open it from the demo controls).'} Watch the whole evening, or try it
+                {showPhone ? 'Mom’s phone, on the right, is how the parents stay in the loop.' : 'Mom’s phone stays in the loop (open it from the demo controls).'} Watch the highlights, or try it
                 yourself.
               </p>
               {qrUrl && showPhone && (
@@ -1127,8 +1151,11 @@ export function App() {
                 </div>
               )}
               <div className="welcome-btns">
-                <button className="primary" onClick={() => void playEvening()}>
-                  <Icon name="play" /> Watch the evening <small>3 min</small>
+                <button className="primary" onClick={() => void playEvening(0, HIGHLIGHTS)}>
+                  <Icon name="play" /> Watch the highlights <small>2½ min</small>
+                </button>
+                <button onClick={() => void playEvening()}>
+                  The whole evening <small>5 min</small>
                 </button>
                 <button
                   onClick={() => {
@@ -1145,7 +1172,7 @@ export function App() {
       </section>
 
       {!FILM && (
-        <aside className="panel">
+        <aside className={`panel ${welcome && connState === 'connected' ? 'behind' : ''}`}>
           <header className="panel-head">
             <div>
               <p className="eyebrow">Demo controls</p>
@@ -1154,16 +1181,21 @@ export function App() {
             </div>
           </header>
 
-          <button className={`watch ${playing ? 'on' : ''}`} onClick={() => (playing ? stopPlaying() : void playEvening())} disabled={!conn}>
+          <button className={`watch ${playing ? 'on' : ''}`} onClick={() => (playing ? stopPlaying() : void playEvening(0, HIGHLIGHTS))} disabled={!conn}>
             <span className="watch-icon">
               <Icon name={playing ? 'stop' : 'play'} size={20} />
             </span>
             <span className="watch-text">
-              <b>{playing ? 'Stop watching' : 'Watch the whole evening'}</b>
-              <small>{playing ? `${GUIDE[tourStep].title} · ${tourStep + 1} of ${GUIDE.length}` : '3 min · hands-free · Mom answers on her phone'}</small>
+              <b>{playing ? 'Stop watching' : 'Watch the highlights'}</b>
+              <small>{playing ? `${GUIDE[tourStep].title} · ${tourStep + 1} of ${GUIDE.length}` : '2½ min · hands-free · Mom answers on her phone'}</small>
             </span>
             {playing && <i className="watch-progress" style={{ transform: `scaleX(${(tourStep + 1) / GUIDE.length})` }} />}
           </button>
+          {!playing && (
+            <button className="watch-short" onClick={() => void playEvening()} disabled={!conn}>
+              <Icon name="play" size={14} /> The whole evening <small>About 5 min: from the handover to the parents coming home</small>
+            </button>
+          )}
 
           <section className={`timeline ${playing ? 'auto' : ''}`} aria-label="The evening, step by step">
             <div className="timeline-head">
@@ -1202,6 +1234,10 @@ export function App() {
                               <>
                                 <Icon name="phone" size={14} /> Mom approves the order on her phone
                               </>
+                            ) : 'paste' in a ? (
+                              <>
+                                <Icon name="phone" size={14} /> Mom pastes her WhatsApp message and confirms it
+                              </>
                             ) : (
                               `“${a.say}”`
                             )}
@@ -1210,7 +1246,7 @@ export function App() {
                       </ol>
                       {nextAction ? (
                         <button className="tour-go" onClick={() => void runTour()} disabled={!conn || tourBusy || playing}>
-                          <Icon name={tourBusy ? 'spark' : 'ring' in nextAction ? 'bell' : 'bee' in nextAction ? 'spark' : 'door' in nextAction || 'approve' in nextAction ? 'phone' : 'play'} size={16} />
+                          <Icon name={tourBusy ? 'spark' : 'ring' in nextAction ? 'bell' : 'bee' in nextAction ? 'spark' : 'door' in nextAction || 'approve' in nextAction || 'paste' in nextAction ? 'phone' : 'play'} size={16} />
                           <span>
                             {tourBusy
                               ? 'Alexa is answering…'
@@ -1222,7 +1258,9 @@ export function App() {
                                     ? 'Unlock it from Mom’s phone'
                                     : 'approve' in nextAction
                                       ? 'Approve it on Mom’s phone'
-                                      : `Say “${nextAction.say}”`}
+                                      : 'paste' in nextAction
+                                        ? 'Paste Mom’s message on her phone'
+                                        : `Say “${nextAction.say}”`}
                           </span>
                         </button>
                       ) : (

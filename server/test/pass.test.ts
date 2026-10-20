@@ -64,7 +64,10 @@ test('the handoff issues a Guest Pass: a QR code on the briefing, never read alo
   assert.match(pass.join_url, /\/guest#[\w-]{30,}$/, 'the token is in the fragment, not the query');
   assert.match(pass.qr_svg, /^<svg/);
   assert.doesNotMatch(r.content[0].text, /guest|http/i, 'the link is shown, not spoken');
-  assert.equal((await fetch(`${base}/guest`)).status, 200);
+  const page = await fetch(`${base}/guest`);
+  assert.equal(page.status, 200);
+  // In an emergency the sitter's phone puts a one-tap call to a parent under the step (a parent asked for it).
+  assert.match(await page.text(), /class="sos call-parent" href="tel:/);
   await call('end_handoff');
 });
 
