@@ -1,6 +1,6 @@
 # Devpost submission text
 
-Copy each section into the matching Devpost field.
+Copy each section into the matching Devpost field. Lines like **[Devpost image: …]** are instructions, not text: in the "About the project" editor, put the cursor there, upload that image with the image button, and delete the line.
 
 ## Name
 While You're Out
@@ -20,19 +20,27 @@ Every time parents go out, someone else holds their child's safety: a babysitter
 ## What it does
 A guest mode for the smart home. When the parents head out, the kitchen Echo Show becomes the sitter's guide for the evening, in the parents' own words.
 
+**In one line:** it answers from the parents' own words, asks the parents whatever their words don't cover, and in an emergency walks the sitter through the family's own plan. Everything else below serves those three.
+
 - **In an emergency it reads the family's own plan, one step at a time.**
   - It starts the second-EpiPen timer and tells the sitter the parents have been alerted.
   - It puts "Call Mom" one tap away on the sitter's phone.
   - It keeps going on the kitchen screen and the sitter's phone if the internet drops.
+
+**[Devpost image: `media/blog/emergency.jpg`]**
+
 - **Setting up is pasting the message you'd send anyway.** Each line becomes a rule the parent confirms on their phone. A three-question check before they leave confirms the sitter knows what matters.
 - **Questions get the parents' words, never a guess.**
   - "Can she have chicken satay?" gets "No. That can have peanuts in it."
   - Doses are never given.
   - A stranger at the door is never called safe.
+
+**[Devpost image: `media/blog/satay.jpg`]**
+
 - **What the notes don't cover goes to the parents.** It runs as an MCP Task that waits for an answer from the parent's lock screen. The doorbell photo, the dinner order and paying the sitter also run through the parents' phones.
 - **Afterwards:** "All's well at home" when the child is asleep, Mom's goodnight message at bedtime, and a debrief in the morning.
 
-## How we built it
+## How I built it
 - **The add-on:** an MCP server in TypeScript (the official SDK). It has 23 tools, each with an output schema, plus:
   - one MCP Apps card for every screen, sized per Echo device, light and dark;
   - Tasks, and form and URL elicitation;
@@ -40,36 +48,40 @@ A guest mode for the smart home. When the parents head out, the kitchen Echo Sho
   - OAuth 2.1 account linking;
   - a private demo house per visitor.
 - **Safety is code, not a prompt:** the rules that decide what may be said give the same answer every time, in milliseconds, with no AI or internet. An AI's second look can only add caution.
-- **No Alexa+ host is available to developers yet** (the add-on console says "Coming Soon"), so we built a stand-in for it. An open-source Echo Show simulator plays the Alexa+ host, and an Alexa-hosted skill that is an MCP host runs the same add-on on today's Alexa.
+- **No Alexa+ host is available to developers yet** (the add-on console says "Coming Soon"), so I built a stand-in for it. An open-source Echo Show simulator plays the Alexa+ host, and an Alexa-hosted skill that is an MCP host runs the same add-on on today's Alexa.
 - **The parent's and the sitter's phones are web apps:** Web Push with lock-screen answers for parents, and an offline guide for the sitter.
 
-## Who we built it with
-We talked to six people in India: three parents, a grandparent and two babysitters. It was a small, informal sample, so we treat it as an early signal rather than proof.
+## Who I built it with
+I talked to six people in India: three parents, a grandparent and two babysitters. It was a small, informal sample, so I treat it as an early signal rather than proof. The summary is in [RESEARCH.md](RESEARCH.md).
 - **Parents** hand over by talking and WhatsApp and still worry something will be forgotten.
 - **Carers** call the parents most about food, sleep and a crying child, and feel they call too often.
 - **Everyone** said it must be simple and private, and must still let the carer reach the parents directly. All three parents, a mother in Hyderabad among them, said they'd only trust it if the sitter could still reach them.
 
-What we changed because of them:
+What I changed because of them:
 1. In an emergency, the parents-alerted line and the one-tap call.
 2. "All's well" when the child is asleep.
 3. Setup that works by pasting a message, without any AI.
 
 ## Challenges
-- No Alexa+ access, so we built a stand-in for the host.
+- No Alexa+ access, so I built a stand-in for the host.
 - Alexa-hosted skills run Node.js 16.
 - An APL parameter named "payload" silently receives every data source.
 - Making safety deterministic while still letting an AI help.
+- Amazon's Alexa+ authentication pages and the MCP spec disagree on the 401 that starts account linking; I built to Amazon's.
 
 The full [friction log](FRICTION_LOG.md) has the details.
 
 ## Accomplishments
 - **Safety, measured:**
-  - 120 lines another AI wrote without seeing our tests: 102 of 120 (85%) on the first run, before any fix. That's the honest number. The rules alone missed 8 of its 12 emergencies; the AI's second look caught 7 of them, and the rules were fixed the same day;
-  - 357 things a sitter might say that we wrote, with 49 of 49 emergencies recognised and no false alarms on the other 308, and 55 held-out lines scoring 50 of 55 (91%) on their only run.
+  - 120 lines another AI wrote without seeing my tests: 102 of 120 (85%) on the first run, before any fix. That's the honest number. The rules alone missed 8 of its 12 emergencies; the AI's second look caught 7 of them, and the rules were fixed the same day;
+  - 357 things a sitter might say that I wrote, with 49 of 49 emergencies recognised and no false alarms on the other 308, and 55 held-out lines scoring 50 of 55 (91%) on their only run.
 - **Speed and robustness:** 19 ms p95 per tool call, against a 500 ms budget, and over 440 automated tests on every push.
-- **Runs on real Alexa** today.
+- **Ready for Alexa+'s rules:** account linking and the service-level token built to Amazon's own authentication pages, and 14 Alexa+ and MCP transport checks run against the live demo twice a day.
+- **Runs on real Alexa** today, through an Alexa-hosted skill that is an MCP host.
 
-## What we learned
+**[Devpost image: `media/blog/alexa-console.png`]**
+
+## What I learned
 Parents don't want an AI deciding about their child; they want their own words, available at the right moment, and to be reached when it matters. The best features came from listening: the one-tap call and "all's well".
 
 ## What's next

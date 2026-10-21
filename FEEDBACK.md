@@ -1,15 +1,15 @@
 # Product feedback
 
-Every tool, API and SDK we used: what for, what worked, what needs work, how onboarding felt, and whether we'd use it again. The details of each problem are in the [friction log](FRICTION_LOG.md).
+Every tool, API and SDK I used: what for, what worked, what needs work, how onboarding felt, and whether I'd use it again. The details of each problem are in the [friction log](FRICTION_LOG.md).
 
 ## Amazon
 
 **Alexa+ add-ons (MCP), the track's core**
 - **Used for:** the add-on's design. An MCP server, spec 2025-11-25, Streamable HTTP, with 23 tools, MCP Apps cards, Tasks, form and URL elicitation, resources, and OAuth 2.1 account linking.
 - **What worked:** building on the open MCP standard means one server works with Alexa+, today's Alexa (through a skill) and any MCP host, such as Claude, VS Code or the MCP Inspector. The design guidance for add-on cards (device classes, light and dark) was clear and easy to test against.
-- **What needs work:** we couldn't run the add-on on Alexa+ at all, because the add-on console says "Coming Soon" (friction log 1). Everything had to be tested on a host we built ourselves.
+- **What needs work:** I couldn't run the add-on on Alexa+ at all, because the add-on console says "Coming Soon" (friction log 1). Everything had to be tested on a host I built myself.
 - **Onboarding:** the docs and policies were good; access to the platform is the gap.
-- **Again?** Yes, and we'd register on day one if a sandbox existed.
+- **Again?** Yes, and I'd register on day one if a sandbox existed.
 
 **Alexa Skills Kit: Alexa-hosted skills and the developer console**
 - **Used for:** running the same add-on on today's Alexa. A custom skill that is an MCP host, with free hosting, Import Code, and the Test tab with the Echo Show display.
@@ -24,11 +24,11 @@ Every tool, API and SDK we used: what for, what worked, what needs work, how onb
 
 **APL (Alexa Presentation Language)**
 - **Used for:** the Echo Show screens in the skill: launch, the emergency guide, the EpiPen, "emergency over".
-- **What worked:** responsive layouts across Echo Show sizes; data binding once we'd learned the rules.
+- **What worked:** responsive layouts across Echo Show sizes; data binding once I'd learned the rules.
 - **What needs work:** the silent `payload` rule (friction 3), and empty lists (4).
 - **Again?** Yes.
 
-**AWS:** not used. The project runs without an AWS account, and we didn't enter the AWS Builder mini challenge.
+**AWS:** not used. The project runs without an AWS account, and I didn't enter the AWS Builder mini challenge.
 
 ## Others
 
@@ -41,7 +41,7 @@ Every tool, API and SDK we used: what for, what worked, what needs work, how onb
 **MCP Apps**
 - **Used for:** one card (`ui://`) for every screen.
 - **What worked:** sandboxed HTML cards and host context (theme, device class).
-- **What needs work:** there's no Echo host to preview them on, which is why we built a stand-in.
+- **What needs work:** there's no Echo host to preview them on, which is why I built a stand-in.
 
 **Gemini API**
 - **Used for:**

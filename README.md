@@ -1,10 +1,10 @@
 <div align="center">
 
-<a href="https://murthyroshan.github.io/while-youre-out/"><img src="media/site-home.jpg" alt="While You're Out: a cutaway of the family's home at dusk, with 'Tonight, Priya is looking after Maya.'" width="100%"></a>
+<a href="https://while-youre-out-wpj3.onrender.com/?moment=highlights"><img src="media/hero-emergency.jpg" alt="8:14 pm, &quot;Her lips are swelling.&quot; The kitchen Echo Show reads step 1 of the family's own allergy plan: give the EpiPen in the outer thigh, with the 911 address and where the EpiPen is." width="100%"></a>
 
 # While You're Out
 
-**Your Echo Show knows your house. Tonight it hands that knowledge to whoever is looking after your kids, and keeps you one tap away.**
+**"Her lips are swelling." The kitchen Echo Show walks the babysitter through your family's own plan, step by step, and keeps you one tap away.**
 
 [![Tests](https://github.com/murthyroshan/while-youre-out/actions/workflows/test.yml/badge.svg)](https://github.com/murthyroshan/while-youre-out/actions/workflows/test.yml)
 [![Live demo check](https://github.com/murthyroshan/while-youre-out/actions/workflows/smoke.yml/badge.svg)](https://github.com/murthyroshan/while-youre-out/actions/workflows/smoke.yml)
@@ -26,10 +26,10 @@
 
 The babysitter, grandparent or nanny asks the kitchen Echo Show anything. It answers in the parents' own words, asks the parents when their notes don't cover it, and in an emergency walks the sitter through the family's own plan, one step at a time, even when the internet drops.
 
+- **"Her lips are swelling."** The family's own plan, step by step, the second-EpiPen timer, "Anita and Rahul have been alerted", and "Call Anita" one tap away on the sitter's phone.
 - **Setup is the message you'd send anyway.** Paste the WhatsApp message; each line becomes a rule the parent confirms. Works without any AI.
 - **"Can she have chicken satay?"** gets *"No. That can have peanuts in it."* Never "it's safe", never a dose, never a stranger called safe.
 - **What the notes don't cover goes to the parents**, as an MCP Task that waits for an answer from their lock screen.
-- **"Her lips are swelling."** The family's own plan, step by step, the second-EpiPen timer, "Anita and Rahul have been alerted", and "Call Anita" one tap away on the sitter's phone.
 - **Lights out:** Mom's goodnight message plays for Maya; the parents get "All's well at home".
 
 **Try it in a minute:** [the highlights](https://while-youre-out-wpj3.onrender.com/?moment=highlights) play hands-free in 2½ minutes. Scan the QR code and be Mom on your own phone. Or jump straight to [the door](https://while-youre-out-wpj3.onrender.com/?moment=door), [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) or [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight). MCP endpoint: `https://while-youre-out-wpj3.onrender.com/mcp`.
@@ -40,13 +40,13 @@ The babysitter, grandparent or nanny asks the kitchen Echo Show anything. It ans
 
 Every time parents go out, someone else holds their child's safety, and what they need to know lives in a WhatsApp thread, a fridge note and a parent's head. About 1 in 20 U.S. children has a food allergy ([CDC, 2024 data](https://www.cdc.gov/nchs/pressroom/releases/20260108.html)); more than 40% of them have had a severe reaction, and epinephrine is needed within minutes ([FARE, 2024](https://www.foodallergy.org/sites/default/files/2024-07/FARE%20Food%20Allergy%20Facts%20and%20Statistics_April2024.pdf)). A sitter shouldn't be scrolling WhatsApp when that happens.
 
-**What parents and carers told us.** We talked to six people in India: three parents, a grandparent and two babysitters. It's a small, informal sample, so read it as an early signal rather than proof.
+**What parents and carers told me.** I talked to six people in India: three parents, a grandparent and two babysitters. It's a small, informal sample, so read it as an early signal rather than proof. The summary is in [RESEARCH.md](RESEARCH.md).
 
 - **Parents** hand over by talking and WhatsApp, and still worry something will be forgotten.
 - **Carers** call the parents most about food, sleep and a crying child, and feel they call too often.
 - **Everyone** said it must be simple and private, and must still let the carer reach the parents directly.
 
-What we changed because of it:
+What I changed because of it:
 
 1. In an emergency the Echo Show says at once that the parents have been alerted, and the sitter's phone puts a one-tap "Call Anita" under the step (911 stays first).
 2. When the sitter notes the child is asleep, the parents get one quiet "All's well at home".
@@ -105,21 +105,21 @@ The rules that decide what may be said give the same answer every time, in under
 | Measured | Result |
 | --- | --- |
 | [357 things a sitter might say](server/eval/REPORT.md): hidden allergens, "she already ate it", emergencies in three languages, doses, the alarm code, a stranger at the door | 357 of 357 |
-| Emergencies in our own set | 49 of 49 by the rules alone, with no false alarms on the other 308 |
+| Emergencies in my own set | 49 of 49 by the rules alone, with no false alarms on the other 308 |
 | **120 lines another AI wrote without seeing ours (the honest number)** | **102 of 120 (85%)** on the first run, before any fix. The rules alone missed 8 of its 12 emergencies; the AI's second look caught 7 of them. All 120 pass now and run on every push |
-| Held-out lines we wrote after the fixes | 50 of 55 (91%) on their only run; the report names the five it missed |
+| Held-out lines I wrote after the fixes | 50 of 55 (91%) on their only run; the report names the five it missed |
 | Speed, every tool over real MCP HTTP ([SPEED.md](server/eval/SPEED.md)) | p95 19 ms, against the MCP Toolkit's 500 ms |
 | Load and fuzz | 2,000 calls from 50 sessions at once, 1,500 hostile requests: no errors |
 | Automated tests on every push | 440+ (server, simulator, Alexa skill), plus a twice-daily check of the live demo |
-| [Every Alexa+ add-on rule](COMPLIANCE.md) | Each with the test that fails the build if it stops being true, and the three we only partly meet |
+| [Every Alexa+ add-on rule](COMPLIANCE.md) | Each with the test that fails the build if it stops being true, and the three it only partly meets |
 
-We wrote the traps and fixed what they found, so the 100% on them says little. That's why we quote the set another AI wrote ([independent.json](server/eval/independent.json)): its first run is frozen in the file, misses and all. A chatbot given the same notes and our ten rules in its prompt scored 384 of 393 (Gemini Flash-Lite, Oct 20), which is close. What a prompt can't give is the rest: the same answer every time, a few milliseconds with no AI and no internet (so it works when the model is busy or the connection drops), and actions (the parents alerted, the guide, the timer). The chatbot missed 911 three times, offered to "call Mom", which it can't, and on four worries about a scrape or a bump either gave no next step or said it was fine. With the AI's second look switched on, the add-on passes 474 of 477: in three lines ("Maya just ate a cashew") the AI turned an exposure into a full emergency, more caution than the rules ask for.
+I wrote the traps and fixed what they found, so the 100% on them says little. That's why I quote the set another AI wrote ([independent.json](server/eval/independent.json)): its first run is frozen in the file, misses and all. A chatbot given the same notes and our ten rules in its prompt scored 384 of 393 (Gemini Flash-Lite, Oct 20), which is close. What a prompt can't give is the rest: the same answer every time, a few milliseconds with no AI and no internet (so it works when the model is busy or the connection drops), and actions (the parents alerted, the guide, the timer). The chatbot missed 911 three times, offered to "call Mom", which it can't, and on four worries about a scrape or a bump either gave no next step or said it was fine. With the AI's second look switched on, the add-on passes 474 of 477: in three lines ("Maya just ate a cashew") the AI turned an exposure into a full emergency, more caution than the rules ask for.
 
 ## How it fits together
 
 ```mermaid
 flowchart LR
-  S(("Sitter<br/>(voice)")) --> H["Alexa+ host<br/>our Echo Show simulator,<br/>or the Alexa skill on today's Alexa"]
+  S(("Sitter<br/>(voice)")) --> H["Alexa+ host<br/>my Echo Show simulator,<br/>or the Alexa skill on today's Alexa"]
   H -- "MCP · Streamable HTTP<br/>tools, MCP Apps cards, Tasks, elicitation" --> M["While You're Out<br/>MCP server"]
   M --> R["Safety rules<br/>deterministic, no AI, under 10 ms"]
   M --> D[("SQLite<br/>one house per family")]
@@ -129,7 +129,7 @@ flowchart LR
   M -. "second look: can only add caution" .-> A["Gemini"]
 ```
 
-**What's real and what's a stand-in.** Real: the MCP server and its 23 tools, the cards, the safety rules, the parent's phone (Web Push), the sitter's phone, and the add-on on real Alexa through the [Alexa-hosted skill](alexa/README.md). Stand-ins, labelled as such everywhere: the Alexa+ host itself (the Alexa+ add-on console says "Coming Soon", so our simulator plays it), the Ring doorbell, Amazon Pay, the delivery partner and store, the Fire TV and Bee. Each is built against the interface the real one would use.
+**What's real and what's a stand-in.** Real: the MCP server and its 23 tools, the cards, the safety rules, the parent's phone (Web Push), the sitter's phone, and the add-on on real Alexa through the [Alexa-hosted skill](alexa/README.md). Stand-ins, labelled as such everywhere: the Alexa+ host itself (the Alexa+ add-on console says "Coming Soon", so my simulator plays it), the Ring doorbell, Amazon Pay, the delivery partner and store, the Fire TV and Bee. Each is built against the interface the real one would use.
 
 <p align="center"><img src="media/alexa-real-display.png" alt="The Alexa developer console's Echo Hub display: Get Maya and everyone else out now. Step 1 of 4. Call 911 from your phone, with the address. Alerted: Anita, Rahul, Mrs. Lee." width="70%"><br><sub>On today's Alexa, through the Alexa-hosted skill: "the curtains by the stove are engulfed in flames", in the Alexa developer console's Echo Hub display.</sub></p>
 
@@ -193,9 +193,9 @@ Simulator: `VITE_MCP_URL` (default: the server that serves it, or `http://127.0.
 
 ## What Alexa+ would need
 
-Everything below works in the demo, but some of it is simulated because an add-on can't do it today. This is the list we would bring to the Alexa+ team, in the order it matters to families. The full [friction log](FRICTION_LOG.md) and [product feedback](FEEDBACK.md) have the rest.
+Everything below works in the demo, but some of it is simulated because an add-on can't do it today. This is the list I would bring to the Alexa+ team, in the order it matters to families. The full [friction log](FRICTION_LOG.md) and [product feedback](FEEDBACK.md) have the rest.
 
-| Gap | What we did instead | What would make it real |
+| Gap | What I did instead | What would make it real |
 | --- | --- | --- |
 | An add-on can't speak first | "Sitter first": a parent's answer or a due reminder is told at the start of the sitter's next reply; MCP Tasks for answers that take minutes | A proactive announcement API for add-ons (rate-limited, per household), so "Anita says yes" is heard when it arrives |
 | Who is speaking | Voice always gets the sitter's view: anyone in the room can talk to the device | Speaker roles for guests, so a sitter can't change the parents' rules and a parent can (Voice ID with a guest role) |
@@ -203,16 +203,16 @@ Everything below works in the demo, but some of it is simulated because an add-o
 | Emergencies | A fixed script from the family's own plan, timers, every parent phone live; the sitter calls 911 | A hand-off to Alexa Emergency Assist (agent call with the address and the plan), triggered by the add-on |
 | The doorbell | Sample snapshots and a simulated Ring chime | Ring doorbell events and the latest snapshot, for add-ons the household allows |
 | Lights out for the house | Simulated and labelled so on screen | Scoped smart-home actions from an add-on (dim a room, check a lock) |
-| The shopping list | Our own list | Write access to the family's Alexa shopping list |
+| The shopping list | The add-on's own list | Write access to the family's Alexa shopping list |
 | Paying the sitter | MCP URL elicitation to a demo approval page on the parent's phone; no money moves | Amazon Pay for a person-to-person payment, approved by the parent |
 | Timers | The card counts down and the device speaks the warnings | Device timers an add-on can start ("5 minutes to the second EpiPen") |
-| The screen | MCP Apps cards that refresh themselves and ask for full screen | Echo Show support for MCP Apps display modes and cards calling tools, as in our simulator |
+| The screen | MCP Apps cards that refresh themselves and ask for full screen | Echo Show support for MCP Apps display modes and cards calling tools, as in my simulator |
 
 ## Built alongside: the Alexa+ add-on simulator
 
 <a href="https://github.com/murthyroshan/alexa-addon-simulator"><img src="media/addon-simulator.png" alt="The Alexa+ add-on simulator: test your Alexa+ add-on on an Echo Show" width="100%"></a>
 
-No Alexa+ host is open to developers yet, so we built a stand-in for it. [alexa-addon-simulator](https://github.com/murthyroshan/alexa-addon-simulator) is a separate open-source tool made from this project's simulator: point it at any MCP server to talk to it like Alexa+, see its MCP Apps cards on seven Echo screens, and get a readiness score (protocol, tools, cards, voice, speed, robustness). Running it on While You're Out found tool parameters without descriptions, tools without safety hints, and card text that shrank on the smallest Echo Show. All three are fixed here.
+No Alexa+ host is open to developers yet, so I built a stand-in for it. [alexa-addon-simulator](https://github.com/murthyroshan/alexa-addon-simulator) is a separate open-source tool made from this project's simulator: point it at any MCP server to talk to it like Alexa+, see its MCP Apps cards on seven Echo screens, and get a readiness score (protocol, tools, cards, voice, speed, robustness). Running it on While You're Out found tool parameters without descriptions, tools without safety hints, and card text that shrank on the smallest Echo Show. All three are fixed here.
 
 ## Everything else
 
@@ -390,7 +390,7 @@ Checks against a running server (not unit tests): `npx tsx simulator/test/e2e-ho
 - The home address is shown, never read aloud. A parent's rule that says no to exactly this ("nothing scary", "No friends over tonight") is the answer, and is never weighed against how they answered before.
 - Payments are approved on the parent's own phone, never on the shared screen.
 
-The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider. All media in the repository is our own: the doorbell snapshots are drawn by a script, the lullaby is *Twinkle Twinkle Little Star* (a traditional melody) synthesized note by note, and the screenshots and GIF in `media/` are taken from this code.
+The demo household's emergency plan is sample data written for the demo, not medical advice. The doorbell snapshots, the lullaby and the payment page are demo stand-ins; in production they would come from Ring, the parent's own recording, and a real payment provider. All media in the repository is my own: the doorbell snapshots are drawn by a script, the lullaby is *Twinkle Twinkle Little Star* (a traditional melody) synthesized note by note, and the screenshots and GIF in `media/` are taken from this code.
 
 </details>
 

@@ -1,10 +1,10 @@
 # Alexa+ add-on rules: how While You're Out meets each one
 
-Every rule below is quoted from Amazon's Alexa+ add-on documentation (the design guide, the functional requirements and the policy requirements). Each row says how we meet it and what proves it: a test that fails the build if it stops being true, or, where there's no test, says so. ✅ met · ◐ partly met · ✗ not met.
+Every rule below is quoted from Amazon's Alexa+ add-on documentation (the design guide, the functional requirements and the policy requirements). Each row says how the add-on meets it and what proves it: a test that fails the build if it stops being true, or, where there's no test, says so. ✅ met · ◐ partly met · ✗ not met.
 
 ## Policy
 
-| Rule (Amazon's words) | | How we meet it | Proof |
+| Rule (Amazon's words) | | How it meets it | Proof |
 |---|---|---|---|
 | "Your add-on must not be targeted towards children… must never target children or collect their data." | ✅ | It's for the adults looking after children; nothing is ever collected from a child. What it keeps about a child (a first name, an age, allergies) is entered by a parent or guardian, only after they agree, and who agreed is recorded. Evenings are deleted after 90 days; "Delete everything" is on the parent's phone. The Alexa skill is listed as not child-directed and using no personal information. | `test/compliance.test.ts` (skill listing); `test/phone.test.ts` (consent, 90 days) |
 | Healthcare and medical: "rejected if it claims to provide life-saving assistance or emergency intervention capability." | ✅ | The add-on never claims to call 911 or to intervene: "This device can't call 911: use your phone." Medical steps are the parents' own saved plan, attributed to it ("From the doctor's plan the parents saved"), or general safety steps that send the sitter to 911 or Poison Control. | `test/contract.test.ts` (terms say it doesn't call 911); `test/compliance.test.ts` (no reply among 357 says it called for help) |
@@ -17,7 +17,7 @@ Every rule below is quoted from Amazon's Alexa+ add-on documentation (the design
 
 ## Functional requirements
 
-| Rule | | How we meet it | Proof |
+| Rule | | How it meets it | Proof |
 |---|---|---|---|
 | Show an interim "still working" message when tools are slow; aim for results within 3 seconds. | ✅ | Every tool declares `_meta.ui.invoking` and `invoked`. Every tool's p95 is about 20 ms over real MCP HTTP. | `test/contract.test.ts`; `test/speed.test.ts`; [eval/SPEED.md](server/eval/SPEED.md) |
 | "Never show API codes, JSON or tool names to the customer." | ✅ | What is said and shown is plain sentences. | `test/contract.test.ts`; `test/compliance.test.ts` (357 replies) |
@@ -30,7 +30,7 @@ Every rule below is quoted from Amazon's Alexa+ add-on documentation (the design
 
 ## Design guide
 
-| Rule | | How we meet it | Proof |
+| Rule | | How it meets it | Proof |
 |---|---|---|---|
 | Author at 768×480; typography scales (zoom 1.667 on Echo Show 8/15); read `hostContext.deviceClass`. | ✅ | One root scale from the device class. On the short screens (Echo Show 5 and 21, under 440 of the 480 base height) only what matters is kept: the title shrinks, the second and third plan steps and the "alerted" list give way, so the steps, the address and the 911 note always fit. On a phone, one column. | `test/design.test.ts`; every screen on every device in [the gallery](site/public/screens.html) (`#echo-show-5`, `#echo-show-21`, `#phone`, …) |
 | Light and dark modes required. | ✅ | Both, with Alexa's card colours; contrast checked in both. | `test/design.test.ts` |
@@ -46,7 +46,7 @@ Every rule below is quoted from Amazon's Alexa+ add-on documentation (the design
 
 ## Tools
 
-| Rule | | How we meet it | Proof |
+| Rule | | How it meets it | Proof |
 |---|---|---|---|
 | "One meaningful customer intent" per tool. | ✅ | 23 tools, one job each (`ask_house`, `where_is`, `door_check`, `order_dinner`, `pay_sitter`, …). | `src/mcp/server.ts` |
 | "Declare only what you honor." | ✅ | Annotations (read-only, destructive, open-world) on every tool, matching what it does. | `test/contract.test.ts` |
