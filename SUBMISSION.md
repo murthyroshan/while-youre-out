@@ -95,7 +95,7 @@ Parents don't want an AI deciding about their child; they want their own words, 
 - **Website:** https://murthyroshan.github.io/while-youre-out/
 - **Code (MIT):** https://github.com/murthyroshan/while-youre-out
 - **MCP endpoint:** https://while-youre-out-wpj3.onrender.com/mcp
-- **Video:** (add the YouTube or Vimeo link)
+- **Video:** https://youtu.be/0Rx9l2b8j4Q
 
 ## Built with
 TypeScript · Model Context Protocol (TypeScript SDK, MCP Apps) · Alexa Skills Kit (Alexa-hosted skills, APL) · Node.js · Express · SQLite · Web Push · React · Vite · three.js · Gemini API · Render · GitHub Pages

@@ -12,7 +12,7 @@
 ![p95 19 ms](https://img.shields.io/badge/p95-19%20ms-blue)
 [![MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
-**[▶ Watch the highlights live](https://while-youre-out-wpj3.onrender.com/?moment=highlights)** · [Website](https://murthyroshan.github.io/while-youre-out/) · [The 3-minute video](#) · [Echo Show simulator (open source)](https://github.com/murthyroshan/alexa-addon-simulator) · [Run it on today's Alexa](alexa/README.md)
+**[▶ Watch the highlights live](https://while-youre-out-wpj3.onrender.com/?moment=highlights)** · [Website](https://murthyroshan.github.io/while-youre-out/) · [The 3-minute video](https://youtu.be/0Rx9l2b8j4Q) · [Echo Show simulator (open source)](https://github.com/murthyroshan/alexa-addon-simulator) · [Run it on today's Alexa](alexa/README.md)
 
 <sub>An Alexa+ add-on: a self-hosted MCP server (spec 2025-11-25, Streamable HTTP). Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track.</sub>
 
