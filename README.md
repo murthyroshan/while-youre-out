@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://while-youre-out-wpj3.onrender.com/?moment=highlights"><img src="media/hero-emergency.jpg" alt="8:14 pm, &quot;Her lips are swelling.&quot; The kitchen Echo Show reads step 1 of the family's own allergy plan: give the EpiPen in the outer thigh, with the 911 address and where the EpiPen is." width="100%"></a>
+<a href="https://while-youre-out-demo.onrender.com/?moment=highlights"><img src="media/hero-emergency.jpg" alt="8:14 pm, &quot;Her lips are swelling.&quot; The kitchen Echo Show reads step 1 of the family's own allergy plan: give the EpiPen in the outer thigh, with the 911 address and where the EpiPen is." width="100%"></a>
 
 # While You're Out
 
@@ -12,7 +12,7 @@
 ![p95 19 ms](https://img.shields.io/badge/p95-19%20ms-blue)
 [![MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
-**[▶ Watch the highlights live](https://while-youre-out-wpj3.onrender.com/?moment=highlights)** · [Website](https://murthyroshan.github.io/while-youre-out/) · [The 3-minute video](https://youtu.be/0Rx9l2b8j4Q) · [The build story (dev.to)](https://dev.to/roshan_7c49d2a48522e3f8ff/i-built-an-alexa-add-on-for-whoever-looks-after-your-kids-and-an-alexa-simulator-first-4375) · [Echo Show simulator (open source)](https://github.com/murthyroshan/alexa-addon-simulator) · [Run it on today's Alexa](alexa/README.md)
+**[▶ Watch the highlights live](https://while-youre-out-demo.onrender.com/?moment=highlights)** · [Website](https://murthyroshan.github.io/while-youre-out/) · [The 3-minute video](https://youtu.be/0Rx9l2b8j4Q) · [The build story (dev.to)](https://dev.to/roshan_7c49d2a48522e3f8ff/i-built-an-alexa-add-on-for-whoever-looks-after-your-kids-and-an-alexa-simulator-first-4375) · [Echo Show simulator (open source)](https://github.com/murthyroshan/alexa-addon-simulator) · [Run it on today's Alexa](alexa/README.md)
 
 <sub>An Alexa+ add-on: a self-hosted MCP server (spec 2025-11-25, Streamable HTTP). Built for the Build, Ship, Shape: Amazon Developer Hackathon, Alexa+ track.</sub>
 
@@ -32,7 +32,7 @@ The babysitter, grandparent or nanny asks the kitchen Echo Show anything. It ans
 - **What the notes don't cover goes to the parents**, as an MCP Task that waits for an answer from their lock screen.
 - **Lights out:** Mom's goodnight message plays for Maya; the parents get "All's well at home".
 
-**Try it in a minute:** [the highlights](https://while-youre-out-wpj3.onrender.com/?moment=highlights) play hands-free in 2½ minutes. Scan the QR code and be Mom on your own phone. Or jump straight to [the door](https://while-youre-out-wpj3.onrender.com/?moment=door), [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) or [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight). MCP endpoint: `https://while-youre-out-wpj3.onrender.com/mcp`.
+**Try it in a minute:** [the highlights](https://while-youre-out-demo.onrender.com/?moment=highlights) play hands-free in 2½ minutes. Scan the QR code and be Mom on your own phone. Or jump straight to [the door](https://while-youre-out-demo.onrender.com/?moment=door), [the emergency](https://while-youre-out-demo.onrender.com/?moment=emergency) or [lights out](https://while-youre-out-demo.onrender.com/?moment=goodnight). MCP endpoint: `https://while-youre-out-demo.onrender.com/mcp`.
 
 <sub>It runs on a free host: after a quiet spell the first load can take up to a minute. Every visitor gets their own copy of the demo house, and `/version` shows which commit is live.</sub>
 
@@ -146,7 +146,7 @@ npm test             # the server and simulator suites (the Alexa skill: npx tsx
 
 For the demo, run the server with `WYO_DEMO=1 WYO_ESCALATE_MS=20000` (from `server/`: `WYO_DEMO=1 npx tsx src/index.ts`). The simulator's **guided demo** then walks through the whole evening one step at a time: one button says the next line, and it moves the house clock and rings the doorbell for you. Its first step resets the demo family, so a reload mid-demo starts clean (`POST /demo/reset`, demo mode only).
 
-Any MCP host works too: [/connect](https://while-youre-out-wpj3.onrender.com/connect) gives you a demo house of your own with its MCP address and how to add it to Claude, Claude Code, VS Code or the MCP Inspector, plus that house's parent page.
+Any MCP host works too: [/connect](https://while-youre-out-demo.onrender.com/connect) gives you a demo house of your own with its MCP address and how to add it to Claude, Claude Code, VS Code or the MCP Inspector, plus that house's parent page.
 
 <details>
 <summary><b>Hosting, notifications and settings</b></summary>
@@ -235,11 +235,11 @@ That evening is the product. Everything else (the Guest Pass, ordering dinner, r
 
 | Where | What to try |
 | --- | --- |
-| Straight to a moment | [The highlights, 2½ minutes](https://while-youre-out-wpj3.onrender.com/?moment=highlights) · [Mom sets it up](https://while-youre-out-wpj3.onrender.com/?moment=setup) · [the knock at the door](https://while-youre-out-wpj3.onrender.com/?moment=door) · [the emergency](https://while-youre-out-wpj3.onrender.com/?moment=emergency) · [lights out](https://while-youre-out-wpj3.onrender.com/?moment=goodnight) · [paying the sitter](https://while-youre-out-wpj3.onrender.com/?moment=pay). Also `handover`, `questions`, `evening`, `ask`. The evening skips ahead silently, then plays from there |
+| Straight to a moment | [The highlights, 2½ minutes](https://while-youre-out-demo.onrender.com/?moment=highlights) · [Mom sets it up](https://while-youre-out-demo.onrender.com/?moment=setup) · [the knock at the door](https://while-youre-out-demo.onrender.com/?moment=door) · [the emergency](https://while-youre-out-demo.onrender.com/?moment=emergency) · [lights out](https://while-youre-out-demo.onrender.com/?moment=goodnight) · [paying the sitter](https://while-youre-out-demo.onrender.com/?moment=pay). Also `handover`, `questions`, `evening`, `ask`. The evening skips ahead silently, then plays from there |
 | Your own phone | "Use your own phone" (or the QR code on the welcome card) opens the parent page for your demo house on your phone. Priya's questions arrive there, and "Watch the evening" waits for your answer |
 | Echo Show | The **Tonight** screen (refreshes itself), every answer card, the doorbell, the emergency guide, the goodnight message, the who's-babysitting form, paying the sitter |
 | Parent's phone | Live header, questions with one-tap answers (door questions with the photo), the live emergency view with "I'm on my way", goodnight message recorder, expected visitors, busy mode, House Brain, family setup, "Reset to the demo family" |
-| Any MCP host | [/connect](https://while-youre-out-wpj3.onrender.com/connect) gives you a demo house of your own; `/h/<any 16+ letters>/mcp` is a private MCP house. An agent hosting it should follow the [Agent Skill](agent-skill/SKILL.md) |
+| Any MCP host | [/connect](https://while-youre-out-demo.onrender.com/connect) gives you a demo house of your own; `/h/<any 16+ letters>/mcp` is a private MCP house. An agent hosting it should follow the [Agent Skill](agent-skill/SKILL.md) |
 | Today's Alexa | The free Alexa-hosted skill in [alexa/](alexa/README.md): the same add-on on an Echo, set up in about five minutes |
 
 </details>

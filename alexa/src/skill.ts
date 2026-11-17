@@ -13,7 +13,7 @@ import type { ToolResult } from '../../simulator/src/mcp';
 import { aplDirective, cardModel } from './apl';
 
 /** The hosted demo. The skill is code-only, so the address lives here. */
-export const SERVER = 'https://while-youre-out-wpj3.onrender.com';
+export const SERVER = 'https://while-youre-out-demo.onrender.com';
 /** Alexa waits 8 seconds for a skill; a free host that is waking up can take longer. */
 const BUDGET_MS = 6_500;
 

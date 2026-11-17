@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { CSS3DObject, CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
 
-export const LIVE_ORIGIN = import.meta.env.DEV ? 'http://127.0.0.1:5173' : 'https://while-youre-out-wpj3.onrender.com';
+export const LIVE_ORIGIN = import.meta.env.DEV ? 'http://127.0.0.1:5173' : 'https://while-youre-out-demo.onrender.com';
 
 export interface LiveEvents {
   onTool?: (name: string, args: Record<string, unknown>) => void;

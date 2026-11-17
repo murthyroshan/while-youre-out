@@ -168,7 +168,7 @@ addEventListener('message', (e) => {
 mkdirSync(dirname(out), { recursive: true });
 // The gallery is published: links and photos point at the public demo, never at the machine that
 // made it (photos are served from the demo's shared /static; the rest open the demo itself).
-const PUBLIC = (process.env.SCREENS_PUBLIC_URL ?? 'https://while-youre-out-wpj3.onrender.com').replace(/\/$/, '');
+const PUBLIC = (process.env.SCREENS_PUBLIC_URL ?? 'https://while-youre-out-demo.onrender.com').replace(/\/$/, '');
 const local = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const published = page
   .replace(new RegExp(`${local}/h/[0-9a-f]+/static/`, 'g'), `${PUBLIC}/static/`)

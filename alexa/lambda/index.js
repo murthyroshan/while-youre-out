@@ -36690,7 +36690,7 @@ function aplDirective(card, opts = {}) {
 }
 
 // alexa/src/skill.ts
-var SERVER = "https://while-youre-out-wpj3.onrender.com";
+var SERVER = "https://while-youre-out-demo.onrender.com";
 var BUDGET_MS = 6500;
 var HELP = `I keep the parents' notes for whoever is looking after the kids. Say "Priya is babysitting tonight" to start, then ask anything, like "where's the EpiPen?". Say "emergency" anytime.`;
 var xml = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

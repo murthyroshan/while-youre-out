@@ -18,7 +18,7 @@ const OUT = fileURLToPath(new URL('../../site/src/game/answers.json', import.met
 const TZ = 'America/Los_Angeles';
 const db = openDb(':memory:');
 seedDemoHousehold(db);
-const server = buildServer({ db, taskStore: new InMemoryTaskStore(), escalateAfterMs: 600_000, publicUrl: 'https://while-youre-out-wpj3.onrender.com', ai: { available: false } as any });
+const server = buildServer({ db, taskStore: new InMemoryTaskStore(), escalateAfterMs: 600_000, publicUrl: 'https://while-youre-out-demo.onrender.com', ai: { available: false } as any });
 const [c, s] = InMemoryTransport.createLinkedPair();
 await server.connect(s);
 const client = new Client({ name: 'record-game', version: '1' });

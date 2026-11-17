@@ -1,6 +1,6 @@
 // Checks the live demo the way a judge uses it: the page loads, a fresh house connects over MCP,
 // the add-on answers from the house manual, and the parent page answers for that house.
-// Usage: node scripts/smoke.mjs https://while-youre-out-wpj3.onrender.com
+// Usage: node scripts/smoke.mjs https://while-youre-out-demo.onrender.com
 import { randomBytes } from 'node:crypto';
 
 const base = (process.argv[2] ?? process.env.DEMO_URL ?? '').replace(/\/$/, '');

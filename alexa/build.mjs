@@ -65,7 +65,7 @@ const modelFor = (locale) =>
 mkdirSync(here('./skill-package/interactionModels/custom'), { recursive: true });
 for (const locale of LOCALES) writeFileSync(here(`./skill-package/interactionModels/custom/${locale}.json`), `${JSON.stringify(modelFor(locale), null, 2)}\n`);
 
-const SERVER = 'https://while-youre-out-wpj3.onrender.com';
+const SERVER = 'https://while-youre-out-demo.onrender.com';
 const listing = {
   summary: "The parents' notes for whoever is looking after the kids, with safety enforced in code.",
   description:

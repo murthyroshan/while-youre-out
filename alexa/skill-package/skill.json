@@ -125,28 +125,28 @@
       "containsAds": false,
       "locales": {
         "en-US": {
-          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
-          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+          "privacyPolicyUrl": "https://while-youre-out-demo.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-demo.onrender.com/terms"
         },
         "en-GB": {
-          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
-          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+          "privacyPolicyUrl": "https://while-youre-out-demo.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-demo.onrender.com/terms"
         },
         "en-IN": {
-          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
-          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+          "privacyPolicyUrl": "https://while-youre-out-demo.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-demo.onrender.com/terms"
         },
         "en-CA": {
-          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
-          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+          "privacyPolicyUrl": "https://while-youre-out-demo.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-demo.onrender.com/terms"
         },
         "en-AU": {
-          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
-          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+          "privacyPolicyUrl": "https://while-youre-out-demo.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-demo.onrender.com/terms"
         },
         "hi-IN": {
-          "privacyPolicyUrl": "https://while-youre-out-wpj3.onrender.com/privacy",
-          "termsOfUseUrl": "https://while-youre-out-wpj3.onrender.com/terms"
+          "privacyPolicyUrl": "https://while-youre-out-demo.onrender.com/privacy",
+          "termsOfUseUrl": "https://while-youre-out-demo.onrender.com/terms"
         }
       }
     },
